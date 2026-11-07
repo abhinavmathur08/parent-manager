@@ -1,4 +1,4 @@
-# Builds a release APK and runs the Maestro flows on an Android emulator.
+# Builds an x86_64 release APK and runs the Maestro flows on an Android emulator.
 # Slow (20+ minutes), so it isn't run on every PR: start it from the Actions tab
 # or with `gh workflow run e2e.yml --ref <branch>`. It also runs after merges to main.
 name: E2E
