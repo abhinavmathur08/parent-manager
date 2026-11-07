@@ -9,7 +9,7 @@
     "userInterfaceStyle": "automatic",
     "ios": {
       "icon": "./assets/expo.icon",
-      "bundleIdentifier": "com.abhinavmathur.parentmanager",
+      "bundleIdentifier": "com.parentmanager.app",
       "supportsTablet": false
     },
     "android": {
@@ -20,7 +20,7 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.abhinavmathur.parentmanager"
+      "package": "com.parentmanager.app"
     },
     "plugins": [
       "expo-router",
