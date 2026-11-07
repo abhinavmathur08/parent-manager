@@ -4,7 +4,7 @@ An Expo (TypeScript) mobile app for iOS and Android with a Supabase backend. See
 
 ## Getting started
 
-You need Node 22 (see `.nvmrc`), plus Xcode 26.4 or later for iOS (Expo SDK 58 doesn't build on older versions) or Android Studio for Android. CocoaPods also needs a UTF-8 locale, so set `LANG=en_US.UTF-8` if `pod install` complains.
+You need Node 22 (see `.nvmrc`), plus Xcode 26.4 or later for iOS (Expo SDK 58 doesn't build on older versions; tested with Xcode 27.2) or Android Studio for Android. Xcode 26.4 and later need macOS Tahoe 26.2 or later. CocoaPods also needs a UTF-8 locale, so set `LANG=en_US.UTF-8` if `pod install` complains.
 
 ```bash
 npm install
@@ -32,14 +32,20 @@ On Android, use `npx expo run:android --variant release` in place of the first c
 
 ## Backend
 
-`supabase/` holds the project config and SQL migrations. Local Supabase needs Docker.
+`supabase/` holds the project config and SQL migrations. The hosted project is `parent-manager` (ref `qwjvwwqsqhnvmdyjiylm`, region `us-east-1`). Its URL and publishable key are on the dashboard under Project Settings → API Keys. Local Supabase needs Docker.
+
+Use the Supabase CLI pinned in this repo (`npx supabase`, version 3), not a global install. In version 3, database commands target your local stack unless you pass `--remote`.
 
 ```bash
-npx supabase start                        # run the local stack
-npx supabase migration new <name>         # create a migration
-npx supabase link --project-ref <ref>     # connect to the hosted project
-npx supabase db push                      # apply migrations to the hosted project
+npx supabase link --project-ref qwjvwwqsqhnvmdyjiylm   # once per checkout
+npx supabase migration new <name>                      # create a migration
+npx supabase start                                     # run the local stack (Docker)
+npx supabase migration up                              # apply migrations locally
+npx supabase migration list --remote                   # compare with the hosted project
+npx supabase migration up --remote                     # apply migrations to the hosted project
 ```
+
+Remote commands may prompt for the database password. Set `SUPABASE_DB_PASSWORD` in your shell for that command only, and never commit it.
 
 Auth sessions are stored with `expo-sqlite`'s `localStorage`, as in Supabase's Expo quickstart. That storage isn't encrypted, so review this before shipping if the spec calls for stronger protection.
 
