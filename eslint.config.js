@@ -1,0 +1,9 @@
+const { defineConfig, globalIgnores } = require('eslint/config');
+const expoConfig = require('eslint-config-expo/flat');
+const prettierConfig = require('eslint-config-prettier/flat');
+
+module.exports = defineConfig([
+  expoConfig,
+  prettierConfig,
+  globalIgnores(['dist/*', 'coverage/*', 'ios/*', 'android/*', 'supabase/functions/*']),
+]);

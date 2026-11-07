@@ -1,0 +1,13 @@
+# Runs against a release build, which bundles its JS and needs no Metro server.
+# See the "Testing" section of README.md.
+appId: com.parentmanager.app
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible:
+      id: home-title
+    timeout: 60000
+- assertVisible: Parent Manager
+- assertVisible:
+    id: supabase-status
