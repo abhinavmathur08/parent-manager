@@ -1,3 +1,4 @@
+# Same checks as `npm run check`, plus a check that dependencies match the Expo SDK.
 name: CI
 
 on:
