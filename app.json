@@ -38,6 +38,12 @@
       "typedRoutes": true,
       "reactCompiler": true
     },
-    "platforms": ["ios", "android"]
+    "platforms": ["ios", "android"],
+    "extra": {
+      "eas": {
+        "projectId": "4981939e-671f-44b5-b428-9fa2a5338d17"
+      }
+    },
+    "owner": "abhinav08"
   }
 }

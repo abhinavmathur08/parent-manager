@@ -64,6 +64,8 @@ Auth sessions are stored with `expo-sqlite`'s `localStorage`, as in Supabase's E
 npx eas-cli@latest build --profile preview --platform all
 ```
 
+The project is [@abhinav08/parent-manager](https://expo.dev/accounts/abhinav08/projects/parent-manager) on Expo. EAS builds don't use `.env.local`. They get the Supabase values from EAS environment variables, which are set in the development, preview and production environments. To see them, run `npx eas-cli@latest env:list --environment <name>`. To copy them into `.env.local`, run `npx eas-cli@latest env:pull --environment development`.
+
 ## CI
 
 - `.github/workflows/ci.yml` runs `npm run check` and an Expo dependency check on every PR and on pushes to `main`.
