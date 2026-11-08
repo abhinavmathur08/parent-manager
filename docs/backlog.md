@@ -113,12 +113,13 @@ Set up the localization framework:
 
 ### F-06 Design system foundation
 
-Turn the chosen design direction into the app's design system:
+Turn the chosen design direction, Calm Kitchen with Village touches (`docs/design-directions.md`, board `docs/design/direction-ac.html`), into the app's design system:
 
 - **Tokens:** color, type, spacing and radius, in light and dark.
 - **Core components:** button, list row with a large tap target, bottom sheet, text field, checkbox row, empty state, toast and section header.
 - **Accessibility:** dynamic type support and accessibility props on every component.
-- **Navigation:** the bottom tab bar.
+- **Navigation:** the floating bottom tab bar.
+- **Village touches:** the member avatar component, the progress bar, the usual-items grid and the completion screen.
 
 **Acceptance:**
 
@@ -127,7 +128,7 @@ Turn the chosen design direction into the app's design system:
 - Contrast meets WCAG AA.
 - A component gallery screen exists in development builds.
 
-**Depends on:** F-05, and the design-direction decision (D-3).
+**Depends on:** F-05. The design-direction decision (D-3) is made.
 
 **Size:** L.
 

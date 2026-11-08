@@ -28,13 +28,12 @@ Sorted by what blocks progress soonest. Each entry names the backlog items it un
   - Register the matching domain, plus a separate subdomain for email (such as `mail.<domain>`) to protect deliverability.
 - **You do:** choose the name, buy the domain and give me access to DNS records, or add the records yourself when I list them.
 
-### D-3 Design direction
+### D-3 Design direction: decided
 
 **Blocks:** F-06 design system, and every screen after it.
 
-- **Options:** A Calm Kitchen, B Clear Utility or C Village (see [design-directions.md](design-directions.md)).
-- **Recommendation:** A, borrowing member avatar dots and one completion moment from C.
-- **You do:** pick one, or mix them, and say whether to commission mockups or have Claude produce them first.
+- **Decided 2026-11-07:** Calm Kitchen with Village touches, including a floating tab bar in Calm Kitchen's style. The details are in [design-directions.md](design-directions.md#decision-calm-kitchen-with-village-touches), and the board is `docs/design/direction-ac.html`.
+- **Still open:** whether mockups of the remaining screens are commissioned or produced by Claude. This doesn't block F-06's tokens and components.
 
 ### D-4 Observability and email accounts: Sentry, PostHog and Resend
 

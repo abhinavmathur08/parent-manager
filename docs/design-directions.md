@@ -1,6 +1,32 @@
 # Parent Manager: design directions
 
-Status: three directions for the product owner to choose from. These are written briefs, not designs. Real mockups of the core screens (Plan, List, Recipe, Import review) come after a direction is chosen, before backlog item F-06 builds the design system.
+Status: **decided on 2026-11-07.** The product owner chose Calm Kitchen with Village touches, including the floating tab bar (see "Decision" below). The three directions stay here for reference. The visual boards are in `docs/design/` (PR #3), and `docs/design/direction-ac.html` is the chosen one.
+
+## Decision: Calm Kitchen with Village touches
+
+Build on **Direction A, Calm Kitchen**, with five ideas borrowed from **Direction C, Village**.
+
+**Kept from Calm Kitchen:**
+
+- **Palette:** the A palette, in light and dark (see below).
+- **Type:** Fraunces for screen titles and recipe names only, and the system font for everything else.
+- **Shapes:** 12 pt corners and light dividers.
+- **Layout:** one primary action per screen, in the bottom third.
+
+**Borrowed from Village, redrawn in Calm Kitchen's style:**
+
+1. **Member avatars:** small sand (`#E9CFA6`) and sage (`#B7D3BF`) circles with initials in `#2B2A28` (at least 8.9:1). They show who added a meal and who checked an item, plus a "shopping now" line on the list. In light mode they have an outline in the secondary text color, so they stay visible on white.
+2. **A dinners-planned progress bar** on the Plan tab ("6 of 7"), with the primary button naming the gap ("Add Sunday dinner").
+3. **A one-tap grid of usual items** in quick add, filled from purchase memory (spec FR-MEM-3).
+4. **One quiet completion moment** when the whole list is checked: a single screen, with no sound or confetti, and no motion when Reduce Motion is on.
+5. **A floating tab bar:**
+   - **Shape:** slim and inset 16 pt from the screen edges, with a hairline border and a soft shadow.
+   - **Active tab:** a Surface 2 pill. The active label reaches 5.2:1 in light mode and 6.3:1 in dark.
+   - **Targets and layout:** tabs are 52 pt tall, and screen content and bottom actions end above the bar.
+
+**Left behind from Village:** coral and yellow, decorative blobs, chunky buttons, big pill shapes and constant celebration.
+
+**When building it (backlog F-06):** follow the spec's 48 pt minimum tap target, which is stricter than the boards' 44 pt minimum for chips. Still open: whether mockups of the remaining screens are commissioned or produced by Claude (D-3).
 
 ## What every direction must do
 
@@ -120,4 +146,4 @@ Two ideas to borrow from Village:
 1. **Member avatar dots.** Show who added or checked an item, so sharing is visible.
 2. **One small completion moment.** For example, when the list is fully checked off, with Reduce Motion respected.
 
-Next step once a direction is chosen: mockups of Plan, List, Recipe detail and Import review, in light and dark mode, at default and the largest text sizes, tested with two or three real parents before F-06 starts.
+Next step, now that a direction is chosen: mockups of Plan, List, Recipe detail and Import review, in light and dark mode, at default and the largest text sizes, tested with two or three real parents before F-06 starts.
