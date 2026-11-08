@@ -1,0 +1,10 @@
+# Every change is owned by the product owner. Paths listed separately are
+# sensitive: product scope, security, CI and agent rules.
+* @abhinavmathur08
+
+/docs/vision.md @abhinavmathur08
+/CLAUDE.md @abhinavmathur08
+/AGENTS.md @abhinavmathur08
+/.github/ @abhinavmathur08
+/supabase/migrations/ @abhinavmathur08
+/eas.json @abhinavmathur08
