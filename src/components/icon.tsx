@@ -1,5 +1,5 @@
 import { SymbolView } from 'expo-symbols';
-import { I18nManager, type StyleProp, type ViewStyle } from 'react-native';
+import { I18nManager, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 
 import type { ColorToken } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
@@ -50,19 +50,26 @@ export type IconProps = {
 export function Icon({ name, size = 'md', color = 'text', style, testID }: IconProps) {
   const theme = useTheme();
   const mirror = I18nManager.isRTL && DIRECTIONAL.includes(name);
+  const box = { width: theme.icon[size], height: theme.icon[size] };
   return (
-    <SymbolView
-      name={SYMBOLS[name]}
-      size={theme.icon[size]}
-      tintColor={theme.color[color]}
-      style={[
-        { width: theme.icon[size], height: theme.icon[size] },
-        mirror && { transform: [{ scaleX: -1 }] },
-        style,
-      ]}
+    <View
       testID={testID}
+      style={[box, mirror && styles.mirror, style]}
       accessibilityElementsHidden
       importantForAccessibility="no-hide-descendants"
-    />
+    >
+      <SymbolView
+        name={SYMBOLS[name]}
+        size={theme.icon[size]}
+        tintColor={theme.color[color]}
+        style={box}
+      />
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  mirror: {
+    transform: [{ scaleX: -1 }],
+  },
+});
