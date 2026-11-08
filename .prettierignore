@@ -4,5 +4,5 @@ dist/
 coverage/
 ios/
 android/
-package-lock.json
+pnpm-lock.yaml
 supabase/.temp/

@@ -38,7 +38,7 @@ The Expo SDK 58 TypeScript app, Expo Router, ESLint and Prettier, Jest, the Maes
 - **Depends on:** none.
 - **Size:** done.
 
-### F-02 Move to pnpm
+### F-02 Move to pnpm (done)
 
 Replace npm with pnpm, keeping Expo's `hoisted` mode, and update CI, the E2E workflow, the README and `CLAUDE.md`.
 

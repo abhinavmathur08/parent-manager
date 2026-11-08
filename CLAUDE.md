@@ -12,7 +12,7 @@ One app that runs a new family's household logistics, starting with meals and gr
 
 Expo SDK 58 with React Native, TypeScript and Expo Router, built for iOS and Android. EAS handles builds, submissions and over-the-air updates. Supabase provides auth, Postgres, storage, row-level security (RLS) and Edge Functions. Sentry reports crashes, PostHog handles analytics and feature flags, RevenueCat handles subscriptions and Resend sends email. Jest runs unit tests, Maestro runs end-to-end (E2E) tests, and GitHub Actions runs CI.
 
-**Package manager:** npm for now. Backlog item F-02 moves the project to pnpm; once that lands, use `pnpm` in every command below.
+**Package manager:** pnpm, with the version pinned in `package.json` (`packageManager`). Never use npm or yarn. pnpm blocks dependency install scripts unless they're approved in `allowBuilds` in `pnpm-workspace.yaml`, so approving a new one needs a reason in the PR.
 
 Don't add a library or service for something the stack already covers. Any new dependency needs a reason in the PR description.
 
@@ -28,24 +28,24 @@ Don't add a library or service for something the stack already covers. Any new d
 ## Commands
 
 ```bash
-npm install            # install dependencies
-npm run ios            # build and run on the iOS simulator (Xcode 26.4+)
-npm run android        # build and run on an Android emulator
-npm start              # start Metro for an installed development build
-npm run lint           # ESLint, no warnings allowed
-npm run typecheck      # TypeScript
-npm test               # Jest unit tests
-npm run check          # lint, format check, typecheck and unit tests, the same as CI
-npm run test:e2e       # Maestro flows against an installed release build (see README)
+pnpm install            # install dependencies
+pnpm run ios            # build and run on the iOS simulator (Xcode 26.4+)
+pnpm run android        # build and run on an Android emulator
+pnpm start              # start Metro for an installed development build
+pnpm run lint           # ESLint, no warnings allowed
+pnpm run typecheck      # TypeScript
+pnpm test               # Jest unit tests
+pnpm run check          # lint, format check, typecheck and unit tests, the same as CI
+pnpm run test:e2e       # Maestro flows against an installed release build (see README)
 ```
 
-Add dependencies with `npx expo install <package>`, never with a bare `npm install <package>`.
+Add dependencies with `pnpm expo install <package>`, never with a bare `pnpm add <package>`.
 
 ## Workflow rules
 
 - **One GitHub issue, one branch, one PR.** Name the branch `<type>/<issue-number>-<short-slug>`, for example `feat/12-invite-partner`. The PR must say `Closes #<issue>`.
 - **Never push to `main`.** Every change reaches `main` through a PR. Branch protection enforces this, and you must never weaken it.
-- **CI must pass.** Run `npm run check` before opening a PR, plus `npm run test:e2e` if a user flow changed. Never skip, disable or loosen a check (`--no-verify`, `.skip`, lint-disable comments, lower thresholds) to get a pass.
+- **CI must pass.** Run `pnpm run check` before opening a PR, plus `pnpm run test:e2e` if a user flow changed. Never skip, disable or loosen a check (`--no-verify`, `.skip`, lint-disable comments, lower thresholds) to get a pass.
 - **Keep PRs small.** Each PR does one thing. If a change passes about 400 lines, not counting lockfiles and generated code, split it.
 - **Keep the docs current.** If a change alters the architecture, update `docs/architecture.md` in the same PR. Never edit `docs/vision.md` without the product owner's approval.
 
@@ -77,6 +77,6 @@ Add dependencies with `npx expo install <package>`, never with a bare `npm insta
 
 ## Supabase and testing
 
-- Get the client only from `getSupabase()` in `src/lib/supabase.ts`. Use the CLI pinned in this repo (`npx supabase`). Database commands target the local stack unless you pass `--remote`.
+- Get the client only from `getSupabase()` in `src/lib/supabase.ts`. Use the CLI pinned in this repo (`pnpm supabase`). Database commands target the local stack unless you pass `--remote`.
 - Every schema change is a new migration. Never edit a migration that has already been applied, and never change the schema in the dashboard.
 - New logic gets Jest tests. Bug fixes get a test that fails without the fix. RLS changes get database tests. New or changed user flows get a Maestro flow that selects elements by `testID`.
