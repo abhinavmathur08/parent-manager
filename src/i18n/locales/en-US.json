@@ -1,0 +1,45 @@
+{
+  "app": {
+    "name": "Parent Manager"
+  },
+  "home": {
+    "title": "Parent Manager",
+    "supabaseStatus": {
+      "configured": "Supabase: configured",
+      "notConfigured": "Supabase: not configured"
+    }
+  },
+  "vocabulary": {
+    "diapers": "Diapers",
+    "pacifier": "Pacifier",
+    "stroller": "Stroller"
+  },
+  "units": {
+    "tsp_one": "tsp",
+    "tsp_other": "tsp",
+    "tbsp_one": "tbsp",
+    "tbsp_other": "tbsp",
+    "cup_one": "cup",
+    "cup_other": "cups",
+    "floz_one": "fl oz",
+    "floz_other": "fl oz",
+    "pint_one": "pint",
+    "pint_other": "pints",
+    "qt_one": "qt",
+    "qt_other": "qt",
+    "ml_one": "ml",
+    "ml_other": "ml",
+    "l_one": "L",
+    "l_other": "L",
+    "g_one": "g",
+    "g_other": "g",
+    "kg_one": "kg",
+    "kg_other": "kg",
+    "oz_one": "oz",
+    "oz_other": "oz",
+    "lb_one": "lb",
+    "lb_other": "lb",
+    "each_one": "",
+    "each_other": ""
+  }
+}

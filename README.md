@@ -30,6 +30,13 @@ pnpm run test:e2e
 
 On Android, use `pnpm expo run:android --variant release` in place of the first command.
 
+## Localization
+
+All user-facing text lives in `src/i18n/locales`. `en-US` is the base, and `en-GB` and `en-AU` override only the words that differ, such as nappies instead of diapers. Lint fails on text written directly in JSX.
+
+- **Formatting:** use the helpers exported from `@/i18n` (`formatNumber`, `formatDate`, `formatCurrency`, `formatQuantity` and `displayQuantity`). They use `Intl` and the spec's unit rules, so quantities follow the household's unit system.
+- **Pseudo-locale:** to check that layouts stretch and nothing is hard-coded, start a development build with `EXPO_PUBLIC_PSEUDO_LOCALE=1`. Every translated string then shows accented and twice as long, so any plain English is text that skipped translation.
+
 ## Backend
 
 `supabase/` holds the project config and SQL migrations. The hosted project is `parent-manager` (ref `qwjvwwqsqhnvmdyjiylm`, region `us-east-1`). Its URL and publishable key are on the dashboard under Project Settings → API Keys. Local Supabase needs Docker.

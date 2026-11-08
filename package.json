@@ -9,12 +9,15 @@
     "expo-dev-client": "~58.0.18",
     "expo-font": "~58.0.11",
     "expo-linking": "~58.0.16",
+    "expo-localization": "~58.0.5",
     "expo-router": "~58.0.30",
     "expo-splash-screen": "~58.0.13",
     "expo-sqlite": "~58.0.15",
     "expo-status-bar": "~58.0.4",
     "expo-system-ui": "~58.0.7",
+    "i18next": "^26.7.2",
     "react": "19.3.0",
+    "react-i18next": "^17.1.13",
     "react-native": "0.88.1",
     "react-native-gesture-handler": "~3.3.0",
     "react-native-reanimated": "4.7.1",
@@ -49,7 +52,8 @@
     "test:watch": "jest --watch",
     "test:ci": "jest --ci",
     "test:e2e": "maestro test .maestro",
-    "check": "pnpm run lint && pnpm run format:check && pnpm run typecheck && pnpm run test:ci"
+    "check": "pnpm run lint && pnpm run lint:rules && pnpm run format:check && pnpm run typecheck && pnpm run test:ci",
+    "lint:rules": "node scripts/check-lint-rules.js"
   },
   "private": true,
   "jest": {
@@ -61,7 +65,10 @@
     ],
     "moduleNameMapper": {
       "^@/(.*)$": "<rootDir>/src/$1"
-    }
+    },
+    "setupFiles": [
+      "<rootDir>/jest.setup.ts"
+    ]
   },
   "packageManager": "pnpm@12.18.0"
 }

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -8,14 +9,17 @@ import { supabaseConfig } from '@/lib/supabase-config';
 
 // Placeholder until the first Phase 1 feature from docs/backlog.md lands.
 export default function HomeScreen() {
+  const { t } = useTranslation();
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
         <ThemedText type="subtitle" testID="home-title">
-          Parent Manager
+          {t('home.title')}
         </ThemedText>
         <ThemedText type="small" themeColor="textSecondary" testID="supabase-status">
-          {supabaseConfig ? 'Supabase: configured' : 'Supabase: not configured'}
+          {supabaseConfig
+            ? t('home.supabaseStatus.configured')
+            : t('home.supabaseStatus.notConfigured')}
         </ThemedText>
       </SafeAreaView>
     </ThemedView>
