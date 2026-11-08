@@ -1,0 +1,4429 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Mockups of the remaining Phase 1 screens in the chosen design direction."
+    />
+    <title>Screen mockups · Parent Manager</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&display=swap"
+    />
+    <script>
+      (function () {
+        var r = document.documentElement,
+          k = 'pm-board-theme',
+          t;
+        try {
+          t = localStorage.getItem(k);
+        } catch (e) {}
+        if (t !== 'light' && t !== 'dark') {
+          t =
+            window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches
+              ? 'dark'
+              : 'light';
+        }
+        r.setAttribute('data-theme', t);
+        window.pmToggle = function () {
+          var n = r.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+          r.setAttribute('data-theme', n);
+          try {
+            localStorage.setItem(k, n);
+          } catch (e) {}
+          var b = document.getElementById('themeBtn');
+          if (b) {
+            b.textContent = n === 'dark' ? 'Light mode' : 'Dark mode';
+            b.setAttribute('aria-pressed', n === 'dark');
+          }
+        };
+        document.addEventListener('DOMContentLoaded', function () {
+          var b = document.getElementById('themeBtn');
+          if (b) {
+            var d = r.getAttribute('data-theme') === 'dark';
+            b.textContent = d ? 'Light mode' : 'Dark mode';
+            b.setAttribute('aria-pressed', d);
+          }
+        });
+      })();
+    </script>
+    <style>
+      :root {
+        --font-head: 'Fraunces', Georgia, 'Times New Roman', serif;
+        --font-body:
+          -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        color-scheme: light;
+      }
+      :root[data-theme='light'] {
+        --bg: #faf7f2;
+        --surface: #ffffff;
+        --surface2: #f1ece3;
+        --border: #e2dacc;
+        --text: #2b2a28;
+        --muted: #6b665e;
+        --primary: #3f6b4f;
+        --onPrimary: #ffffff;
+        --accent: #b4602f;
+        --onAccent: #ffffff;
+        --success: #2f6b45;
+        --warning: #8a5a00;
+        --error: #b3261e;
+        --avS: #e9cfa6;
+        --avA: #b7d3bf;
+        --onAv: #2b2a28;
+      }
+      :root[data-theme='dark'] {
+        --bg: #1c1b19;
+        --surface: #262421;
+        --surface2: #302d29;
+        --border: #3d3833;
+        --text: #f2eee8;
+        --muted: #b5afa6;
+        --primary: #8dbb9c;
+        --onPrimary: #10291a;
+        --accent: #e39a6b;
+        --onAccent: #2a1406;
+        --success: #8fd19e;
+        --warning: #e9b949;
+        --error: #f2b8b5;
+        --avS: #e9cfa6;
+        --avA: #b7d3bf;
+        --onAv: #2b2a28;
+        color-scheme: dark;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+      html {
+        -webkit-text-size-adjust: 100%;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: var(--font-body);
+        line-height: 1.5;
+        font-size: 16px;
+      }
+      a {
+        color: var(--primary);
+      }
+      .page {
+        max-width: 1240px;
+        margin: 0 auto;
+        padding: 24px 16px 64px;
+      }
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 8px;
+      }
+      .crumb {
+        font-size: 14px;
+        color: var(--muted);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        min-height: 44px;
+      }
+      .crumb:hover {
+        text-decoration: underline;
+      }
+      .toggle {
+        font: inherit;
+        font-size: 15px;
+        font-weight: 600;
+        min-height: 44px;
+        padding: 0 16px;
+        border-radius: 999px;
+        border: 1.5px solid var(--muted);
+        background: var(--surface);
+        color: var(--text);
+        cursor: pointer;
+      }
+      .toggle:focus-visible,
+      .btn:focus-visible {
+        outline: 3px solid var(--primary);
+        outline-offset: 2px;
+      }
+      h1.board-title {
+        font-family: var(--font-head);
+        font-size: clamp(32px, 6vw, 52px);
+        line-height: 1.1;
+        margin: 8px 0 4px;
+      }
+      .lede {
+        font-size: 18px;
+        color: var(--muted);
+        margin: 0 0 8px;
+        max-width: 760px;
+      }
+      .section {
+        margin-top: 48px;
+      }
+      .section > h2 {
+        font-family: var(--font-head);
+        font-size: 26px;
+        margin: 0 0 4px;
+      }
+      .section > p.sub {
+        color: var(--muted);
+        margin: 0 0 20px;
+        max-width: 760px;
+      }
+      .mood {
+        margin: 16px 0 0;
+        padding: 0;
+        list-style: none;
+        display: grid;
+        gap: 10px;
+        max-width: 820px;
+      }
+      .mood li {
+        padding-left: 18px;
+        position: relative;
+      }
+      .mood li:before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0.65em;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--primary);
+      }
+      .modes {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 480px), 1fr));
+        gap: 20px;
+      }
+      .mode {
+        border-radius: 16px;
+        padding: 16px;
+        border: 1px solid var(--border);
+      }
+      .mode h3 {
+        margin: 0 0 12px;
+        font-size: 16px;
+      }
+      .swatches {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+        gap: 10px;
+      }
+      .sw {
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid rgba(127, 127, 127, 0.35);
+      }
+      .sw .swc {
+        display: block;
+        height: 56px;
+      }
+      .sw .meta {
+        padding: 8px 10px;
+        font-size: 13px;
+        line-height: 1.35;
+      }
+      .sw code {
+        font-size: 12.5px;
+      }
+      table.contrast {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+        margin-top: 16px;
+      }
+      table.contrast th,
+      table.contrast td {
+        text-align: left;
+        padding: 8px;
+        border-bottom: 1px solid var(--border);
+        vertical-align: middle;
+      }
+      table.contrast td.num {
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+      }
+      .pill {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 600;
+        background: var(--surface2);
+        color: var(--text);
+      }
+      .sample-pair {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 44px;
+        height: 28px;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 13px;
+        padding: 0 6px;
+      }
+      .table-wrap {
+        overflow-x: auto;
+      }
+      .type-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
+        gap: 20px;
+      }
+      .panel {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 20px;
+      }
+      .scale-row {
+        display: flex;
+        align-items: baseline;
+        gap: 16px;
+        padding: 10px 0;
+        border-bottom: 1px solid var(--border);
+        flex-wrap: wrap;
+      }
+      .scale-row:last-child {
+        border-bottom: 0;
+      }
+      .scale-row .spec {
+        font-size: 12.5px;
+        color: var(--muted);
+        min-width: 120px;
+        font-family: var(--font-body);
+        font-weight: 400;
+      }
+      .comp-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
+        gap: 20px;
+      }
+      .comp {
+        background: var(--bg);
+        border: 1px dashed var(--border);
+        border-radius: 16px;
+        padding: 16px;
+      }
+      .comp h3 {
+        margin: 0 0 12px;
+        font-size: 13px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--muted);
+        font-family: var(--font-body);
+      }
+      .row-wrap {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+      }
+      .phones {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 28px;
+        justify-content: center;
+      }
+      .phone-wrap {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        width: min(390px, 100%);
+      }
+      .phone-cap {
+        font-size: 14px;
+        color: var(--muted);
+        text-align: center;
+      }
+      .phone {
+        position: relative;
+        width: 100%;
+        height: 844px;
+        border-radius: 44px;
+        overflow: hidden;
+        background: var(--bg);
+        color: var(--text);
+        box-shadow:
+          0 0 0 10px #111,
+          0 0 0 11px #333,
+          0 24px 48px rgba(0, 0, 0, 0.25);
+        font-family: var(--font-body);
+      }
+      .status {
+        height: 47px;
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        padding: 0 28px 6px;
+        font-size: 15px;
+        font-weight: 600;
+      }
+      .status .dots {
+        display: flex;
+        gap: 5px;
+        align-items: center;
+      }
+      .status .dots i {
+        width: 16px;
+        height: 10px;
+        border-radius: 2px;
+        background: currentColor;
+        opacity: 0.85;
+        display: block;
+      }
+      .status .dots i:last-child {
+        width: 24px;
+      }
+      .screen {
+        position: absolute;
+        inset: 47px 0 0 0;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+      .screen-body {
+        flex: 1;
+        overflow: hidden;
+        padding: 0 16px;
+      }
+      .home-ind {
+        position: absolute;
+        bottom: 8px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 134px;
+        height: 5px;
+        border-radius: 3px;
+        background: var(--text);
+        opacity: 0.85;
+        z-index: 9;
+      }
+      .why {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+        gap: 16px;
+      }
+      .why .panel h3 {
+        margin: 0 0 6px;
+        font-size: 17px;
+        font-family: var(--font-head);
+      }
+      .why .panel p {
+        margin: 0;
+        color: var(--text);
+      }
+      .ic {
+        display: inline-flex;
+        width: 24px;
+        height: 24px;
+      }
+      .ic svg {
+        width: 100%;
+        height: 100%;
+      }
+      .sr {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+      }
+      footer.note {
+        margin-top: 48px;
+        font-size: 14px;
+        color: var(--muted);
+      }
+      @media (max-width: 600px) {
+        .phone {
+          height: 760px;
+          border-radius: 36px;
+          box-shadow:
+            0 0 0 6px #111,
+            0 12px 28px rgba(0, 0, 0, 0.2);
+        }
+      }
+
+      .btn {
+        font: 600 17px/1 var(--font-body);
+        min-height: 52px;
+        padding: 0 22px;
+        border-radius: 12px;
+        border: 1.5px solid transparent;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+      .btn.primary {
+        background: var(--primary);
+        color: var(--onPrimary);
+      }
+      .btn.secondary {
+        background: transparent;
+        color: var(--primary);
+        border-color: var(--primary);
+      }
+      .btn.ghost {
+        background: transparent;
+        color: var(--text);
+        border-color: transparent;
+        text-decoration: underline;
+        text-underline-offset: 3px;
+      }
+      .btn[disabled] {
+        background: var(--surface2);
+        color: var(--muted);
+        border-color: var(--surface2);
+        cursor: not-allowed;
+      }
+      .btn.block {
+        width: 100%;
+      }
+      .lrow {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        min-height: 56px;
+        padding: 6px 4px;
+        border-bottom: 1px solid var(--border);
+        background: transparent;
+      }
+      .lrow .cb {
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        border: 2px solid var(--muted);
+        flex: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--onPrimary);
+      }
+      .lrow.done .cb {
+        background: var(--primary);
+        border-color: var(--primary);
+      }
+      .lrow .cb .ic {
+        width: 16px;
+        height: 16px;
+      }
+      .lrow .nm {
+        flex: 1;
+        font-size: 17px;
+      }
+      .lrow .qt {
+        color: var(--muted);
+        font-size: 15px;
+        font-variant-numeric: tabular-nums;
+      }
+      .lrow.done .nm {
+        color: var(--muted);
+        text-decoration: line-through;
+        text-decoration-color: var(--muted);
+      }
+      .lrow .by {
+        font-size: 13px;
+        color: var(--muted);
+      }
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 16px;
+      }
+      .card .ttl {
+        font-family: var(--font-head);
+        font-size: 21px;
+        font-weight: 600;
+        margin: 2px 0;
+      }
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        min-height: 44px;
+        padding: 0 14px;
+        border-radius: 999px;
+        background: var(--surface2);
+        color: var(--text);
+        font-size: 14px;
+      }
+      .chip.sel {
+        background: var(--primary);
+        color: var(--onPrimary);
+      }
+      .chip.tap {
+        min-height: 44px;
+        padding: 0 16px;
+        font-size: 15px;
+      }
+      .tag {
+        display: inline-flex;
+        align-items: center;
+        padding: 2px 10px;
+        border-radius: 999px;
+        font-size: 13px;
+        border: 1px solid var(--muted);
+        color: var(--muted);
+      }
+      .tag.warn {
+        border-color: var(--warning);
+        color: var(--warning);
+      }
+      .field {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-height: 52px;
+        padding: 0 16px;
+        border-radius: 12px;
+        background: var(--surface2);
+        border: 1.5px solid transparent;
+        font-size: 17px;
+        color: var(--text);
+      }
+      .field.focus {
+        border-color: var(--primary);
+        background: var(--surface);
+      }
+      .field .ph {
+        color: var(--muted);
+      }
+      .flabel {
+        font-size: 14px;
+        color: var(--muted);
+        margin: 0 0 6px;
+      }
+      .tabbar {
+        display: flex;
+        justify-content: space-around;
+        align-items: flex-start;
+        padding: 8px 8px 26px;
+        background: var(--surface);
+        border-top: 1px solid var(--border);
+      }
+      .tab {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+        min-width: 64px;
+        min-height: 48px;
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .tab.on {
+        color: var(--primary);
+        font-weight: 600;
+      }
+      .tab.on:after {
+        content: '';
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: var(--primary);
+        margin-top: 1px;
+      }
+      .sheet {
+        background: var(--surface);
+        border-radius: 22px 22px 0 0;
+        padding: 10px 20px 20px;
+        box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.12);
+      }
+      .sheet .grab {
+        width: 40px;
+        height: 5px;
+        border-radius: 3px;
+        background: var(--border);
+        margin: 0 auto 14px;
+      }
+      .sheet .sh-t {
+        font-family: var(--font-head);
+        font-size: 22px;
+        font-weight: 600;
+        margin: 0 0 12px;
+      }
+      .stepper {
+        display: inline-flex;
+        align-items: center;
+        border: 1.5px solid var(--muted);
+        border-radius: 12px;
+        overflow: hidden;
+      }
+      .stepper b {
+        min-width: 48px;
+        text-align: center;
+        font-size: 17px;
+        font-variant-numeric: tabular-nums;
+      }
+      .stepper span {
+        width: 48px;
+        height: 48px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--primary);
+      }
+      .stepper .ic {
+        width: 20px;
+        height: 20px;
+      }
+
+      .av {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font: 600 12px/1 var(--font-body);
+        color: var(--onAv);
+        flex: none;
+        box-shadow: 0 0 0 1.5px var(--muted);
+      }
+      :root[data-theme='dark'] .av {
+        box-shadow: 0 0 0 2px var(--surface);
+      }
+      .av.s {
+        background: var(--avS);
+      }
+      .av.a {
+        background: var(--avA);
+      }
+      .av.sm {
+        width: 22px;
+        height: 22px;
+        font-size: 11px;
+      }
+      .avs {
+        display: inline-flex;
+        align-items: center;
+      }
+      .avs .av + .av {
+        margin-left: -6px;
+      }
+      .prog {
+        display: flex;
+        gap: 4px;
+      }
+      .prog i {
+        flex: 1;
+        height: 6px;
+        border-radius: 3px;
+        background: var(--surface2);
+      }
+      .prog i.on {
+        background: var(--primary);
+      }
+      .usual {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+      }
+      /* floating tab bar, Calm Kitchen style: slim, hairline border, soft shadow, quiet active pill */
+      .tab-spacer {
+        flex: none;
+        height: 92px;
+      }
+      .tabbar.float {
+        position: absolute;
+        left: 16px;
+        right: 16px;
+        bottom: 22px;
+        align-items: center;
+        padding: 6px;
+        border: 1px solid var(--border);
+        border-radius: 22px;
+        background: var(--surface);
+        box-shadow: 0 6px 20px rgba(43, 42, 40, 0.12);
+      }
+      :root[data-theme='dark'] .tabbar.float {
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+      }
+      .tabbar.float .tab {
+        flex: 1;
+        justify-content: center;
+        min-height: 52px;
+        border-radius: 16px;
+      }
+      .tabbar.float .tab.on {
+        background: var(--surface2);
+      }
+      .tabbar.float .tab.on:after {
+        display: none;
+      }
+      .usual .chip {
+        justify-content: center;
+        white-space: nowrap;
+        padding: 0 8px;
+        background: var(--surface);
+        border: 1.5px solid var(--border);
+      }
+
+      /* the spec's tap-target minimum is 48 pt (F-06), stricter than the boards' 44 pt */
+      .chip,
+      .chip.tap {
+        min-height: 48px;
+      }
+      .av.c {
+        background: #d9d2c6;
+      } /* stone: people without accounts, such as children */
+      .top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        min-height: 44px;
+      }
+      .back {
+        color: var(--primary);
+        font-size: 16px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        min-height: 44px;
+      }
+      .h1 {
+        font-family: var(--font-head);
+        font-size: 30px;
+        font-weight: 600;
+        margin: 4px 0 6px;
+        line-height: 1.15;
+      }
+      .h2 {
+        font-family: var(--font-head);
+        font-size: 22px;
+        font-weight: 600;
+        margin: 0 0 6px;
+        line-height: 1.2;
+      }
+      .sub {
+        font-size: 16px;
+        color: var(--muted);
+        margin: 0 0 14px;
+      }
+      .small {
+        font-size: 13px;
+        color: var(--muted);
+      }
+      .lbl {
+        font-size: 14px;
+        color: var(--muted);
+        margin: 14px 0 6px;
+      }
+      .steps {
+        display: flex;
+        gap: 6px;
+        margin: 4px 0 14px;
+      }
+      .steps i {
+        flex: 1;
+        height: 4px;
+        border-radius: 2px;
+        background: var(--surface2);
+      }
+      .steps i.on {
+        background: var(--primary);
+      }
+      .opt {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        min-height: 64px;
+        padding: 12px 14px;
+        border-radius: 14px;
+        border: 1.5px solid var(--border);
+        background: var(--surface);
+        margin-bottom: 10px;
+      }
+      .opt.sel {
+        border-color: var(--primary);
+        box-shadow: inset 0 0 0 1px var(--primary);
+      }
+      .opt .t {
+        font-size: 17px;
+        font-weight: 600;
+      }
+      .opt .d {
+        font-size: 14px;
+        color: var(--muted);
+      }
+      .radio {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        border: 2px solid var(--muted);
+        flex: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .opt.sel .radio {
+        border-color: var(--primary);
+      }
+      .opt.sel .radio:after {
+        content: '';
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: var(--primary);
+      }
+      .notice {
+        border-radius: 14px;
+        padding: 12px 14px;
+        border: 1.5px solid var(--warning);
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+        font-size: 15px;
+        margin-bottom: 12px;
+      }
+      .notice .ic {
+        color: var(--warning);
+        flex: none;
+      }
+      .notice b {
+        display: block;
+        margin-bottom: 2px;
+      }
+      .toggle-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-height: 56px;
+        border-bottom: 1px solid var(--border);
+      }
+      .toggle-row .grow {
+        flex: 1;
+      }
+      .toggle-row .t {
+        font-size: 17px;
+      }
+      .toggle-row .d {
+        font-size: 14px;
+        color: var(--muted);
+      }
+      .sw-t {
+        width: 51px;
+        height: 31px;
+        border-radius: 16px;
+        background: var(--surface2);
+        position: relative;
+        flex: none;
+        box-shadow: inset 0 0 0 1.5px var(--muted);
+      }
+      .sw-t:after {
+        content: '';
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        width: 25px;
+        height: 25px;
+        border-radius: 50%;
+        background: var(--surface);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+      }
+      .sw-t.on {
+        background: var(--primary);
+        box-shadow: none;
+      }
+      .sw-t.on:after {
+        left: 23px;
+        background: #fff;
+      }
+      .nav-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-height: 56px;
+        border-bottom: 1px solid var(--border);
+        font-size: 17px;
+      }
+      .nav-row .grow {
+        flex: 1;
+      }
+      .nav-row .val {
+        color: var(--muted);
+        font-size: 15px;
+      }
+      .nav-row .ic {
+        color: var(--muted);
+        width: 20px;
+        height: 20px;
+      }
+      .nav-row .lead {
+        color: var(--primary);
+      }
+      .nav-row .lead .ic,
+      .nav-row .lead.ic {
+        color: var(--primary);
+        width: 24px;
+        height: 24px;
+      }
+      .danger {
+        color: var(--error) !important;
+      }
+      .codebox {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+        margin: 16px 0;
+      }
+      .codebox span {
+        width: 44px;
+        height: 56px;
+        border-radius: 12px;
+        border: 1.5px solid var(--muted);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font: 600 24px/1 var(--font-body);
+        font-variant-numeric: tabular-nums;
+      }
+      .codebox span.cur {
+        border-color: var(--primary);
+        box-shadow: inset 0 0 0 1px var(--primary);
+      }
+      .dim {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.28);
+      }
+      .under {
+        opacity: 0.35;
+      }
+      .line {
+        display: grid;
+        grid-template-columns: 56px 76px 1fr;
+        gap: 8px;
+        align-items: center;
+        min-height: 56px;
+        border-bottom: 1px solid var(--border);
+      }
+      .line .box {
+        min-height: 44px;
+        border-radius: 10px;
+        background: var(--surface2);
+        display: flex;
+        align-items: center;
+        padding: 0 10px;
+        font-size: 15px;
+      }
+      .rv {
+        padding: 10px 0;
+        border-bottom: 1px solid var(--border);
+      }
+      .rv .orig {
+        font-size: 13px;
+        color: var(--muted);
+      }
+      .rv .parsed {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        font-size: 16px;
+        margin-top: 2px;
+      }
+      .rv.low {
+        background: color-mix(in srgb, var(--warning) 10%, transparent);
+        border-radius: 10px;
+        padding: 10px;
+        border: 1.5px solid var(--warning);
+        margin: 6px 0;
+      }
+      .rv.low .flag {
+        color: var(--warning);
+        font-size: 13px;
+        font-weight: 600;
+      }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 2px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 600;
+        background: var(--surface2);
+        color: var(--text);
+      }
+      .mark {
+        width: 72px;
+        height: 72px;
+        border-radius: 20px;
+        background: var(--primary);
+        color: var(--onPrimary);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font: 600 30px/1 var(--font-head);
+      }
+      .center {
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .or {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: var(--muted);
+        font-size: 14px;
+        margin: 14px 0;
+      }
+      .or:before,
+      .or:after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: var(--border);
+      }
+      .btn.apple {
+        background: var(--text);
+        color: var(--bg);
+      }
+      .mock-section {
+        margin-top: 56px;
+      }
+      .mock-section > h2 {
+        font-family: var(--font-head);
+        font-size: 28px;
+        margin: 0 0 4px;
+      }
+      .mock-section > p.sub {
+        font-size: 16px;
+      }
+      .phone-cap b {
+        color: var(--text);
+      }
+      .spec-note {
+        font-size: 13px;
+        color: var(--muted);
+        max-width: 360px;
+        text-align: center;
+      }
+      .toc {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 16px;
+      }
+      .toc a {
+        display: inline-flex;
+        align-items: center;
+        min-height: 44px;
+        padding: 0 16px;
+        border-radius: 999px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        color: var(--text);
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 15px;
+      }
+      .rcard {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        min-height: 72px;
+        padding: 10px 12px;
+        border-radius: 14px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        margin-bottom: 8px;
+      }
+      .rcard .thumb {
+        width: 52px;
+        height: 52px;
+        border-radius: 10px;
+        background: var(--surface2);
+        flex: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font: 600 20px/1 var(--font-head);
+        color: var(--muted);
+      }
+      .rcard .t {
+        font-size: 16px;
+        font-weight: 600;
+      }
+      .rcard .d {
+        font-size: 13px;
+        color: var(--muted);
+      }
+      .hscroll {
+        display: flex;
+        gap: 10px;
+        overflow: hidden;
+      }
+      .scard {
+        flex: none;
+        width: 150px;
+        border-radius: 14px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        padding: 10px;
+      }
+      .scard .thumb {
+        height: 70px;
+        border-radius: 10px;
+        background: var(--surface2);
+        margin-bottom: 8px;
+      }
+      .scard .t {
+        font-size: 15px;
+        font-weight: 600;
+        line-height: 1.25;
+      }
+      .plan-card {
+        border: 2px solid var(--primary);
+        border-radius: 14px;
+        padding: 12px 14px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+        min-height: 64px;
+      }
+      .plan-card.alt {
+        border: 1.5px solid var(--border);
+      }
+      .spinner {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        border: 5px solid var(--surface2);
+        border-top-color: var(--primary);
+      }
+      .check-line {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-height: 44px;
+        font-size: 16px;
+      }
+      .check-line .dot {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex: none;
+      }
+      .check-line .dot.done {
+        background: var(--primary);
+        color: var(--onPrimary);
+      }
+      .check-line .dot.done .ic {
+        width: 14px;
+        height: 14px;
+      }
+      .check-line .dot.now {
+        border: 2.5px solid var(--primary);
+        border-right-color: transparent;
+      }
+      .check-line .dot.todo {
+        border: 2px solid var(--muted);
+      }
+      .unread {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--primary);
+        flex: none;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <div class="topbar">
+        <a class="crumb" href="index.html">← All boards</a
+        ><button
+          id="themeBtn"
+          class="toggle"
+          type="button"
+          onclick="pmToggle()"
+          aria-pressed="false"
+        >
+          Dark mode
+        </button>
+      </div>
+      <p
+        style="
+          margin: 0;
+          color: var(--muted);
+          font-weight: 600;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+          font-size: 13px;
+        "
+      >
+        Parent Manager · Calm Kitchen with Village touches
+      </p>
+      <h1 class="board-title">Screen mockups</h1>
+      <p class="lede">
+        The 32 spec screens not shown on the direction boards, in the chosen style. Each is labelled
+        with its screen ID from <code>docs/spec.md</code> (section 4.1) and the requirements it
+        shows. The Plan, List, quick-add and completion screens are on the
+        <a href="direction-ac.html">chosen board</a>.
+      </p>
+      <p class="sub" style="color: var(--muted); max-width: 760px">
+        Placeholder content: Sam and Alex, with Rowan (0–6 months). Prices are placeholders because
+        they come from the stores. Real copy will live in translation files.
+      </p>
+      <nav class="toc" aria-label="Sections">
+        <a href="#auth">Sign in and onboarding</a><a href="#plan">Planner</a
+        ><a href="#recipes">Meals and import</a><a href="#list">List, pantry and export</a
+        ><a href="#household">Household and settings</a><a href="#premium">Premium and access</a>
+      </nav>
+      <section class="mock-section" id="auth">
+        <h2>Sign in and onboarding</h2>
+        <p class="sub">
+          From first launch to a household, in at most four onboarding screens (FR-ONB-2).
+        </p>
+        <div class="phones">
+          <div class="phone-wrap">
+            <div
+              class="phone"
+              role="img"
+              aria-label="&lt;b&gt;S-01&lt;/b&gt; · Launch: update required sample screen"
+            >
+              <div class="status">
+                <span>9:41</span><span class="dots"><i></i><i></i><i></i></span>
+              </div>
+              <div class="screen">
+                <div class="screen-body" style="padding-top: 4px">
+                  <div class="center" style="padding-top: 150px">
+                    <span class="mark">PM</span>
+                    <div class="h1" style="margin-top: 22px">Time for a quick update</div>
+                    <p class="sub" style="max-width: 290px">
+                      This version of Parent Manager is no longer supported. Update to keep your
+                      plans and lists in sync.
+                    </p>
+                  </div>
+                </div>
+                <div
+                  style="padding: 10px 16px 34px; display: flex; flex-direction: column; gap: 8px"
+                >
+                  <button class="btn primary block" type="button">Update now</button>
+                </div>
+              </div>
+              <div class="home-ind"></div>
+            </div>
+            <div class="phone-cap"><b>S-01</b> · Launch: update required</div>
+            <div class="spec-note">
+              FR-AUTH, NFR-REL-4: shown only when the installed version is below the minimum.
+            </div>
+          </div>
+          <div class="phone-wrap">
+            <div
+              class="phone"
+              role="img"
+              aria-label="&lt;b&gt;S-02&lt;/b&gt; · Sign in sample screen"
+            >
+              <div class="status">
+                <span>9:41</span><span class="dots"><i></i><i></i><i></i></span>
+              </div>
+              <div class="screen">
+                <div class="screen-body" style="padding-top: 4px">
+                  <div style="padding-top: 70px">
+                    <span
+                      class="mark"
+                      style="width: 56px; height: 56px; font-size: 24px; border-radius: 16px"
+                      >PM</span
+                    >
+                    <div class="h1" style="font-size: 34px; margin-top: 18px">Parent Manager</div>
+                    <p class="sub">Plan the week, share the list, shop together.</p>
+                    <div class="lbl">Email</div>
+                    <div class="field focus"><span>sam@example.com</span></div>
+                    <div style="height: 10px"></div>
+                    <button class="btn primary block" type="button">Continue with email</button>
+                    <div class="or">or</div>
+                    <div style="display: flex; flex-direction: column; gap: 10px">
+                      <button class="btn apple block" type="button">Continue with Apple</button
+                      ><button class="btn secondary block" type="button">
+                        Continue with Google
+                      </button>
+                    </div>
+                    <p class="small" style="text-align: center; margin-top: 22px">
+                      By continuing you agree to the <u>Terms</u> and <u>Privacy Policy</u>.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div class="home-ind"></div>
+            </div>
+            <div class="phone-cap"><b>S-02</b> · Sign in</div>
+            <div class="spec-note">
+              FR-AUTH-1 to 3: email code, Sign in with Apple and Google on both platforms.
+            </div>
+          </div>
+          <div class="phone-wrap">
+            <div
+              class="phone"
+              role="img"
+              aria-label="&lt;b&gt;S-03&lt;/b&gt; · Enter code sample screen"
+            >
+              <div class="status">
+                <span>9:41</span><span class="dots"><i></i><i></i><i></i></span>
+              </div>
+              <div class="screen">
+                <div class="screen-body" style="padding-top: 4px">
+                  <div class="top"><span class="back">‹ Back</span></div>
+                  <div class="h1" style="margin-top: 20px">Check your email</div>
+                  <p class="sub">
+                    We sent a 6-digit code to <b style="color: var(--text)">sam@example.com</b>. It
+                    works for 10 minutes.
+                  </p>
+                  <div class="codebox">
+                    <span>4</span><span>8</span><span>1</span><span class="cur"></span><span></span
+                    ><span></span>
+                  </div>
+                  <p class="small" style="text-align: center">Resend code in 0:24</p>
+                  <div style="text-align: center; margin-top: 8px">
+                    <span class="btn ghost">Use a different email</span>
+                  </div>
+                </div>
+              </div>
+              <div class="home-ind"></div>
+            </div>
+            <div class="phone-cap"><b>S-03</b> · Enter code</div>
+            <div class="spec-note">
+              FR-AUTH-2: 6-digit code, valid 10 minutes; resend limited to every 30 seconds.
+            </div>
+          </div>
+          <div class="phone-wrap">
+            <div
+              class="phone"
+              role="img"
+              aria-label="&lt;b&gt;S-04&lt;/b&gt; · Biometric lock sample screen"
+            >
+              <div class="status">
+                <span>9:41</span><span class="dots"><i></i><i></i><i></i></span>
+              </div>
+              <div class="screen">
+                <div class="screen-body" style="padding-top: 4px">
+                  <div class="center" style="padding-top: 190px">
+                    <span
+                      style="
+                        width: 84px;
+                        height: 84px;
+                        border-radius: 24px;
+                        background: var(--surface2);
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                        color: var(--primary);
+                      "
+                      ><span class="ic" style="width: 44px; height: 44px"
+                        ><svg viewBox="0 0 24 24" aria-hidden="true">
+                          <rect
+                            x="5"
+                            y="10.5"
+                            width="14"
+                            height="10"
+                            rx="2.5"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="1.8"
+                          />
+                          <path
+                            d="M8 10.5V8a4 4 0 018 0v2.5"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="1.8"
+                          /></svg></span
+                    ></span>
+                    <div class="h2" style="margin-top: 22px">Parent Manager is locked</div>
+                    <p class="sub">Your household's plans stay private.</p>
+                  </div>
+                </div>
+                <div
+                  style="padding: 10px 16px 34px; display: flex; flex-direction: column; gap: 8px"
+                >
+                  <button class="btn primary block" type="button">
+                    <span class="ic"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M4 8V6a2 2 0 012-2h2M16 4h2a2 2 0 012 2v2M20 16v2a2 2 0 01-2 2h-2M8 20H6a2 2 0 01-2-2v-2"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="1.8"
+                          stroke-linecap="round"
+                        />
+                        <path
+                          d="M9 9.5v1M15 9.5v1M12 9.5v3.5h-1M9.5 15.5a3.5 3.5 0 005 0"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="1.8"
+                          stroke-linecap="round"
+                        /></svg></span
+                    >Unlock with Face ID</button
+                  ><button class="btn ghost block" type="button">Use passcode</button>
+                </div>
+              </div>
+              <div class="home-ind"></div>
+            </div>
+            <div class="phone-cap"><b>S-04</b> · Biometric lock</div>
+            <div class="spec-note">
+              FR-AUTH-6: optional; after the lock timeout, with passcode fallback.
+            </div>
+          </div>
+          <div class="phone-wrap">
+            <div
+              class="phone"
+              role="img"
+              aria-label="&lt;b&gt;S-05&lt;/b&gt; · Create or join sample screen"
+            >
+              <div class="status">
+                <span>9:41</span><span class="dots"><i></i><i></i><i></i></span>
+              </div>
+              <div class="screen">
+                <div class="screen-body" style="padding-top: 4px">
+                  <div class="h1" style="margin-top: 40px">Welcome, Sam</div>
+                  <p class="sub">Is your partner already using Parent Manager?</p>
+                  <div class="opt">
+                    <span
+                      class="mark"
+                      style="width: 44px; height: 44px; font-size: 20px; border-radius: 12px"
+                      >+</span
+                    >
+                    <div style="flex: 1">
+                      <div class="t">Start a new household</div>
+                      <div class="d">Set up in about a minute, then invite your partner.</div>
+                    </div>
+                    <span class="ic"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M9 6l6 6-6 6"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        /></svg
+                    ></span>
+                  </div>
+                  <div class="opt">
+                    <span
+                      class="mark"
+                      style="
+                        width: 44px;
+                        height: 44px;
+                        font-size: 18px;
+                        border-radius: 12px;
+                        background: var(--surface2);
+                        color: var(--primary);
+                      "
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M10 14a4 4 0 005.7 0l3-3a4 4 0 00-5.7-5.7l-1 1M14 10a4 4 0 00-5.7 0l-3 3a4 4 0 005.7 5.7l1-1"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="1.8"
+                          stroke-linecap="round"
+                        /></svg
+                    ></span>
+                    <div style="flex: 1">
+                      <div class="t">Join with an invite</div>
+                      <div class="d">Use the link or 6-character code your partner sent.</div>
+                    </div>
+                    <span class="ic"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M9 6l6 6-6 6"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        /></svg
+                    ></span>
+                  </div>
+                </div>
+              </div>
+              <div class="home-ind"></div>
+            </div>
+            <div class="phone-cap"><b>S-05</b> · Create or join</div>
+            <div class="spec-note">
+              FR-ONB-1: first choice for a user with no household; invite links skip straight to
+              joining.
+            </div>
+          </div>
+          <div class="phone-wrap">
+            <div
+              class="phone"
+              role="img"
+              aria-label="&lt;b&gt;S-06&lt;/b&gt; · Onboarding: name and region sample screen"
+            >
+              <div class="status">
+                <span>9:41</span><span class="dots"><i></i><i></i><i></i></span>
+              </div>
+              <div class="screen">
+                <div class="screen-body" style="padding-top: 4px">
+                  <div class="top">
+                    <span class="back">‹ Back</span><span class="small">Step 2 of 4</span>
+                  </div>
+                  <div class="steps"><i class="on"></i><i class="on"></i><i></i><i></i></div>
+                  <div class="lbl" style="margin-top: 4px">Household name</div>
+                  <div class="field"><span>Sam &amp; Alex's home</span></div>
+                  <div class="h2" style="margin-top: 20px">Where do you shop?</div>
+                  <p class="sub" style="margin-bottom: 10px">
+                    This sets units and when your week starts. You can change it later.
+                  </p>
+                  <div class="opt sel">
+                    <span class="radio"></span>
+                    <div>
+                      <div class="t">United States</div>
+                      <div class="d">Cups and ounces · week starts Sunday</div>
+                    </div>
+                  </div>
+                  <div class="opt">
+                    <span class="radio"></span>
+                    <div>
+                      <div class="t">United Kingdom</div>
+                      <div class="d">Grams and millilitres · week starts Monday</div>
+                    </div>
+                  </div>
+                  <div class="opt">
+                    <span class="radio"></span>
+                    <div>
+                      <div class="t">Australia</div>
+                      <div class="d">Metric, with 20 ml tablespoons · week starts Monday</div>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  style="padding: 10px 16px 34px; display: flex; flex-direction: column; gap: 8px"
+                >
+                  <button class="btn primary block" type="button">Continue</button>
+                </div>
+              </div>
+              <div class="home-ind"></div>
+            </div>
+            <div class="phone-cap"><b>S-06</b> · Onboarding: name and region</div>
+            <div class="spec-note">
+              FR-ONB-2 steps 1 and 2; FR-ONB-3: region sets units, locale and week start.
+            </div>
+          </div>
+          <div class="phone-wrap">
+            <div
+              class="phone"
+              role="img"
+              aria-label="&lt;b&gt;S-07&lt;/b&gt; · Onboarding: who you&#x27;re feeding sample screen"
+            >
+              <div class="status">
+                <span>9:41</span><span class="dots"><i></i><i></i><i></i></span>
+              </div>
+              <div class="screen">
+                <div class="screen-body" style="padding-top: 4px">
+                  <div class="top">
+                    <span class="back">‹ Back</span
+                    ><span class="small">Step 3 of 4 · <u>Skip</u></span>
+                  </div>
+                  <div class="steps">
+                    <i class="on"></i><i class="on"></i><i class="on"></i><i></i>
+                  </div>
+                  <div class="h2">Who are you feeding?</div>
+                  <p class="sub" style="margin-bottom: 8px">
+                    Portions start from this. Nicknames are fine.
+                  </p>
+                  <div class="lbl">Adults</div>
+                  <div class="lrow">
+                    <span class="av s">S</span
+                    ><span class="nm">Sam <span class="small">(you)</span></span>
+                  </div>
+                  <div class="lrow">
+                    <span class="av a">A</span><span class="nm">Alex</span
+                    ><span class="small">Remove</span>
+                  </div>
+                  <div class="lbl">Children</div>
+                  <div class="card" style="padding: 12px 14px">
+                    <div style="display: flex; justify-content: space-between; align-items: center">
+                      <b style="font-size: 17px">Rowan</b><span class="small">Remove</span>
+                    </div>
+                    <div class="row-wrap" style="gap: 6px; margin-top: 10px">
+                      <span class="chip sel">0–6 months</span><span class="chip">6–12 months</span
+                      ><span class="chip">Toddler</span><span class="chip">Preschool</span>
+                    </div>
+                  </div>
+                  <div class="row-wrap" style="gap: 8px; margin-top: 12px">
+                    <span class="chip">+ Add a child</span
+                    ><span class="chip">+ We're expecting</span>
+                  </div>
+                  <p class="small" style="margin-top: 12px">We never ask for birth dates.</p>
+                </div>
+                <div
+                  style="padding: 10px 16px 34px; display: flex; flex-direction: column; gap: 8px"
+                >
+                  <button class="btn primary block" type="button">Continue</button>
+                </div>
+              </div>
+              <div class="home-ind"></div>
+            </div>
+            <div class="phone-cap"><b>S-07</b> · Onboarding: who you're feeding</div>
+            <div class="spec-note">
+              FR-ONB-2 step 3, FR-ONB-4: age bands only, never birth dates.
+            </div>
+          </div>
+          <div class="phone-wrap">
+            <div
+              class="phone"
+              role="img"
+              aria-label="&lt;b&gt;S-08&lt;/b&gt; · Onboarding: allergies and diets sample screen"
+            >
+              <div class="status">
+                <span>9:41</span><span class="dots"><i></i><i></i><i></i></span>
+              </div>
+              <div class="screen">
+                <div class="screen-body" style="padding-top: 4px">
+                  <div class="top">
+                    <span class="back">‹ Back</span
+                    ><span class="small">Step 4 of 4 · <u>Skip</u></span>
+                  </div>
+                  <div class="steps">
+                    <i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i>
+                  </div>
+                  <div class="h2">Any allergies or diets?</div>
+                  <p class="sub" style="margin-bottom: 8px">We'll flag meals that contain them.</p>
+                  <div class="lrow">
+                    <span class="av a">A</span><span class="nm">Alex</span
+                    ><span class="tag warn">tree nuts</span>
+                  </div>
+                  <div class="lbl">Allergies for Alex</div>
+                  <div class="row-wrap" style="gap: 6px">
+                    <span class="chip">Milk</span><span class="chip">Egg</span
+                    ><span class="chip">Peanut</span><span class="chip sel">Tree nuts</span
+                    ><span class="chip">Soy</span><span class="chip">Wheat</span
+                    ><span class="chip">Fish</span><span class="chip">Shellfish</span
+                    ><span class="chip">Sesame</span>
+                  </div>
+                  <div class="lrow" style="margin-top: 6px">
+                    <span class="av s">S</span><span class="nm">Sam</span
+                    ><span class="small">None</span>
+                  </div>
+                  <div class="lrow">
+                    <span class="av c">R</span><span class="nm">Rowan</span
+                    ><span class="small">None</span>
+                  </div>
+                  <p class="small" style="margin-top: 12px">
+                    Parent Manager can miss allergens, and products vary. Always check labels. This
+                    isn't medical advice.
+                  </p>
+                </div>
+                <div
+                  style="padding: 10px 16px 34px; display: flex; flex-direction: column; gap: 8px"
+                >
+                  <button class="btn primary block" type="button">Finish setup</button>
+                </div>
+              </div>
+              <div class="home-ind"></div>
+            </div>
+            <div class="phone-cap"><b>S-08</b> · Onboarding: allergies and diets</div>
+            <div class="spec-note">
+              FR-ONB-2 step 4, FR-HH-12: fixed codes; disclaimer always shown; always free.
+            </div>
+          </div>
+          <div class="phone-wrap">
+            <div
+              class="phone"
+              role="img"
+              aria-label="&lt;b&gt;S-09&lt;/b&gt; · Join household sample screen"
+            >
+              <div class="status">
+                <span>9:41</span><span class="dots"><i></i><i></i><i></i></span>
+              </div>
+              <div class="screen">
+                <div class="screen-body" style="padding-top: 4px">
+                  <div class="top"><span class="back">‹ Back</span></div>
+                  <div class="h1" style="margin-top: 14px">Join a household</div>
+                  <p class="sub">Enter the code your partner shared.</p>
+                  <div class="codebox">
+                    <span>K</span><span>7</span><span>M</span><span>P</span><span>4</span
+                    ><span>Q</span>
+                  </div>
+                  <div class="card" style="margin-top: 6px">
+                    <div style="display: flex; gap: 12px; align-items: center">
+                      <span class="av s">S</span>
+                      <div>
+                        <div style="font-size: 15px; color: var(--muted)">Sam invited you to</div>
+                        <div class="ttl" style="font-size: 21px">Sam &amp; Alex's home</div>
+                      </div>
+                    </div>
+                    <div
+                      style="
+                        display: flex;
+                        justify-content: space-between;
+                        margin-top: 12px;
+                        font-size: 15px;
+                      "
+                    >
+                      <span class="small">Your role</span><b>Parent</b>
+                    </div>
+                    <div
+                      style="
+                        display: flex;
+                        justify-content: space-between;
+                        margin-top: 6px;
+                        font-size: 15px;
+                      "
+                    >
+                      <span class="small">Invite expires</span><span>in 6 days</span>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  style="padding: 10px 16px 34px; display: flex; flex-direction: column; gap: 8px"
+                >
+                  <button class="btn primary block" type="button">Join household</button>
+                </div>
+              </div>
+              <div class="home-ind"></div>
+            </div>
+            <div class="phone-cap"><b>S-09</b> · Join household</div>
+            <div class="spec-note">
+              FR-HH-4 to 7: code in any case; preview of household, inviter and role before
+              accepting.
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="mock-section" id="plan">
+        <h2>Planner</h2>
+        <p class="sub">The sheets behind the Plan tab, and past weeks.</p>
+        <div class="phones">
+          <div class="phone-wrap">
+            <div
+              class="phone"
+              role="img"
+              aria-label="&lt;b&gt;S-11&lt;/b&gt; · Add to slot (sheet) sample screen"
+            >
+              <div class="status">
+                <span>9:41</span><span class="dots"><i></i><i></i><i></i></span>
+              </div>
+              <div class="screen">
+                <div class="screen-body under" style="padding-top: 8px">
+                  <h3 class="h1">This week</h3>
+                  <div class="lrow">
+                    <span style="width: 44px; font-weight: 600; color: var(--muted)">Mon</span
+                    ><span class="nm">Sheet-pan chicken & veg</span>
+                  </div>
+                  <div class="lrow">
+                    <span style="width: 44px; font-weight: 600; color: var(--muted)">Tue</span
+                    ><span class="nm">Lentil soup</span>
+                  </div>
+                  <div class="lrow">
+                    <span style="width: 44px; font-weight: 600; color: var(--muted)">Wed</span
+                    ><span class="nm">Lentil soup (leftovers)</span>
+                  </div>
+                  <div class="lrow">
+                    <span style="width: 44px; font-weight: 600; color: var(--muted)">Thu</span
+                    ><span class="nm">Slow-cooker chili</span>
+                  </div>
+                </div>
+                <div class="dim"></div>
+                <div
+                  class="sheet"
+                  style="
+                    position: absolute;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    padding-bottom: 30px;
+                    max-height: 88%;
+                    overflow: hidden;
+                  "
+                >
+                  <div class="grab"></div>
+                  <div class="sh-t">Sunday dinner</div>
+                  <div class="field">
+                    <span class="ic" style="color: var(--muted)"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <circle
+                          cx="11"
+                          cy="11"
+                          r="6"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="1.8"
+                        />
+                        <path
+                          d="M16 16l4 4"
+                          stroke="currentColor"
+                          stroke-width="1.8"
+                          stroke-linecap="round"
+                        /></svg></span
+                    ><span class="ph">Search meals</span>
+                  </div>
+                  <div class="lbl">Recent</div>
+                  <div class="lrow">
+                    <span class="nm">Sheet-pan chicken & veg</span><span class="qt">35 min</span
+                    ><span class="ic"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M12 5v14M5 12h14"
+                          stroke="currentColor"
+                          stroke-width="2.2"
+                          stroke-linecap="round"
+                        /></svg
+                    ></span>
+                  </div>
+                  <div class="lrow">
+                    <span class="nm">Slow-cooker chili</span><span class="qt">6 h</span
+                    ><span class="ic"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M12 5v14M5 12h14"
+                          stroke="currentColor"
+                          stroke-width="2.2"
+                          stroke-linecap="round"
+                        /></svg
+                    ></span>
+                  </div>
+                  <div class="lrow">
+                    <span class="nm">Pesto pasta with peas</span><span class="qt">20 min</span
+                    ><span class="ic"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M12 5v14M5 12h14"
+                          stroke="currentColor"
+                          stroke-width="2.2"
+                          stroke-linecap="round"
+                        /></svg
+                    ></span>
+                  </div>
+                  <div class="lbl">Starter ideas · one-handed</div>
+                  <div class="lrow">
+                    <span class="nm">Breakfast for dinner</span><span class="qt">15 min</span
+                    ><span class="ic"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M12 5v14M5 12h14"
+                          stroke="currentColor"
+                          stroke-width="2.2"
+                          stroke-linecap="round"
+                        /></svg
+                    ></span>
+                  </div>
+                  <div class="lrow">
+                    <span class="nm" style="color: var(--primary)"
+                      >Write something else, like "takeout"</span
+                    >
+                  </div>
+                  <div
+                    style="
+                      display: flex;
+                      justify-content: space-between;
+                      align-items: center;
+                      margin-top: 14px;
+                    "
+                  >
+                    <span class="small">Servings</span
+                    ><span class="stepper"
+                      ><span
+                        ><span class="ic"
+                          ><svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path
+                              d="M5 12h14"
+                              stroke="currentColor"
+                              stroke-width="2.2"
+                              stroke-linecap="round"
+                            /></svg></span></span
+                      ><b>2</b
+                      ><span
+                        ><span class="ic"
+                          ><svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path
+                              d="M12 5v14M5 12h14"
+                              stroke="currentColor"
+                              stroke-width="2.2"
+                              stroke-linecap="round"
+                            /></svg></span></span
+                    ></span>
+                  </div>
+                </div>
+              </div>
+              <div class="home-ind"></div>
+            </div>
+            <div class="phone-cap"><b>S-11</b> · Add to slot (sheet)</div>
+            <div class="spec-note">
+              FR-PLAN-3 to 5: recent recipes, search, free text; at most 2 taps after a result
+              appears.
+            </div>
+          </div>
+          <div class="phone-wrap">
+            <div
+              class="phone"
+              role="img"
+              aria-label="&lt;b&gt;S-12&lt;/b&gt; · Entry detail (sheet) sample screen"
+            >
+              <div class="status">
+                <span>9:41</span><span class="dots"><i></i><i></i><i></i></span>
+              </div>
+              <div class="screen">
+                <div class="screen-body under" style="padding-top: 8px">
+                  <h3 class="h1">This week</h3>
+                  <div class="lrow">
+                    <span style="width: 44px; font-weight: 600; color: var(--muted)">Mon</span
+                    ><span class="nm">Sheet-pan chicken & veg</span>
+                  </div>
+                  <div class="lrow">
+                    <span style="width: 44px; font-weight: 600; color: var(--muted)">Tue</span
+                    ><span class="nm">Lentil soup</span>
+                  </div>
+                  <div class="lrow">
+                    <span style="width: 44px; font-weight: 600; color: var(--muted)">Wed</span
+                    ><span class="nm">Lentil soup (leftovers)</span>
+                  </div>
+                  <div class="lrow">
+                    <span style="width: 44px; font-weight: 600; color: var(--muted)">Thu</span
+                    ><span class="nm">Slow-cooker chili</span>
+                  </div>
+                </div>
+                <div class="dim"></div>
+                <div
+                  class="sheet"
+                  style="
+                    position: absolute;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    padding-bottom: 30px;
+                    max-height: 88%;
+                    overflow: hidden;
+                  "
+                >
+                  <div class="grab"></div>
+                  <div class="sh-t">Slow-cooker chili</div>
+                  <p class="small" style="margin: -6px 0 10px">Thursday dinner · added by Alex</p>
+                  <div class="lbl" style="margin-top: 0">Who's eating</div>
+                  <div class="lrow">
+                    <span class="av s">S</span
+                    ><span class="nm">Sam<br /><span class="small">Adult</span></span
+                    ><span class="stepper"
+                      ><span
+                        ><span class="ic"
+                          ><svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path
+                              d="M5 12h14"
+                              stroke="currentColor"
+                              stroke-width="2.2"
+                              stroke-linecap="round"
+                            /></svg></span></span
+                      ><b>1</b
+                      ><span
+                        ><span class="ic"
+                          ><svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path
+                              d="M12 5v14M5 12h14"
+                              stroke="currentColor"
+                              stroke-width="2.2"
+                              stroke-linecap="round"
+                            /></svg></span></span
+                    ></span>
+                  </div>
+                  <div class="lrow">
+                    <span class="av a">A</span
+                    ><span class="nm">Alex<br /><span class="small">Adult</span></span
+                    ><span class="stepper"
+                      ><span
+                        ><span class="ic"
+                          ><svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path
+                              d="M5 12h14"
+                              stroke="currentColor"
+                              stroke-width="2.2"
+                              stroke-linecap="round"
+                            /></svg></span></span
+                      ><b>1</b
+                      ><span
+                        ><span class="ic"
+                          ><svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path
+                              d="M12 5v14M5 12h14"
+                              stroke="currentColor"
+                              stroke-width="2.2"
+                              stroke-linecap="round"
+                            /></svg></span></span
+                    ></span>
+                  </div>
+                  <div class="lrow">
+                    <span class="av c">R</span
+                    ><span class="nm"
+                      >Rowan<br /><span class="small">0–6 months · not eating yet</span></span
+                    ><span class="stepper"
+                      ><span
+                        ><span class="ic"
+                          ><svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path
+                              d="M5 12h14"
+                              stroke="currentColor"
+                              stroke-width="2.2"
+                              stroke-linecap="round"
+                            /></svg></span></span
+                      ><b>0</b
+                      ><span
+                        ><span class="ic"
+                          ><svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path
+                              d="M12 5v14M5 12h14"
+                              stroke="currentColor"
+                              stroke-width="2.2"
+                              stroke-linecap="round"
+                            /></svg></span></span
+                    ></span>
+                  </div>
+                  <div
+                    style="
+                      display: flex;
+                      justify-content: space-between;
+                      margin: 10px 0;
+                      font-size: 15px;
+                    "
+                  >
+                    <span class="small">Total</span><b>2 servings</b>
+                  </div>
+                  <div class="nav-row">
+                    <span class="grow">Leftovers for</span><span class="val">Friday lunch</span
+                    ><span class="ic"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M9 6l6 6-6 6"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        /></svg
+                    ></span>
+                  </div>
+                  <div class="row-wrap" style="gap: 8px; margin-top: 14px">
+                    <span class="chip">Move</span><span class="chip">Duplicate</span
+                    ><span class="chip danger">Remove</span>
+                  </div>
+                </div>
+              </div>
+              <div class="home-ind"></div>
+            </div>
+            <div class="phone-cap"><b>S-12</b> · Entry detail (sheet)</div>
+            <div class="spec-note">
+              FR-PLAN-5 to 8: portions per person, baby plate, leftovers link, move, duplicate,
+              remove with undo.
+            </div>
+          </div>
+          <div class="phone-wrap">
+            <div
+              class="phone"
+              role="img"
+              aria-label="&lt;b&gt;S-34&lt;/b&gt; · History sample screen"
+            >
+              <div class="status">
+                <span>9:41</span><span class="dots"><i></i><i></i><i></i></span>
+              </div>
+              <div class="screen">
+                <div class="screen-body" style="padding-top: 4px">
+                  <div class="top"><span class="back">‹ This week</span></div>
+                  <h3 class="h1">Past weeks</h3>
+                  <div class="nav-row">
+                    <span class="grow"
+                      >Nov 2 – 8<br /><span class="small"
+                        >7 dinners · list finished by Sam and Alex</span
+                      ></span
+                    ><span class="ic"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M9 6l6 6-6 6"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        /></svg
+                    ></span>
+                  </div>
+                  <div class="nav-row">
+                    <span class="grow"
+                      >Oct 26 – Nov 1<br /><span class="small"
+                        >6 dinners · list finished</span
+                      ></span
+                    ><span class="ic"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M9 6l6 6-6 6"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        /></svg
+                    ></span>
+                  </div>
+                  <div class="nav-row">
+                    <span class="grow">Oct 19 – 25<br /><span class="small">5 dinners</span></span
+                    ><span class="ic"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M9 6l6 6-6 6"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        /></svg
+                    ></span>
+                  </div>
+                  <div class="nav-row">
+                    <span class="grow">Oct 12 – 18<br /><span class="small">4 dinners</span></span
+                    ><span class="ic"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M9 6l6 6-6 6"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        /></svg
+                    ></span>
+                  </div>
+                  <div
+                    class="card"
+                    style="margin-top: 16px; display: flex; gap: 12px; align-items: center"
+                  >
+                    <span class="ic" style="color: var(--primary)"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <rect
+                          x="5"
+                          y="10.5"
+                          width="14"
+                          height="10"
+                          rx="2.5"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="1.8"
+                        />
+                        <path
+                          d="M8 10.5V8a4 4 0 018 0v2.5"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="1.8"
+                        /></svg
+                    ></span>
+                    <div style="flex: 1">
+                      <b>11 older weeks</b>
+                      <div class="small">Kept safe. See them with Premium.</div>
+                    </div>
+                    <span class="badge">Premium</span>
+                  </div>
+                </div>
+              </div>
+              <div class="home-ind"></div>
+            </div>
+            <div class="phone-cap"><b>S-34</b> · History</div>
+            <div class="spec-note">
+              FR-PAY-6, FR-LIST-13: free sees the current week and the last 4; older weeks need
+              Premium.
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="mock-section" id="recipes">
+        <h2>Meals and import</h2>
+        <p class="sub">
+          Browsing, editing and the AI import flow with its review-before-save step (AI-5).
+        </p>
+        <div class="phones">
+          <div class="phone-wrap">
+            <div
+              class="phone"
+              role="img"
+              aria-label="&lt;b&gt;S-16&lt;/b&gt; · Recipes tab sample screen"
+            >
+              <div class="status">
+                <span>9:41</span><span class="dots"><i></i><i></i><i></i></span>
+              </div>
+              <div class="screen">
+                <div class="screen-body" style="padding-top: 4px">
+                  <div class="top">
+                    <span class="small">42 meals</span
+                    ><span class="avs"><span class="av s">S</span><span class="av a">A</span></span>
+                  </div>
+                  <h3 class="h1">Meals</h3>
+                  <div class="field">
+                    <span class="ic" style="color: var(--muted)"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <circle
+                          cx="11"
+                          cy="11"
+                          r="6"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="1.8"
+                        />
+                        <path
+                          d="M16 16l4 4"
+                          stroke="currentColor"
+                          stroke-width="1.8"
+                          stroke-linecap="round"
+                        /></svg></span
+                    ><span class="ph">Search meals or ingredients</span>
+                  </div>
+                  <div
+                    class="row-wrap"
+                    style="gap: 6px; margin: 12px 0 4px; flex-wrap: nowrap; overflow: hidden"
+                  >
+                    <span class="chip sel">All</span><span class="chip">Quick</span
+                    ><span class="chip">One-handed</span><span class="chip">Freezer</span>
+                  </div>
+                  <div class="lbl">Our meals</div>
+                  <div class="rcard">
+                    <span class="thumb">S</span>
+                    <div style="flex: 1">
+                      <div class="t">Slow-cooker chili</div>
+                      <div class="d">6 h · batch-prep · in plan Thu</div>
+                    </div>
+                    <span class="av a sm">A</span>
+                  </div>
+                  <div class="rcard">
+                    <span class="thumb">L</span>
+                    <div style="flex: 1">
+                      <div class="t">Lentil soup</div>
+                      <div class="d">40 min · freezer-friendly</div>
+                    </div>
+                    <span class="av s sm">S</span>
+                  </div>
+                  <div class="rcard">
+                    <span class="thumb">P</span>
+                    <div style="flex: 1">
+                      <div class="t">Pesto pasta with peas</div>
+                      <div class="d">20 min · quick</div>
+                    </div>
+                    <span class="av s sm">S</span>
+                  </div>
+                  <div class="lbl">Starter ideas</div>
+                  <div class="hscroll">
+                    <div class="scard">
+                      <div class="thumb"></div>
+                      <div class="t">Overnight oats</div>
+                      <div class="small">5 min · no-cook</div>
+                    </div>
+                    <div class="scard">
+                      <div class="thumb"></div>
+                      <div class="t">Freezer burritos</div>
+                      <div class="small">batch-prep</div>
+                    </div>
+                    <div class="scard">
+                      <div class="thumb"></div>
+                      <div class="t">Sheet-pan salmon</div>
+                      <div class="small">25 min</div>
+                    </div>
+                  </div>
+                </div>
+                <div style="padding: 10px 16px; display: flex; flex-direction: column; gap: 8px">
+                  <button class="btn primary block" type="button">
+                    <span class="ic"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M12 5v14M5 12h14"
+                          stroke="currentColor"
+                          stroke-width="2.2"
+                          stroke-linecap="round"
+                        /></svg></span
+                    >Add or import a meal
+                  </button>
+                </div>
+                <div class="tab-spacer"></div>
+                <nav class="tabbar float" aria-label="Main tabs (sample)">
+                  <span class="tab"
+                    ><span class="ic"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <rect
+                          x="3.5"
+                          y="5"
+                          width="17"
+                          height="15"
+                          rx="2.5"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="1.8"
+                        />
+                        <path
+                          d="M3.5 10h17M8 3v4M16 3v4"
+                          stroke="currentColor"
+                          stroke-width="1.8"
+                          stroke-linecap="round"
+                        /></svg></span
+                    ><span>Plan</span></span
+                  ><span class="tab"
+                    ><span class="ic"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M9 7h11M9 12h11M9 17h11"
+                          stroke="currentColor"
+                          stroke-width="1.8"
+                          stroke-linecap="round"
+                        />
+                        <path
+                          d="M3.5 7l1.5 1.5L7.5 6M3.5 12l1.5 1.5 2.5-2.5"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="1.8"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        />
+                        <circle cx="5" cy="17" r="1.5" fill="currentColor" /></svg></span
+                    ><span>List</span></span
+                  ><span class="tab on"
+                    ><span class="ic"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M5 4.5h10a3 3 0 013 3v12H8a3 3 0 01-3-3z"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="1.8"
+                          stroke-linejoin="round"
+                        />
+                        <path
+                          d="M5 16.5a3 3 0 013-3h10"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="1.8"
+                        /></svg></span
+                    ><span>Recipes</span></span
+                  ><span class="tab"
+                    ><span class="ic"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M4 11l8-6.5 8 6.5V19a1.5 1.5 0 01-1.5 1.5h-4v-5h-5v5h-4A1.5 1.5 0 014 19z"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="1.8"
+                          stroke-linejoin="round"
+                        /></svg></span
+                    ><span>Household</span></span
+                  >
+                </nav>
+              </div>
+              <div class="home-ind"></div>
+            </div>
+            <div class="phone-cap"><b>S-16</b> · Recipes tab</div>
+            <div class="spec-note">
+              FR-REC-1, FR-REC-7, FR-REC-10: household meals, starter library, offline search, tag
+              filters.
+            </div>
+          </div>
+          <div class="phone-wrap">
+            <div
+              class="phone"
+              role="img"
+              aria-label="&lt;b&gt;S-17&lt;/b&gt; · Recipe detail sample screen"
+            >
+              <div class="status">
+                <span>9:41</span><span class="dots"><i></i><i></i><i></i></span>
+              </div>
+              <div class="screen">
+                <div class="screen-body" style="padding-top: 4px">
+                  <div class="top">
+                    <span class="back">‹ Meals</span
+                    ><span style="color: var(--primary); font-weight: 600">Edit</span>
+                  </div>
+                  <h3 class="h1">Pesto pasta with peas</h3>
+                  <p class="small" style="margin: 0 0 8px">
+                    10 min prep · 10 min cook · imported from a link
+                  </p>
+                  <div class="row-wrap" style="gap: 6px; margin-bottom: 12px">
+                    <span class="tag">quick</span><span class="tag">kid-friendly</span>
+                  </div>
+                  <div class="notice">
+                    <span class="ic"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M12 4l9 16H3z"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="1.8"
+                          stroke-linejoin="round"
+                        />
+                        <path
+                          d="M12 10v4.5"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                        />
+                        <circle cx="12" cy="17.3" r="1.1" fill="currentColor" /></svg
+                    ></span>
+                    <div>
+                      <b>Contains tree nuts (pine nuts)</b>Alex is allergic. Parent Manager can miss
+                      allergens, and products vary. Always check labels. This isn't medical advice.
+                    </div>
+                  </div>
+                  <div style="display: flex; justify-content: space-between; align-items: center">
+                    <span class="h2" style="margin: 0">Ingredients</span
+                    ><span class="stepper"
+                      ><span
+                        ><span class="ic"
+                          ><svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path
+                              d="M5 12h14"
+                              stroke="currentColor"
+                              stroke-width="2.2"
+                              stroke-linecap="round"
+                            /></svg></span></span
+                      ><b>4</b
+                      ><span
+                        ><span class="ic"
+                          ><svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path
+                              d="M12 5v14M5 12h14"
+                              stroke="currentColor"
+                              stroke-width="2.2"
+                              stroke-linecap="round"
+                            /></svg></span></span
+                    ></span>
+                  </div>
+                  <div class="lrow" style="min-height: 48px">
+                    <span class="nm" style="font-size: 16px">Penne</span
+                    ><span class="qt">1 lb</span>
+                  </div>
+                  <div class="lrow" style="min-height: 48px">
+                    <span class="nm" style="font-size: 16px">Frozen peas</span
+                    ><span class="qt">2 cups</span>
+                  </div>
+                  <div class="lrow" style="min-height: 48px">
+                    <span class="nm" style="font-size: 16px">Basil pesto</span
+                    ><span class="qt">⅔ cup</span>
+                  </div>
+                  <div class="lrow" style="min-height: 48px">
+                    <span class="nm" style="font-size: 16px">Parmesan, grated</span
+                    ><span class="qt">½ cup</span>
+                  </div>
+                  <p class="small" style="margin-top: 8px">Serves 4 · steps below</p>
+                </div>
+                <div
+                  style="padding: 10px 16px 34px; display: flex; flex-direction: column; gap: 8px"
+                >
+                  <button class="btn primary block" type="button">
+                    <span class="ic"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M12 5v14M5 12h14"
+                          stroke="currentColor"
+                          stroke-width="2.2"
+                          stroke-linecap="round"
+                        /></svg></span
+                    >Add to plan
+                  </button>
+                </div>
+              </div>
+              <div class="home-ind"></div>
+            </div>
+            <div class="phone-cap"><b>S-17</b> · Recipe detail</div>
+            <div class="spec-note">
+              FR-REC-8, FR-REC-9: servings stepper rescales on screen; allergen notice with
+              disclaimer.
+            </div>
+          </div>
+          <div class="phone-wrap">
+            <div
+              class="phone"
+              role="img"
+              aria-label="&lt;b&gt;S-18&lt;/b&gt; · Recipe editor sample screen"
+            >
+              <div class="status">
+                <span>9:41</span><span class="dots"><i></i><i></i><i></i></span>
+              </div>
+              <div class="screen">
+                <div class="screen-body" style="padding-top: 4px">
+                  <div class="top">
+                    <span class="back">Cancel</span><b>New meal</b
+                    ><span style="color: var(--primary); font-weight: 700">Save</span>
+                  </div>
+                  <div class="lbl" style="margin-top: 4px">Name</div>
+                  <div class="field"><span>Grandma's lentil soup</span></div>
+                  <div style="display: flex; gap: 10px">
+                    <div style="flex: 1">
+                      <div class="lbl">Serves</div>
+                      <span class="stepper"
+                        ><span
+                          ><span class="ic"
+                            ><svg viewBox="0 0 24 24" aria-hidden="true">
+                              <path
+                                d="M5 12h14"
+                                stroke="currentColor"
+                                stroke-width="2.2"
+                                stroke-linecap="round"
+                              /></svg></span></span
+                        ><b>4</b
+                        ><span
+                          ><span class="ic"
+                            ><svg viewBox="0 0 24 24" aria-hidden="true">
+                              <path
+                                d="M12 5v14M5 12h14"
+                                stroke="currentColor"
+                                stroke-width="2.2"
+                                stroke-linecap="round"
+                              /></svg></span></span
+                      ></span>
+                    </div>
+                    <div style="flex: 1">
+                      <div class="lbl">Total time</div>
+                      <div class="field"><span>40 min</span></div>
+                    </div>
+                  </div>
+                  <div class="lbl">Ingredients</div>
+                  <div class="line">
+                    <span class="box">1</span><span class="box">cup</span
+                    ><span class="box">Red lentils</span>
+                  </div>
+                  <div class="line">
+                    <span class="box">2</span><span class="box">qt</span
+                    ><span class="box">Vegetable broth</span>
+                  </div>
+                  <div class="line">
+                    <span class="box">1</span><span class="box"></span
+                    ><span class="box">Onion</span>
+                  </div>
+                  <div class="line" style="grid-template-columns: 56px 76px 1fr">
+                    <span
+                      class="box"
+                      style="
+                        background: var(--surface);
+                        box-shadow: inset 0 0 0 1.5px var(--primary);
+                      "
+                      >2</span
+                    ><span
+                      class="box"
+                      style="
+                        background: var(--surface);
+                        box-shadow: inset 0 0 0 1.5px var(--primary);
+                      "
+                      >tbsp</span
+                    ><span
+                      class="box"
+                      style="
+                        background: var(--surface);
+                        box-shadow: inset 0 0 0 1.5px var(--primary);
+                      "
+                      >Olive oil</span
+                    >
+                  </div>
+                  <div
+                    style="
+                      color: var(--primary);
+                      font-weight: 600;
+                      min-height: 48px;
+                      display: flex;
+                      align-items: center;
+                      gap: 6px;
+                    "
+                  >
+                    <span class="ic"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M12 5v14M5 12h14"
+                          stroke="currentColor"
+                          stroke-width="2.2"
+                          stroke-linecap="round"
+                        /></svg
+                    ></span>
+                    Add ingredient
+                  </div>
+                  <div class="lbl" style="margin-top: 4px">Tags</div>
+                  <div class="row-wrap" style="gap: 6px">
+                    <span class="chip sel">Freezer-friendly</span
+                    ><span class="chip">Batch-prep</span><span class="chip">One-handed</span>
+                  </div>
+                </div>
+              </div>
+              <div class="home-ind"></div>
+            </div>
+            <div class="phone-cap"><b>S-18</b> · Recipe editor</div>
+            <div class="spec-note">
+              FR-REC-4 to 6: quantity, unit and ingredient pickers; household units listed first.
+            </div>
+          </div>
+          <div class="phone-wrap">
+            <div
+              class="phone"
+              role="img"
+              aria-label="&lt;b&gt;S-19&lt;/b&gt; · Import: choose input sample screen"
+            >
+              <div class="status">
+                <span>9:41</span><span class="dots"><i></i><i></i><i></i></span>
+              </div>
+              <div class="screen">
+                <div class="screen-body" style="padding-top: 4px">
+                  <div class="top"><span class="back">Cancel</span></div>
+                  <h3 class="h1">Import a meal</h3>
+                  <p class="sub">We'll read it and you check it before saving.</p>
+                  <div class="field focus">
+                    <span class="ic" style="color: var(--primary)"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M10 14a4 4 0 005.7 0l3-3a4 4 0 00-5.7-5.7l-1 1M14 10a4 4 0 00-5.7 0l-3 3a4 4 0 005.7 5.7l1-1"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="1.8"
+                          stroke-linecap="round"
+                        /></svg></span
+                    ><span style="overflow: hidden; white-space: nowrap; text-overflow: ellipsis"
+                      >https://recipes.example.com/chili</span
+                    >
+                  </div>
+                  <div style="height: 10px"></div>
+                  <button class="btn primary block" type="button">Import from link</button>
+                  <div class="or">or</div>
+                  <div class="nav-row">
+                    <span class="ic lead"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M5 6h14M5 10h14M5 14h9M5 18h6"
+                          stroke="currentColor"
+                          stroke-width="1.8"
+                          stroke-linecap="round"
+                        /></svg></span
+                    ><span class="grow">Paste text</span
+                    ><span class="ic"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M9 6l6 6-6 6"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        /></svg
+                    ></span>
+                  </div>
+                  <div class="nav-row">
+                    <span class="ic lead"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M4 8.5A1.5 1.5 0 015.5 7h2.2l1.5-2h5.6l1.5 2h2.2A1.5 1.5 0 0120 8.5v9a1.5 1.5 0 01-1.5 1.5h-13A1.5 1.5 0 014 17.5z"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="1.8"
+                          stroke-linejoin="round"
+                        />
+                        <circle
+                          cx="12"
+                          cy="13"
+                          r="3.2"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="1.8"
+                        /></svg></span
+                    ><span class="grow">Take a photo of a cookbook page</span
+                    ><span class="ic"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M9 6l6 6-6 6"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        /></svg
+                    ></span>
+                  </div>
+                  <div class="nav-row">
+                    <span class="ic lead"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <rect
+                          x="4"
+                          y="5"
+                          width="16"
+                          height="14"
+                          rx="2"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="1.8"
+                        />
+                        <circle cx="9" cy="10" r="1.6" fill="currentColor" />
+                        <path
+                          d="M4.5 17l5-5 4 4 2.5-2.5 3.5 3.5"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="1.8"
+                          stroke-linejoin="round"
+                        /></svg></span
+                    ><span class="grow">Choose a screenshot or photo</span
+                    ><span class="ic"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M9 6l6 6-6 6"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        /></svg
+                    ></span>
+                  </div>
+                  <div
+                    class="card"
+                    style="
+                      margin-top: 16px;
+                      display: flex;
+                      justify-content: space-between;
+                      align-items: center;
+                    "
+                  >
+                    <div>
+                      <b style="font-size: 17px">3 of 5 left</b>
+                      <div class="small">Imports this month · resets Dec 1</div>
+                    </div>
+                    <span class="badge">Free</span>
+                  </div>
+                </div>
+              </div>
+              <div class="home-ind"></div>
+            </div>
+            <div class="phone-cap"><b>S-19</b> · Import: choose input</div>
+            <div class="spec-note">
+              FR-AI-1 to 3: link, text, photo or screenshot; allowance shown before starting; online
+              only.
+            </div>
+          </div>
+          <div class="phone-wrap">
+            <div
+              class="phone"
+              role="img"
+              aria-label="&lt;b&gt;S-20&lt;/b&gt; · Import: progress sample screen"
+            >
+              <div class="status">
+                <span>9:41</span><span class="dots"><i></i><i></i><i></i></span>
+              </div>
+              <div class="screen">
+                <div class="screen-body" style="padding-top: 4px">
+                  <div class="top"><span class="back">Cancel</span></div>
+                  <div class="center" style="padding-top: 110px">
+                    <div class="spinner" role="img" aria-label="working"></div>
+                    <div class="h2" style="margin-top: 22px">Reading the recipe…</div>
+                    <p class="sub">Usually under 20 seconds.</p>
+                  </div>
+                  <div style="max-width: 300px; margin: 8px auto 0">
+                    <div class="check-line">
+                      <span class="dot done"
+                        ><span class="ic"
+                          ><svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path
+                              d="M5 12.5l4.5 4.5L19 7.5"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-width="2.6"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                            /></svg></span></span
+                      >Opened the page
+                    </div>
+                    <div class="check-line">
+                      <span class="dot now"></span>Finding ingredients and steps
+                    </div>
+                    <div class="check-line">
+                      <span class="dot todo"></span
+                      ><span class="small" style="font-size: 16px">Matching to your units</span>
+                    </div>
+                  </div>
+                  <p class="small" style="text-align: center; margin-top: 28px">
+                    You can leave this screen. We'll keep going and let you know.
+                  </p>
+                </div>
+              </div>
+              <div class="home-ind"></div>
+            </div>
+            <div class="phone-cap"><b>S-20</b> · Import: progress</div>
+            <div class="spec-note">
+              FR-AI-11, NFR-PERF-7: can be left; continues on the server; 45-second limit.
+            </div>
+          </div>
+          <div class="phone-wrap">
+            <div
+              class="phone"
+              role="img"
+              aria-label="&lt;b&gt;S-21&lt;/b&gt; · Import: review sample screen"
+            >
+              <div class="status">
+                <span>9:41</span><span class="dots"><i></i><i></i><i></i></span>
+              </div>
+              <div class="screen">
+                <div class="screen-body" style="padding-top: 4px">
+                  <div class="top">
+                    <span class="back">Discard</span><b>Check before saving</b><span></span>
+                  </div>
+                  <div class="notice" style="margin-top: 6px">
+                    <span class="ic"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M12 4l9 16H3z"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="1.8"
+                          stroke-linejoin="round"
+                        />
+                        <path
+                          d="M12 10v4.5"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                        />
+                        <circle cx="12" cy="17.3" r="1.1" fill="currentColor" /></svg
+                    ></span>
+                    <div>
+                      <b>Contains tree nuts (pine nuts in pesto)</b>Alex is allergic. Parent Manager
+                      can miss allergens, and products vary. Always check labels. This isn't medical
+                      advice.
+                    </div>
+                  </div>
+                  <div class="field"><span>Weeknight pesto chicken</span></div>
+                  <div class="rv">
+                    <div class="orig">"1½ lbs chicken thighs"</div>
+                    <div class="parsed"><b>1½ lb</b> Chicken thighs</div>
+                  </div>
+                  <div class="rv">
+                    <div class="orig">"⅓ cup basil pesto"</div>
+                    <div class="parsed">
+                      <b>⅓ cup</b> Basil pesto <span class="tag warn">tree nuts</span>
+                    </div>
+                  </div>
+                  <div class="rv low">
+                    <div class="flag">Check this line</div>
+                    <div class="orig">"1 tin chopped tomatoes"</div>
+                    <div class="parsed"><b>1 can (14.5 oz)</b> Diced tomatoes</div>
+                  </div>
+                  <div class="rv">
+                    <div class="orig">"1 tsp za'atar"</div>
+                    <div class="parsed">
+                      <b>1 tsp</b> Za'atar <span class="badge">new ingredient</span>
+                    </div>
+                  </div>
+                  <p class="small" style="margin-top: 8px">6 more lines · 5 steps · serves 4</p>
+                </div>
+                <div
+                  style="padding: 10px 16px 34px; display: flex; flex-direction: column; gap: 8px"
+                >
+                  <button class="btn primary block" type="button">Save meal</button>
+                </div>
+              </div>
+              <div class="home-ind"></div>
+            </div>
+            <div class="phone-cap"><b>S-21</b> · Import: review</div>
+            <div class="spec-note">
+              FR-AI-4 to 7, AI-5: nothing saved without review; low-confidence and unmatched lines
+              highlighted.
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="mock-section" id="list">
+        <h2>List, pantry and export</h2>
+        <p class="sub">Everything around the shared grocery list.</p>
+        <div class="phones">
+          <div class="phone-wrap">
+            <div
+              class="phone"
+              role="img"
+              aria-label="&lt;b&gt;S-15&lt;/b&gt; · Item detail (sheet) sample screen"
+            >
+              <div class="status">
+                <span>9:41</span><span class="dots"><i></i><i></i><i></i></span>
+              </div>
+              <div class="screen">
+                <div class="screen-body under" style="padding-top: 8px">
+                  <h3 class="h1">Groceries</h3>
+                  <div class="lrow">
+                    <span class="cb"></span><span class="nm">Baby spinach</span
+                    ><span class="qt">5 oz</span>
+                  </div>
+                  <div class="lrow">
+                    <span class="cb"></span><span class="nm">Carrots</span
+                    ><span class="qt">1 lb</span>
+                  </div>
+                  <div class="lrow">
+                    <span class="cb"></span><span class="nm">Whole milk</span
+                    ><span class="qt">1 gal</span>
+                  </div>
+                  <div class="lrow">
+                    <span class="cb"></span><span class="nm">Greek yogurt</span
+                    ><span class="qt">32 oz</span>
+                  </div>
+                </div>
+                <div class="dim"></div>
+                <div
+                  class="sheet"
+                  style="
+                    position: absolute;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    padding-bottom: 30px;
+                    max-height: 88%;
+                    overflow: hidden;
+                  "
+                >
+                  <div class="grab"></div>
+                  <div class="sh-t">Whole milk</div>
+                  <div style="display: flex; gap: 10px; align-items: center">
+                    <span class="stepper"
+                      ><span
+                        ><span class="ic"
+                          ><svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path
+                              d="M5 12h14"
+                              stroke="currentColor"
+                              stroke-width="2.2"
+                              stroke-linecap="round"
+                            /></svg></span></span
+                      ><b>1</b
+                      ><span
+                        ><span class="ic"
+                          ><svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path
+                              d="M12 5v14M5 12h14"
+                              stroke="currentColor"
+                              stroke-width="2.2"
+                              stroke-linecap="round"
+                            /></svg></span></span
+                    ></span>
+                    <div class="field" style="flex: 1"><span>gallon</span></div>
+                  </div>
+                  <div class="lbl">Why it's on the list</div>
+                  <div class="lrow">
+                    <span class="nm">Tuesday · Lentil soup</span><span class="qt">1 cup</span>
+                  </div>
+                  <div class="lrow">
+                    <span class="nm">Sunday · Pancakes</span><span class="qt">2 cups</span>
+                  </div>
+                  <div class="lrow">
+                    <span class="nm">Added by Sam</span><span class="qt">½ gal</span>
+                  </div>
+                  <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 16px">
+                    <button class="btn secondary block" type="button">I already have this</button
+                    ><button class="btn ghost danger block" type="button">Delete from list</button>
+                  </div>
+                </div>
+              </div>
+              <div class="home-ind"></div>
+            </div>
+            <div class="phone-cap"><b>S-15</b> · Item detail (sheet)</div>
+            <div class="spec-note">
+              FR-LIST-7, FR-LIST-12, FR-PAN-4: edit quantity, see sources, "I already have this",
+              delete.
+            </div>
+          </div>
+          <div class="phone-wrap">
+            <div
+              class="phone"
+              role="img"
+              aria-label="&lt;b&gt;S-22&lt;/b&gt; · Pantry sample screen"
+            >
+              <div class="status">
+                <span>9:41</span><span class="dots"><i></i><i></i><i></i></span>
+              </div>
+              <div class="screen">
+                <div class="screen-body" style="padding-top: 4px">
+                  <div class="top"><span class="back">‹ List</span></div>
+                  <h3 class="h1">Pantry</h3>
+                  <p class="sub">Staples stay off your list unless you add them.</p>
+                  <div
+                    class="seg"
+                    style="
+                      display: flex;
+                      background: var(--surface2);
+                      border-radius: 12px;
+                      padding: 3px;
+                      margin-bottom: 8px;
+                    "
+                  >
+                    <span
+                      style="
+                        flex: 1;
+                        text-align: center;
+                        min-height: 44px;
+                        line-height: 44px;
+                        border-radius: 10px;
+                        background: var(--surface);
+                        font-weight: 600;
+                      "
+                      >Staples · 9</span
+                    ><span
+                      style="
+                        flex: 1;
+                        text-align: center;
+                        min-height: 44px;
+                        line-height: 44px;
+                        color: var(--muted);
+                        font-weight: 600;
+                      "
+                      >Have this week · 2</span
+                    >
+                  </div>
+                  <div class="lbl">Pantry</div>
+                  <div class="lrow">
+                    <span class="nm">Salt</span><span class="small">Remove</span>
+                  </div>
+                  <div class="lrow">
+                    <span class="nm">Black pepper</span><span class="small">Remove</span>
+                  </div>
+                  <div class="lrow">
+                    <span class="nm">Olive oil</span><span class="small">Remove</span>
+                  </div>
+                  <div class="lrow">
+                    <span class="nm">All-purpose flour</span><span class="small">Remove</span>
+                  </div>
+                  <div class="lrow">
+                    <span class="nm">Sugar</span><span class="small">Remove</span>
+                  </div>
+                  <div class="lbl">Baking</div>
+                  <div class="lrow">
+                    <span class="nm">Baking soda</span><span class="small">Remove</span>
+                  </div>
+                  <div style="margin-top: 12px" class="field">
+                    <span class="ic" style="color: var(--primary)"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M12 5v14M5 12h14"
+                          stroke="currentColor"
+                          stroke-width="2.2"
+                          stroke-linecap="round"
+                        /></svg></span
+                    ><span class="ph">Add a staple</span>
+                  </div>
+                </div>
+              </div>
+              <div class="home-ind"></div>
+            </div>
+            <div class="phone-cap"><b>S-22</b> · Pantry</div>
+            <div class="spec-note">
+              FR-PAN-1 to 5: staples stay off the list; "have this week" can be undone.
+            </div>
+          </div>
+          <div class="phone-wrap">
+            <div
+              class="phone"
+              role="img"
+              aria-label="&lt;b&gt;S-23&lt;/b&gt; · Export (sheet) sample screen"
+            >
+              <div class="status">
+                <span>9:41</span><span class="dots"><i></i><i></i><i></i></span>
+              </div>
+              <div class="screen">
+                <div class="screen-body under" style="padding-top: 8px">
+                  <h3 class="h1">Groceries</h3>
+                  <div class="lrow">
+                    <span class="cb"></span><span class="nm">Baby spinach</span
+                    ><span class="qt">5 oz</span>
+                  </div>
+                  <div class="lrow">
+                    <span class="cb"></span><span class="nm">Carrots</span
+                    ><span class="qt">1 lb</span>
+                  </div>
+                  <div class="lrow">
+                    <span class="cb"></span><span class="nm">Whole milk</span
+                    ><span class="qt">1 gal</span>
+                  </div>
+                  <div class="lrow">
+                    <span class="cb"></span><span class="nm">Greek yogurt</span
+                    ><span class="qt">32 oz</span>
+                  </div>
+                </div>
+                <div class="dim"></div>
+                <div
+                  class="sheet"
+                  style="
+                    position: absolute;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    padding-bottom: 30px;
+                    max-height: 88%;
+                    overflow: hidden;
+                  "
+                >
+                  <div class="grab"></div>
+                  <div class="sh-t">Send the list</div>
+                  <div class="nav-row">
+                    <span class="ic lead"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M7 9V4h10v5M7 17H5a1 1 0 01-1-1v-6a1 1 0 011-1h14a1 1 0 011 1v6a1 1 0 01-1 1h-2M7 14h10v6H7z"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="1.8"
+                          stroke-linejoin="round"
+                        /></svg></span
+                    ><span class="grow"
+                      >Print or save as PDF<br /><span class="small"
+                        >Grouped by aisle, with checkboxes</span
+                      ></span
+                    ><span class="ic"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M9 6l6 6-6 6"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        /></svg
+                    ></span>
+                  </div>
+                  <div class="nav-row">
+                    <span class="ic lead"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <circle
+                          cx="6"
+                          cy="7"
+                          r="2"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="1.6"
+                        />
+                        <circle
+                          cx="6"
+                          cy="12"
+                          r="2"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="1.6"
+                        />
+                        <circle
+                          cx="6"
+                          cy="17"
+                          r="2"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="1.6"
+                        />
+                        <path
+                          d="M10.5 7H20M10.5 12H20M10.5 17H20"
+                          stroke="currentColor"
+                          stroke-width="1.8"
+                          stroke-linecap="round"
+                        /></svg></span
+                    ><span class="grow"
+                      >Apple Reminders<br /><span class="small">Adds a "Groceries" list</span></span
+                    ><span class="ic"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M9 6l6 6-6 6"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        /></svg
+                    ></span>
+                  </div>
+                  <div class="nav-row">
+                    <span class="ic lead"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M12 4v11M7.5 8.5L12 4l4.5 4.5M5 13v5.5A1.5 1.5 0 006.5 20h11a1.5 1.5 0 001.5-1.5V13"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="1.8"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        /></svg></span
+                    ><span class="grow"
+                      >Share as text<br /><span class="small"
+                        >Messages, email, Google Keep</span
+                      ></span
+                    ><span class="ic"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M9 6l6 6-6 6"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        /></svg
+                    ></span>
+                  </div>
+                  <div class="nav-row">
+                    <span class="ic lead"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <rect
+                          x="8"
+                          y="8"
+                          width="11"
+                          height="12"
+                          rx="2"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="1.8"
+                        />
+                        <path
+                          d="M16 8V6a2 2 0 00-2-2H7a2 2 0 00-2 2v9a2 2 0 002 2h1"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="1.8"
+                        /></svg></span
+                    ><span class="grow"
+                      >Copy as text<br /><span class="small">Paste anywhere</span></span
+                    ><span class="ic"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M9 6l6 6-6 6"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        /></svg
+                    ></span>
+                  </div>
+                  <div class="toggle-row" style="border-bottom: 0">
+                    <div class="grow"><div class="t">Include items in the cart</div></div>
+                    <span class="sw-t" role="img" aria-label="off"></span>
+                  </div>
+                  <div
+                    class="card"
+                    style="
+                      font-family: ui-monospace, Menlo, monospace;
+                      font-size: 13px;
+                      line-height: 1.6;
+                      padding: 12px;
+                    "
+                  >
+                    Produce<br />☐ 5 oz baby spinach<br />☐ 1 lb carrots<br />Dairy &amp; eggs<br />☐
+                    32 oz Greek yogurt
+                  </div>
+                </div>
+              </div>
+              <div class="home-ind"></div>
+            </div>
+            <div class="phone-cap"><b>S-23</b> · Export (sheet)</div>
+            <div class="spec-note">
+              FR-EXP-1 to 6: print or PDF, Apple Reminders (iOS), share or copy as text; always
+              free.
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="mock-section" id="household">
+        <h2>Household and settings</h2>
+        <p class="sub">The Household tab and its screens.</p>
+        <div class="phones">
+          <div class="phone-wrap">
+            <div
+              class="phone"
+              role="img"
+              aria-label="&lt;b&gt;S-24&lt;/b&gt; · Notifications inbox sample screen"
+            >
+              <div class="status">
+                <span>9:41</span><span class="dots"><i></i><i></i><i></i></span>
+              </div>
+              <div class="screen">
+                <div class="screen-body" style="padding-top: 4px">
+                  <div class="top">
+                    <span class="back">‹ Back</span
+                    ><span style="color: var(--primary); font-weight: 600">Mark all read</span>
+                  </div>
+                  <h3 class="h1">Notifications</h3>
+                  <div class="lrow" style="align-items: flex-start; padding: 12px 4px">
+                    <span class="unread" style="margin-top: 8px"></span><span class="av a">A</span>
+                    <div style="flex: 1">
+                      <div style="font-size: 16px; font-weight: 600">
+                        Alex says the list is ready
+                      </div>
+                      <div class="small">20 min ago</div>
+                    </div>
+                  </div>
+                  <div class="lrow" style="align-items: flex-start; padding: 12px 4px">
+                    <span class="unread" style="margin-top: 8px"></span
+                    ><span class="ic" style="color: var(--primary)"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M6 16V11a6 6 0 0112 0v5l1.5 2h-15zM10 20a2 2 0 004 0"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="1.8"
+                          stroke-linejoin="round"
+                        /></svg
+                    ></span>
+                    <div style="flex: 1">
+                      <div style="font-size: 16px; font-weight: 600">
+                        Defrost the beef tonight for Thursday's chili
+                      </div>
+                      <div class="small">Today, 8:00 am</div>
+                    </div>
+                  </div>
+                  <div class="lrow" style="align-items: flex-start; padding: 12px 4px">
+                    <span style="width: 10px"></span
+                    ><span class="ic" style="color: var(--primary)"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <rect
+                          x="3.5"
+                          y="5"
+                          width="17"
+                          height="15"
+                          rx="2.5"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="1.8"
+                        />
+                        <path
+                          d="M3.5 10h17M8 3v4M16 3v4"
+                          stroke="currentColor"
+                          stroke-width="1.8"
+                          stroke-linecap="round"
+                        /></svg
+                    ></span>
+                    <div style="flex: 1">
+                      <div style="font-size: 16px">Time to plan next week</div>
+                      <div class="small">Sat, 6:00 pm</div>
+                    </div>
+                  </div>
+                  <div class="lrow" style="align-items: flex-start; padding: 12px 4px">
+                    <span style="width: 10px"></span><span class="av a">A</span>
+                    <div style="flex: 1">
+                      <div style="font-size: 16px">Alex joined Sam & Alex's home</div>
+                      <div class="small">Nov 2</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="home-ind"></div>
+            </div>
+            <div class="phone-cap"><b>S-24</b> · Notifications inbox</div>
+            <div class="spec-note">
+              FR-NOT-8: last 50 notifications with read state; tap opens the related screen.
+            </div>
+          </div>
+          <div class="phone-wrap">
+            <div
+              class="phone"
+              role="img"
+              aria-label="&lt;b&gt;S-25&lt;/b&gt; · Household tab sample screen"
+            >
+              <div class="status">
+                <span>9:41</span><span class="dots"><i></i><i></i><i></i></span>
+              </div>
+              <div class="screen">
+                <div class="screen-body" style="padding-top: 4px">
+                  <div class="top">
+                    <span class="small">Free plan</span
+                    ><span class="ic" style="color: var(--muted)"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M6 16V11a6 6 0 0112 0v5l1.5 2h-15zM10 20a2 2 0 004 0"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="1.8"
+                          stroke-linejoin="round"
+                        /></svg
+                    ></span>
+                  </div>
+                  <div style="display: flex; gap: 12px; align-items: center; margin: 4px 0 8px">
+                    <span class="avs"><span class="av s">S</span><span class="av a">A</span></span>
+                    <h3 class="h1" style="margin: 0; font-size: 26px">Sam &amp; Alex's home</h3>
+                  </div>
+                  <div class="nav-row">
+                    <span class="grow">Members and invites</span><span class="val">2 people</span
+                    ><span class="ic"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M9 6l6 6-6 6"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        /></svg
+                    ></span>
+                  </div>
+                  <div class="nav-row">
+                    <span class="grow">People and allergies</span><span class="val">3 people</span
+                    ><span class="ic"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M9 6l6 6-6 6"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        /></svg
+                    ></span>
+                  </div>
+                  <div class="nav-row">
+                    <span class="grow">Pantry and staples</span><span class="val">9 staples</span
+                    ><span class="ic"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M9 6l6 6-6 6"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        /></svg
+                    ></span>
+                  </div>
+                  <div class="nav-row">
+                    <span class="grow">Notifications</span><span class="val">3 on</span
+                    ><span class="ic"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M9 6l6 6-6 6"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        /></svg
+                    ></span>
+                  </div>
+                  <div class="nav-row">
+                    <span class="grow">Household settings</span><span class="val">US · Sunday</span
+                    ><span class="ic"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M9 6l6 6-6 6"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        /></svg
+                    ></span>
+                  </div>
+                  <div class="nav-row">
+                    <span class="grow">Subscription</span><span class="val">Free</span
+                    ><span class="ic"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M9 6l6 6-6 6"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        /></svg
+                    ></span>
+                  </div>
+                  <div class="nav-row">
+                    <span class="grow">Privacy and data</span><span class="val"></span
+                    ><span class="ic"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M9 6l6 6-6 6"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        /></svg
+                    ></span>
+                  </div>
+                  <div class="nav-row">
+                    <span class="grow">Account</span><span class="val">Sam</span
+                    ><span class="ic"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M9 6l6 6-6 6"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        /></svg
+                    ></span>
+                  </div>
+                </div>
+                <div class="tab-spacer"></div>
+                <nav class="tabbar float" aria-label="Main tabs (sample)">
+                  <span class="tab"
+                    ><span class="ic"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <rect
+                          x="3.5"
+                          y="5"
+                          width="17"
+                          height="15"
+                          rx="2.5"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="1.8"
+                        />
+                        <path
+                          d="M3.5 10h17M8 3v4M16 3v4"
+                          stroke="currentColor"
+                          stroke-width="1.8"
+                          stroke-linecap="round"
+                        /></svg></span
+                    ><span>Plan</span></span
+                  ><span class="tab"
+                    ><span class="ic"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M9 7h11M9 12h11M9 17h11"
+                          stroke="currentColor"
+                          stroke-width="1.8"
+                          stroke-linecap="round"
+                        />
+                        <path
+                          d="M3.5 7l1.5 1.5L7.5 6M3.5 12l1.5 1.5 2.5-2.5"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="1.8"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        />
+                        <circle cx="5" cy="17" r="1.5" fill="currentColor" /></svg></span
+                    ><span>List</span></span
+                  ><span class="tab"
+                    ><span class="ic"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M5 4.5h10a3 3 0 013 3v12H8a3 3 0 01-3-3z"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="1.8"
+                          stroke-linejoin="round"
+                        />
+                        <path
+                          d="M5 16.5a3 3 0 013-3h10"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="1.8"
+                        /></svg></span
+                    ><span>Recipes</span></span
+                  ><span class="tab on"
+                    ><span class="ic"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M4 11l8-6.5 8 6.5V19a1.5 1.5 0 01-1.5 1.5h-4v-5h-5v5h-4A1.5 1.5 0 014 19z"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="1.8"
+                          stroke-linejoin="round"
+                        /></svg></span
+                    ><span>Household</span></span
+                  >
+                </nav>
+              </div>
+              <div class="home-ind"></div>
+            </div>
+            <div class="phone-cap"><b>S-25</b> · Household tab</div>
+            <div class="spec-note">
+              FR-PRIV-1: the household hub; only parents can edit household settings.
+            </div>
+          </div>
+          <div class="phone-wrap">
+            <div
+              class="phone"
+              role="img"
+              aria-label="&lt;b&gt;S-26&lt;/b&gt; · Members and invitations sample screen"
+            >
+              <div class="status">
+                <span>9:41</span><span class="dots"><i></i><i></i><i></i></span>
+              </div>
+              <div class="screen">
+                <div class="screen-body" style="padding-top: 4px">
+                  <div class="top"><span class="back">‹ Household</span></div>
+                  <h3 class="h1">Members</h3>
+                  <div class="lrow">
+                    <span class="av s">S</span
+                    ><span class="nm"
+                      >Sam <span class="small">(you)</span><br /><span class="small"
+                        >Parent · joined Oct 30</span
+                      ></span
+                    >
+                  </div>
+                  <div class="lrow">
+                    <span class="av a">A</span
+                    ><span class="nm"
+                      >Alex<br /><span class="small">Parent · joined Nov 2</span></span
+                    ><span class="ic"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M9 6l6 6-6 6"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        /></svg
+                    ></span>
+                  </div>
+                  <div class="lbl">Pending invites</div>
+                  <div class="lrow">
+                    <span class="nm"
+                      >Caregiver invite<br /><span class="small"
+                        >Expires Nov 14 · paused until Premium</span
+                      ></span
+                    ><span class="danger" style="font-weight: 600">Revoke</span>
+                  </div>
+                  <p class="small" style="margin-top: 10px">
+                    2 of 2 parent seats used. Grandparents and caregivers can join with Premium.
+                  </p>
+                </div>
+                <div
+                  style="padding: 10px 16px 34px; display: flex; flex-direction: column; gap: 8px"
+                >
+                  <button class="btn primary block" type="button">
+                    <span class="ic"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M12 5v14M5 12h14"
+                          stroke="currentColor"
+                          stroke-width="2.2"
+                          stroke-linecap="round"
+                        /></svg></span
+                    >Invite someone</button
+                  ><button class="btn ghost danger block" type="button">Leave household</button>
+                </div>
+              </div>
+              <div class="home-ind"></div>
+            </div>
+            <div class="phone-cap"><b>S-26</b> · Members and invitations</div>
+            <div class="spec-note">
+              FR-HH-1, 9, 10, 14: roles, pending invites with expiry, revoke, remove; the last
+              parent can't leave.
+            </div>
+          </div>
+          <div class="phone-wrap">
+            <div
+              class="phone"
+              role="img"
+              aria-label="&lt;b&gt;S-27&lt;/b&gt; · Invite (sheet) sample screen"
+            >
+              <div class="status">
+                <span>9:41</span><span class="dots"><i></i><i></i><i></i></span>
+              </div>
+              <div class="screen">
+                <div class="screen-body under" style="padding-top: 8px">
+                  <h3 class="h1">Groceries</h3>
+                  <div class="lrow">
+                    <span class="cb"></span><span class="nm">Baby spinach</span
+                    ><span class="qt">5 oz</span>
+                  </div>
+                  <div class="lrow">
+                    <span class="cb"></span><span class="nm">Carrots</span
+                    ><span class="qt">1 lb</span>
+                  </div>
+                  <div class="lrow">
+                    <span class="cb"></span><span class="nm">Whole milk</span
+                    ><span class="qt">1 gal</span>
+                  </div>
+                  <div class="lrow">
+                    <span class="cb"></span><span class="nm">Greek yogurt</span
+                    ><span class="qt">32 oz</span>
+                  </div>
+                </div>
+                <div class="dim"></div>
+                <div
+                  class="sheet"
+                  style="
+                    position: absolute;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    padding-bottom: 30px;
+                    max-height: 88%;
+                    overflow: hidden;
+                  "
+                >
+                  <div class="grab"></div>
+                  <div class="sh-t">Invite to your household</div>
+                  <div class="opt">
+                    <span class="radio"></span>
+                    <div style="flex: 1">
+                      <div class="t">Parent</div>
+                      <div class="d">Full access · 2 of 2 seats used</div>
+                    </div>
+                  </div>
+                  <div class="opt sel">
+                    <span class="radio"></span>
+                    <div style="flex: 1">
+                      <div class="t">Family member</div>
+                      <div class="d">Plans, meals and the list</div>
+                    </div>
+                    <span class="badge">Premium</span>
+                  </div>
+                  <div class="opt">
+                    <span class="radio"></span>
+                    <div style="flex: 1">
+                      <div class="t">Caregiver</div>
+                      <div class="d">Sees the plan, helps with the list</div>
+                    </div>
+                    <span class="badge">Premium</span>
+                  </div>
+                  <div class="card" style="text-align: center; margin: 6px 0 12px">
+                    <div class="small">Invite code</div>
+                    <div style="font: 600 30px/1.3 var(--font-body); letter-spacing: 0.12em">
+                      K7M P4Q
+                    </div>
+                    <div class="small">Works once · expires in 7 days</div>
+                  </div>
+                  <div style="display: flex; flex-direction: column; gap: 8px">
+                    <button class="btn primary block" type="button">
+                      <span class="ic"
+                        ><svg viewBox="0 0 24 24" aria-hidden="true">
+                          <path
+                            d="M12 4v11M7.5 8.5L12 4l4.5 4.5M5 13v5.5A1.5 1.5 0 006.5 20h11a1.5 1.5 0 001.5-1.5V13"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="1.8"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                          /></svg></span
+                      >Share invite</button
+                    ><button class="btn secondary block" type="button">Copy code</button>
+                  </div>
+                </div>
+              </div>
+              <div class="home-ind"></div>
+            </div>
+            <div class="phone-cap"><b>S-27</b> · Invite (sheet)</div>
+            <div class="spec-note">
+              FR-HH-1 to 3: link plus a 6-character code (no 0, O, 1 or I); single use; 7 days.
+            </div>
+          </div>
+          <div class="phone-wrap">
+            <div
+              class="phone"
+              role="img"
+              aria-label="&lt;b&gt;S-28&lt;/b&gt; · People and allergies sample screen"
+            >
+              <div class="status">
+                <span>9:41</span><span class="dots"><i></i><i></i><i></i></span>
+              </div>
+              <div class="screen">
+                <div class="screen-body" style="padding-top: 4px">
+                  <div class="top"><span class="back">‹ Household</span></div>
+                  <h3 class="h1">People</h3>
+                  <p class="sub">Everyone you cook for, with or without the app.</p>
+                  <div
+                    class="card"
+                    style="margin-bottom: 10px; display: flex; gap: 12px; align-items: center"
+                  >
+                    <span class="av s">S</span>
+                    <div style="flex: 1">
+                      <b style="font-size: 17px">Sam</b>
+                      <div class="small">Adult · has the app</div>
+                      <div class="row-wrap" style="gap: 6px; margin-top: 6px"></div>
+                    </div>
+                    <span class="ic"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M9 6l6 6-6 6"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        /></svg
+                    ></span>
+                  </div>
+                  <div
+                    class="card"
+                    style="margin-bottom: 10px; display: flex; gap: 12px; align-items: center"
+                  >
+                    <span class="av a">A</span>
+                    <div style="flex: 1">
+                      <b style="font-size: 17px">Alex</b>
+                      <div class="small">Adult · has the app</div>
+                      <div class="row-wrap" style="gap: 6px; margin-top: 6px">
+                        <span class="tag warn">tree nuts</span>
+                      </div>
+                    </div>
+                    <span class="ic"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M9 6l6 6-6 6"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        /></svg
+                    ></span>
+                  </div>
+                  <div
+                    class="card"
+                    style="margin-bottom: 10px; display: flex; gap: 12px; align-items: center"
+                  >
+                    <span class="av c">R</span>
+                    <div style="flex: 1">
+                      <b style="font-size: 17px">Rowan</b>
+                      <div class="small">0–6 months</div>
+                      <div class="row-wrap" style="gap: 6px; margin-top: 6px">
+                        <span class="small">No allergies added</span>
+                      </div>
+                    </div>
+                    <span class="ic"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M9 6l6 6-6 6"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        /></svg
+                    ></span>
+                  </div>
+                  <p class="small">
+                    Parent Manager can miss allergens, and products vary. Always check labels. This
+                    isn't medical advice.
+                  </p>
+                </div>
+                <div
+                  style="padding: 10px 16px 34px; display: flex; flex-direction: column; gap: 8px"
+                >
+                  <button class="btn secondary block" type="button">
+                    <span class="ic"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M12 5v14M5 12h14"
+                          stroke="currentColor"
+                          stroke-width="2.2"
+                          stroke-linecap="round"
+                        /></svg></span
+                    >Add a person
+                  </button>
+                </div>
+              </div>
+              <div class="home-ind"></div>
+            </div>
+            <div class="phone-cap"><b>S-28</b> · People and allergies</div>
+            <div class="spec-note">
+              FR-HH-11 and 12: people without accounts, age bands, dietary codes; always free.
+            </div>
+          </div>
+          <div class="phone-wrap">
+            <div
+              class="phone"
+              role="img"
+              aria-label="&lt;b&gt;S-29&lt;/b&gt; · Notification settings sample screen"
+            >
+              <div class="status">
+                <span>9:41</span><span class="dots"><i></i><i></i><i></i></span>
+              </div>
+              <div class="screen">
+                <div class="screen-body" style="padding-top: 4px">
+                  <div class="top"><span class="back">‹ Household</span></div>
+                  <h3 class="h1">Notifications</h3>
+                  <div class="toggle-row">
+                    <div class="grow">
+                      <div class="t">Plan your week</div>
+                      <div class="d">Saturday, 6:00 pm · skipped if already planned</div>
+                    </div>
+                    <span class="sw-t on" role="img" aria-label="on"></span>
+                  </div>
+                  <div class="toggle-row">
+                    <div class="grow">
+                      <div class="t">List is ready</div>
+                      <div class="d">When Alex finishes the list</div>
+                    </div>
+                    <span class="sw-t on" role="img" aria-label="on"></span>
+                  </div>
+                  <div class="toggle-row">
+                    <div class="grow">
+                      <div class="t">Defrost tonight</div>
+                      <div class="d">8:00 am on the day</div>
+                    </div>
+                    <span class="sw-t on" role="img" aria-label="on"></span>
+                  </div>
+                  <div class="toggle-row">
+                    <div class="grow">
+                      <div class="t">Sounds</div>
+                      <div class="d">Off keeps naps safe</div>
+                    </div>
+                    <span class="sw-t" role="img" aria-label="off"></span>
+                  </div>
+                  <div class="lbl" style="margin-top: 20px">Quiet hours</div>
+                  <div
+                    class="card"
+                    style="display: flex; justify-content: space-between; align-items: center"
+                  >
+                    <div>
+                      <b style="font-size: 17px">9:00 pm – 7:00 am</b>
+                      <div class="small">Held until morning, never lost</div>
+                    </div>
+                    <span class="ic"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M9 6l6 6-6 6"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        /></svg
+                    ></span>
+                  </div>
+                </div>
+              </div>
+              <div class="home-ind"></div>
+            </div>
+            <div class="phone-cap"><b>S-29</b> · Notification settings</div>
+            <div class="spec-note">
+              FR-NOT-1 to 7: per-type controls, quiet hours 9 pm to 7 am, no sound by default.
+            </div>
+          </div>
+          <div class="phone-wrap">
+            <div
+              class="phone"
+              role="img"
+              aria-label="&lt;b&gt;S-30&lt;/b&gt; · Privacy and data sample screen"
+            >
+              <div class="status">
+                <span>9:41</span><span class="dots"><i></i><i></i><i></i></span>
+              </div>
+              <div class="screen">
+                <div class="screen-body" style="padding-top: 4px">
+                  <div class="top"><span class="back">‹ Household</span></div>
+                  <h3 class="h1">Privacy and data</h3>
+                  <div class="lbl">Your data</div>
+                  <div class="nav-row">
+                    <span class="ic lead"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M12 4v11M7.5 8.5L12 4l4.5 4.5M5 13v5.5A1.5 1.5 0 006.5 20h11a1.5 1.5 0 001.5-1.5V13"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="1.8"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        /></svg></span
+                    ><span class="grow">Export household data</span><span class="val">ZIP</span
+                    ><span class="ic"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M9 6l6 6-6 6"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        /></svg
+                    ></span>
+                  </div>
+                  <div class="nav-row">
+                    <span class="ic lead"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M12 4v11M7.5 8.5L12 4l4.5 4.5M5 13v5.5A1.5 1.5 0 006.5 20h11a1.5 1.5 0 001.5-1.5V13"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="1.8"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        /></svg></span
+                    ><span class="grow">Export my account data</span><span class="val">ZIP</span
+                    ><span class="ic"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M9 6l6 6-6 6"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        /></svg
+                    ></span>
+                  </div>
+                  <div class="lbl" style="margin-top: 20px">Usage</div>
+                  <div class="toggle-row">
+                    <div class="grow">
+                      <div class="t">Share anonymous usage</div>
+                      <div class="d">
+                        Counts and app events only. Never names, children's details or list
+                        contents.
+                      </div>
+                    </div>
+                    <span class="sw-t on" role="img" aria-label="on"></span>
+                  </div>
+                  <div class="lbl" style="margin-top: 20px">Policies</div>
+                  <div class="nav-row">
+                    <span class="grow">Privacy policy</span><span class="val"></span
+                    ><span class="ic"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M9 6l6 6-6 6"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        /></svg
+                    ></span>
+                  </div>
+                  <div class="nav-row">
+                    <span class="grow">Terms of use</span><span class="val"></span
+                    ><span class="ic"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M9 6l6 6-6 6"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        /></svg
+                    ></span>
+                  </div>
+                  <p class="small" style="margin-top: 12px">
+                    Deleted data leaves our backups within 30 days.
+                  </p>
+                </div>
+              </div>
+              <div class="home-ind"></div>
+            </div>
+            <div class="phone-cap"><b>S-30</b> · Privacy and data</div>
+            <div class="spec-note">
+              FR-PRIV-2, 4, 5, 6: exports always free; analytics opt-out; policy links.
+            </div>
+          </div>
+          <div class="phone-wrap">
+            <div
+              class="phone"
+              role="img"
+              aria-label="&lt;b&gt;S-31&lt;/b&gt; · Account sample screen"
+            >
+              <div class="status">
+                <span>9:41</span><span class="dots"><i></i><i></i><i></i></span>
+              </div>
+              <div class="screen">
+                <div class="screen-body" style="padding-top: 4px">
+                  <div class="top"><span class="back">‹ Household</span></div>
+                  <div style="display: flex; gap: 14px; align-items: center; margin: 6px 0 14px">
+                    <span class="av s" style="width: 56px; height: 56px; font-size: 22px">S</span>
+                    <div>
+                      <div class="h2" style="margin: 0">Sam</div>
+                      <div class="small">sam@example.com · signed in with email</div>
+                    </div>
+                  </div>
+                  <div class="nav-row">
+                    <span class="grow">Display name</span><span class="val">Sam</span
+                    ><span class="ic"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M9 6l6 6-6 6"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        /></svg
+                    ></span>
+                  </div>
+                  <div class="toggle-row">
+                    <div class="grow">
+                      <div class="t">Lock with Face ID</div>
+                      <div class="d">Ask after 5 minutes away</div>
+                    </div>
+                    <span class="sw-t on" role="img" aria-label="on"></span>
+                  </div>
+                  <div class="nav-row">
+                    <span class="grow">Lock after</span><span class="val">5 minutes</span
+                    ><span class="ic"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M9 6l6 6-6 6"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        /></svg
+                    ></span>
+                  </div>
+                  <div style="height: 24px"></div>
+                  <div class="nav-row">
+                    <span class="grow">Sign out</span><span class="val"></span
+                    ><span class="ic"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M9 6l6 6-6 6"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        /></svg
+                    ></span>
+                  </div>
+                  <div class="nav-row">
+                    <span class="grow danger">Delete account</span
+                    ><span class="ic"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M9 6l6 6-6 6"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        /></svg
+                    ></span>
+                  </div>
+                  <p class="small" style="margin-top: 12px">
+                    Deleting your account keeps the household for Alex.
+                  </p>
+                </div>
+              </div>
+              <div class="home-ind"></div>
+            </div>
+            <div class="phone-cap"><b>S-31</b> · Account</div>
+            <div class="spec-note">
+              FR-AUTH-6, FR-PRIV-3: biometric lock and timeout; delete account within 3 taps of the
+              Household tab.
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="mock-section" id="premium">
+        <h2>Premium and access</h2>
+        <p class="sub">Moment-of-need upgrade, status, and what a caregiver sees after a lapse.</p>
+        <div class="phones">
+          <div class="phone-wrap">
+            <div
+              class="phone"
+              role="img"
+              aria-label="&lt;b&gt;S-32&lt;/b&gt; · Premium (sheet) sample screen"
+            >
+              <div class="status">
+                <span>9:41</span><span class="dots"><i></i><i></i><i></i></span>
+              </div>
+              <div class="screen">
+                <div class="screen-body under" style="padding-top: 8px">
+                  <h3 class="h1">Members</h3>
+                </div>
+                <div class="dim"></div>
+                <div
+                  class="sheet"
+                  style="
+                    position: absolute;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    padding-bottom: 30px;
+                    max-height: 88%;
+                    overflow: hidden;
+                  "
+                >
+                  <div class="grab"></div>
+                  <div class="sh-t">Bring in your helpers</div>
+                  <p class="sub" style="margin-top: -4px">Premium covers your whole household.</p>
+                  <div class="check-line" style="align-items: flex-start; min-height: 40px">
+                    <span class="dot done" style="margin-top: 2px"
+                      ><span class="ic"
+                        ><svg viewBox="0 0 24 24" aria-hidden="true">
+                          <path
+                            d="M5 12.5l4.5 4.5L19 7.5"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2.6"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                          /></svg></span></span
+                    ><span><b>Caregiver and family seats</b>, up to 6, with limited access</span>
+                  </div>
+                  <div class="check-line" style="align-items: flex-start; min-height: 40px">
+                    <span class="dot done" style="margin-top: 2px"
+                      ><span class="ic"
+                        ><svg viewBox="0 0 24 24" aria-hidden="true">
+                          <path
+                            d="M5 12.5l4.5 4.5L19 7.5"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2.6"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                          /></svg></span></span
+                    ><span>100 meal imports a month</span>
+                  </div>
+                  <div class="check-line" style="align-items: flex-start; min-height: 40px">
+                    <span class="dot done" style="margin-top: 2px"
+                      ><span class="ic"
+                        ><svg viewBox="0 0 24 24" aria-hidden="true">
+                          <path
+                            d="M5 12.5l4.5 4.5L19 7.5"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2.6"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                          /></svg></span></span
+                    ><span>Saved week templates</span>
+                  </div>
+                  <div class="check-line" style="align-items: flex-start; min-height: 40px">
+                    <span class="dot done" style="margin-top: 2px"
+                      ><span class="ic"
+                        ><svg viewBox="0 0 24 24" aria-hidden="true">
+                          <path
+                            d="M5 12.5l4.5 4.5L19 7.5"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2.6"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                          /></svg></span></span
+                    ><span>Your full plan and list history</span>
+                  </div>
+                  <div style="margin-top: 12px">
+                    <div class="plan-card">
+                      <div>
+                        <b style="font-size: 17px">Yearly</b>
+                        <div class="small">[price] per year · best value</div>
+                      </div>
+                      <span class="radio" style="border-color: var(--primary)"></span>
+                    </div>
+                    <div class="plan-card alt">
+                      <div>
+                        <b style="font-size: 17px">Monthly</b>
+                        <div class="small">[price] per month</div>
+                      </div>
+                      <span class="radio"></span>
+                    </div>
+                  </div>
+                  <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 6px">
+                    <button class="btn primary block" type="button">Start 14-day free trial</button
+                    ><button class="btn ghost block" type="button">Not now</button>
+                  </div>
+                  <p class="small" style="text-align: center; margin: 4px 0 0">
+                    Restore purchases · Cancel anytime in the App Store. Prices come from the store.
+                  </p>
+                </div>
+              </div>
+              <div class="home-ind"></div>
+            </div>
+            <div class="phone-cap"><b>S-32</b> · Premium (sheet)</div>
+            <div class="spec-note">
+              FR-PAY-4 and 5: names the triggering benefit first; prices and trial come from the
+              store; no full-screen paywall.
+            </div>
+          </div>
+          <div class="phone-wrap">
+            <div
+              class="phone"
+              role="img"
+              aria-label="&lt;b&gt;S-33&lt;/b&gt; · Subscription status sample screen"
+            >
+              <div class="status">
+                <span>9:41</span><span class="dots"><i></i><i></i><i></i></span>
+              </div>
+              <div class="screen">
+                <div class="screen-body" style="padding-top: 4px">
+                  <div class="top"><span class="back">‹ Household</span></div>
+                  <h3 class="h1">Subscription</h3>
+                  <div class="card" style="margin-bottom: 14px">
+                    <span class="badge" style="background: var(--primary); color: var(--onPrimary)"
+                      >Premium</span
+                    >
+                    <div class="ttl" style="margin-top: 8px">Yearly plan</div>
+                    <div class="small">Renews Nov 7, 2027 · bought by Sam on the App Store</div>
+                    <div style="display: flex; gap: 8px; align-items: center; margin-top: 12px">
+                      <span class="av s sm">S</span><span class="av a sm">A</span
+                      ><span class="small">Everyone in the household has Premium</span>
+                    </div>
+                  </div>
+                  <div class="nav-row">
+                    <span class="grow">Manage in the App Store</span><span class="val"></span
+                    ><span class="ic"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M9 6l6 6-6 6"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        /></svg
+                    ></span>
+                  </div>
+                  <div class="nav-row">
+                    <span class="grow">Restore purchases</span><span class="val"></span
+                    ><span class="ic"
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M9 6l6 6-6 6"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        /></svg
+                    ></span>
+                  </div>
+                  <p class="small" style="margin-top: 14px">
+                    If Premium ends, nothing is deleted. Caregiver access pauses and everything
+                    stays exportable.
+                  </p>
+                </div>
+              </div>
+              <div class="home-ind"></div>
+            </div>
+            <div class="phone-cap"><b>S-33</b> · Subscription status</div>
+            <div class="spec-note">
+              FR-PAY-1, 7, 8: tier from the server; manage in the store; restore.
+            </div>
+          </div>
+          <div class="phone-wrap">
+            <div
+              class="phone"
+              role="img"
+              aria-label="&lt;b&gt;S-35&lt;/b&gt; · Access paused sample screen"
+            >
+              <div class="status">
+                <span>9:41</span><span class="dots"><i></i><i></i><i></i></span>
+              </div>
+              <div class="screen">
+                <div class="screen-body" style="padding-top: 4px">
+                  <div class="center" style="padding-top: 150px">
+                    <span class="av a" style="width: 72px; height: 72px; font-size: 28px">J</span>
+                    <div class="h2" style="margin-top: 20px">
+                      Access to Sam &amp; Alex's home is paused
+                    </div>
+                    <p class="sub" style="max-width: 300px">
+                      The household's Premium ended, so caregiver access is paused. Nothing has been
+                      deleted. Ask Sam or Alex to renew.
+                    </p>
+                  </div>
+                </div>
+                <div
+                  style="padding: 10px 16px 34px; display: flex; flex-direction: column; gap: 8px"
+                >
+                  <button class="btn secondary block" type="button">Ask a parent to renew</button
+                  ><button class="btn ghost block" type="button">Start my own household</button>
+                </div>
+              </div>
+              <div class="home-ind"></div>
+            </div>
+            <div class="phone-cap"><b>S-35</b> · Access paused</div>
+            <div class="spec-note">
+              FR-PAY-9, FR-HH-10: caregiver view after a lapse; nothing deleted; "ask a parent".
+            </div>
+          </div>
+        </div>
+      </section>
+      <footer class="note">
+        Static mockups for review, not the app. Tap targets are at least 48 pt, as the spec
+        requires. Fonts load from Google Fonts when online and fall back to system fonts.
+      </footer>
+    </main>
+  </body>
+</html>
