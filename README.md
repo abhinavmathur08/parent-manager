@@ -19,7 +19,10 @@ The app still starts without Supabase values, and the home screen shows "Supabas
 ```bash
 pnpm run check   # lint, format check, typecheck and unit tests (same as CI)
 pnpm test        # unit tests only
+pnpm run test:db # pgTAP database tests in supabase/tests (needs `pnpm supabase start`)
 ```
+
+Database tests run against the local stack, which needs Docker. Every new table needs a test there proving that another household's members can't read or write it.
 
 Maestro flows in `.maestro/` run against a release build, which needs no Metro server. To run them on iOS, with a simulator booted and [Maestro](https://docs.maestro.dev) installed:
 
@@ -75,5 +78,5 @@ The project is [@abhinav08/parent-manager](https://expo.dev/accounts/abhinav08/p
 
 ## CI
 
-- `.github/workflows/ci.yml` runs `pnpm run check` and an Expo dependency check on every PR and on pushes to `main`.
+- `.github/workflows/ci.yml` runs `pnpm run check` and an Expo dependency check on every PR and on pushes to `main`. Its "Database tests" job starts local Supabase, applies the migrations and runs the pgTAP tests in `supabase/tests`.
 - `.github/workflows/e2e.yml` builds an Android release and runs Maestro on an emulator. It runs on pushes to `main`, or on demand with `gh workflow run e2e.yml --ref <branch>`.

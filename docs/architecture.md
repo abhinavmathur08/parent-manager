@@ -312,7 +312,7 @@ Supabase Auth, with:
 
 ### CI/CD
 
-- **On every PR:** lint, formatting, types, unit tests and an Expo dependency check (exists today). F-04 adds pgTAP RLS tests and Edge Function tests against a local Supabase stack.
+- **On every PR:** lint, formatting, types, unit tests and an Expo dependency check, plus pgTAP database tests against a local Supabase stack (the "Database tests" job, F-04.1). F-04.2 adds Edge Function tests.
 - **On `main`:** Android E2E with Maestro (exists today). F-04 adds iOS E2E on a macOS runner, which is free for a public repo.
 - **Database migrations:**
   - **Staging:** applied automatically by a GitHub Action after a merge to `main`. It needs a Supabase access token as a GitHub secret, which the product owner adds.

@@ -34,3 +34,22 @@ jobs:
       - run: pnpm run format:check
       - run: pnpm run typecheck
       - run: pnpm run test:ci
+
+  database:
+    name: Database tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6 # version comes from packageManager in package.json
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # Only Postgres and Auth are needed: Auth's migrations create auth.users, which the
+      # tests sign in as. Skipping the rest keeps the job well under its 10-minute limit.
+      - name: Start local Supabase and apply migrations
+        run: pnpm supabase start -x realtime,storage-api,imgproxy,mailpit,postgres-meta,studio,edge-runtime,logflare,vector,supavisor
+      - name: Run pgTAP tests
+        run: pnpm run test:db
