@@ -98,6 +98,10 @@ insert into public.household_members (household_id, user_id, role) values
   ('00000000-0000-0000-0000-00000000000a', 'aaaaaaaa-0000-0000-0000-000000000003', 'caregiver'),
   ('00000000-0000-0000-0000-00000000000b', 'bbbbbbbb-0000-0000-0000-000000000001', 'parent');
 
+-- Family members and caregivers need Premium (H-01.2), so household A has it.
+update public.household_entitlements set tier = 'premium'
+where household_id = '00000000-0000-0000-0000-00000000000a';
+
 insert into public.invitations (household_id, role, invited_by, token_hash, expires_at) values
   ('00000000-0000-0000-0000-00000000000a', 'parent', 'aaaaaaaa-0000-0000-0000-000000000001', 'hash-a', now() + interval '7 days'),
   ('00000000-0000-0000-0000-00000000000b', 'parent', 'bbbbbbbb-0000-0000-0000-000000000001', 'hash-b', now() + interval '7 days');
