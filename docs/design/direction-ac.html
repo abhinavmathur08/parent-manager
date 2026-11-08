@@ -734,6 +734,38 @@
         grid-template-columns: repeat(3, 1fr);
         gap: 8px;
       }
+      /* floating tab bar, Calm Kitchen style: slim, hairline border, soft shadow, quiet active pill */
+      .tab-spacer {
+        flex: none;
+        height: 92px;
+      }
+      .tabbar.float {
+        position: absolute;
+        left: 16px;
+        right: 16px;
+        bottom: 22px;
+        align-items: center;
+        padding: 6px;
+        border: 1px solid var(--border);
+        border-radius: 22px;
+        background: var(--surface);
+        box-shadow: 0 6px 20px rgba(43, 42, 40, 0.12);
+      }
+      :root[data-theme='dark'] .tabbar.float {
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+      }
+      .tabbar.float .tab {
+        flex: 1;
+        justify-content: center;
+        min-height: 52px;
+        border-radius: 16px;
+      }
+      .tabbar.float .tab.on {
+        background: var(--surface2);
+      }
+      .tabbar.float .tab.on:after {
+        display: none;
+      }
       .usual .chip {
         justify-content: center;
         white-space: nowrap;
@@ -771,7 +803,7 @@
       </p>
       <h1 class="board-title">Calm Kitchen with Village touches</h1>
       <p class="lede">
-        Calm Kitchen's palette, type and calm layouts, plus four ideas borrowed from Village.
+        Calm Kitchen's palette, type and calm layouts, plus five ideas borrowed from Village.
       </p>
       <section class="section" aria-labelledby="s1">
         <h2 id="s1">1. Mood and principles</h2>
@@ -782,12 +814,12 @@
           </li>
           <li>
             Borrowed from Village: member avatars showing who added or checked what, a progress
-            indicator for dinners planned, a one-tap grid of usual items, and one gentle completion
-            moment.
+            indicator for dinners planned, a one-tap grid of usual items, one gentle completion
+            moment, and a floating tab bar, redrawn slim and quiet in Calm Kitchen's style.
           </li>
           <li>
-            Left behind from Village: coral and yellow, blobs, chunky buttons, the floating tab bar
-            and constant celebration.
+            Left behind from Village: coral and yellow, blobs, chunky buttons, big pill shapes and
+            constant celebration.
           </li>
         </ul>
       </section>
@@ -1489,18 +1521,14 @@
             <div
               style="
                 position: relative;
-                height: 86px;
+                height: 96px;
                 border-radius: 12px;
                 overflow: hidden;
                 background: var(--bg);
                 border: 1px solid var(--border);
               "
             >
-              <nav
-                class="tabbar"
-                style="position: absolute; left: 0; right: 0; bottom: 0"
-                aria-label="Main tabs (sample)"
-              >
+              <nav class="tabbar float" aria-label="Main tabs (sample)">
                 <span class="tab"
                   ><span class="ic"
                     ><svg viewBox="0 0 24 24" aria-hidden="true">
@@ -1699,7 +1727,8 @@
                     Add Sunday dinner
                   </button>
                 </div>
-                <nav class="tabbar" aria-label="Main tabs (sample)">
+                <div class="tab-spacer"></div>
+                <nav class="tabbar float" aria-label="Main tabs (sample)">
                   <span class="tab on"
                     ><span class="ic"
                       ><svg viewBox="0 0 24 24" aria-hidden="true">
@@ -1939,7 +1968,8 @@
                     ><span class="ph">Add an item</span>
                   </div>
                 </div>
-                <nav class="tabbar" aria-label="Main tabs (sample)">
+                <div class="tab-spacer"></div>
+                <nav class="tabbar float" aria-label="Main tabs (sample)">
                   <span class="tab"
                     ><span class="ic"
                       ><svg viewBox="0 0 24 24" aria-hidden="true">
@@ -2199,7 +2229,8 @@
                   <button class="btn primary block" type="button">Finish shopping</button
                   ><button class="btn ghost block" type="button">Keep the list open</button>
                 </div>
-                <nav class="tabbar" aria-label="Main tabs (sample)">
+                <div class="tab-spacer"></div>
+                <nav class="tabbar float" aria-label="Main tabs (sample)">
                   <span class="tab"
                     ><span class="ic"
                       ><svg viewBox="0 0 24 24" aria-hidden="true">
@@ -2282,8 +2313,9 @@
           <div class="panel">
             <h3>One-handed reach</h3>
             <p>
-              Same as Calm Kitchen: the main action sits in the bottom third. The usual-items grid
-              adds the six most common items with a single tap, without the keyboard.
+              The floating tab bar sits a little higher and inset from the edges, inside an easy
+              thumb arc and clear of the home gesture area, with 52 pt targets. The main action
+              still sits just above it, and the usual-items grid adds common items with one tap.
             </p>
           </div>
           <div class="panel">
