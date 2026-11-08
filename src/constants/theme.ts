@@ -90,7 +90,7 @@ const darkElevation: Record<ElevationToken, ElevationStyle> = {
 
 /**
  * Section 3. Fraunces 600 is embedded at build time by the expo-font config plugin
- * (app.json). Android names an embedded font after its file; iOS uses the PostScript
+ * (app.config.ts). Android names an embedded font after its file; iOS uses the PostScript
  * name from the file. The system serif is the fallback where neither is available
  * (for example in Jest).
  */
