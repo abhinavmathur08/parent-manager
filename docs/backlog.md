@@ -35,7 +35,7 @@ Every functional requirement in the spec (`FR-` IDs, 129 in total) is covered by
 - **Sizes:** the old backlog had items sized M and L (up to a week). Each is split into steps of about a day. H-06 became a spike and three build steps.
 - **Tap targets:** the request for this backlog said 44 pt, while spec NFR-A11Y-4 says 48 pt. design-system.md treats 44 pt as the floor and 48 pt as the product standard, so the spec stands.
 - **Content work:** R-01.2 (ingredient seed) and R-04.2 (starter recipes) are content work, not code, and carry the `content` area. R-04.2 needs decision D-8.
-- **Owner decisions block 18 items:** D-1, D-2, D-4, D-5, D-6, D-7, D-8, D-9, D-10 and D-11. Each issue names the decision it waits on.
+- **Owner decisions block 14 items:** D-1, D-2, D-4, D-5, D-7, D-8, D-10, D-11. Each issue names the decision it waits on. D-6 and D-9 were decided on 2026-11-08.
 - **Phase 1 items without an FR:** a few cite only NFRs or none (tooling, CI, the AI evaluation set). They exist because the spec's definition of done and launch gates need them.
 
 ## Items
@@ -603,7 +603,7 @@ The `import-recipe` Edge Function skeleton: session and role check (no caregiver
 - **Area:** AI recipe import
 - **Size:** S
 - **Spec:** FR-AI-8, FR-AI-9, FR-AI-16, NFR-SEC-9
-- **Depends on:** F-04.2, H-01.2; decisions D-9
+- **Depends on:** F-04.2, H-01.2
 - **Acceptance:**
   - Concurrent requests can't exceed the allowance (test)
   - Failed imports don't count
@@ -763,7 +763,7 @@ S-07 and S-08: people by age band (due month for expecting), allergies and diets
 - **Area:** Households
 - **Size:** S
 - **Spec:** FR-ONB-2, FR-ONB-4, FR-ONB-5, FR-ONB-6, FR-ONB-7
-- **Depends on:** H-02.1, G-03.1; decisions D-6
+- **Depends on:** H-02.1, G-03.1
 - **Acceptance:**
   - A new user lands on the Plan tab with a household after at most 4 screens
   - Only the due month is stored for expecting
@@ -1148,7 +1148,7 @@ Server-enforced gates for family and caregiver seats, AI allowance tiers, templa
 - **Area:** Subscriptions
 - **Size:** S
 - **Spec:** FR-PAY-2, FR-PAY-3, FR-PAY-9, FR-PAY-10, FR-HH-1, FR-AI-9
-- **Depends on:** M-01.2, R-05.1, H-04.1; decisions D-9
+- **Depends on:** M-01.2, R-05.1, H-04.1
 - **Acceptance:**
   - pgTAP tests seat limits with and without an entitlement
   - After a lapse everything is still exportable
@@ -1173,7 +1173,7 @@ S-34: past weeks' plans and lists. Free sees the current week and the last 4, en
 - **Area:** Grocery list
 - **Size:** S
 - **Spec:** FR-LIST-13, FR-PAY-6
-- **Depends on:** G-04.2, M-03; decisions D-9
+- **Depends on:** G-04.2, M-03
 - **Acceptance:**
   - The free window is enforced on the server
   - Lapsed Premium hides older weeks without deleting them

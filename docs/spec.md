@@ -257,7 +257,7 @@ When Premium lapses (FR-PAY-9):
   3. "Who are you feeding?": adults (prefilled with the user, plus their partner if known), and children by age band, including "expecting".
   4. Allergies and diets for the people entered, from fixed codes, showing the not-medical-advice disclaimer (FR-HH-12).
 - **FR-ONB-3:** The default week start is Sunday for US and Monday for GB and AU (PROPOSED). The timezone comes from the device. Both can be changed in settings.
-- **FR-ONB-4:** Onboarding never asks for an exact birth date. For "expecting", it asks for the due month only (PROPOSED; decision D-6).
+- **FR-ONB-4:** Onboarding never asks for an exact birth date. For "expecting", it asks for the due month only (decided, D-6).
 - **FR-ONB-5:** When onboarding finishes, the user lands on the Plan tab for the current week. An empty state offers two next steps: "add your first meal" and "invite your partner".
 - **FR-ONB-6:** The default staples for the region are added to the pantry automatically (FR-PAN-1). No setup screen is shown for them.
 - **FR-ONB-7:** If onboarding is interrupted, for example when the app is killed, the user resumes at the step they left, with answers kept.
@@ -447,8 +447,8 @@ When Premium lapses (FR-PAY-9):
 - **FR-AI-7:** If a parsed ingredient's allergen codes match an allergy of any household person, or the model flags a possible allergen, the review screen shows an allergen notice at the top, marks the affected lines, and shows the disclaimer. The notice can't be dismissed before saving, but it doesn't block saving.
 - **FR-AI-8:** A successful import that's saved or discarded counts as one import against the allowance. Failed imports don't count. Link imports parsed from embedded schema.org recipe data, without calling the AI model, don't count (PROPOSED; architecture section 6).
 - **FR-AI-9:** Allowances, per household per calendar month in the household's timezone:
-  - **Free:** 5 imports (PROPOSED; D-9).
-  - **Premium:** 100 imports (PROPOSED; D-9).
+  - **Free:** 5 imports (decided, D-9).
+  - **Premium:** 100 imports, with a fair-use cap (decided, D-9).
   - **Per member, any tier:** at most 10 imports an hour (PROPOSED).
 - **FR-AI-10:** When the allowance is used up, the import screen shows the allowance-reached message, with the reset date and, for free households, the upgrade prompt (FR-PAY-4). Manual recipe creation is always available.
 - **FR-AI-11:** An import that hasn't finished within 45 seconds (PROPOSED) fails with the timeout message and is retryable. The pasted input is kept, so retrying needs no retyping.
@@ -640,7 +640,7 @@ When Premium lapses (FR-PAY-9):
 - **FR-LIST-10:** "Finish shopping" asks for confirmation, then records purchase events for any checked items that don't already have one. Checked items move to the week's history, and unchecked items stay on the list.
 - **FR-LIST-11:** The list, check-offs, adding and editing all work offline. An offline banner and a pending-changes indicator are shown, and changes sync when the device reconnects (section 6.2).
 - **FR-LIST-12:** An item can be expanded to show its sources: the plan entries and recipe lines it comes from.
-- **FR-LIST-13:** Free households see the current week's list and lists from the last 4 weeks (PROPOSED; D-9). Premium sees all history (FR-PAY-6).
+- **FR-LIST-13:** Free households see the current week's list and lists from the last 4 weeks (decided, D-9). Premium sees all history (FR-PAY-6).
 
 **Acceptance criteria**
 
@@ -939,7 +939,7 @@ Phase 1 builds the foundation and one free feature. Recommendations are Phase 2 
   - Only parents can buy. Family members and caregivers in a lapsed household see "ask a parent".
 - **FR-PAY-5:** Prompt triggers in Phase 1: inviting a family member or caregiver, running out of AI imports, saving or applying a template, and opening history older than the free window. A Premium section in the Household tab is the only place Premium is advertised without a trigger.
 - **FR-PAY-6:** **History window:**
-  - **Free:** plans and lists of the last 4 weeks and the current week (PROPOSED; D-9).
+  - **Free:** plans and lists of the last 4 weeks and the current week (decided, D-9).
   - **Premium:** everything.
   - **Enforcement:** on the server. Older data is kept, not deleted.
 - **FR-PAY-7:** **Products:** monthly and annual household subscriptions with a free trial, configured by the product owner in the App Store, Google Play and RevenueCat (D-10). The trial length is 14 days (PROPOSED; D-10). Prices are shown from the store, in the store's currency.
@@ -1193,13 +1193,13 @@ The bottom tabs are Plan, List, Recipes and Household. Plan is the default tab.
 | Household people (no account)                                    | 12                                 | 12                              | PROPOSED              |
 | Manual recipes                                                   | Unlimited                          | Unlimited                       | Vision                |
 | Starter library                                                  | Full                               | Full                            | Vision                |
-| AI imports per month (household)                                 | 5                                  | 100                             | PROPOSED; D-9         |
+| AI imports per month (household)                                 | 5                                  | 100                             | Decided, D-9          |
 | AI imports per member per hour                                   | 10                                 | 10                              | PROPOSED              |
 | Link imports read from embedded recipe data                      | Not counted                        | Not counted                     | PROPOSED              |
 | Images per import                                                | 1                                  | 1                               | PROPOSED              |
 | Saved week templates                                             | 0                                  | 50                              | PROPOSED              |
 | Grocery lists                                                    | 1 per week                         | 1 per week (more after the MVP) | Vision, MVP scope     |
-| History of plans and lists                                       | Current week plus the last 4 weeks | All                             | PROPOSED; D-9         |
+| History of plans and lists                                       | Current week plus the last 4 weeks | All                             | Decided, D-9          |
 | Pending invitations                                              | 5                                  | 5                               | PROPOSED              |
 | Invitation validity                                              | 7 days, single use                 | 7 days, single use              | Architecture          |
 | Recipe size                                                      | 100 ingredient lines, 50 steps     | Same                            | PROPOSED              |
@@ -1424,8 +1424,8 @@ Each line needs the product owner's sign-off.
 
 ### 9.2 Open questions needing the product owner's decision
 
-1. **Free-tier numbers (D-9):** 5 free and 100 Premium AI imports a month; 4 weeks of free history; 6 Premium seats; 50 templates; 14-day trial (D-10). All PROPOSED.
-2. **Onboarding (D-6):** ask "expecting, or how old is your youngest?" with age bands and the due month only? Age range pregnancy to 5 (vision) or narrower?
+1. **Free-tier numbers:** decided on 2026-11-08 (D-9): 5 free and 100 Premium AI imports a month, and 4 weeks of free history. Still PROPOSED: 6 Premium seats, 50 templates, and a 14-day trial (D-10).
+2. **Onboarding:** decided on 2026-11-08 (D-6): ask "expecting, or how old is your youngest?", with age bands and the due month only, covering pregnancy to age 5.
 3. **"Have" scope (R-PAN-2):** should "I already have this" last only for the current week (PROPOSED), or until the user removes it?
 4. **"List is ready" trigger (FR-NOT-4):** an explicit button, an automatic trigger when the week is planned, or both (PROPOSED: both, at most once a day)?
 5. **Deleting a household with two parents (FR-PRIV-7):** require the other parent's confirmation (PROPOSED), or let either parent delete?
