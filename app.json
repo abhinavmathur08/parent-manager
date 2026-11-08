@@ -10,7 +10,8 @@
     "ios": {
       "icon": "./assets/expo.icon",
       "bundleIdentifier": "com.parentmanager.app",
-      "supportsTablet": false
+      "supportsTablet": false,
+      "appleTeamId": "5JNGSJXS6A"
     },
     "android": {
       "adaptiveIcon": {
