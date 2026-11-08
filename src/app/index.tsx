@@ -1,28 +1,29 @@
 import { useTranslation } from 'react-i18next';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Spacing } from '@/constants/theme';
+import { Text } from '@/components/text';
+import { space } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 import { supabaseConfig } from '@/lib/supabase-config';
 
 // Placeholder until the first Phase 1 feature from docs/backlog.md lands.
 export default function HomeScreen() {
   const { t } = useTranslation();
+  const theme = useTheme();
   return (
-    <ThemedView style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.color.background }]}>
       <SafeAreaView style={styles.safeArea}>
-        <ThemedText type="subtitle" testID="home-title">
+        <Text variant="screenTitle" testID="home-title">
           {t('home.title')}
-        </ThemedText>
-        <ThemedText type="small" themeColor="textSecondary" testID="supabase-status">
+        </Text>
+        <Text variant="label" color="textSecondary" testID="supabase-status">
           {supabaseConfig
             ? t('home.supabaseStatus.configured')
             : t('home.supabaseStatus.notConfigured')}
-        </ThemedText>
+        </Text>
       </SafeAreaView>
-    </ThemedView>
+    </View>
   );
 }
 
@@ -34,7 +35,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: Spacing.two,
-    paddingHorizontal: Spacing.four,
+    gap: space[2],
+    paddingHorizontal: space[6],
   },
 });

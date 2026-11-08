@@ -356,6 +356,14 @@ Supabase Auth, with:
 - **Pseudo-locale:** a pseudo-locale in development builds lengthens text and adds accents, to catch layout and hard-coded strings.
 - **Server copy:** notifications, emails, store listings, legal documents and the starter library are versioned per locale.
 
+### Design system
+
+- **Tokens:** `src/constants/theme.ts` holds every token in [design-system.md](design-system.md) under the same name, with `light` and `dark` color and elevation sets. Components read them through `useTheme()` (`src/hooks/use-theme.tsx`), which follows the system appearance.
+- **Overrides:** `ThemeOverride` forces a scheme or an extra text scale for a subtree. Only the component gallery uses it, to preview dark mode and the largest text size side by side.
+- **Text:** all text goes through `Text` in `src/components/text.tsx`, which applies a `type.*` and a `color.*` token and always scales with the system text size.
+- **Fonts:** Fraunces 600 comes from `@expo-google-fonts/fraunces` and is embedded at build time by the `expo-font` config plugin, so there's no runtime font loading or splash-screen wait. Everything else uses the system font.
+- **Contrast:** a unit test checks every allowed color pair against WCAG 2.2 AA in both modes (NFR-A11Y-1).
+
 ## 10. Trade-offs, risks and decisions
 
 | Topic                      | Trade-off or risk                                                                                                        | Proposal                                                                                                                            |
