@@ -9,6 +9,8 @@
 // Usage: node spikes/sync/two-devices.mjs [stock|fixed]
 //   stock: the plugin's default create and update
 //   fixed: create and update that throw on network errors, so the plugin retries them
+//   full:  as fixed, but every sync lists the whole household instead of changes since the
+//          last sync
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
 
@@ -115,7 +117,7 @@ async function createDevice(name, user) {
     return { data: data[0], error: null };
   };
   const fixedActions =
-    MODE === 'fixed'
+    MODE !== 'stock'
       ? {
           create: throwing((input) => client.from('spike_items').insert(input).select()),
           update: throwing((input) =>
@@ -132,7 +134,7 @@ async function createDevice(name, user) {
         filter: (select) => select.eq('household_id', householdId),
         realtime: { filter: `household_id=eq.${householdId}` },
         actions: ['read', 'create', 'update'],
-        changesSince: 'last-sync',
+        ...(MODE === 'full' ? {} : { changesSince: 'last-sync' }),
         fieldCreatedAt: 'created_at',
         fieldUpdatedAt: 'updated_at',
         fieldDeleted: 'deleted',
@@ -363,6 +365,13 @@ const pick = (r) =>
 for (const [k, id] of Object.entries({ ...ids, newOnA, newOnB })) {
   console.log(
     `  ${k}: server ${JSON.stringify(pick(server[k]))} A ${JSON.stringify(pick(A.item(id)))} B ${JSON.stringify(pick(B.item(id)))}`,
+  );
+}
+
+for (const d of [A, B]) {
+  const st = syncState(d.items$);
+  console.log(
+    `  ${d.name} pending sets ${st.numPendingSets.peek() ?? 0}, pending changes ${JSON.stringify(st.getPendingChanges())}`,
   );
 }
 
