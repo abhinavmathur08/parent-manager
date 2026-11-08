@@ -363,6 +363,8 @@ Supabase Auth, with:
 - **Text:** all text goes through `Text` in `src/components/text.tsx`, which applies a `type.*` and a `color.*` token and always scales with the system text size.
 - **Fonts:** Fraunces 600 comes from `@expo-google-fonts/fraunces` and is embedded at build time by the `expo-font` config plugin, so there's no runtime font loading or splash-screen wait. Everything else uses the system font.
 - **Icons:** `expo-symbols` (SF Symbols on iOS, Material Symbols on Android) behind the `Icon` component in `src/components/icon.tsx`, which names each icon once per platform and mirrors directional icons in right-to-left layouts.
+- **Interrupted forms:** `useDraftState` (`src/hooks/use-draft-state.ts`) keeps an in-progress form in the `expo-sqlite` key-value store, under a `draft:` prefix, so it survives the app being killed (NFR-A11Y-8). Drafts stay on the device and are never synced. Sign-out and account deletion must call `clearAllDrafts()`.
+- **Motion:** `useReduceMotion()` follows the system setting. Sheets, toasts and skeletons fade or stay still when it's on (NFR-A11Y-7).
 - **Contrast:** a unit test checks every allowed color pair against WCAG 2.2 AA in both modes (NFR-A11Y-1).
 
 ## 10. Trade-offs, risks and decisions
