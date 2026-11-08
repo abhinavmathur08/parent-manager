@@ -92,6 +92,22 @@ pnpm dlx eas-cli@latest build --profile preview --platform all
 - To see the resolved config for a variant, run `APP_VARIANT=preview pnpm expo config`.
 - After switching variant locally, regenerate the native projects with `pnpm expo prebuild --clean`, because `ios/` and `android/` keep the old app ID.
 
+### Over-the-air updates
+
+`expo-updates` lets JavaScript-only changes reach installed builds without a store release.
+
+- **Channels:** each build profile has a channel named after its variant (`development`, `preview`, `production`), and `development-simulator` shares `development`'s. A build only receives updates published to its own channel.
+- **Runtime version:** this is a fingerprint of the native project (`runtimeVersion.policy: "fingerprint"`). Any native change, such as a new native module, a config plugin or an app config change, gives builds a new runtime version, so older binaries never receive an update built for different native code.
+- **Publish with the build's variant:** the app config is part of the fingerprint, so an update must be published with the same `APP_VARIANT` as the builds it targets, or no build will match it. `pnpm run update:preview` does this for preview builds:
+
+  ```bash
+  pnpm run update:preview --message "Fix the grocery list header"
+  ```
+
+- **Production updates need the product owner's approval.** There's deliberately no script for them. Never run `eas update` against the `production` channel or environment without that approval, the same as a store release (see `CLAUDE.md`, human gates).
+- **Check a build's runtime version:** run `APP_VARIANT=preview pnpm exec expo-updates runtimeversion:resolve --platform ios`.
+- **Development builds** load JavaScript from Metro, not from published updates.
+
 The project is [@abhinav08/parent-manager](https://expo.dev/accounts/abhinav08/projects/parent-manager) on Expo. EAS builds don't use `.env.local`. They get the Supabase values from EAS environment variables, which are set in the development, preview and production environments. To see them, run `pnpm dlx eas-cli@latest env:list --environment <name>`. To copy them into `.env.local`, run `pnpm dlx eas-cli@latest env:pull --environment development`.
 
 ## CI

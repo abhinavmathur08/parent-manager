@@ -12,6 +12,7 @@ export type AppVariant = (typeof APP_VARIANTS)[number];
 const BASE_ID = 'com.myparentmanager';
 const BASE_NAME = 'Parent Manager';
 const BASE_SCHEME = 'parentmanager';
+const EAS_PROJECT_ID = '4981939e-671f-44b5-b428-9fa2a5338d17';
 
 export function getAppVariant(value: string | undefined): AppVariant {
   if (!value) {
@@ -95,10 +96,21 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       reactCompiler: true,
     },
     platforms: ['ios', 'android'],
+    // Over-the-air updates (F-03.3). The runtime version is a fingerprint of the native
+    // project, so a native change gives binaries a new runtime and they never receive an
+    // update built for different native code. The channel comes from the build profile
+    // in eas.json, and app config changes alter the fingerprint, so publish with the
+    // same APP_VARIANT the build used (`pnpm run update:preview`).
+    runtimeVersion: { policy: 'fingerprint' },
+    updates: {
+      url: `https://u.expo.dev/${EAS_PROJECT_ID}`,
+      checkAutomatically: 'ON_LOAD',
+      fallbackToCacheTimeout: 0,
+    },
     extra: {
       appVariant: variant,
       eas: {
-        projectId: '4981939e-671f-44b5-b428-9fa2a5338d17',
+        projectId: EAS_PROJECT_ID,
       },
     },
     owner: 'abhinav08',
