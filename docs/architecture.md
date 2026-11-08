@@ -1,6 +1,6 @@
 # Parent Manager: architecture
 
-Status: proposal for review, 2026-11-07. [vision.md](vision.md) is the source of truth for scope. This document describes how we build it, and [backlog.md](backlog.md) breaks the work into Phase 1 items. Decisions that need the product owner are marked **Decision** and collected in [decisions-needed.md](decisions-needed.md).
+Status: proposal for review, 2026-11-07. [vision.md](vision.md) is the source of truth for scope, and [spec.md](spec.md) defines how Phase 1 behaves. This document describes how we build it, and [backlog.md](backlog.md) breaks the work into Phase 1 items. Decisions that need the product owner are marked **Decision** and collected in [decisions-needed.md](decisions-needed.md).
 
 ## 1. Where we start
 

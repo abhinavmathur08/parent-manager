@@ -5,6 +5,7 @@
 One app that runs a new family's household logistics, starting with meals and groceries, so busy parents can spend their time on their children. Two partners share one household in real time, and caregivers can join on a Premium subscription. It launches in the US, then the UK and Australia, in English, built for more languages later.
 
 - **[docs/vision.md](docs/vision.md)** is the source of truth for the product. If a request conflicts with it, ask.
+- [docs/spec.md](docs/spec.md) says exactly how Phase 1 must behave. Build to its numbered requirements (`FR-`, `NFR-`, `R-` and `AI-`), and cite them in PRs.
 - [docs/architecture.md](docs/architecture.md) describes how the app is built, and [docs/backlog.md](docs/backlog.md) lists the Phase 1 work, in order.
 
 ## Stack
