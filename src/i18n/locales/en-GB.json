@@ -1,0 +1,11 @@
+{
+  "vocabulary": {
+    "diapers": "Nappies",
+    "pacifier": "Dummy",
+    "stroller": "Pushchair"
+  },
+  "units": {
+    "l_one": "litre",
+    "l_other": "litres"
+  }
+}

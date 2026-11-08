@@ -30,6 +30,7 @@ jobs:
       - name: Check Expo dependency versions
         run: pnpm expo install --check
       - run: pnpm run lint
+      - run: pnpm run lint:rules
       - run: pnpm run format:check
       - run: pnpm run typecheck
       - run: pnpm run test:ci
