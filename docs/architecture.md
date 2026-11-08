@@ -15,7 +15,6 @@ PR #1 already delivered:
 
 Gaps against the fixed stack:
 
-- **Package manager:** npm, not pnpm (backlog F-02).
 - **Environments:** one Supabase project serves every environment (F-03).
 - **Monitoring and payments:** Sentry, PostHog, RevenueCat and Resend aren't added yet.
 - **Session storage:** the session is stored unencrypted (F-08).

@@ -1,0 +1,6 @@
+nodeLinker: hoisted
+
+# Dependency install scripts that may run. Everything else is blocked.
+allowBuilds:
+  supabase: true # downloads the pinned Supabase CLI binary
+  '@parcel/watcher': false # ships prebuilt binaries; the script only builds from source

@@ -1,4 +1,4 @@
-# Same checks as `npm run check`, plus a check that dependencies match the Expo SDK.
+# Same checks as `pnpm run check`, plus a check that dependencies match the Expo SDK.
 name: CI
 
 on:
@@ -21,14 +21,15 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6 # version comes from packageManager in package.json
       - uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
-          cache: npm
-      - run: npm ci
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
       - name: Check Expo dependency versions
-        run: npx expo install --check
-      - run: npm run lint
-      - run: npm run format:check
-      - run: npm run typecheck
-      - run: npm run test:ci
+        run: pnpm expo install --check
+      - run: pnpm run lint
+      - run: pnpm run format:check
+      - run: pnpm run typecheck
+      - run: pnpm run test:ci
