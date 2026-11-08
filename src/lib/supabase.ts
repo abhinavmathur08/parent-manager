@@ -3,6 +3,7 @@ import 'react-native-url-polyfill/auto';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import 'expo-sqlite/localStorage/install';
 
+import { createEncryptedStorage } from '@/lib/encrypted-storage';
 import { supabaseConfig } from '@/lib/supabase-config';
 
 let client: SupabaseClient | undefined;
@@ -19,7 +20,8 @@ export function getSupabase(): SupabaseClient {
   }
   client ??= createClient(supabaseConfig.url, supabaseConfig.publishableKey, {
     auth: {
-      storage: localStorage,
+      // Encrypted at rest (F-08): ciphertext in SQLite, its AES key in SecureStore.
+      storage: createEncryptedStorage(localStorage),
       autoRefreshToken: true,
       persistSession: true,
       detectSessionInUrl: false,
