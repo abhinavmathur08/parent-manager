@@ -41,5 +41,15 @@
     "lb_other": "lb",
     "each_one": "",
     "each_other": ""
+  },
+  "components": {
+    "textField": {
+      "clear": "Clear text"
+    },
+    "stepper": {
+      "decrease": "Decrease {{label}}",
+      "increase": "Increase {{label}}",
+      "announce": "{{label}}: {{value}}"
+    }
   }
 }

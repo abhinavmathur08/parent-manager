@@ -25,8 +25,8 @@ export function Text({ variant = 'body', color = 'text', tabular, style, ...rest
       ? token
       : {
           ...token,
-          fontSize: (token.fontSize ?? 17) * scale,
-          lineHeight: token.lineHeight ? token.lineHeight * scale : undefined,
+          fontSize: token.fontSize * scale,
+          lineHeight: token.lineHeight * scale,
         };
   return (
     <NativeText
