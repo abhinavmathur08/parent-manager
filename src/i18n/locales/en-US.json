@@ -50,6 +50,10 @@
       "decrease": "Decrease {{label}}",
       "increase": "Increase {{label}}",
       "announce": "{{label}}: {{value}}"
+    },
+    "checkboxRow": {
+      "checkedBy": "checked by {{name}}",
+      "pendingSync": "waiting to sync"
     }
   }
 }
