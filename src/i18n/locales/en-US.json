@@ -54,6 +54,20 @@
     "checkboxRow": {
       "checkedBy": "checked by {{name}}",
       "pendingSync": "waiting to sync"
+    },
+    "bottomSheet": {
+      "close": "Close"
+    },
+    "banner": {
+      "dismiss": "Dismiss"
+    },
+    "skeleton": {
+      "loading": "Loading"
+    },
+    "allergenNotice": {
+      "message": "Contains {{allergen}}. {{person}} is allergic.",
+      "importReview": "This recipe may contain {{allergen}}. {{person}} is allergic. Check the marked lines before you save.",
+      "disclaimer": "This isn't medical advice. The app can miss allergens and products vary, so always check the label."
     }
   }
 }
