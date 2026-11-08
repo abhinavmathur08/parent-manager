@@ -35,7 +35,7 @@ Every functional requirement in the spec (`FR-` IDs, 129 in total) is covered by
 - **Sizes:** the old backlog had items sized M and L (up to a week). Each is split into steps of about a day. H-06 became a spike and three build steps.
 - **Tap targets:** the request for this backlog said 44 pt, while spec NFR-A11Y-4 says 48 pt. design-system.md treats 44 pt as the floor and 48 pt as the product standard, so the spec stands.
 - **Content work:** R-01.2 (ingredient seed) and R-04.2 (starter recipes) are content work, not code, and carry the `content` area. R-04.2 needs decision D-8.
-- **Owner decisions block 14 items:** D-1, D-2, D-4, D-5, D-7, D-8, D-10, D-11. Each issue names the decision it waits on. D-6 and D-9 were decided on 2026-11-08.
+- **Owner decisions block 7 items:** D-1, D-2, D-7, D-8, D-10, D-11. Each issue names the decision it waits on. Decisions made so far are recorded in decisions-needed.md.
 - **Phase 1 items without an FR:** a few cite only NFRs or none (tooling, CI, the AI evaluation set). They exist because the spec's definition of done and launch gates need them.
 
 ## Items
@@ -225,7 +225,7 @@ Add `@sentry/react-native` with the Expo plugin and source maps from EAS builds,
 - **Area:** Infrastructure
 - **Size:** S
 - **Spec:** NFR-OBS-1, NFR-SEC-6
-- **Depends on:** F-03.2; decisions D-4
+- **Depends on:** F-03.2
 - **Acceptance:**
   - A test crash appears with readable stack traces
   - `sendDefaultPii` is off and `beforeSend` strips user content (unit test)
@@ -237,7 +237,7 @@ A typed analytics wrapper that only accepts IDs, counts and fixed values, sends 
 - **Area:** Infrastructure
 - **Size:** S
 - **Spec:** NFR-OBS-2, NFR-SEC-6, FR-PRIV-5
-- **Depends on:** F-03.2; decisions D-4
+- **Depends on:** F-03.2
 - **Acceptance:**
   - Unit test proves free-text properties are rejected
   - Opt-out stops all events on that device
@@ -352,7 +352,7 @@ Supabase email OTP (6 digits, 10 minutes) with magic link, sent through Resend f
 - **Area:** Accounts and auth
 - **Size:** S
 - **Spec:** FR-AUTH-2
-- **Depends on:** H-01.1; decisions D-2, D-4
+- **Depends on:** H-01.1
 - **Acceptance:**
   - Codes expire after 10 minutes and lock after 5 wrong attempts
   - Emails come from the product domain and use translated copy
@@ -389,7 +389,7 @@ Native Sign in with Apple on both platforms through `signInWithIdToken`.
 - **Area:** Accounts and auth
 - **Size:** S
 - **Spec:** FR-AUTH-1, FR-AUTH-3
-- **Depends on:** A-01.2; decisions D-5
+- **Depends on:** A-01.2
 - **Acceptance:**
   - Works on real iOS and Android devices
   - Button follows Apple's guidelines
@@ -402,7 +402,7 @@ Native Google sign-in, and linking to an existing account with the same verified
 - **Area:** Accounts and auth
 - **Size:** S
 - **Spec:** FR-AUTH-1, FR-AUTH-3
-- **Depends on:** A-01.2; decisions D-5
+- **Depends on:** A-01.2
 - **Acceptance:**
   - Signing in with Google for an email that already has an account reaches that account, with no duplicate
 
@@ -465,7 +465,7 @@ S-09: code entry in any case, invite links (universal and App Links), a preview 
 - **Area:** Households
 - **Size:** S
 - **Spec:** FR-HH-4, FR-HH-5, FR-HH-6, FR-HH-8
-- **Depends on:** H-03.1, H-02.1; decisions D-2
+- **Depends on:** H-03.1, H-02.1
 - **Acceptance:**
   - A second account joins as a parent from a link or a code on either platform
   - Expired, revoked or used invites show clear messages
@@ -1123,7 +1123,7 @@ Add `react-native-purchases` with the Supabase user ID and the household attribu
 - **Area:** Subscriptions
 - **Size:** S
 - **Spec:** FR-PAY-7
-- **Depends on:** H-04.1, F-03.2; decisions D-5, D-10
+- **Depends on:** H-04.1, F-03.2; decisions D-10
 - **Acceptance:**
   - Sandbox purchase and restore work on both platforms
   - No billing configuration is changed by code or Claude
@@ -1246,7 +1246,7 @@ Production-profile builds to TestFlight internal testing and the Play internal t
 - **Area:** Release
 - **Size:** S
 - **Spec:** none (tooling or content)
-- **Depends on:** L-01.2, L-02, M-02.2; decisions D-5
+- **Depends on:** L-01.2, L-02, M-02.2
 - **Acceptance:**
   - Both builds install from the stores' internal tracks
   - Crash reporting and analytics confirmed working

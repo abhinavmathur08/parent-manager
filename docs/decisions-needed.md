@@ -6,64 +6,21 @@ This is the decision log. Each entry names the backlog items and GitHub issues i
 
 Updated 2026-11-08.
 
-| ID   | Decision                                   | Status                                                                     | Needed by                                                                               |
-| ---- | ------------------------------------------ | -------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| D-1  | Supabase production plan                   | Deferred                                                                   | Before the external beta (L-03.2). Development and staging go ahead without it          |
-| D-2  | Product name and domain                    | **Open**                                                                   | Email sign-in (#32) and invite links (#41)                                              |
-| D-3  | Design direction                           | Decided 2026-11-07                                                         |                                                                                         |
-| D-4  | Sentry, PostHog and Resend accounts        | **Open**                                                                   | Observability (#21, #22) and email sign-in (#32)                                        |
-| D-5  | Apple and Google developer accounts        | Decided 2026-11-08: publish as an individual. **Enrollment pending (you)** | Apple and Google sign-in (#35, #36), device builds, purchases (#94), beta builds (#104) |
-| D-6  | Onboarding: due date or age, and age range | Decided 2026-11-08                                                         |                                                                                         |
-| D-7  | AI provider and data terms                 | **Open**                                                                   | AI parsing (#54)                                                                        |
-| D-8  | Starter recipe content                     | Deferred                                                                   | Before the internal beta (L-03.1). Development uses placeholder recipes                 |
-| D-9  | Free-tier limits                           | Decided 2026-11-08                                                         |                                                                                         |
-| D-10 | RevenueCat, products, prices and trial     | Deferred                                                                   | Before subscriptions are built (M-01.1, #94) and the beta. Needs D-5                    |
-| D-11 | Legal review and no ads                    | Deferred                                                                   | Before the external beta (L-01.2, #102)                                                 |
-| D-12 | Updates channel                            | Deferred                                                                   | Any time; blocks nothing                                                                |
-| D-13 | Offline sync approach                      | **Open**, blocks the sync layer                                            | Before H-06.2 (#28)                                                                     |
-
-## Open: needed during development and staging
-
-### D-2 Product name and domain
-
-**Blocks:**
-
-- A-01.1 (#32): sign-in emails come from the domain, which needs DNS records for Resend.
-- H-03.3 (#41): invite links need the domain.
-- L-04 (#106): store listings.
-- The app's display name.
-
-**Details:**
-
-- **The situation:** this is open in the vision. The bundle ID `com.myparentmanager` is already chosen and is never shown to users, so the brand can differ. The App Store and Google Play require unique app names.
-- **Interim:** development can use Supabase's built-in email, which is rate-limited but fine for testing, and invite codes instead of links.
-- **Recommendation:** pick the name before A-01.1, check that the trademark and store names are free, and register the matching domain plus an email subdomain (such as `mail.<domain>`).
-- **You do:** choose the name, buy the domain, and add the DNS records when I list them.
-
-### D-4 Observability and email accounts: Sentry, PostHog and Resend
-
-**Blocks:** F-07.1 and F-07.2 observability (#21, #22), and A-01.1 email sign-in (#32, Resend).
-
-- **Recommendation:** the free tiers are enough until the beta. Use PostHog US Cloud for the US launch, and revisit EU hosting before the UK. Resend needs the sending domain from D-2.
-- **You do:** create the accounts and add the API keys and DSNs as EAS or GitHub secrets when asked. Never paste them into chat or code.
-
-### D-7 AI provider and data terms
-
-**Blocks:** R-05.3 AI parsing (#54), and with it the import screens and photo import.
-
-- **The situation:** this isn't in the fixed stack. It needs structured JSON output, image input, strong parsing quality, and terms that rule out training on our data, with short retention.
-- **Recommendation:** run R-05.4's evaluation set on two providers, and choose on accuracy, cost and terms. Calls go through our Edge Function only, so switching later is cheap.
-- **You do:** approve the provider, sign up for a paid API account, and add the key as a Supabase secret.
-
-### D-13 Offline sync approach
-
-**Blocks:** H-06.2 to H-06.4, the sync layer (#28 onwards), and so every feature that needs sharing or offline use.
-
-- **The situation:** the H-06.1 spike (#27, PR #110) failed with Legend-State. It's fast (p95 about 515 ms), but on the device a row deleted elsewhere came back, and a stale uncheck stalled the write queue. Its Supabase plugin is also a beta. The server-side conflict rules held, and the two-device test harness is reusable.
-- **Options:**
-  - Spike PowerSync for one day with the same harness. It's a new vendor holding a copy of household data, free during development and from USD 49 a month for production.
-  - Build our own write queue on the device with Supabase Realtime. That adds no vendor, but takes about 2 to 3 extra days, and we own any sync bugs.
-- **Recommendation:** the one-day PowerSync spike first, then decide with results. Build our own if it also fails, or if you'd rather not add a processor for children's data.
+| ID   | Decision                                   | Status                                                 | Needed by                                                                      |
+| ---- | ------------------------------------------ | ------------------------------------------------------ | ------------------------------------------------------------------------------ |
+| D-1  | Supabase production plan                   | Deferred                                               | Before the external beta (L-03.2). Development and staging go ahead without it |
+| D-2  | Product name and domain                    | Deferred; interim decided 2026-11-08                   | Before the internal beta (L-03.1). Store listings (#106) wait for it           |
+| D-3  | Design direction                           | Decided 2026-11-07                                     |                                                                                |
+| D-4  | Sentry, PostHog and Resend accounts        | Deferred 2026-11-08                                    | Before the internal beta. The wrappers do nothing without keys until then      |
+| D-5  | Apple and Google developer accounts        | Decided 2026-11-08: publish as an individual. Enrolled |                                                                                |
+| D-6  | Onboarding: due date or age, and age range | Decided 2026-11-08                                     |                                                                                |
+| D-7  | AI provider and data terms                 | Deferred 2026-11-08                                    | Before AI parsing (R-05.3, #54)                                                |
+| D-8  | Starter recipe content                     | Deferred                                               | Before the internal beta (L-03.1). Development uses placeholder recipes        |
+| D-9  | Free-tier limits                           | Decided 2026-11-08                                     |                                                                                |
+| D-10 | RevenueCat, products, prices and trial     | Deferred                                               | Before subscriptions are built (M-01.1, #94) and the beta. Needs D-5           |
+| D-11 | Legal review and no ads                    | Deferred                                               | Before the external beta (L-01.2, #102)                                        |
+| D-12 | Updates channel                            | Deferred                                               | Any time; blocks nothing                                                       |
+| D-13 | Offline sync approach                      | Decided 2026-11-08: build our own                      |                                                                                |
 
 ## Decided
 
@@ -80,10 +37,9 @@ Both stores will use personal (individual) accounts, not a company.
   - **Closed test first:** new personal accounts must run a closed test before getting production access; at last check, at least 12 testers for 14 days in a row. L-03.2 (#105) plans for this, so start closed testing early.
   - **Public contact details:** Google may also require public contact details for developers who sell, which applies here because of in-app subscriptions. Check this during enrollment.
 - **Moving to a company later:** both stores support transferring an app to another developer account, such as a future company. It takes some steps, and subscribers need care, so check the transfer rules at the time.
-- **Still to do (you):**
-  - Enroll in both.
-  - When asked, create an App Store Connect API key and a Google Play service account for EAS, and add them as EAS credentials yourself. Never paste them into chat.
-- **Still blocked until you've enrolled:** A-02.1 and A-02.2 Apple and Google sign-in (#35, #36), M-01.1 purchases (#94, which also needs D-10), and L-03.1 beta builds (#104).
+- **Enrollment:** done for both stores. The first EAS iOS build registered `com.myparentmanager` under team `5JNGSJXS6A` on 2026-11-08.
+- **Still to do (you):** when asked, create an App Store Connect API key and a Google Play service account for EAS, and add them as EAS credentials yourself. Never paste them into chat.
+- **Unblocks:** A-02.1 and A-02.2 Apple and Google sign-in (#35, #36), and L-03.1 beta builds (#104). M-01.1 purchases (#94) still need D-10.
 
 ### D-6 Onboarding: decided 2026-11-08
 
@@ -104,9 +60,39 @@ Both stores will use personal (individual) accounts, not a company.
 - **Unblocks:** R-05.1 (#52), M-03 (#96) and G-08 (#98). Spec FR-AI-9, FR-LIST-13, FR-PAY-6 and section 5.7 are updated to match.
 - **Still PROPOSED in the spec:** Premium seats (6), saved templates (50) and the trial length (14 days, part of D-10).
 
+### D-13 Offline sync: decided 2026-11-08, build our own
+
+- **Decision:** build our own sync layer, with no sync vendor. A local SQLite copy, an outbox of queued writes, and Supabase Realtime filtered by household. The H-06.2 to H-06.4 items already describe this design.
+- **Why:** the Legend-State spike (H-06.1, #27, PR #110) failed two offline conflict rules on the device. A sync vendor such as PowerSync would be another processor holding children's data, from about USD 49 a month. Building our own adds no vendor, at the cost of about 2 to 3 more days, and we own any sync bugs.
+- **Reused from the spike:** the server-side conflict rules (server-set `updated_at` and `version`, soft deletes) held, and the two-device test harness carries over as H-06.3's acceptance test. PR #110 is closed, and its branch is kept for reference.
+- **Unblocks:** H-06.2 to H-06.4 (#28, #30, #31).
+
 ## Deferred until the beta or launch
 
 These don't block development or staging. Each is listed with the point by which it's needed.
+
+### D-2 Product name and domain: needed before the internal beta
+
+- **Blocks now:** only L-04 store listings (#106) and the app's display name.
+- **Interim, decided 2026-11-08:**
+  - **Email sign-in (A-01.1, #32):** uses Supabase's built-in email, which is rate-limited but fine for development and staging.
+  - **Joining a household (H-03.3, #41):** build joining by invite code now. Invite links follow once there's a domain.
+- **Switching later:** the sending domain and link host become configuration (Supabase SMTP settings and an env var), not code changes.
+- **You do, before the beta:** choose the name, check the trademark and store names, and buy the domain plus an email subdomain (such as `mail.<domain>`). I'll list the DNS records for Resend.
+
+### D-4 Sentry, PostHog and Resend: needed before the internal beta
+
+- **Decided 2026-11-08:** defer all three accounts.
+- **In the meantime:** F-07.1 (#21) and F-07.2 (#22) build the crash-reporting and analytics wrappers so they do nothing without keys. Screens that call them aren't blocked, and adding keys later turns them on with no code change.
+- **Recommendation for later:** free tiers are enough until the beta. Use PostHog US Cloud for the US launch, and revisit EU hosting before the UK. Resend needs the domain from D-2.
+- **You do, before the beta:** create the accounts, and add the keys and DSNs as EAS or GitHub secrets when asked. Never paste them into chat or code.
+
+### D-7 AI provider and data terms: needed before R-05.3
+
+- **Decided 2026-11-08:** defer until R-05.3 AI parsing (#54). The import function, quotas and link extraction (R-05.1, R-05.2) don't need it.
+- **Needs:** structured JSON output, image input, strong parsing quality, and terms that rule out training on our data, with short retention.
+- **Recommendation for later:** run R-05.4's evaluation set on two providers, and choose on accuracy, cost and terms. Calls go through our Edge Function only, so switching later is cheap.
+- **You do, then:** approve the provider, sign up for a paid API account, and add the key as a Supabase secret.
 
 ### D-1 Supabase production plan: needed before the external beta
 
