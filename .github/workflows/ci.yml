@@ -53,3 +53,15 @@ jobs:
         run: pnpm supabase start -x realtime,storage-api,imgproxy,mailpit,postgres-meta,studio,edge-runtime,logflare,vector,supavisor
       - name: Run pgTAP tests
         run: pnpm run test:db
+
+  functions:
+    name: Edge Function tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x # matches edge_runtime.deno_version in supabase/config.toml
+      - name: Run Deno tests
+        run: deno test --frozen --permit-no-files --lock=supabase/functions/deno.lock supabase/functions

@@ -37,6 +37,7 @@ pnpm run lint           # ESLint, no warnings allowed
 pnpm run typecheck      # TypeScript
 pnpm test               # Jest unit tests
 pnpm run test:db        # pgTAP database tests (needs `pnpm supabase start` and Docker)
+pnpm run test:functions # Deno tests for Edge Functions (needs Deno 2)
 pnpm run check          # lint, format check, typecheck and unit tests, the same as CI
 pnpm run test:e2e       # Maestro flows against an installed release build (see README)
 ```
