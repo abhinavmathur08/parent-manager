@@ -36,6 +36,14 @@
           "imageWidth": 76
         }
       ],
+      [
+        "expo-font",
+        {
+          "fonts": [
+            "./node_modules/@expo-google-fonts/fraunces/600SemiBold/Fraunces_600SemiBold.ttf"
+          ]
+        }
+      ],
       "expo-sqlite",
       "expo-localization"
     ],
