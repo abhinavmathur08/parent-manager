@@ -1,0 +1,39 @@
+# H-06.1 sync spike: runs the two-device harness in spikes/sync against a local Supabase
+# stack. Throwaway: runs only on pushes to the spike branch, or on demand once merged.
+name: Sync spike
+
+on:
+  push:
+    branches: ['spike/27-**']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  two-devices:
+    name: Two devices offline
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [stock, fixed]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Start local Supabase and apply migrations
+        run: pnpm supabase start -x storage-api,imgproxy,mailpit,postgres-meta,studio,edge-runtime,logflare,vector,supavisor
+      - name: Apply the throwaway spike table
+        run: docker exec -i supabase_db_parent-manager psql -v ON_ERROR_STOP=1 -U postgres -d postgres < spikes/sync/schema.sql
+      - name: Run the two-device harness
+        run: |
+          pnpm supabase status -o env > "$RUNNER_TEMP/status.env"
+          sed 's/=.*//' "$RUNNER_TEMP/status.env"   # variable names only
+          set -a; . "$RUNNER_TEMP/status.env"; set +a
+          node spikes/sync/two-devices.mjs ${{ matrix.mode }}
