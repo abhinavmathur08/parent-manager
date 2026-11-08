@@ -1,0 +1,55 @@
+name: Backlog item
+description: One unit of Phase 1 work, sized for a single PR (about a day or less).
+title: '[ID] '
+labels: ['phase-1']
+body:
+  - type: input
+    id: backlog-id
+    attributes:
+      label: Backlog ID
+      description: The item's ID in docs/backlog.md, such as G-02.1.
+      placeholder: G-02.1
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What to build, and why, in a few sentences.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Testable statements. The PR is done when every box is checked.
+      value: |
+        - [ ]
+    validations:
+      required: true
+  - type: input
+    id: spec
+    attributes:
+      label: Spec requirements
+      description: IDs from docs/spec.md, such as FR-LIST-4, NFR-A11Y-4.
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies
+      description: Issues that must be done first, and any product-owner decisions (D-1 and so on) this waits on.
+  - type: dropdown
+    id: size
+    attributes:
+      label: Size
+      options:
+        - XS (half a day or less)
+        - S (about a day)
+    validations:
+      required: true
+  - type: checkboxes
+    id: rules
+    attributes:
+      label: Standing rules
+      options:
+        - label: I've checked this against CLAUDE.md (localization, privacy, human gates).
+          required: true

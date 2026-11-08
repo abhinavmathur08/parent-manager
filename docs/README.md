@@ -6,6 +6,7 @@ Product and engineering documentation that lives alongside the code.
 - [spec.md](spec.md): the detailed Phase 1 specification, with numbered, testable requirements.
 - [architecture.md](architecture.md): how the app is built, covering the data model, security, sync, AI import, entitlements and operations.
 - [backlog.md](backlog.md): the ordered Phase 1 (MVP) backlog.
+- [design-system.md](design-system.md): tokens, components and accessibility rules for the chosen direction.
 - [design-directions.md](design-directions.md): three visual and UX directions, with a recommendation.
 - [decisions-needed.md](decisions-needed.md): decisions and accounts needed from the product owner.
 
