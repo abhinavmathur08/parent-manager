@@ -90,7 +90,7 @@ Add CI jobs for the backend and for iOS:
 
 **Size:** M.
 
-### F-05 Localization foundation
+### F-05 Localization foundation (done)
 
 Set up the localization framework:
 
