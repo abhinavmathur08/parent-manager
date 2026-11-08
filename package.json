@@ -61,7 +61,8 @@
     "testPathIgnorePatterns": [
       "/node_modules/",
       "/ios/",
-      "/android/"
+      "/android/",
+      "/.claude/"
     ],
     "moduleNameMapper": {
       "^@/(.*)$": "<rootDir>/src/$1"
