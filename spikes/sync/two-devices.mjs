@@ -179,7 +179,10 @@ async function serverRow(id) {
 async function seed(rows) {
   const { error } = await admin
     .from('spike_items')
-    .insert(rows.map((r) => ({ household_id: householdId, ...r })));
+    .insert(
+      rows.map((r) => ({ household_id: householdId, ...r })),
+      { defaultToNull: false },
+    );
   if (error) throw error;
 }
 
