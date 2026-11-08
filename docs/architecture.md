@@ -315,7 +315,7 @@ Supabase Auth, with:
 ### CI/CD
 
 - **On every PR:** lint, formatting, types, unit tests and an Expo dependency check, plus pgTAP database tests against a local Supabase stack ("Database tests", F-04.1) and Deno tests for Edge Functions ("Edge Function tests", F-04.2).
-- **On `main`:** Android E2E with Maestro (exists today). F-04 adds iOS E2E on a macOS runner, which is free for a public repo.
+- **On `main`:** E2E with Maestro on Android (an emulator on Linux) and iOS (a simulator on a macOS runner, which is free for a public repo, with Xcode 26.4 or later, F-04.3). Both jobs live in `.github/workflows/e2e.yml`, build the production variant as a release, and can also be started on any branch with `workflow_dispatch`.
 - **Database migrations:**
   - **Staging:** applied automatically by a GitHub Action after a merge to `main`. It needs a Supabase access token as a GitHub secret, which the product owner adds.
   - **Production:** applied by a manual GitHub Actions workflow behind a protected "production" environment that needs the product owner's approval.

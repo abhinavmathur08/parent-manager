@@ -1,6 +1,7 @@
-# Builds an x86_64 release APK and runs the Maestro flows on an Android emulator.
-# Slow (20+ minutes), so it isn't run on every PR: start it from the Actions tab
-# or with `gh workflow run e2e.yml --ref <branch>`. It also runs after merges to main.
+# Builds release apps and runs the Maestro flows on an Android emulator (x86_64 APK)
+# and an iOS simulator (F-04.3). Slow (20+ minutes), so it isn't run on every PR:
+# start it from the Actions tab or with `gh workflow run e2e.yml --ref <branch>`.
+# It also runs after merges to main.
 name: E2E
 
 on:
@@ -73,4 +74,97 @@ jobs:
         with:
           name: maestro-report
           path: maestro-report.xml
+          if-no-files-found: ignore
+
+  ios:
+    name: Maestro on iOS
+    # macOS runners are free for public repos. Expo SDK 58 needs Xcode 26.4 or later,
+    # which needs macOS Tahoe 26.2 or later.
+    runs-on: macos-26
+    timeout-minutes: 90
+    env:
+      LANG: en_US.UTF-8 # CocoaPods fails without a UTF-8 locale
+    steps:
+      - uses: actions/checkout@v7
+      - name: Select the newest Xcode (26.4 or later)
+        run: |
+          xcode="$(ls -d /Applications/Xcode_*.app | sort -V | tail -n 1)"
+          sudo xcode-select -s "${xcode}"
+          version="$(xcodebuild -version | awk 'NR==1 { print $2 }')"
+          echo "Using ${xcode} (Xcode ${version})"
+          if [ "$(printf '%s\n' 26.4 "${version}" | sort -V | head -n 1)" != "26.4" ]; then
+            echo "::error::Expo SDK 58 needs Xcode 26.4 or later, but the newest on this runner is ${version}."
+            exit 1
+          fi
+      - uses: pnpm/action-setup@v6 # version comes from packageManager in package.json
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - uses: actions/setup-java@v6 # Maestro runs on the JVM
+        with:
+          distribution: temurin
+          java-version: '17'
+      - run: pnpm install --frozen-lockfile
+      # No APP_VARIANT, so this is the production variant (com.myparentmanager), the
+      # flows' default app ID.
+      - name: Generate the native iOS project and install pods
+        run: pnpm expo prebuild --platform ios
+      - name: Boot a simulator
+        id: simulator
+        run: |
+          udid="$(xcrun simctl list devices available --json | python3 -c '
+          import json, re, sys
+          runtimes = json.load(sys.stdin)["devices"]
+          versions = {}
+          for runtime in runtimes:
+              match = re.search(r"SimRuntime\.iOS-(\d+)-(\d+)$", runtime)
+              if match:
+                  versions[runtime] = (int(match[1]), int(match[2]))
+          for runtime in sorted(versions, key=versions.get, reverse=True):
+              # Prefer a standard model ("iPhone 17 Pro") over unusual ones.
+              phones = [d for d in runtimes[runtime] if re.match(r"iPhone \d+", d["name"])]
+              if phones:
+                  print(phones[-1]["udid"])
+                  break
+          ')"
+          if [ -z "${udid}" ]; then
+            echo "::error::No iPhone simulator is available on this runner."
+            exit 1
+          fi
+          xcrun simctl list devices | grep "${udid}"
+          xcrun simctl boot "${udid}"
+          echo "udid=${udid}" >> "$GITHUB_OUTPUT"
+      - name: Build a release app for the simulator
+        run: |
+          workspace="$(ls -d ios/*.xcworkspace | head -n 1)"
+          scheme="$(basename "${workspace}" .xcworkspace)"
+          # The full log is long, so keep it as an artifact and print its tail on failure.
+          xcodebuild \
+            -workspace "${workspace}" \
+            -scheme "${scheme}" \
+            -configuration Release \
+            -sdk iphonesimulator \
+            -destination "id=${{ steps.simulator.outputs.udid }}" \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            build > xcodebuild.log 2>&1 || { tail -n 200 xcodebuild.log; exit 1; }
+          tail -n 5 xcodebuild.log
+      - name: Install the app
+        run: xcrun simctl install "${{ steps.simulator.outputs.udid }}" build/Build/Products/Release-iphonesimulator/*.app
+      - name: Install Maestro
+        run: |
+          curl -fsSL https://get.maestro.mobile.dev | bash
+          echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
+      - name: Run Maestro flows
+        run: maestro --device "${{ steps.simulator.outputs.udid }}" test --format junit --output maestro-report.xml .maestro
+      - name: Upload Maestro report and logs
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: maestro-report-ios
+          path: |
+            maestro-report.xml
+            ~/.maestro/tests
+            xcodebuild.log
           if-no-files-found: ignore
