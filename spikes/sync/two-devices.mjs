@@ -35,6 +35,8 @@ const { ObservablePersistLocalStorage } =
   await import('@legendapp/state/persist-plugins/local-storage');
 
 const MODE = process.argv[2] ?? 'fixed';
+// Leave out the edit-after-delete conflict, to see whether it is what jams the queue.
+const SKIP_DELETE_CONFLICT = process.argv.includes('--skip-delete-conflict');
 const URL = process.env.API_URL;
 const ANON_KEY = process.env.ANON_KEY ?? process.env.PUBLISHABLE_KEY;
 const SERVICE_KEY = process.env.SERVICE_ROLE_KEY ?? process.env.SECRET_KEY;
@@ -268,7 +270,7 @@ A.items$[newOnA].set({ id: newOnA, household_id: householdId, name: 'pasta (A)',
 B.items$[newOnB].set({ id: newOnB, household_id: householdId, name: 'tea (B)', checked: false });
 // S4. A deletes a row that B edits offline.
 A.items$[ids.deleted].delete();
-B.items$[ids.deleted].name.set('yoghurt (B edit after A deleted)');
+if (!SKIP_DELETE_CONFLICT) B.items$[ids.deleted].name.set('yoghurt (B edit after A deleted)');
 // S6. B unchecks "rice" offline, from the checked state it saw (version 1).
 B.items$[ids.staleUncheck].checked.set(false);
 
@@ -376,7 +378,9 @@ for (const d of [A, B]) {
 }
 
 const failed = results.filter((r) => !r.pass);
-console.log(`\nMode: ${MODE}. ${results.length - failed.length}/${results.length} passed.`);
+console.log(
+  `\nMode: ${MODE}${SKIP_DELETE_CONFLICT ? ' (no edit-after-delete)' : ''}. ${results.length - failed.length}/${results.length} passed.`,
+);
 await A.client.removeAllChannels();
 await B.client.removeAllChannels();
 process.exit(failed.length ? 1 : 0);

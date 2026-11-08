@@ -18,7 +18,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        mode: [stock, fixed, full]
+        mode: [stock, fixed, 'fixed --skip-delete-conflict']
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
