@@ -138,6 +138,8 @@ async function createDevice(name, user) {
         fieldDeleted: 'deleted',
         persist: { plugin: ObservablePersistLocalStorage, name: `${name}_items`, retrySync: true },
         retry: { infinite: true, backoff: 'exponential', delay: 250, maxDelay: 1000 },
+        onError: (error, params) =>
+          console.log(`  [${name}] onError ${params?.source}/${params?.type}: ${error.message}`),
         ...fixedActions,
       }),
     );
@@ -177,12 +179,10 @@ async function serverRow(id) {
 }
 
 async function seed(rows) {
-  const { error } = await admin
-    .from('spike_items')
-    .insert(
-      rows.map((r) => ({ household_id: householdId, ...r })),
-      { defaultToNull: false },
-    );
+  const { error } = await admin.from('spike_items').insert(
+    rows.map((r) => ({ household_id: householdId, ...r })),
+    { defaultToNull: false },
+  );
   if (error) throw error;
 }
 
@@ -355,6 +355,14 @@ record(
     'S8 realtime works again after reconnecting',
     ms !== null && ms < 2000,
     `${ms?.toFixed(0)} ms`,
+  );
+}
+
+const pick = (r) =>
+  r && { name: r.name, checked: r.checked, version: r.version, deleted: r.deleted };
+for (const [k, id] of Object.entries({ ...ids, newOnA, newOnB })) {
+  console.log(
+    `  ${k}: server ${JSON.stringify(pick(server[k]))} A ${JSON.stringify(pick(A.item(id)))} B ${JSON.stringify(pick(B.item(id)))}`,
   );
 }
 

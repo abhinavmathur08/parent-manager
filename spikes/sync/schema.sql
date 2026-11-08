@@ -54,9 +54,13 @@ language plpgsql set search_path = '' as $$
 declare
   stale boolean := new.version is distinct from old.version;
 begin
-  -- Deletes are tombstones: once deleted, a row never comes back.
+  -- Deletes are tombstones: once deleted, a row never comes back. A late edit is ignored,
+  -- but still bumps the version and timestamp so the editing device learns of the delete.
   if old.deleted then
-    return old;
+    new := old;
+    new.version := old.version + 1;
+    new.updated_at := clock_timestamp();
+    return new;
   end if;
 
   new.id := old.id;
