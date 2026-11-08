@@ -287,7 +287,7 @@ Supabase Auth, with:
 - **Email:** a one-time code by default, with a magic link as an alternative. Codes are more reliable than links on mobile, because email apps open links in the wrong browser. Supabase sends these emails through Resend over SMTP, from the product domain.
 - **Apple and Google:** Sign in with Apple and Google sign-in on the device, then `signInWithIdToken`. Apple requires Sign in with Apple when other social sign-ins are offered.
 - **Biometric unlock:** `expo-local-authentication` locks the app over an existing session. It isn't a sign-in method.
-- **Session storage:** encrypted, with an AES key in `expo-secure-store` and the encrypted session in SQLite storage. This replaces today's unencrypted storage (F-08).
+- **Session storage:** encrypted (F-08). `createEncryptedStorage` in `src/lib/encrypted-storage.ts` gives each storage key a random AES-256 key, stored in `expo-secure-store` and readable after first unlock, and seals the value with AES-GCM from `expo-crypto`. Only the ciphertext goes to SQLite storage (`expo-sqlite/localStorage`), which avoids SecureStore's size limits. Removing the item (sign-out) deletes both the ciphertext and the key. Data without its key, or data that fails authentication, reads as signed out and is cleared. A SecureStore error is passed on rather than treated as a sign-out.
 - **Account deletion:** in the app, which Apple requires. It removes the user, and either hands their households to a remaining parent or deletes households where they're the only member, after a confirmation.
 
 ### Notifications

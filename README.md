@@ -60,7 +60,7 @@ pnpm supabase migration up --remote                     # apply migrations to th
 
 Remote commands may prompt for the database password. Set `SUPABASE_DB_PASSWORD` in your shell for that command only, and never commit it.
 
-Auth sessions are stored with `expo-sqlite`'s `localStorage`, as in Supabase's Expo quickstart. That storage isn't encrypted, so review this before shipping if the spec calls for stronger protection.
+Auth sessions are stored encrypted (FR-AUTH-5, NFR-SEC-1). `src/lib/encrypted-storage.ts` seals the session with AES-256-GCM through `expo-crypto`, keeps the ciphertext in `expo-sqlite`'s `localStorage`, and keeps the random AES key in `expo-secure-store` (the iOS Keychain or the Android Keystore). The session can't be read as plain text, and SecureStore's value size limits don't apply to it. Signing out deletes both the session and its key. A session that can't be decrypted, for example one restored from a backup without its key, reads as signed out.
 
 ## Builds
 
