@@ -113,4 +113,4 @@ The project is [@abhinav08/parent-manager](https://expo.dev/accounts/abhinav08/p
 ## CI
 
 - `.github/workflows/ci.yml` runs `pnpm run check` and an Expo dependency check on every PR and on pushes to `main`. Its "Database tests" job starts local Supabase, applies the migrations and runs the pgTAP tests in `supabase/tests`, and its "Edge Function tests" job runs the Deno tests in `supabase/functions`.
-- `.github/workflows/e2e.yml` builds an Android release and runs Maestro on an emulator. It runs on pushes to `main`, or on demand with `gh workflow run e2e.yml --ref <branch>`.
+- `.github/workflows/e2e.yml` builds release apps and runs the Maestro flows on both platforms: an Android emulator on Linux, and an iOS simulator on a macOS runner with the newest Xcode there (it fails if that's older than 26.4). It runs on pushes to `main`, or on demand with `gh workflow run e2e.yml --ref <branch>`. Each job uploads its Maestro report, and the iOS job also uploads Maestro's screenshots and logs and the `xcodebuild` log.
