@@ -6,7 +6,7 @@ import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
 import { supabaseConfig } from '@/lib/supabase-config';
 
-// Placeholder until the first feature from docs/spec.md lands.
+// Placeholder until the first Phase 1 feature from docs/backlog.md lands.
 export default function HomeScreen() {
   return (
     <ThemedView style={styles.container}>

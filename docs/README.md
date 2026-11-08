@@ -1,7 +1,12 @@
 # Docs
 
-Project documentation that should live alongside the code.
+Product and engineering documentation that lives alongside the code.
 
-- [spec.md](spec.md): product spec, the source of truth for what we're building.
+- [vision.md](vision.md): the product vision, and the source of truth for what we're building.
+- [spec.md](spec.md): the detailed Phase 1 specification, with numbered, testable requirements.
+- [architecture.md](architecture.md): how the app is built, covering the data model, security, sync, AI import, entitlements and operations.
+- [backlog.md](backlog.md): the ordered Phase 1 (MVP) backlog.
+- [design-directions.md](design-directions.md): three visual and UX directions, with a recommendation.
+- [decisions-needed.md](decisions-needed.md): decisions and accounts needed from the product owner.
 
-Add new documents here, such as architecture notes or decision records, and link them from this list.
+Change `vision.md` only with the product owner's approval. Keep `architecture.md` current in the same PR as any change that affects it.

@@ -1,6 +1,6 @@
 # Parent Manager
 
-An Expo (TypeScript) mobile app for iOS and Android with a Supabase backend. See [docs/spec.md](docs/spec.md) for the product spec and [CLAUDE.md](CLAUDE.md) for our conventions.
+An Expo (TypeScript) mobile app for iOS and Android with a Supabase backend. See [docs/vision.md](docs/vision.md) for the product vision, [docs/architecture.md](docs/architecture.md) for how it is built, and [CLAUDE.md](CLAUDE.md) for our conventions.
 
 ## Getting started
 
