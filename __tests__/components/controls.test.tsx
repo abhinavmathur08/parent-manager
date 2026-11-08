@@ -10,6 +10,7 @@ import { Stepper, stepValue } from '@/components/stepper';
 import { Switch } from '@/components/switch';
 import { TextField } from '@/components/text-field';
 import { theme } from '@/constants/theme';
+import { ThemeOverride } from '@/hooks/use-theme';
 
 const MIN_TARGET = theme.layout.minTarget;
 
@@ -282,5 +283,27 @@ describe('RadioOption', () => {
     );
     expect(screen.getByRole('radio')).not.toBeChecked();
     expect(flat('r').borderColor).toBe(theme.light.color.border);
+  });
+});
+
+describe('SegmentedControl at large text sizes', () => {
+  it('stacks its segments so labels never break mid-word', async () => {
+    const { ThemeOverride } =
+      jest.requireActual<typeof import('@/hooks/use-theme')>('@/hooks/use-theme');
+    await render(
+      <ThemeOverride fontScale={2}>
+        <SegmentedControl
+          options={[
+            { value: 'a', label: 'System' },
+            { value: 'b', label: 'Light' },
+          ]}
+          value="a"
+          onChange={jest.fn()}
+          accessibilityLabel="Appearance"
+          testID="seg"
+        />
+      </ThemeOverride>,
+    );
+    expect(flat('seg').flexDirection).toBe('column');
   });
 });

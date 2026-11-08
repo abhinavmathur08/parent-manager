@@ -68,6 +68,104 @@
       "message": "Contains {{allergen}}. {{person}} is allergic.",
       "importReview": "This recipe may contain {{allergen}}. {{person}} is allergic. Check the marked lines before you save.",
       "disclaimer": "This isn't medical advice. The app can miss allergens and products vary, so always check the label."
+    },
+    "topBar": {
+      "back": "Back"
+    }
+  },
+  "tabs": {
+    "label": "Main tabs",
+    "plan": "Plan",
+    "list": "List",
+    "recipes": "Recipes",
+    "household": "Household"
+  },
+  "placeholder": {
+    "comingSoon": "This part of the app is on its way."
+  },
+  "gallery": {
+    "title": "Component gallery",
+    "appearance": {
+      "label": "Appearance",
+      "system": "System",
+      "light": "Light",
+      "dark": "Dark"
+    },
+    "textSize": {
+      "label": "Text size",
+      "default": "Default",
+      "largest": "Largest"
+    },
+    "samples": {
+      "sections": {
+        "typography": "Type",
+        "buttons": "Buttons",
+        "inputs": "Inputs",
+        "lists": "Lists",
+        "content": "Content",
+        "feedback": "Feedback",
+        "navigation": "Navigation"
+      },
+      "screenTitle": "This week",
+      "sheetTitle": "Add a meal",
+      "cardTitle": "Lemon chicken traybake",
+      "body": "Dinner for four, ready in 35 minutes.",
+      "caption": "Updated 2 minutes ago",
+      "addMeal": "Add a meal",
+      "delete": "Delete recipe",
+      "save": "Save",
+      "search": "Search recipes",
+      "close": "Close",
+      "recipeName": "Recipe name",
+      "recipePlaceholder": "For example, fish tacos",
+      "email": "Email",
+      "emailValue": "alex@example",
+      "emailError": "Enter a full email address, like name@example.com.",
+      "searchValue": "chicken",
+      "servings": "Servings",
+      "reminders": "Meal reminders",
+      "remindersDetail": "A nudge at 4 pm on cooking days",
+      "week": "Week",
+      "day": "Day",
+      "view": "View",
+      "regionUs": "United States",
+      "regionUsDetail": "Cups, ounces and US store sections",
+      "regionUk": "United Kingdom",
+      "regionUkDetail": "Grams, millilitres and UK store sections",
+      "code": "Code from your email",
+      "codeValue": "482",
+      "codeError": "That code didn't work. Check your email and try again.",
+      "produce": "Produce",
+      "milk": "Milk",
+      "milkDetail": "2 gallons · for 3 meals",
+      "eggs": "Eggs",
+      "eggsDetail": "12",
+      "region": "Region",
+      "people": "People and allergies",
+      "version": "Version",
+      "versionDetail": "Development build",
+      "tonight": "Tonight",
+      "tonightCard": "Tonight: lemon chicken traybake",
+      "minutes": "35 min",
+      "containsPeanuts": "Peanuts",
+      "vegetarian": "Vegetarian",
+      "quick": "Under 30 minutes",
+      "memberAlex": "Alex",
+      "memberSam": "Sam",
+      "memberMia": "Mia",
+      "addedBy": "Added by Alex and Sam",
+      "dinnersPlanned": "{{count}} of {{total}} dinners planned",
+      "offline": "You're offline. Changes will sync when you're back.",
+      "partnerActivity": "Sam added 3 items to the list.",
+      "info": "Tip: press and hold an item to edit it.",
+      "peanuts": "peanuts",
+      "emptyList": "Your list is empty.",
+      "addItem": "Add an item",
+      "showToast": "Show undo toast",
+      "openSheet": "Open bottom sheet",
+      "milkRemoved": "Milk removed",
+      "undo": "Undo",
+      "edit": "Edit"
     }
   }
 }
