@@ -1,6 +1,6 @@
 # Runs against a release build, which bundles its JS and needs no Metro server.
 # See the "Testing" section of README.md.
-appId: com.parentmanager.app
+appId: com.myparentmanager
 ---
 - launchApp:
     clearState: true
