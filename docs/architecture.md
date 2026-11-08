@@ -304,7 +304,7 @@ Supabase Auth, with:
 
 | Environment | Supabase                                       | EAS build profile and environment | Update channel | App ID                        |
 | ----------- | ---------------------------------------------- | --------------------------------- | -------------- | ----------------------------- |
-| Development | Local stack (Docker)                           | `development`                     | none           | `com.myparentmanager.dev`     |
+| Development | Local stack (Docker)                           | `development`                     | `development`  | `com.myparentmanager.dev`     |
 | Staging     | Hosted `parent-manager` (the existing project) | `preview`                         | `preview`      | `com.myparentmanager.preview` |
 | Production  | A new hosted project                           | `production`                      | `production`   | `com.myparentmanager`         |
 
@@ -321,7 +321,7 @@ Supabase Auth, with:
   - **Production:** applied by a manual GitHub Actions workflow behind a protected "production" environment that needs the product owner's approval.
 - **Builds and updates:**
   - **Preview builds:** EAS builds them on demand.
-  - **Over-the-air updates:** with `expo-updates`, the runtime version is a fingerprint of the native code. JavaScript-only fixes go out as OTA updates to `preview`, and to `production` only with approval.
+  - **Over-the-air updates:** with `expo-updates`, the runtime version is a fingerprint of the native code. Each build profile in `eas.json` has its own channel (`development`, `preview`, `production`). Because the app config is part of the fingerprint, updates are published with the target builds' `APP_VARIANT` (`pnpm run update:preview`). JavaScript-only fixes go out as OTA updates to `preview`, and to `production` only with the product owner's approval.
   - **Store builds and submissions:** these need approval (a human gate).
 
 ### Testing strategy
