@@ -4,10 +4,28 @@ appId: com.myparentmanager
 ---
 - launchApp:
     clearState: true
+# The app opens on the Plan tab, under the floating tab bar.
 - extendedWaitUntil:
     visible:
-      id: home-title
+      id: plan-screen-title
     timeout: 60000
-- assertVisible: Parent Manager
+- assertVisible:
+    id: tab-bar
+- tapOn:
+    id: tab-list
+- assertVisible:
+    id: list-screen-title
+- tapOn:
+    id: tab-recipes
+- assertVisible:
+    id: recipes-screen-title
+- tapOn:
+    id: tab-household
+- assertVisible:
+    id: household-screen-title
 - assertVisible:
     id: supabase-status
+- tapOn:
+    id: tab-plan
+- assertVisible:
+    id: plan-screen-title

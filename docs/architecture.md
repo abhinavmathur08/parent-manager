@@ -58,6 +58,8 @@ supabase/
 - **Bottom tabs,** in the order Plan, List, Recipes, Household. Bottom tabs keep the main actions in thumb reach.
 - **One main action per screen,** placed at the bottom: add a meal, add an item or import.
 - **Bottom sheets for secondary flows** instead of full-screen pushes, so a parent who gets interrupted keeps their place.
+- **Tab shell:** `src/app/(tabs)/_layout.tsx` uses Expo Router's headless tabs (`expo-router/ui`) with the design system's `FloatingTabBar`, so the bar is drawn from tokens rather than styled on top of a native tab bar. Each tab is a folder (`plan/`, `list/`, `recipes/`, `household/`), so a feature can add its own stack later. Tab screens use `Screen`, which pads scrolling content by `layout.tabBarClearance` plus the bottom safe area. `/` redirects to `/plan`.
+- **Component gallery:** `/gallery` shows every shared component, with switches for light, dark and the largest text size. It's a protected route that exists only in development builds, opened from the Household tab.
 
 ### Deep links
 

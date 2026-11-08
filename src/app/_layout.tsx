@@ -24,7 +24,12 @@ export default function RootLayout() {
   }, [theme]);
   return (
     <ThemeProvider value={navigationTheme}>
-      <Stack screenOptions={{ headerShown: false }} />
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="(tabs)" />
+        <Stack.Protected guard={__DEV__}>
+          <Stack.Screen name="gallery" />
+        </Stack.Protected>
+      </Stack>
     </ThemeProvider>
   );
 }
