@@ -64,7 +64,8 @@
       "/node_modules/",
       "/ios/",
       "/android/",
-      "/.claude/"
+      "/.claude/",
+      "/supabase/functions/"
     ],
     "moduleNameMapper": {
       "^@/(.*)$": "<rootDir>/src/$1"
