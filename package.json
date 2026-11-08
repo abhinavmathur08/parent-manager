@@ -54,7 +54,8 @@
     "test:e2e": "maestro test .maestro",
     "check": "pnpm run lint && pnpm run lint:rules && pnpm run format:check && pnpm run typecheck && pnpm run test:ci",
     "lint:rules": "node scripts/check-lint-rules.js",
-    "test:db": "supabase test db"
+    "test:db": "supabase test db",
+    "test:functions": "deno test --permit-no-files --lock=supabase/functions/deno.lock supabase/functions"
   },
   "private": true,
   "jest": {
@@ -63,7 +64,8 @@
       "/node_modules/",
       "/ios/",
       "/android/",
-      "/.claude/"
+      "/.claude/",
+      "/supabase/functions/"
     ],
     "moduleNameMapper": {
       "^@/(.*)$": "<rootDir>/src/$1"

@@ -20,6 +20,7 @@ The app still starts without Supabase values, and the home screen shows "Supabas
 pnpm run check   # lint, format check, typecheck and unit tests (same as CI)
 pnpm test        # unit tests only
 pnpm run test:db # pgTAP database tests in supabase/tests (needs `pnpm supabase start`)
+pnpm run test:functions # Deno tests for supabase/functions (needs Deno 2)
 ```
 
 Database tests run against the local stack, which needs Docker. Every new table needs a test there proving that another household's members can't read or write it.
@@ -78,5 +79,5 @@ The project is [@abhinav08/parent-manager](https://expo.dev/accounts/abhinav08/p
 
 ## CI
 
-- `.github/workflows/ci.yml` runs `pnpm run check` and an Expo dependency check on every PR and on pushes to `main`. Its "Database tests" job starts local Supabase, applies the migrations and runs the pgTAP tests in `supabase/tests`.
+- `.github/workflows/ci.yml` runs `pnpm run check` and an Expo dependency check on every PR and on pushes to `main`. Its "Database tests" job starts local Supabase, applies the migrations and runs the pgTAP tests in `supabase/tests`, and its "Edge Function tests" job runs the Deno tests in `supabase/functions`.
 - `.github/workflows/e2e.yml` builds an Android release and runs Maestro on an emulator. It runs on pushes to `main`, or on demand with `gh workflow run e2e.yml --ref <branch>`.
