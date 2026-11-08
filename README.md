@@ -32,6 +32,8 @@ pnpm expo run:ios --configuration Release --no-bundler
 pnpm run test:e2e
 ```
 
+That builds the production variant (`com.myparentmanager`), which is the flows' default app ID. To test another variant, pass its app ID: `pnpm run test:e2e -e APP_ID=com.myparentmanager.dev`.
+
 On Android, use `pnpm expo run:android --variant release` in place of the first command.
 
 ## Localization
@@ -74,6 +76,21 @@ Auth sessions are stored with `expo-sqlite`'s `localStorage`, as in Supabase's E
 ```bash
 pnpm dlx eas-cli@latest build --profile preview --platform all
 ```
+
+### App variants
+
+`app.config.ts` reads `APP_VARIANT`, which each build profile sets in `eas.json`, so the three variants can be installed side by side on one device:
+
+| `APP_VARIANT`            | Profiles                               | App ID (iOS and Android)      | Home screen name         | URL scheme              |
+| ------------------------ | -------------------------------------- | ----------------------------- | ------------------------ | ----------------------- |
+| `development`            | `development`, `development-simulator` | `com.myparentmanager.dev`     | Parent Manager (Dev)     | `parentmanager-dev`     |
+| `preview`                | `preview`                              | `com.myparentmanager.preview` | Parent Manager (Preview) | `parentmanager-preview` |
+| `production`, or not set | `production`                           | `com.myparentmanager`         | Parent Manager           | `parentmanager`         |
+
+- `pnpm run ios`, `pnpm run android` and `pnpm start` set `APP_VARIANT=development`. Commands you run directly, such as `pnpm expo run:ios`, get production's config unless you set it yourself.
+- An unknown value stops the build with an error rather than guessing.
+- To see the resolved config for a variant, run `APP_VARIANT=preview pnpm expo config`.
+- After switching variant locally, regenerate the native projects with `pnpm expo prebuild --clean`, because `ios/` and `android/` keep the old app ID.
 
 The project is [@abhinav08/parent-manager](https://expo.dev/accounts/abhinav08/projects/parent-manager) on Expo. EAS builds don't use `.env.local`. They get the Supabase values from EAS environment variables, which are set in the development, preview and production environments. To see them, run `pnpm dlx eas-cli@latest env:list --environment <name>`. To copy them into `.env.local`, run `pnpm dlx eas-cli@latest env:pull --environment development`.
 

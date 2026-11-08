@@ -1,6 +1,8 @@
 # Runs against a release build, which bundles its JS and needs no Metro server.
-# See the "Testing" section of README.md.
-appId: com.myparentmanager
+# See the "Testing" section of README.md. Production's app ID by default; for another
+# variant pass its ID, for example `maestro test -e APP_ID=com.myparentmanager.dev .maestro`.
+# (A flow-level `env:` default would win over -e, so the default lives in the expression.)
+appId: ${APP_ID || 'com.myparentmanager'}
 ---
 - launchApp:
     clearState: true

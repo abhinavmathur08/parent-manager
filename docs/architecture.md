@@ -308,7 +308,7 @@ Supabase Auth, with:
 | Staging     | Hosted `parent-manager` (the existing project) | `preview`                         | `preview`      | `com.myparentmanager.preview` |
 | Production  | A new hosted project                           | `production`                      | `production`   | `com.myparentmanager`         |
 
-- **Separate app IDs** let all three install side by side. They come from an `app.config.ts` that reads the environment.
+- **Separate app IDs** let all three install side by side. `app.config.ts` reads `APP_VARIANT` (`development`, `preview` or `production`), which each build profile sets in `eas.json`; `development-simulator` inherits `development`'s. Without `APP_VARIANT` the config is production's, so EAS commands that don't run a build (submit, credentials) act on the store app, and local scripts (`pnpm run ios`, `android`, `start`) set `development`. Each variant also gets its own name suffix and URL scheme (`parentmanager-dev`, `parentmanager-preview`, `parentmanager`), so deep links open the right install. Maestro flows take the app ID as `APP_ID` and default to production's.
 - **Supabase plan:** the Free plan allows two active projects per organization, and the Yakka project already uses one. Free projects also pause after a week of inactivity, which is unacceptable for production. **Decision:** Supabase Pro for production, in a new or upgraded organization.
 - **Today's gap:** all three EAS environments currently point at the one hosted project. F-03 fixes that.
 
