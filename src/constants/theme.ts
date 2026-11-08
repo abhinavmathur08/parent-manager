@@ -102,7 +102,7 @@ export const fonts = {
   }),
 } as const;
 
-const heading = (fontSize: number, lineHeight: number): TextStyle => ({
+const heading = (fontSize: number, lineHeight: number) => ({
   fontFamily: fonts.heading,
   fontSize,
   lineHeight,
@@ -111,8 +111,8 @@ const heading = (fontSize: number, lineHeight: number): TextStyle => ({
 const system = (
   fontSize: number,
   lineHeight: number,
-  fontWeight: TextStyle['fontWeight'],
-): TextStyle => ({ fontSize, lineHeight, fontWeight });
+  fontWeight: NonNullable<TextStyle['fontWeight']>,
+) => ({ fontSize, lineHeight, fontWeight });
 
 export const type = {
   screenTitle: heading(30, 36),
@@ -123,7 +123,11 @@ export const type = {
   bodyStrong: system(17, 24, '600'),
   label: system(15, 20, '500'),
   caption: system(13, 18, '400'),
-  overline: { ...system(13, 18, '600'), textTransform: 'uppercase', letterSpacing: 13 * 0.05 },
+  overline: {
+    ...system(13, 18, '600'),
+    textTransform: 'uppercase' as const,
+    letterSpacing: 13 * 0.05,
+  },
   tab: system(12, 16, '500'),
   tabActive: system(12, 16, '600'),
 } satisfies Record<string, TextStyle>;
@@ -229,6 +233,8 @@ export const contrastPairs: readonly ContrastPair[] = [
   { foreground: 'primary', background: 'surfaceAlt', minimum: 4.5 },
   { foreground: 'onPrimary', background: 'primary', minimum: 4.5 },
   { foreground: 'onAccent', background: 'accent', minimum: 4.5 },
+  // Destructive button labels.
+  { foreground: 'onPrimary', background: 'error', minimum: 4.5 },
   // Light mode allows accent on background for large text and fills only.
   { foreground: 'accent', background: 'background', minimum: 3, scheme: 'light' },
   { foreground: 'accent', background: 'background', minimum: 4.5, scheme: 'dark' },

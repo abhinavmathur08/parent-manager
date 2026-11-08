@@ -362,6 +362,7 @@ Supabase Auth, with:
 - **Overrides:** `ThemeOverride` forces a scheme or an extra text scale for a subtree. Only the component gallery uses it, to preview dark mode and the largest text size side by side.
 - **Text:** all text goes through `Text` in `src/components/text.tsx`, which applies a `type.*` and a `color.*` token and always scales with the system text size.
 - **Fonts:** Fraunces 600 comes from `@expo-google-fonts/fraunces` and is embedded at build time by the `expo-font` config plugin, so there's no runtime font loading or splash-screen wait. Everything else uses the system font.
+- **Icons:** `expo-symbols` (SF Symbols on iOS, Material Symbols on Android) behind the `Icon` component in `src/components/icon.tsx`, which names each icon once per platform and mirrors directional icons in right-to-left layouts.
 - **Contrast:** a unit test checks every allowed color pair against WCAG 2.2 AA in both modes (NFR-A11Y-1).
 
 ## 10. Trade-offs, risks and decisions
