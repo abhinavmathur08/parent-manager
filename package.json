@@ -53,7 +53,8 @@
     "test:ci": "jest --ci",
     "test:e2e": "maestro test .maestro",
     "check": "pnpm run lint && pnpm run lint:rules && pnpm run format:check && pnpm run typecheck && pnpm run test:ci",
-    "lint:rules": "node scripts/check-lint-rules.js"
+    "lint:rules": "node scripts/check-lint-rules.js",
+    "test:db": "supabase test db"
   },
   "private": true,
   "jest": {
