@@ -29,5 +29,12 @@ module.exports = defineConfig([
   expoConfig,
   prettierConfig,
   localizationRules,
-  globalIgnores(['dist/*', 'coverage/*', 'ios/*', 'android/*', 'supabase/functions/*']),
+  globalIgnores([
+    'dist/*',
+    'coverage/*',
+    'ios/*',
+    'android/*',
+    'supabase/functions/*',
+    '.claude/*',
+  ]),
 ]);

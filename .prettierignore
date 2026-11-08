@@ -6,3 +6,4 @@ ios/
 android/
 pnpm-lock.yaml
 supabase/.temp/
+.claude/
