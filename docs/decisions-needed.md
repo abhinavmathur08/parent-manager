@@ -6,21 +6,21 @@ This is the decision log. Each entry names the backlog items and GitHub issues i
 
 Updated 2026-11-08.
 
-| ID   | Decision                                   | Status                                   | Needed by                                                                      |
-| ---- | ------------------------------------------ | ---------------------------------------- | ------------------------------------------------------------------------------ |
-| D-1  | Supabase production plan                   | Deferred                                 | Before the external beta (L-03.2). Development and staging go ahead without it |
-| D-2  | Product name and domain                    | **Open**                                 | Email sign-in (#32) and invite links (#41)                                     |
-| D-3  | Design direction                           | Decided 2026-11-07                       |                                                                                |
-| D-4  | Sentry, PostHog and Resend accounts        | **Open**                                 | Observability (#21, #22) and email sign-in (#32)                               |
-| D-5  | Apple and Google developer accounts        | **Open**, start now because of lead time | Apple and Google sign-in (#35, #36) and device builds                          |
-| D-6  | Onboarding: due date or age, and age range | Decided 2026-11-08                       |                                                                                |
-| D-7  | AI provider and data terms                 | **Open**                                 | AI parsing (#54)                                                               |
-| D-8  | Starter recipe content                     | Deferred                                 | Before the internal beta (L-03.1). Development uses placeholder recipes        |
-| D-9  | Free-tier limits                           | Decided 2026-11-08                       |                                                                                |
-| D-10 | RevenueCat, products, prices and trial     | Deferred                                 | Before subscriptions are built (M-01.1, #94) and the beta. Needs D-5           |
-| D-11 | Legal review and no ads                    | Deferred                                 | Before the external beta (L-01.2, #102)                                        |
-| D-12 | Updates channel                            | Deferred                                 | Any time; blocks nothing                                                       |
-| D-13 | Offline sync approach                      | **Open**, blocks the sync layer          | Before H-06.2 (#28)                                                            |
+| ID   | Decision                                   | Status                                                                     | Needed by                                                                               |
+| ---- | ------------------------------------------ | -------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| D-1  | Supabase production plan                   | Deferred                                                                   | Before the external beta (L-03.2). Development and staging go ahead without it          |
+| D-2  | Product name and domain                    | **Open**                                                                   | Email sign-in (#32) and invite links (#41)                                              |
+| D-3  | Design direction                           | Decided 2026-11-07                                                         |                                                                                         |
+| D-4  | Sentry, PostHog and Resend accounts        | **Open**                                                                   | Observability (#21, #22) and email sign-in (#32)                                        |
+| D-5  | Apple and Google developer accounts        | Decided 2026-11-08: publish as an individual. **Enrollment pending (you)** | Apple and Google sign-in (#35, #36), device builds, purchases (#94), beta builds (#104) |
+| D-6  | Onboarding: due date or age, and age range | Decided 2026-11-08                                                         |                                                                                         |
+| D-7  | AI provider and data terms                 | **Open**                                                                   | AI parsing (#54)                                                                        |
+| D-8  | Starter recipe content                     | Deferred                                                                   | Before the internal beta (L-03.1). Development uses placeholder recipes                 |
+| D-9  | Free-tier limits                           | Decided 2026-11-08                                                         |                                                                                         |
+| D-10 | RevenueCat, products, prices and trial     | Deferred                                                                   | Before subscriptions are built (M-01.1, #94) and the beta. Needs D-5                    |
+| D-11 | Legal review and no ads                    | Deferred                                                                   | Before the external beta (L-01.2, #102)                                                 |
+| D-12 | Updates channel                            | Deferred                                                                   | Any time; blocks nothing                                                                |
+| D-13 | Offline sync approach                      | **Open**, blocks the sync layer                                            | Before H-06.2 (#28)                                                                     |
 
 ## Open: needed during development and staging
 
@@ -47,24 +47,6 @@ Updated 2026-11-08.
 - **Recommendation:** the free tiers are enough until the beta. Use PostHog US Cloud for the US launch, and revisit EU hosting before the UK. Resend needs the sending domain from D-2.
 - **You do:** create the accounts and add the API keys and DSNs as EAS or GitHub secrets when asked. Never paste them into chat or code.
 
-### D-5 Apple and Google developer accounts
-
-**Blocks:** A-02.1 and A-02.2 Apple and Google sign-in (#35, #36), test builds on real iPhones, M-01.1 purchases (#94), and L-03.1 beta builds (#104).
-
-**Apple:**
-
-- The Apple Developer Program costs USD 99 a year.
-- Enrolling as an organization shows the company as the seller, and needs a D-U-N-S number, which can take days to weeks.
-
-**Google:**
-
-- Google Play Console has a one-off USD 25 fee.
-- New _personal_ accounts must run a closed test before production access; at last check, 12 testers for 14 days.
-
-**Recommendation:** decide now whether to publish as an individual or a company, because it's hard to change later. If you choose a company, start the D-U-N-S and organization enrollment today.
-
-**You do:** enroll in both. Later, add access for EAS through App Store Connect API keys and a Google service account, which you create and upload yourself.
-
 ### D-7 AI provider and data terms
 
 **Blocks:** R-05.3 AI parsing (#54), and with it the import screens and photo import.
@@ -88,6 +70,20 @@ Updated 2026-11-08.
 ### D-3 Design direction: decided 2026-11-07
 
 Calm Kitchen with Village touches, including a floating tab bar in Calm Kitchen's style. The details are in [design-directions.md](design-directions.md#decision-calm-kitchen-with-village-touches), and the tokens in [design-system.md](design-system.md). Still open: whether mockups of later screens are commissioned or produced by Claude. The current set is `docs/design/mockups.html`.
+
+### D-5 Developer accounts: decided 2026-11-08, publish as an individual
+
+Both stores will use personal (individual) accounts, not a company.
+
+- **Apple:** the Apple Developer Program as an individual costs USD 99 a year. The App Store shows your legal name as the seller. No D-U-N-S number is needed, so enrollment is usually quick after identity verification.
+- **Google:** a personal Google Play Console account has a one-off USD 25 fee and needs identity verification.
+  - **Closed test first:** new personal accounts must run a closed test before getting production access; at last check, at least 12 testers for 14 days in a row. L-03.2 (#105) plans for this, so start closed testing early.
+  - **Public contact details:** Google may also require public contact details for developers who sell, which applies here because of in-app subscriptions. Check this during enrollment.
+- **Moving to a company later:** both stores support transferring an app to another developer account, such as a future company. It takes some steps, and subscribers need care, so check the transfer rules at the time.
+- **Still to do (you):**
+  - Enroll in both.
+  - When asked, create an App Store Connect API key and a Google Play service account for EAS, and add them as EAS credentials yourself. Never paste them into chat.
+- **Still blocked until you've enrolled:** A-02.1 and A-02.2 Apple and Google sign-in (#35, #36), M-01.1 purchases (#94, which also needs D-10), and L-03.1 beta builds (#104).
 
 ### D-6 Onboarding: decided 2026-11-08
 
