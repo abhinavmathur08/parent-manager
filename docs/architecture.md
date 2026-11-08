@@ -185,15 +185,19 @@ The engine is a set of pure TypeScript functions with no side effects, unit-test
 
 **Approach:** keep a local SQLite copy of the household's working data, run all reads and writes against it, queue writes in an outbox, and sync both ways.
 
-Options, with my recommendation first:
+**Decided (D-13, 2026-11-08): we build our own.** There's no sync vendor. The pieces:
 
-| Option                                                                    | Pros                                                                                                                                                       | Cons                                                                                                              |
-| ------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| **Legend-State with its Supabase sync plugin** (recommended to try first) | Listed in Expo's local-first guide. No new vendor. Offline persistence, incremental sync on `updated_at`, Realtime subscriptions and retries are built in. | Conflict handling is row-level last-write-wins, which we have to design around. Smaller community than PowerSync. |
-| PowerSync (fallback)                                                      | A mature Postgres-to-SQLite sync engine with an official Supabase integration and a well-defined upload queue.                                             | A new vendor and cost. Sync rules are an extra thing to maintain.                                                 |
-| Build our own (TanStack Query with an `expo-sqlite` outbox and Realtime)  | Full control.                                                                                                                                              | Most work, and the riskiest.                                                                                      |
+- **Local copy:** `expo-sqlite` in `src/lib/sync` holds the household's working data and is read on start (H-06.2).
+- **Outbox:** writes are queued in order and survive restarts. The server sets `updated_at` and `version`, and deletes are soft (H-06.3).
+- **Realtime:** Supabase Realtime, filtered by household, applies remote changes to the local copy (H-06.4).
 
-Backlog item H-06 starts with a **time-boxed spike** with pass or fail tests: two devices edit the same list offline and reconnect, and the result must follow the rules below. If Legend-State fails, we switch to PowerSync. That would add a vendor, so it becomes a **Decision**.
+How we got here:
+
+| Option                                                   | Result                                                                                                                                                                                                          |
+| -------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Legend-State with its Supabase sync plugin (tried first) | **Failed** the H-06.1 spike (#27, PR #110). On the device, a row deleted elsewhere came back, and a stale uncheck stalled the write queue. Its Supabase plugin is also a beta.                                  |
+| PowerSync                                                | Not tried. It would add a vendor holding a copy of children's data, from about USD 49 a month.                                                                                                                  |
+| **Build our own** (an `expo-sqlite` outbox and Realtime) | **Chosen.** No new vendor or processor, full control over the conflict rules below. It costs about 2 to 3 more days, and we own any sync bugs. The spike's two-device test harness is H-06.3's acceptance test. |
 
 ### Conflict rules
 
@@ -284,7 +288,7 @@ All export formats come from one function that turns a list into localized secti
 
 Supabase Auth, with:
 
-- **Email:** a one-time code by default, with a magic link as an alternative. Codes are more reliable than links on mobile, because email apps open links in the wrong browser. Supabase sends these emails through Resend over SMTP, from the product domain.
+- **Email:** a one-time code by default, with a magic link as an alternative. Codes are more reliable than links on mobile, because email apps open links in the wrong browser. Supabase sends these emails through Resend over SMTP, from the product domain. Until the domain (D-2) and Resend account (D-4) exist, development and staging use Supabase's built-in email, which is rate-limited.
 - **Apple and Google:** Sign in with Apple and Google sign-in on the device, then `signInWithIdToken`. Apple requires Sign in with Apple when other social sign-ins are offered.
 - **Biometric unlock:** `expo-local-authentication` locks the app over an existing session. It isn't a sign-in method.
 - **Session storage:** encrypted (F-08). `createEncryptedStorage` in `src/lib/encrypted-storage.ts` gives each storage key a random AES-256 key, stored in `expo-secure-store` and readable after first unlock, and seals the value with AES-GCM from `expo-crypto`. Only the ciphertext goes to SQLite storage (`expo-sqlite/localStorage`), which avoids SecureStore's size limits. Removing the item (sign-out) deletes both the ciphertext and the key. Data without its key, or data that fails authentication, reads as signed out and is cleared. A SecureStore error is passed on rather than treated as a sign-out.
@@ -373,7 +377,7 @@ Supabase Auth, with:
 
 | Topic                      | Trade-off or risk                                                                                                        | Proposal                                                                                                                            |
 | -------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
-| Offline sync               | A library could fail our conflict needs late in the project.                                                             | A spike first, with pass or fail tests. PowerSync as the fallback (a **Decision** if needed).                                       |
+| Offline sync               | A library could fail our conflict needs late in the project.                                                             | Our own outbox and Realtime (D-13), held to the conflict rules by the two-device test harness in CI.                                |
 | Row-level last-write-wins  | A partner's edit to the same field can be lost.                                                                          | Small, granular rows, check-offs recorded with who and when, and "updated by" hints. Revisit with CRDTs only if real users hit it.  |
 | Unit merging               | Mass and volume can't merge without a density.                                                                           | Keep them as separate lines rather than guessing. Add densities for common ingredients over time.                                   |
 | AI cost and abuse          | Image parsing is the most expensive call.                                                                                | Quotas, rate limits, a cost ceiling per job, and schema.org parsing first.                                                          |
