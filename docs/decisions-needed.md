@@ -21,7 +21,7 @@ Sorted by what blocks progress soonest. Each entry names the backlog items it un
 - L-04: store listings.
 - The app's display name.
 
-- **The situation:** this is open in the vision. The bundle ID `com.parentmanager.app` is already chosen and is never shown to users, so the brand can differ. The App Store and Google Play require unique app names.
+- **The situation:** this is open in the vision. The bundle ID `com.myparentmanager` is already chosen and is never shown to users, so the brand can differ. The App Store and Google Play require unique app names.
 - **Recommendation:**
   - Pick the name before A-01.
   - Check that the trademark and the store names are free.

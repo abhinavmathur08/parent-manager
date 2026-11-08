@@ -7,7 +7,7 @@ Status: proposal for review, 2026-11-07. [vision.md](vision.md) is the source of
 PR #1 already delivered:
 
 - **App:** an Expo SDK 58 app with TypeScript and Expo Router, building for iOS and Android.
-- **Bundle ID:** `com.parentmanager.app` on both platforms.
+- **Bundle ID:** `com.myparentmanager` on both platforms. The first choice, `com.parentmanager.app`, was already registered with Apple by someone else.
 - **Supabase:** a client and the CLI project folder, linked to the hosted project `parent-manager` in us-east-1.
 - **EAS:** the project `@abhinav08/parent-manager`, with development, preview and production build profiles.
 - **Tooling:** ESLint and Prettier, Jest, a Maestro smoke test, and GitHub Actions running CI on every PR and E2E on `main`.
@@ -300,11 +300,11 @@ Supabase Auth, with:
 
 ### Environments
 
-| Environment | Supabase                                       | EAS build profile and environment | Update channel | App ID                          |
-| ----------- | ---------------------------------------------- | --------------------------------- | -------------- | ------------------------------- |
-| Development | Local stack (Docker)                           | `development`                     | none           | `com.parentmanager.app.dev`     |
-| Staging     | Hosted `parent-manager` (the existing project) | `preview`                         | `preview`      | `com.parentmanager.app.preview` |
-| Production  | A new hosted project                           | `production`                      | `production`   | `com.parentmanager.app`         |
+| Environment | Supabase                                       | EAS build profile and environment | Update channel | App ID                        |
+| ----------- | ---------------------------------------------- | --------------------------------- | -------------- | ----------------------------- |
+| Development | Local stack (Docker)                           | `development`                     | none           | `com.myparentmanager.dev`     |
+| Staging     | Hosted `parent-manager` (the existing project) | `preview`                         | `preview`      | `com.myparentmanager.preview` |
+| Production  | A new hosted project                           | `production`                      | `production`   | `com.myparentmanager`         |
 
 - **Separate app IDs** let all three install side by side. They come from an `app.config.ts` that reads the environment.
 - **Supabase plan:** the Free plan allows two active projects per organization, and the Yakka project already uses one. Free projects also pause after a week of inactivity, which is unacceptable for production. **Decision:** Supabase Pro for production, in a new or upgraded organization.
