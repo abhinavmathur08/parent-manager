@@ -101,7 +101,7 @@ These don't block development or staging. Each is listed with the point by which
   - Free projects pause after a week of inactivity.
   - The free plan has no automatic backups, and keeps only 1 day of logs.
 - **Recommendation:** Supabase Pro (from USD 25 a month, first project included), in a new "Parent Manager" organization, created shortly before the external beta.
-- **In the meantime:** the development and staging parts of F-03.2 (#10) and F-04.4 (#15) can be built now. Only their production halves wait.
+- **In the meantime (decided 2026-11-09):** one hosted project, `parent-manager`, serves both development and staging builds, on the Free plan, with test data only. The Migrations workflow (F-04.4, #15) deploys to it after each merge. Automated tests use the local stack. F-03.2 (#10) and F-04.4's production half wait for this decision.
 
 ### D-8 Starter recipe content: needed before the internal beta
 
