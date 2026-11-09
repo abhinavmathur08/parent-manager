@@ -114,6 +114,7 @@ How the catalog is built (R-01.1):
 - **Units.** `to_base` matches `src/i18n/units.ts`. `regions` says which size a plain word such as "tbsp" means in each region (`unit.tbsp_au` in AU). `unit.pinch` and `unit.dash` have no `to_base` (R-ING-5). `unit.floz_imperial` (28.41 ml) is there for UK and AU recipes.
 - **Household ingredients** have IDs of the form `ingredient.h.<uuid as 32 hex digits>`, made on the device so they work offline, and can't be default staples. Parents and family members write them; caregivers read them. Removing one is a soft delete.
 - **`ingredient_names` carries `household_id` too,** kept equal to its ingredient's by a trigger, so its policies need no join.
+- **Seed data (R-01.2).** `supabase/catalog/ingredients.json` is the source of truth for catalog ingredients: section, default dimension, density, allergen codes, staple flag, and per-locale name, plural and synonyms. Each locale lists the other regions' names as synonyms where that word means nothing else locally, so a UK recipe's "courgette" resolves in a US household. `node scripts/catalog-seed.js --new` turns it into a new seed migration that upserts every row and soft-deletes dropped ones. `pnpm run catalog:check` (in CI) validates the JSON, including that no word names two ingredients in a locale, and fails if the newest seed migration is out of date.
 - **Allergen codes** are a fixed list checked by the database and mirrored in `src/features/ingredients/catalog-ids.ts`, with section IDs.
 
 #### Recipes
