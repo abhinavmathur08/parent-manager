@@ -30,9 +30,9 @@ const ALLERGENS = new Set(idsSource.match(/'allergen\.[a-z0-9_]+'/g).map((s) => 
 function normalize(text) {
   return text
     .normalize('NFKD')
-    .replace(/[̀-ͯ]/g, '')
+    .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()
-    .replace(/['’]/g, '')
+    .replace(/['\u2019]/g, '')
     .replace(/[^a-z0-9%]+/g, ' ')
     .trim();
 }

@@ -94,3 +94,27 @@ export function displayQuantity(
   }
   return [{ value: roundNonZero(base / CUP_US, 0.25), unitId: 'unit.cup_us' }];
 }
+
+/** A household's region (architecture section 3.1). It decides what plain unit words mean. */
+export type Region = 'US' | 'GB' | 'AU';
+
+/**
+ * "A pinch" and "a dash": count-like units with no base conversion, never merged with
+ * measured quantities and shown as written (R-ING-5, PROPOSED).
+ */
+export const UNMEASURED_UNITS = ['unit.pinch', 'unit.dash'] as const;
+export type UnmeasuredUnitId = (typeof UNMEASURED_UNITS)[number];
+
+/**
+ * Unit words whose size depends on the region, such as "tbsp": 15 ml in the UK, 20 ml in
+ * Australia and 14.8 ml in the US (R-ING-2). Mirrors the `regions` column of `units`.
+ */
+export const REGIONAL_UNITS = {
+  tsp: { US: 'unit.tsp_us', GB: 'unit.tsp_metric', AU: 'unit.tsp_metric' },
+  tbsp: { US: 'unit.tbsp_us', GB: 'unit.tbsp_metric', AU: 'unit.tbsp_au' },
+  cup: { US: 'unit.cup_us', GB: 'unit.cup_metric', AU: 'unit.cup_metric' },
+  floz: { US: 'unit.floz_us', GB: 'unit.floz_imperial', AU: 'unit.floz_imperial' },
+  pint: { US: 'unit.pint_us', GB: 'unit.pint_imperial', AU: 'unit.pint_imperial' },
+} as const satisfies Record<string, Record<Region, UnitId>>;
+
+export type RegionalUnitWord = keyof typeof REGIONAL_UNITS;
