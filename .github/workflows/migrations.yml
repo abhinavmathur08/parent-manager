@@ -1,0 +1,63 @@
+# Applies database migrations to the hosted Supabase projects (F-04.4).
+#
+# - Staging: runs automatically after a merge to main that changes supabase/migrations,
+#   or by hand from the Actions tab.
+# - Production: runs only by hand (target "production"), and only after the product owner
+#   approves the run in the protected "production" environment. The production project
+#   doesn't exist yet (decision D-1), so that job fails with a clear message until it does.
+#
+# Each GitHub environment holds its own settings, added by the product owner:
+#   - secret SUPABASE_ACCESS_TOKEN: a Supabase access token, scoped to that project
+#   - variable SUPABASE_PROJECT_REF: the project's ref, e.g. the part before .supabase.co
+# The pinned Supabase CLI (`pnpm supabase`) is used, as everywhere else. With CLI 3, `db push`
+# targets the local database unless `--remote` is passed, and hosted changes need `--yes`.
+name: Migrations
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'supabase/migrations/**'
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Which project to migrate
+        type: choice
+        options: [staging, production]
+        default: staging
+
+# One deploy at a time per target, and never cancel one that has started.
+concurrency:
+  group: migrations-${{ github.event.inputs.target || 'staging' }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Migrate ${{ github.event.inputs.target || 'staging' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: ${{ github.event.inputs.target || 'staging' }}
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      PROJECT_REF: ${{ vars.SUPABASE_PROJECT_REF }}
+    steps:
+      - name: Check the environment is configured
+        run: |
+          if [ -z "$SUPABASE_ACCESS_TOKEN" ] || [ -z "$PROJECT_REF" ]; then
+            echo "::error::The '${{ github.event.inputs.target || 'staging' }}' environment needs the SUPABASE_ACCESS_TOKEN secret and the SUPABASE_PROJECT_REF variable. See docs/architecture.md, section on environments."
+            exit 1
+          fi
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6 # version comes from packageManager in package.json
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Show the migrations that will be applied
+        run: pnpm supabase db push --remote="$PROJECT_REF" --dry-run
+      - name: Apply migrations
+        run: pnpm supabase db push --remote="$PROJECT_REF" --yes
