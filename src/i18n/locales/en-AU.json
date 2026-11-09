@@ -3,5 +3,15 @@
     "diapers": "Nappies",
     "pacifier": "Dummy",
     "stroller": "Pram"
+  },
+  "sections": {
+    "produce": "Fruit and veg",
+    "canned": "Canned food",
+    "condiments": "Sauces and condiments"
+  },
+  "allergens": {
+    "crustacean": "Crustaceans",
+    "sulphite": "Sulphites",
+    "mollusc": "Molluscs"
   }
 }
