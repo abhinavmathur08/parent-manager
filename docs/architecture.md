@@ -108,6 +108,14 @@ These tables are global and read-only, filled from versioned seed data:
 
 Unit, section, tag and allergen names live in the app's locale files. Ingredient names live in the database, because the catalog grows without app releases.
 
+How the catalog is built (R-01.1):
+
+- **Reference rows are read-only.** Anyone, including the anonymous role, can read `units`, `store_sections` and catalog rows of `ingredients` and `ingredient_names` (where `household_id` is null). Only migrations write them.
+- **Units.** `to_base` matches `src/i18n/units.ts`. `regions` says which size a plain word such as "tbsp" means in each region (`unit.tbsp_au` in AU). `unit.pinch` and `unit.dash` have no `to_base` (R-ING-5). `unit.floz_imperial` (28.41 ml) is there for UK and AU recipes.
+- **Household ingredients** have IDs of the form `ingredient.h.<uuid as 32 hex digits>`, made on the device so they work offline, and can't be default staples. Parents and family members write them; caregivers read them. Removing one is a soft delete.
+- **`ingredient_names` carries `household_id` too,** kept equal to its ingredient's by a trigger, so its policies need no join.
+- **Allergen codes** are a fixed list checked by the database and mirrored in `src/features/ingredients/catalog-ids.ts`, with section IDs.
+
 #### Recipes
 
 | Table                | Key columns                                                                                                                                                                                                                                            | Notes                                                                                                 |
@@ -168,6 +176,22 @@ The engine is a set of pure TypeScript functions with no side effects, unit-test
 - **No photos, health records or full names are required.** A nickname is enough.
 - **Due date versus age.** Whether onboarding asks for a due date or the baby's age is a vision open question and a **Decision**. If we store a due date, store the month only.
 - **Allergies and pregnancy status are health-related data.** UK GDPR and some US state laws, such as Washington's My Health My Data Act, treat this kind of data strictly, so legal review must cover it before launch.
+
+### 3.4 Data export and account deletion coverage
+
+Export (A-04.2) and deletion must cover every table that holds household data. Add a row here with each new table.
+
+| Table                    | Export                               | Deletion                                               |
+| ------------------------ | ------------------------------------ | ------------------------------------------------------ |
+| `profiles`               | The user's own row                   | With the account                                       |
+| `households`             | The household                        | When its only member deletes their account             |
+| `household_members`      | All members' roles and join dates    | Cascades from the household                            |
+| `invitations`            | Open invitations, without token hash | Cascades from the household                            |
+| `household_people`       | All people                           | Cascades from the household                            |
+| `person_dietary`         | All diets and allergies              | Cascades from the household                            |
+| `household_entitlements` | Tier and status                      | Cascades from the household                            |
+| `ingredients`            | Rows with the household's ID only    | Household rows cascade; catalog rows are never touched |
+| `ingredient_names`       | Rows with the household's ID only    | Household rows cascade; catalog rows are never touched |
 
 ## 4. Row-level security and household isolation
 

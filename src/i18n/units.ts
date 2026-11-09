@@ -20,6 +20,7 @@ export const UNITS = {
   'unit.tbsp_au': { dimension: 'volume', toBase: 20, label: 'tbsp', fractions: true },
   'unit.cup_metric': { dimension: 'volume', toBase: 250, label: 'cup', fractions: true },
   'unit.pint_imperial': { dimension: 'volume', toBase: 568.261, label: 'pint', fractions: true },
+  'unit.floz_imperial': { dimension: 'volume', toBase: 28.4131, label: 'floz', fractions: true },
   'unit.ml': { dimension: 'volume', toBase: 1, label: 'ml', fractions: false },
   'unit.l': { dimension: 'volume', toBase: 1000, label: 'l', fractions: false },
   'unit.g': { dimension: 'mass', toBase: 1, label: 'g', fractions: false },

@@ -7,5 +7,16 @@
   "units": {
     "l_one": "litre",
     "l_other": "litres"
+  },
+  "sections": {
+    "produce": "Fruit and veg",
+    "canned": "Tins and jars",
+    "condiments": "Sauces and condiments"
+  },
+  "allergens": {
+    "crustacean": "Crustaceans",
+    "soy": "Soya",
+    "sulphite": "Sulphites",
+    "mollusc": "Molluscs"
   }
 }
