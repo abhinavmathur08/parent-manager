@@ -32,6 +32,10 @@ tags:
 - assertVisible:
     id: region-GB
     checked: true
+# Continue sits below the region options on small screens.
+- scrollUntilVisible:
+    element:
+      id: create-household-continue
 - tapOn:
     id: create-household-continue
 - extendedWaitUntil:
