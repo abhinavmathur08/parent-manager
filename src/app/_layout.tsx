@@ -5,6 +5,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useMemo } from 'react';
 
 import { AuthProvider, useAuth } from '@/features/auth/session';
+import { BiometricLock } from '@/features/biometric/biometric-lock';
 import { useTheme } from '@/hooks/use-theme';
 
 // S-01: the splash screen stays up until the saved session has been read.
@@ -21,19 +22,21 @@ function RootStack() {
   if (auth.status === 'loading') return null;
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="index" />
-      <Stack.Protected guard={signedIn}>
-        <Stack.Screen name="(tabs)" />
-      </Stack.Protected>
-      <Stack.Protected guard={!signedIn}>
-        <Stack.Screen name="(auth)" />
-      </Stack.Protected>
-      <Stack.Screen name="auth-callback" />
-      <Stack.Protected guard={__DEV__}>
-        <Stack.Screen name="gallery" />
-      </Stack.Protected>
-    </Stack>
+    <BiometricLock active={signedIn}>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="index" />
+        <Stack.Protected guard={signedIn}>
+          <Stack.Screen name="(tabs)" />
+        </Stack.Protected>
+        <Stack.Protected guard={!signedIn}>
+          <Stack.Screen name="(auth)" />
+        </Stack.Protected>
+        <Stack.Screen name="auth-callback" />
+        <Stack.Protected guard={__DEV__}>
+          <Stack.Screen name="gallery" />
+        </Stack.Protected>
+      </Stack>
+    </BiometricLock>
   );
 }
 
