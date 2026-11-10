@@ -347,8 +347,11 @@ max_frequency = "5s"
 # `discord`, `facebook`, `github`, `gitlab`, `google`, `keycloak`, `linkedin_oidc`, `notion`, `twitch`,
 # `twitter`, `x`, `slack_oidc`, `spotify`, `workos`, `zoom`.
 [auth.external.apple]
-enabled = false
-client_id = ""
+# Sign in with Apple (A-02.1). On iOS the app signs in with Apple's ID token, whose audience is
+# the app's bundle ID, one per variant (app.config.ts); no secret is needed for that. Android
+# uses Apple's web sign-in, which needs a Services ID (added to client_id) and the secret.
+enabled = true
+client_id = "com.myparentmanager,com.myparentmanager.dev,com.myparentmanager.preview"
 # DO NOT commit your OAuth provider secret to git. Use environment variable substitution instead:
 secret = "env(SUPABASE_AUTH_EXTERNAL_APPLE_SECRET)"
 # Overrides the default auth callback URL derived from auth.external_url.
