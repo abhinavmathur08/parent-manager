@@ -1,0 +1,51 @@
+# A new user creates a household (H-02.1): name, then household name and region, then the
+# Plan tab. Resumes after a restart at the same step (FR-ONB-7). Ends signed out.
+# Needs the local stack; see the Testing section of README.md.
+appId: ${APP_ID || 'com.myparentmanager'}
+tags:
+  - backend
+---
+- runFlow: subflows/sign-up-with-email.yaml
+- extendedWaitUntil:
+    visible:
+      id: welcome-name
+    timeout: 20000
+- tapOn:
+    id: welcome-name
+- inputText: Sam
+- hideKeyboard
+- tapOn:
+    id: welcome-create
+- extendedWaitUntil:
+    visible:
+      id: create-household-screen-title
+    timeout: 10000
+- tapOn:
+    id: region-GB
+# Kill and reopen the app: onboarding resumes at this step with the answer kept.
+- stopApp
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: create-household-screen-title
+    timeout: 30000
+- assertVisible:
+    id: region-GB
+    checked: true
+- tapOn:
+    id: create-household-continue
+- extendedWaitUntil:
+    visible:
+      id: plan-screen-title
+    timeout: 20000
+- tapOn:
+    id: tab-household
+- scrollUntilVisible:
+    element:
+      id: sign-out
+- tapOn:
+    id: sign-out
+- extendedWaitUntil:
+    visible:
+      id: sign-in-screen-title
+    timeout: 10000
