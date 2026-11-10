@@ -1,9 +1,41 @@
 import '@/i18n';
 
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
-import { useMemo } from 'react';
+import * as SplashScreen from 'expo-splash-screen';
+import { useEffect, useMemo } from 'react';
 
+import { AuthProvider, useAuth } from '@/features/auth/session';
 import { useTheme } from '@/hooks/use-theme';
+
+// S-01: the splash screen stays up until the saved session has been read.
+SplashScreen.preventAutoHideAsync().catch(() => undefined);
+
+function RootStack() {
+  const auth = useAuth();
+  const signedIn = auth.status === 'signedIn';
+
+  useEffect(() => {
+    if (auth.status !== 'loading') SplashScreen.hideAsync().catch(() => undefined);
+  }, [auth.status]);
+
+  if (auth.status === 'loading') return null;
+
+  return (
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="index" />
+      <Stack.Protected guard={signedIn}>
+        <Stack.Screen name="(tabs)" />
+      </Stack.Protected>
+      <Stack.Protected guard={!signedIn}>
+        <Stack.Screen name="(auth)" />
+      </Stack.Protected>
+      <Stack.Screen name="auth-callback" />
+      <Stack.Protected guard={__DEV__}>
+        <Stack.Screen name="gallery" />
+      </Stack.Protected>
+    </Stack>
+  );
+}
 
 export default function RootLayout() {
   const theme = useTheme();
@@ -24,12 +56,9 @@ export default function RootLayout() {
   }, [theme]);
   return (
     <ThemeProvider value={navigationTheme}>
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="(tabs)" />
-        <Stack.Protected guard={__DEV__}>
-          <Stack.Screen name="gallery" />
-        </Stack.Protected>
-      </Stack>
+      <AuthProvider>
+        <RootStack />
+      </AuthProvider>
     </ThemeProvider>
   );
 }

@@ -1,4 +1,5 @@
 import type { ConfigContext, ExpoConfig } from 'expo/config';
+import { withAndroidManifest } from 'expo/config-plugins';
 
 /**
  * App variants (F-03.1). Each EAS build profile sets APP_VARIANT in eas.json, so
@@ -38,10 +39,33 @@ export function getVariantConfig(variant: AppVariant) {
   return VARIANTS[variant];
 }
 
+/**
+ * End-to-end tests only (E2E_LOCAL_BACKEND=1): lets an Android release build reach the local
+ * Supabase stack over plain HTTP. iOS already allows local networking. Never set for builds
+ * that ship.
+ */
+function withLocalBackendCleartext(config: ExpoConfig): ExpoConfig {
+  return withAndroidManifest(config, (mod) => {
+    const application = mod.modResults.manifest.application?.[0];
+    if (application) application.$['android:usesCleartextTraffic'] = 'true';
+    return mod;
+  });
+}
+
 export default ({ config }: ConfigContext): ExpoConfig => {
   const variant = getAppVariant(process.env.APP_VARIANT);
   const { id, name, scheme } = getVariantConfig(variant);
+  const expoConfig = buildConfig(config, variant, id, name, scheme);
+  return process.env.E2E_LOCAL_BACKEND === '1' ? withLocalBackendCleartext(expoConfig) : expoConfig;
+};
 
+function buildConfig(
+  config: ConfigContext['config'],
+  variant: AppVariant,
+  id: string,
+  name: string,
+  scheme: string,
+): ExpoConfig {
   return {
     ...config,
     name,
@@ -116,4 +140,4 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     },
     owner: 'abhinav08',
   };
-};
+}
