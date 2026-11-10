@@ -365,6 +365,9 @@
     },
     "apple": {
       "continue": "Continue with Apple"
+    },
+    "google": {
+      "continue": "Continue with Google"
     }
   }
 }

@@ -19,6 +19,7 @@
     "packageJson": {
       "dependencies": [
         "npm:@expo-google-fonts/fraunces@~0.4.1",
+        "npm:@react-native-google-signin/google-signin@17",
         "npm:@supabase/supabase-js@^2.119.0",
         "npm:@testing-library/react-native@^14.1.0",
         "npm:@types/jest@30.0.0",
