@@ -8,7 +8,7 @@
 #
 # Each GitHub environment holds its own settings, added by the product owner:
 #   - secret SUPABASE_ACCESS_TOKEN: a Supabase access token, scoped to that project
-#   - variable SUPABASE_PROJECT_REF: the project's ref, e.g. the part before .supabase.co
+#   - variable (or secret) SUPABASE_PROJECT_REF: the project's ref, the part before .supabase.co
 # The pinned Supabase CLI (`pnpm supabase`) is used, as everywhere else. With CLI 3, `db push`
 # targets the local database unless `--remote` is passed, and hosted changes need `--yes`.
 name: Migrations
@@ -42,7 +42,8 @@ jobs:
     environment: ${{ github.event.inputs.target || 'staging' }}
     env:
       SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-      PROJECT_REF: ${{ vars.SUPABASE_PROJECT_REF }}
+      # A variable is preferred; a secret of the same name also works (the ref is then masked in logs).
+      PROJECT_REF: ${{ vars.SUPABASE_PROJECT_REF || secrets.SUPABASE_PROJECT_REF }}
     steps:
       - name: Check the environment is configured
         run: |
