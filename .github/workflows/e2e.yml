@@ -39,10 +39,27 @@ jobs:
           distribution: temurin
           java-version: '17'
       - run: pnpm install --frozen-lockfile
+      # The sign-in flow needs a backend: the local stack, with Mailpit as the test inbox.
+      # The app reaches it on 127.0.0.1 through `adb reverse`, and Maestro reads Mailpit.
+      - name: Start local Supabase
+        run: |
+          pnpm supabase start -x realtime,storage-api,imgproxy,postgres-meta,studio,edge-runtime,logflare,vector,supavisor
+          # Only the publishable key, which is public, goes into the build.
+          key="$(pnpm --silent supabase status -o json | jq -r '.PUBLISHABLE_KEY // .ANON_KEY // empty')"
+          if [ -z "${key}" ]; then
+            echo "::error::No publishable key in the output of supabase status."
+            exit 1
+          fi
+          echo "EXPO_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321" >> "$GITHUB_ENV"
+          echo "EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY=${key}" >> "$GITHUB_ENV"
       - name: Generate the native Android project
+        env:
+          E2E_LOCAL_BACKEND: '1' # allows plain HTTP to the local stack; see app.config.ts
         run: pnpm expo prebuild --platform android --no-install
       - name: Build release APK
         working-directory: android
+        env:
+          E2E_LOCAL_BACKEND: '1'
         run: ./gradlew assembleRelease -PreactNativeArchitectures=x86_64 --no-daemon
       - name: Keep the APK and remove build output
         run: |
@@ -67,6 +84,7 @@ jobs:
           disable-animations: true
           script: |
             adb install app-release.apk
+            adb reverse tcp:54321 tcp:54321
             maestro test --format junit --output maestro-report.xml .maestro
       - name: Upload Maestro report
         if: always()
@@ -157,7 +175,9 @@ jobs:
           curl -fsSL https://get.maestro.mobile.dev | bash
           echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
       - name: Run Maestro flows
-        run: maestro --device "${{ steps.simulator.outputs.udid }}" test --format junit --output maestro-report.xml .maestro
+        # macOS runners have no Docker for the local stack, so flows that need a backend
+        # (tagged `backend`) run on Android only.
+        run: maestro --device "${{ steps.simulator.outputs.udid }}" test --exclude-tags backend --format junit --output maestro-report.xml .maestro
       - name: Upload Maestro report and logs
         if: always()
         uses: actions/upload-artifact@v7

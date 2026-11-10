@@ -1,0 +1,59 @@
+# Signs up with an email code read from the local stack's test inbox (Mailpit), checks the
+# tabs, then signs out (A-01.2). Needs `pnpm supabase start` and a release build pointed at
+# it; see the Testing section of README.md. Tagged so runs without a backend can skip it.
+appId: ${APP_ID || 'com.myparentmanager'}
+tags:
+  - backend
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible:
+      id: sign-in-screen-title
+    timeout: 60000
+- runScript: scripts/new-email.js
+- tapOn:
+    id: sign-in-email
+- inputText: ${output.email}
+- hideKeyboard
+- tapOn:
+    id: sign-in-continue
+- extendedWaitUntil:
+    visible:
+      id: verify-screen-title
+    timeout: 20000
+- runScript:
+    file: scripts/read-code.js
+    env:
+      EMAIL: ${output.email}
+- tapOn:
+    id: verify-code
+- inputText: ${output.code}
+# Signed in: the tabs.
+- extendedWaitUntil:
+    visible:
+      id: plan-screen-title
+    timeout: 20000
+- assertVisible:
+    id: tab-bar
+- tapOn:
+    id: tab-list
+- assertVisible:
+    id: list-screen-title
+- tapOn:
+    id: tab-recipes
+- assertVisible:
+    id: recipes-screen-title
+- tapOn:
+    id: tab-household
+- assertVisible:
+    id: household-screen-title
+- scrollUntilVisible:
+    element:
+      id: sign-out
+- tapOn:
+    id: sign-out
+- extendedWaitUntil:
+    visible:
+      id: sign-in-screen-title
+    timeout: 10000

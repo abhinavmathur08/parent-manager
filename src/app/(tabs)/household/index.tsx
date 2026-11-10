@@ -1,10 +1,12 @@
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
+import { Button } from '@/components/button';
 import { Card } from '@/components/card';
 import { ListRow } from '@/components/list-row';
 import { PlaceholderScreen } from '@/components/placeholder-screen';
 import { Text } from '@/components/text';
+import { signOut } from '@/features/auth/sign-out';
 import { supabaseConfig } from '@/lib/supabase-config';
 
 // Placeholder until the household feature from docs/backlog.md lands.
@@ -27,6 +29,16 @@ export default function HouseholdScreen() {
           testID="open-gallery"
         />
       ) : null}
+      {/* Moves to the Account screen (S-31) when it's built. */}
+      <Button
+        variant="secondary"
+        label={t('auth.signOut.action')}
+        onPress={() => {
+          signOut().catch(() => undefined);
+        }}
+        fullWidth
+        testID="sign-out"
+      />
     </PlaceholderScreen>
   );
 }
