@@ -333,23 +333,24 @@ Supabase Auth, with:
 
 ### Environments
 
-| Environment | Supabase                                       | EAS build profile and environment | Update channel | App ID                        |
-| ----------- | ---------------------------------------------- | --------------------------------- | -------------- | ----------------------------- |
-| Development | Local stack (Docker)                           | `development`                     | `development`  | `com.myparentmanager.dev`     |
-| Staging     | Hosted `parent-manager` (the existing project) | `preview`                         | `preview`      | `com.myparentmanager.preview` |
-| Production  | A new hosted project                           | `production`                      | `production`   | `com.myparentmanager`         |
+| Environment | Supabase                                                                                          | EAS build profile and environment | Update channel | App ID                        |
+| ----------- | ------------------------------------------------------------------------------------------------- | --------------------------------- | -------------- | ----------------------------- |
+| Development | Hosted `parent-manager` for builds on devices; the local stack (Docker) for sessions and CI tests | `development`                     | `development`  | `com.myparentmanager.dev`     |
+| Staging     | Hosted `parent-manager` (the existing project)                                                    | `preview`                         | `preview`      | `com.myparentmanager.preview` |
+| Production  | A new hosted project, created before the external beta (D-1)                                      | `production`                      | `production`   | `com.myparentmanager`         |
 
 - **Separate app IDs** let all three install side by side. `app.config.ts` reads `APP_VARIANT` (`development`, `preview` or `production`), which each build profile sets in `eas.json`; `development-simulator` inherits `development`'s. Without `APP_VARIANT` the config is production's, so EAS commands that don't run a build (submit, credentials) act on the store app, and local scripts (`pnpm run ios`, `android`, `start`) set `development`. Each variant also gets its own name suffix and URL scheme (`parentmanager-dev`, `parentmanager-preview`, `parentmanager`), so deep links open the right install. Maestro flows take the app ID as `APP_ID` and default to production's.
 - **Supabase plan:** the Free plan allows two active projects per organization, and the Yakka project already uses one. Free projects also pause after a week of inactivity, which is unacceptable for production. **Decision:** Supabase Pro for production, in a new or upgraded organization.
-- **Today's gap:** all three EAS environments currently point at the one hosted project. F-03 fixes that.
+- **One hosted project until the beta (decided 2026-11-09):** to stay on the Free plan, development and preview builds share the hosted `parent-manager` project, and migrations reach it through the Migrations workflow after each merge. Automated tests (sessions and CI) use the local stack, never the hosted project. It holds test data only: no real family data, no backups, and it pauses after 7 days without activity. The production project and F-03.2's split (#10) wait for D-1.
 
 ### CI/CD
 
 - **On every PR:** lint, formatting, types, unit tests and an Expo dependency check, plus pgTAP database tests against a local Supabase stack ("Database tests", F-04.1) and Deno tests for Edge Functions ("Edge Function tests", F-04.2).
 - **On `main`:** E2E with Maestro on Android (an emulator on Linux) and iOS (a simulator on a macOS runner, which is free for a public repo, with Xcode 26.4 or later, F-04.3). Both jobs live in `.github/workflows/e2e.yml`, build the production variant as a release, and can also be started on any branch with `workflow_dispatch`.
 - **Database migrations:**
-  - **Staging:** applied automatically by a GitHub Action after a merge to `main`. It needs a Supabase access token as a GitHub secret, which the product owner adds.
-  - **Production:** applied by a manual GitHub Actions workflow behind a protected "production" environment that needs the product owner's approval.
+  - **Staging:** `.github/workflows/migrations.yml` applies them after any merge to `main` that changes `supabase/migrations`, usually within 5 minutes (F-04.4). It prints a dry run, then runs `pnpm supabase db push --remote=<ref> --yes`. The "staging" GitHub environment holds a `SUPABASE_ACCESS_TOKEN` secret (a token scoped to the staging project) and a `SUPABASE_PROJECT_REF` variable, both added by the product owner.
+  - **Production:** the same workflow, started by hand with target "production". The "production" GitHub environment requires the product owner's approval before the job runs, and holds that project's token and ref. Until the production project exists (D-1), the job stops with a message saying what's missing.
+  - **No hand-applied migrations:** apply to hosted projects only through this workflow, so its history and the repo stay in step.
 - **Builds and updates:**
   - **Preview builds:** EAS builds them on demand.
   - **Over-the-air updates:** with `expo-updates`, the runtime version is a fingerprint of the native code. Each build profile in `eas.json` has its own channel (`development`, `preview`, `production`). Because the app config is part of the fingerprint, updates are published with the target builds' `APP_VARIANT` (`pnpm run update:preview`). JavaScript-only fixes go out as OTA updates to `preview`, and to `production` only with the product owner's approval.

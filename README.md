@@ -55,10 +55,9 @@ pnpm supabase migration new <name>                      # create a migration
 pnpm supabase start                                     # run the local stack (Docker)
 pnpm supabase migration up                              # apply migrations locally
 pnpm supabase migration list --remote                   # compare with the hosted project
-pnpm supabase migration up --remote                     # apply migrations to the hosted project
 ```
 
-Remote commands may prompt for the database password. Set `SUPABASE_DB_PASSWORD` in your shell for that command only, and never commit it.
+Don't apply migrations to the hosted project by hand. After a merge to `main`, the Migrations workflow applies them to staging (see CI below). Remote commands may prompt for the database password. Set `SUPABASE_DB_PASSWORD` in your shell for that command only, and never commit it.
 
 Auth sessions are stored encrypted (FR-AUTH-5, NFR-SEC-1). `src/lib/encrypted-storage.ts` seals the session with AES-256-GCM through `expo-crypto`, keeps the ciphertext in `expo-sqlite`'s `localStorage`, and keeps the random AES key in `expo-secure-store` (the iOS Keychain or the Android Keystore). The session can't be read as plain text, and SecureStore's value size limits don't apply to it. Signing out deletes both the session and its key. A session that can't be decrypted, for example one restored from a backup without its key, reads as signed out.
 
@@ -113,4 +112,5 @@ The project is [@abhinav08/parent-manager](https://expo.dev/accounts/abhinav08/p
 ## CI
 
 - `.github/workflows/ci.yml` runs `pnpm run check` and an Expo dependency check on every PR and on pushes to `main`. Its "Database tests" job starts local Supabase, applies the migrations and runs the pgTAP tests in `supabase/tests`, and its "Edge Function tests" job runs the Deno tests in `supabase/functions`.
+- `.github/workflows/migrations.yml` applies new migrations to the staging project after a merge to `main` that changes `supabase/migrations`, and to production only when started by hand and approved in the protected "production" environment. Each GitHub environment needs a `SUPABASE_ACCESS_TOKEN` secret and a `SUPABASE_PROJECT_REF` variable.
 - `.github/workflows/e2e.yml` builds release apps and runs the Maestro flows on both platforms: an Android emulator on Linux, and an iOS simulator on a macOS runner with the newest Xcode there (it fails if that's older than 26.4). It runs on pushes to `main`, or on demand with `gh workflow run e2e.yml --ref <branch>`. Each job uploads its Maestro report, and the iOS job also uploads Maestro's screenshots and logs and the `xcodebuild` log.
