@@ -20,7 +20,13 @@ import {
 import { MEMBER_ROLES, type MemberRole } from '@/features/household/invitations';
 import { fetchMembershipStatus } from '@/features/household/leave';
 import { REGIONS } from '@/features/household/region';
-import { setAppLocale, SUPPORTED_LOCALES, type AppLocale, type Region } from '@/i18n';
+import {
+  setAppLocale,
+  SUPPORTED_LOCALES,
+  type AppLocale,
+  type Region,
+  type UnitSystem,
+} from '@/i18n';
 import { getSupabase } from '@/lib/supabase';
 import { resetSync } from '@/lib/sync';
 
@@ -33,6 +39,10 @@ export type Membership = {
   role: MemberRole;
   region: Region;
   locale: AppLocale;
+  /** How quantities are shown (FR-HH-15). Stored quantities are always in base units. */
+  unitSystem: UnitSystem;
+  /** ISO weekday the week starts on: 1 is Monday, 7 is Sunday. */
+  weekStart: 1 | 7;
 };
 
 export type HouseholdState =
@@ -68,7 +78,7 @@ function readCache(userId: string): Membership | null {
     if (!stored) return null;
     const { userId: owner, ...membership } = JSON.parse(stored) as Cached;
     // A cache from before roles were saved is ignored, so the next load fills it in.
-    return owner === userId && membership.role ? membership : null;
+    return owner === userId && membership.role && membership.unitSystem ? membership : null;
   } catch {
     return null;
   }
@@ -88,14 +98,19 @@ onSignOut(() => writeCache('', null));
 type Row = {
   household_id: string;
   role: string;
-  households: { region: string; locale: string } | null;
+  households: {
+    region: string;
+    locale: string;
+    unit_system: string;
+    week_start: number;
+  } | null;
 };
 
 /** Reads the caller's active membership. RLS returns only households they belong to. */
 export async function fetchMembership(userId: string): Promise<Membership | null> {
   const { data, error } = await getSupabase()
     .from('household_members')
-    .select('household_id, role, households(region, locale)')
+    .select('household_id, role, households(region, locale, unit_system, week_start)')
     .eq('user_id', userId)
     .eq('status', 'active')
     .is('deleted_at', null)
@@ -113,7 +128,14 @@ export async function fetchMembership(userId: string): Promise<Membership | null
   const role = (MEMBER_ROLES as readonly string[]).includes(data.role)
     ? (data.role as MemberRole)
     : 'caregiver';
-  return { householdId: data.household_id, role, region, locale };
+  return {
+    householdId: data.household_id,
+    role,
+    region,
+    locale,
+    unitSystem: household.unit_system === 'metric' ? 'metric' : 'us_customary',
+    weekStart: household.week_start === 1 ? 1 : 7,
+  };
 }
 
 /** Follows whether the signed-in user has a household, for the onboarding guard (FR-ONB-1). */

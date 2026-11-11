@@ -16,13 +16,15 @@ describe('fetchMembership', () => {
     mockRow = {
       household_id: 'h1',
       role: 'family',
-      households: { region: 'GB', locale: 'en-GB' },
+      households: { region: 'GB', locale: 'en-GB', unit_system: 'metric', week_start: 1 },
     };
     await expect(fetchMembership('u1')).resolves.toEqual({
       householdId: 'h1',
       role: 'family',
       region: 'GB',
       locale: 'en-GB',
+      unitSystem: 'metric',
+      weekStart: 1,
     });
   });
 
