@@ -515,6 +515,21 @@
         "last_parent": "The household needs at least one parent. Make someone else a parent first.",
         "not_found": "This person is no longer a member."
       }
+    },
+    "accessEnded": {
+      "removed": {
+        "title": "You're no longer in {{name}}",
+        "body": "A parent removed you from this household, so its plans, lists and recipes are no longer on this device. You can start your own household or join another with an invite."
+      },
+      "paused": {
+        "title": "Your access to {{name}} is paused",
+        "body": "Family members and caregivers can use the household while it has Premium. Ask a parent to renew it, then check again."
+      },
+      "createOrJoin": "Create or join a household",
+      "checkAgain": "Check again",
+      "leave": "Leave this household",
+      "leaveWarning": "You'll leave {{name}} and can come back only with a new invite.",
+      "leaveConfirm": "Leave {{name}}"
     }
   }
 }

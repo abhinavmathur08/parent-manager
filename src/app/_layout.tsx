@@ -8,6 +8,7 @@ import { useEffect, useMemo } from 'react';
 import '@/features/auth/google';
 import { AuthProvider, useAuth } from '@/features/auth/session';
 import { BiometricLock } from '@/features/biometric/biometric-lock';
+import { AccessEnded } from '@/features/household/access-ended';
 import { HouseholdUnavailable } from '@/features/household/household-unavailable';
 import { HouseholdProvider, useHousehold } from '@/features/household/membership';
 import { useTheme } from '@/hooks/use-theme';
@@ -27,6 +28,17 @@ function RootStack() {
 
   if (loading) return null;
   if (signedIn && household.status === 'error') return <HouseholdUnavailable />;
+  if (signedIn && household.status === 'ended') {
+    return (
+      <BiometricLock active>
+        <AccessEnded
+          reason={household.reason}
+          householdId={household.householdId}
+          householdName={household.householdName}
+        />
+      </BiometricLock>
+    );
+  }
 
   return (
     <BiometricLock active={signedIn}>
