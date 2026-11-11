@@ -2,7 +2,8 @@
 --
 -- Unlike the other tests this one commits its fixtures, because the competing requests run
 -- on their own connections (dblink) and must see them. Everything it creates is deleted at
--- the end.
+-- the end. psql stops at the first error, so everything that can fail runs inside one
+-- block that catches errors and reports them as a failed test, and the cleanup still runs.
 create extension if not exists pgtap with schema extensions;
 create extension if not exists dblink with schema extensions;
 
@@ -28,6 +29,7 @@ end;
 $$;
 
 create temp table e_results (n integer primary key, reserved boolean);
+create temp table e_errors (message text);
 
 do $$
 declare
@@ -40,8 +42,8 @@ begin
   -- The gate: hold the usage row's lock until every request is waiting on it.
   perform extensions.dblink_connect('gate', conninfo);
   perform extensions.dblink_exec('gate', 'begin');
-  perform extensions.dblink_exec('gate', $q$select 1 from public.ai_usage
-    where household_id = '00000000-0000-0000-0000-00000000000e' for update$q$);
+  perform * from extensions.dblink('gate', $q$select 1 from public.ai_usage
+    where household_id = '00000000-0000-0000-0000-00000000000e' for update$q$) as t(locked integer);
 
   for job in select * from e_jobs order by n loop
     perform extensions.dblink_connect('c' || job.n, conninfo);
@@ -58,10 +60,16 @@ begin
     perform extensions.dblink_disconnect('c' || job.n);
   end loop;
   perform extensions.dblink_disconnect('gate');
+exception when others then
+  insert into e_errors values (sqlerrm);
+  perform extensions.dblink_disconnect(name)
+  from unnest(extensions.dblink_get_connections()) as name;
 end;
 $$;
 
-select plan(3);
+select plan(4);
+
+select is_empty('select message from e_errors', 'the concurrent requests ran without errors');
 
 select is(
   (select count(*)::int from e_results where reserved), 5,
