@@ -600,6 +600,23 @@
       "leave": "Leave this household",
       "leaveWarning": "You'll leave {{name}} and can come back only with a new invite.",
       "leaveConfirm": "Leave {{name}}"
+    },
+    "leave": {
+      "open": "Leave household",
+      "leave": {
+        "title": "Leave the household?",
+        "body": "You'll lose access to its plans, lists and recipes, and they'll be removed from this device. You can come back only with a new invite.",
+        "action": "Leave household"
+      },
+      "delete": {
+        "title": "Delete the household and leave?",
+        "body": "You're the only member, so leaving deletes the household and everything in it: recipes, meal plans, shopping lists, the pantry and the people you added. This can't be undone.",
+        "action": "Delete household and leave"
+      },
+      "last_parent": {
+        "title": "Make someone else a parent first",
+        "body": "You're the household's only parent, and it needs one. Make another member a parent, then you can leave."
+      }
     }
   }
 }

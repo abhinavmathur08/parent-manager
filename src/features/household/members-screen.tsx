@@ -12,6 +12,7 @@ import { Text } from '@/components/text';
 import { useAuth } from '@/features/auth/session';
 import { revokeInvitation } from '@/features/household/invitations';
 import { InviteSheet } from '@/features/household/invite-sheet';
+import { LeaveSheet, leaveKind } from '@/features/household/leave-sheet';
 import { MemberSheet } from '@/features/household/member-sheet';
 import {
   fetchMembers,
@@ -45,6 +46,7 @@ export function MembersScreen() {
   const [version, setVersion] = useState(0);
   const [selected, setSelected] = useState<Member | null>(null);
   const [inviting, setInviting] = useState(false);
+  const [leaving, setLeaving] = useState(false);
   const [revokeError, setRevokeError] = useState<string>();
   const reload = useCallback(() => setVersion((v) => v + 1), []);
 
@@ -167,6 +169,25 @@ export function MembersScreen() {
             testID="open-invite"
           />
         </View>
+      ) : null}
+      {data && householdId ? (
+        <>
+          <Button
+            variant="secondary"
+            label={t('household.leave.open')}
+            onPress={() => setLeaving(true)}
+            disabled={!online}
+            fullWidth
+            testID="open-leave"
+          />
+          <LeaveSheet
+            visible={leaving}
+            householdId={householdId}
+            kind={leaveKind(data.members.length, parents, isParent)}
+            online={online}
+            onClose={() => setLeaving(false)}
+          />
+        </>
       ) : null}
       {householdId && isParent ? (
         <>
