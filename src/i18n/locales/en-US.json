@@ -306,5 +306,16 @@
     "rangeWords": ["to", "or"],
     "joiners": ["of"],
     "pluralEndings": ["es", "s"]
+  },
+  "email": {
+    "signInCode": {
+      "subject": "Your Parent Manager sign-in code",
+      "heading": "Your sign-in code",
+      "intro": "Enter this code in Parent Manager to sign in.",
+      "expiry": "It works for {{minutes}} minutes.",
+      "linkIntro": "Or, on the phone where Parent Manager is installed, tap this link:",
+      "linkLabel": "Sign in to Parent Manager",
+      "ignore": "If you didn't ask to sign in, you can ignore this email. Someone may have typed your address by mistake."
+    }
   }
 }

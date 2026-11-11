@@ -161,7 +161,14 @@ site_url = "http://127.0.0.1:3000"
 # The public URL that Auth serves on. Defaults to the API external URL with `/auth/v1` appended.
 # external_url = ""
 # A list of *exact* URLs that auth providers are permitted to redirect to post authentication.
-additional_redirect_urls = ["https://127.0.0.1:3000"]
+# The app's deep link schemes, one per variant (app.config.ts), so the magic link in the
+# sign-in email can open the app (FR-AUTH-2).
+additional_redirect_urls = [
+  "https://127.0.0.1:3000",
+  "parentmanager://**",
+  "parentmanager-dev://**",
+  "parentmanager-preview://**",
+]
 # How long tokens are valid for, in seconds. Defaults to 3600 (1 hour), maximum 604,800 (1 week).
 jwt_expiry = 3600
 # JWT issuer URL. If not set, defaults to auth.external_url.
@@ -207,7 +214,9 @@ token_refresh = 150
 # Number of sign up and sign-in requests that can be made in a 5 minute interval per IP address (excludes anonymous users).
 sign_in_sign_ups = 30
 # Number of OTP / Magic link verifications that can be made in a 5 minute interval per IP address.
-token_verifications = 30
+# Kept low so a 6-digit code can't be guessed (FR-AUTH-2): the app also stops accepting a
+# code after 5 wrong tries and asks for a new one, which replaces the old code.
+token_verifications = 10
 # Number of Web3 logins that can be made in a 5 minute interval per IP address.
 web3 = 30
 
@@ -229,11 +238,12 @@ enable_confirmations = false
 # If enabled, users will need to reauthenticate or have logged in recently to change their password.
 secure_password_change = false
 # Controls the minimum amount of time that must pass before sending another signup confirmation or password reset email.
-max_frequency = "1s"
+# A new sign-in code at most every 30 seconds (FR-AUTH-2, the resend timer on S-03).
+max_frequency = "30s"
 # Number of characters used in the email OTP.
 otp_length = 6
-# Number of seconds before the email OTP expires (defaults to 1 hour).
-otp_expiry = 3600
+# Number of seconds before the email OTP expires (defaults to 1 hour). 10 minutes (FR-AUTH-2).
+otp_expiry = 600
 
 # Use a production-ready SMTP server
 # [auth.email.smtp]
@@ -244,6 +254,19 @@ otp_expiry = 3600
 # pass = "env(SENDGRID_API_KEY)"
 # admin_email = "admin@email.com"
 # sender_name = "Admin"
+
+# Sign-in emails (A-01.1). Email sign-in uses a 6-digit code with a magic link as an
+# alternative. A new account gets the confirmation email and an existing one the magic link
+# email, so both use the same template. It's generated from the locale files by
+# `pnpm run email:templates`; don't edit the HTML by hand. Until the domain (D-2) and Resend
+# (D-4) exist, these go through Supabase's built-in email. Resend is SMTP config only.
+[auth.email.template.confirmation]
+subject = "Your Parent Manager sign-in code"
+content_path = "./supabase/templates/sign-in-code.html"
+
+[auth.email.template.magic_link]
+subject = "Your Parent Manager sign-in code"
+content_path = "./supabase/templates/sign-in-code.html"
 
 # Uncomment to customize email template
 # [auth.email.template.invite]

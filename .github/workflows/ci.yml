@@ -32,6 +32,7 @@ jobs:
       - run: pnpm run lint
       - run: pnpm run lint:rules
       - run: pnpm run catalog:check
+      - run: pnpm run email:check
       - run: pnpm run format:check
       - run: pnpm run typecheck
       - run: pnpm run test:ci
