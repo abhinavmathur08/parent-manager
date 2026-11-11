@@ -286,12 +286,15 @@ describe('queue limits', () => {
     console.log(`500 queued changes synced in ${ms.toFixed(0)} ms`);
     expect(A.engine.getStatus().pending).toBe(0);
     expect(ms).toBeLessThan(10_000);
-    const { count } = await admin
+    // Filter by household and name: 250 IDs in the query string make the URL too long.
+    const { count, error } = await admin
       .from(TABLE)
       .select('id', { count: 'exact', head: true })
-      .in('id', created)
+      .eq('household_id', householdId)
+      .eq('name', 'bulk')
       .eq('checked', true)
       .eq('version', 2);
+    if (error) throw error;
     expect(count).toBe(250);
   });
 
