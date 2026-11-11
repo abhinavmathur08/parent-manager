@@ -4,6 +4,8 @@
 // Logs carry only job IDs and error codes: never recipe text, URLs or user content.
 
 import { errorResponse, jsonResponse } from '../_shared/http.ts';
+import { checkLinkShape, type FetchedPage, FetchPageError } from './fetch_page.ts';
+import { readableText, recipeFromStructuredData } from './html.ts';
 import { JobRefused, type JobStore } from './jobs.ts';
 import { ParserError, type RecipeParser } from './parser.ts';
 import type { ImportRequest, InputType, Locale, RecipeDraft, Region } from './types.ts';
@@ -19,6 +21,8 @@ export interface HandlerDeps {
   authenticate(accessToken: string): Promise<string | null>;
   jobs: JobStore;
   parser: RecipeParser;
+  /** Fetches a link with the SSRF guards in fetch_page.ts. */
+  fetchPage(url: string, signal: AbortSignal): Promise<FetchedPage>;
   timeLimitMs?: number;
   log?: (event: string, fields: Record<string, string>) => void;
 }
@@ -53,8 +57,9 @@ export function createHandler(deps: HandlerDeps): (req: Request) => Promise<Resp
     const userId = token ? await deps.authenticate(token) : null;
     if (!userId) return errorResponse('import.unauthenticated', 401);
 
-    const request = await readRequest(req);
-    if (!request) return errorResponse('import.invalid_request', 400);
+    const read = await readRequest(req);
+    if ('error' in read) return errorResponse(read.error, 400);
+    const request = read.request;
 
     let job;
     try {
@@ -131,12 +136,24 @@ async function run(
   region: Region,
   signal: AbortSignal,
 ): Promise<RunResult> {
+  let text: string;
+  if (request.type === 'link') {
+    const page = await deps.fetchPage(request.url, signal);
+    // Embedded schema.org data needs no parser call, so it's free (AI-17, FR-AI-8).
+    const structured = recipeFromStructuredData(page.html);
+    if (structured) return { source: 'structured_data', draft: structured };
+    text = readableText(page.html, MAX_TEXT_CHARS);
+    if (!text) throw new ImportFailure('import.no_recipe_found', 422);
+  } else {
+    text = request.text;
+  }
+
   // Only a parser call uses the allowance, so reserve right before it (FR-AI-8).
   if (!(await deps.jobs.reserve(jobId))) {
     throw new ImportFailure('import.quota_exceeded', 429);
   }
   const parsed = await deps.parser.parse({
-    source: { kind: 'text', text: request.text },
+    source: { kind: 'text', text },
     locale,
     region,
     signal,
@@ -146,6 +163,9 @@ async function run(
 
 function toFailure(error: unknown): ImportFailure {
   if (error instanceof ImportFailure) return error;
+  if (error instanceof FetchPageError) {
+    return new ImportFailure(error.code, error.code === 'import.link_unreachable' ? 502 : 422);
+  }
   if (error instanceof ParserError) {
     return new ImportFailure(error.code, error.code === 'import.parser_unavailable' ? 503 : 422);
   }
@@ -161,35 +181,42 @@ function bearerToken(req: Request): string | null {
   return match ? match[1] : null;
 }
 
-/** Reads and validates the body, or returns null. */
-async function readRequest(req: Request): Promise<ImportRequest | null> {
+type ReadResult = { request: ImportRequest } | { error: string };
+const INVALID: ReadResult = { error: 'import.invalid_request' };
+
+/** Reads and validates the body. Links are checked for shape before any job starts. */
+async function readRequest(req: Request): Promise<ReadResult> {
   const declared = Number(req.headers.get('Content-Length') ?? '0');
-  if (declared > MAX_BODY_BYTES) return null;
+  if (declared > MAX_BODY_BYTES) return INVALID;
   let raw: string;
   try {
     raw = await req.text();
   } catch {
-    return null;
+    return INVALID;
   }
-  if (new TextEncoder().encode(raw).length > MAX_BODY_BYTES) return null;
+  if (new TextEncoder().encode(raw).length > MAX_BODY_BYTES) return INVALID;
 
   let body: unknown;
   try {
     body = JSON.parse(raw);
   } catch {
-    return null;
+    return INVALID;
   }
-  if (typeof body !== 'object' || body === null) return null;
+  if (typeof body !== 'object' || body === null) return INVALID;
   const input = (body as { input?: unknown }).input;
-  if (typeof input !== 'object' || input === null) return null;
-  const { type, text } = input as { type?: unknown; text?: unknown };
+  if (typeof input !== 'object' || input === null) return INVALID;
+  const { type, text, url } = input as { type?: unknown; text?: unknown; url?: unknown };
 
   if (type === 'text' && typeof text === 'string') {
     const trimmed = text.trim();
-    if (trimmed.length === 0 || trimmed.length > MAX_TEXT_CHARS) return null;
-    return { type: 'text', text: trimmed };
+    if (trimmed.length === 0 || trimmed.length > MAX_TEXT_CHARS) return INVALID;
+    return { request: { type: 'text', text: trimmed } };
   }
-  return null;
+  if (type === 'link' && typeof url === 'string') {
+    const link = checkLinkShape(url.trim());
+    return link ? { request: { type: 'link', url: link.href } } : { error: 'import.link_refused' };
+  }
+  return INVALID;
 }
 
 function defaultLog(event: string, fields: Record<string, string>): void {

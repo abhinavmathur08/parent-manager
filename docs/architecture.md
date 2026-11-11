@@ -284,7 +284,8 @@ Most edits are small and touch different rows, so simple rules are enough:
 2. **Edge Function `import-recipe`:** checks the session, then starts a job with `ai_import_start()`, which refuses caregivers and members over the hourly limit. Right before a parser call it reserves one import with `ai_import_reserve()`, a conditional upsert on the `ai_usage` row, so concurrent requests queue on its lock and can't pass the allowance. `ai_import_finish()` records the outcome, and a failure releases the reservation. These RPCs are callable only by the service role.
 3. **Extraction:**
    - **Links:** the server fetches the page with SSRF guards (`fetch_page.ts`): http and https on default ports only, no credentials in the URL, and every resolved address public (no private, loopback, link-local, metadata or IPv6 forms of them). Redirects are followed by hand, at most 3, and each hop is checked again. Pages are HTML only, capped at 2 MB and 10 seconds. The runtime's fetch resolves the host again, so DNS rebinding between check and fetch is a known remaining risk.
-   - If the page has schema.org `Recipe` data embedded, it's parsed directly with no LLM call, which is cheaper and exact. Otherwise the readable text is extracted.
+   - **Embedded data:** if the page has a complete schema.org `Recipe` (a title, ingredients and steps), it's parsed directly with no LLM call, which is cheaper and exact, and the import doesn't count. Its ingredient lines keep their original text with zero confidence until normalization (R-05.3) matches them to the catalog.
+   - **Otherwise** the readable text is extracted (scripts, styles and page furniture removed, capped at 20,000 characters) and goes to the parser like pasted text.
    - **Text:** used as given.
    - **Images:** passed to the LLM's image input.
 4. **LLM parsing** with a strict JSON output schema:

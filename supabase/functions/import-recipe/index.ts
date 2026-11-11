@@ -1,8 +1,9 @@
-// Edge Function `import-recipe` (R-05.1): turns pasted text, and later links and images,
-// into a draft recipe. See handler.ts for the pipeline and architecture section 6.
+// Edge Function `import-recipe` (R-05.1, R-05.2): turns pasted text and links, and later
+// images, into a draft recipe. See handler.ts for the pipeline and architecture section 6.
 
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 
+import { fetchPage, resolveWithDns } from './fetch_page.ts';
 import { createHandler } from './handler.ts';
 import { createJobStore } from './jobs.ts';
 import { parserNotConfigured } from './parser.ts';
@@ -31,6 +32,7 @@ Deno.serve(
       return error ? null : (data.user?.id ?? null);
     },
     jobs: createJobStore(admin),
+    fetchPage: (url, signal) => fetchPage(url, { fetch, resolve: resolveWithDns }, signal),
     // R-05.3 replaces this with the chosen provider's parser (decision D-7).
     parser: parserNotConfigured,
   }),
