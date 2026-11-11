@@ -1,0 +1,33 @@
+# A parent creates an invite for their partner (H-03.2, S-27): the parent role is chosen,
+# Premium roles show the upgrade prompt, and the code appears with Share and Copy.
+# Needs the local stack; see the Testing section of README.md.
+appId: ${APP_ID || 'com.myparentmanager'}
+tags:
+  - backend
+---
+- runFlow: subflows/create-household.yaml
+- tapOn:
+    id: tab-household
+- tapOn:
+    id: open-invite
+- extendedWaitUntil:
+    visible:
+      id: invite-sheet-header
+    timeout: 10000
+- tapOn:
+    id: invite-role-caregiver
+- assertVisible:
+    id: invite-upgrade
+- tapOn:
+    id: invite-role-parent
+- tapOn:
+    id: invite-create
+- extendedWaitUntil:
+    visible:
+      id: invite-code
+    timeout: 10000
+- assertVisible:
+    id: invite-share
+- tapOn:
+    id: invite-copy
+- assertVisible: Copied
