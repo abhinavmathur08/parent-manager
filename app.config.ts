@@ -80,6 +80,8 @@ function buildConfig(
       bundleIdentifier: id,
       supportsTablet: false,
       appleTeamId: '5JNGSJXS6A',
+      // Sign in with Apple (A-02.1). EAS turns the capability on for the app ID when it builds.
+      usesAppleSignIn: true,
       infoPlist: {
         ITSAppUsesNonExemptEncryption: false,
       },
@@ -115,6 +117,8 @@ function buildConfig(
       'expo-sqlite',
       'expo-localization',
       'expo-secure-store',
+      'expo-apple-authentication',
+      'expo-web-browser',
     ],
     experiments: {
       typedRoutes: true,

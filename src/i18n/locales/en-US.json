@@ -362,6 +362,9 @@
       "invalidEmail": "We can't send a code to that address. Check it and try again.",
       "signUpDisabled": "New accounts can't be created right now. Try again later.",
       "generic": "Something went wrong. Try again."
+    },
+    "apple": {
+      "continue": "Continue with Apple"
     }
   },
   "onboarding": {
