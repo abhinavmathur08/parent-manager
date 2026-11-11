@@ -12,6 +12,19 @@ import { GalleryScreen, LARGEST_TEXT_SCALE } from '@/features/gallery/gallery-sc
 
 let mockConfig: { url: string; publishableKey: string } | null = null;
 
+let mockAuthStatus: 'signedIn' | 'signedOut' = 'signedIn';
+
+jest.mock('@/features/auth/session', () => ({
+  AuthProvider: ({ children }: { children: React.ReactNode }) => children,
+  useAuth: () =>
+    mockAuthStatus === 'signedIn'
+      ? { status: 'signedIn', session: { user: { id: 'user-1' } } }
+      : { status: 'signedOut' },
+}));
+jest.mock('expo-network', () => ({
+  useNetworkState: () => ({ isConnected: true, isInternetReachable: true }),
+}));
+
 jest.mock('@/lib/supabase-config', () => ({
   get supabaseConfig() {
     return mockConfig;
@@ -37,6 +50,17 @@ function flat(testID: string) {
 }
 
 describe('navigation shell', () => {
+  afterEach(() => {
+    mockAuthStatus = 'signedIn';
+  });
+
+  it('opens on sign-in when signed out, and the tabs are out of reach', async () => {
+    mockAuthStatus = 'signedOut';
+    await renderRouter(`${process.cwd()}/src/app`, { initialUrl: '/' });
+    expect(await screen.findByTestId('sign-in-screen')).toBeOnTheScreen();
+    expect(screen.queryByTestId('tab-bar')).toBeNull();
+  });
+
   it('opens on Plan and switches tabs from the floating tab bar', async () => {
     await renderRouter(`${process.cwd()}/src/app`, { initialUrl: '/' });
     expect(await screen.findByTestId('plan-screen-title')).toHaveTextContent('Plan');

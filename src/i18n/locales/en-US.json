@@ -317,5 +317,51 @@
       "linkLabel": "Sign in to Parent Manager",
       "ignore": "If you didn't ask to sign in, you can ignore this email. Someone may have typed your address by mistake."
     }
+  },
+  "auth": {
+    "signIn": {
+      "title": "Parent Manager",
+      "subtitle": "Plan the week, share the list, shop together.",
+      "email": "Email",
+      "emailHint": "We will email you a 6-digit code. No password needed.",
+      "emailInvalid": "Enter a full email address, like name@example.com.",
+      "continue": "Continue with email",
+      "or": "or"
+    },
+    "policy": {
+      "agreement": "By continuing you agree to the <terms>Terms</terms> and <privacy>Privacy Policy</privacy>.",
+      "termsLabel": "Terms, opens in your browser",
+      "privacyLabel": "Privacy Policy, opens in your browser"
+    },
+    "verify": {
+      "title": "Check your email",
+      "sentTo": "We sent a 6-digit code to <email>{{email}}</email>. It works for {{minutes}} minutes.",
+      "code": "Code from your email",
+      "resend": "Send a new code",
+      "resendIn_one": "You can send a new code in {{seconds}} second.",
+      "resendIn_other": "You can send a new code in {{seconds}} seconds.",
+      "resent": "We sent a new code.",
+      "changeEmail": "Use a different email",
+      "checking": "Checking the code",
+      "locked": "That code has had too many wrong tries. Send a new code to keep going.",
+      "missingEmail": "Start again with your email address."
+    },
+    "callback": {
+      "checking": "Signing you in",
+      "failed": "That sign-in link didn't work. It may have expired. Ask for a new code instead.",
+      "backToSignIn": "Back to sign-in"
+    },
+    "offline": "You're offline. Connect to the internet to sign in.",
+    "signOut": {
+      "action": "Sign out"
+    },
+    "errors": {
+      "invalidCode": "That code didn't work. It may be wrong or expired. Check your email, or send a new code.",
+      "tooManyRequests": "Too many tries. Wait a minute, then try again.",
+      "network": "We couldn't reach Parent Manager. Check your connection and try again.",
+      "invalidEmail": "We can't send a code to that address. Check it and try again.",
+      "signUpDisabled": "New accounts can't be created right now. Try again later.",
+      "generic": "Something went wrong. Try again."
+    }
   }
 }

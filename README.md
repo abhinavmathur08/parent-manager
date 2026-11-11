@@ -36,6 +36,16 @@ That builds the production variant (`com.myparentmanager`), which is the flows' 
 
 On Android, use `pnpm expo run:android --variant release` in place of the first command.
 
+Flows tagged `backend` (sign-in) need the local stack and a release build pointed at it. They read sign-in codes from the stack's test inbox, [Mailpit](http://127.0.0.1:54324). Start the stack, then build with its URL and publishable key:
+
+```bash
+pnpm supabase start
+EXPO_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321 EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<publishable key from `pnpm supabase status`> pnpm expo run:ios --configuration Release --no-bundler
+pnpm run test:e2e
+```
+
+On Android, also set `E2E_LOCAL_BACKEND=1` for the build, which allows plain HTTP to the stack, and run `adb reverse tcp:54321 tcp:54321` so the emulator reaches it on 127.0.0.1. Without a backend, skip those flows with `pnpm run test:e2e --exclude-tags backend`. In CI, Android runs every flow against the local stack, and iOS skips the `backend` flows because macOS runners have no Docker.
+
 ## Localization
 
 All user-facing text lives in `src/i18n/locales`. `en-US` is the base, and `en-GB` and `en-AU` override only the words that differ, such as nappies instead of diapers. Lint fails on text written directly in JSX.
