@@ -28,6 +28,12 @@ export default function HouseholdScreen() {
             : t('home.supabaseStatus.notConfigured')}
         </Text>
       </Card>
+      <ListRow
+        title={t('people.title')}
+        variant="navigation"
+        onPress={() => router.push('/household/people')}
+        testID="open-people"
+      />
       {/* Moves to the members screen (S-26, H-04.1). Only parents invite (FR-HH-1). */}
       {isParent ? (
         <Button
