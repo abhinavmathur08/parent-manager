@@ -5,7 +5,6 @@ import {
   hasDietary,
   isAgeBand,
   type AgeBand,
-  type ChildAgeBand,
   type DietCode,
   type DueMonth,
 } from '@/features/people/codes';
@@ -63,8 +62,15 @@ export function sanitizePeople(value: unknown): DraftPerson[] | null {
 
 export const isChild = (p: DraftPerson) => p.ageBand !== 'adult';
 
+type Banded = {
+  ageBand: AgeBand;
+  dueMonth: DueMonth | null;
+  allergies: AllergenCode[];
+  diets: DietCode[];
+};
+
 /** Changes a person's age band, dropping what no longer applies to it. */
-export function withAgeBand(person: DraftPerson, ageBand: ChildAgeBand): DraftPerson {
+export function withAgeBand<P extends Banded>(person: P, ageBand: AgeBand): P {
   const expecting = ageBand === 'expecting';
   return {
     ...person,

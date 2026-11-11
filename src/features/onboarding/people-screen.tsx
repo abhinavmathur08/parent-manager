@@ -148,7 +148,7 @@ export function PeopleScreen({ displayName }: { displayName: string | null }) {
         </Card>
       ))}
       {full ? null : (
-        <AgeBandChips
+        <AgeBandChips<ChildAgeBand>
           label={
             children.length === 0
               ? t('onboarding.people.youngestQuestion')
