@@ -1,7 +1,7 @@
 import i18n from './instance';
 import type { AppLocale } from './locale';
 
-export { formatCurrency, formatDate, formatNumber, formatQuantity } from './format';
+export { formatCurrency, formatDate, formatList, formatNumber, formatQuantity } from './format';
 export { DEFAULT_LOCALE, PSEUDO_LOCALE, SUPPORTED_LOCALES, resolveLocale } from './locale';
 export type { AppLocale } from './locale';
 export { displayQuantity, REGIONAL_UNITS, toBase, UNITS, UNMEASURED_UNITS } from './units';
