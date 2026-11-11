@@ -9,6 +9,15 @@ tags:
 - tapOn:
     id: tab-household
 - tapOn:
+    id: open-members
+- extendedWaitUntil:
+    visible:
+      id: members-screen-title
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: open-invite
+- tapOn:
     id: open-invite
 - extendedWaitUntil:
     visible:
