@@ -218,8 +218,10 @@ describe('two devices offline (architecture section 5)', () => {
     ]);
     await A.engine.sync();
     await B.engine.sync();
-    expect((await A.engine.store.rows(TABLE)).length).toBe(6);
-    expect((await B.engine.store.rows(TABLE)).length).toBe(6);
+    // Earlier tests leave rows of their own, so check for the seeded ones.
+    for (const device of [A, B]) {
+      for (const id of Object.values(ids)) expect(await device.row(id)).not.toBeNull();
+    }
 
     A.goOffline();
     B.goOffline();
