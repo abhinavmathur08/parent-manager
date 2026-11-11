@@ -22,6 +22,12 @@ export default function HouseholdScreen() {
             : t('home.supabaseStatus.notConfigured')}
         </Text>
       </Card>
+      <ListRow
+        title={t('people.title')}
+        variant="navigation"
+        onPress={() => router.push('/household/people')}
+        testID="open-people"
+      />
       {__DEV__ ? (
         <ListRow
           title={t('gallery.title')}

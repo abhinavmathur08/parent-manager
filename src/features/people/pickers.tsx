@@ -14,6 +14,7 @@ import {
   dueMonthDate,
   dueMonthOptions,
   OFFERED_ALLERGEN_CODES,
+  type AgeBand,
   type ChildAgeBand,
   type DietCode,
   type DueMonth,
@@ -34,24 +35,27 @@ function ChipGroup({ label, children }: { label: string; children: ReactNode }) 
   );
 }
 
-/** A child's age band, from the fixed bands (D-6). Never a birth date (FR-ONB-4). */
-export function AgeBandChips({
+/** An age band, from the fixed bands (D-6). Never a birth date (FR-ONB-4). */
+export function AgeBandChips<B extends AgeBand = ChildAgeBand>({
   label,
   value,
   onChange,
+  bands = CHILD_AGE_BANDS as unknown as readonly B[],
   disabled,
   testID,
 }: {
   label: string;
-  value: ChildAgeBand | null;
-  onChange: (band: ChildAgeBand) => void;
+  value: B | null;
+  onChange: (band: B) => void;
+  /** Children's bands unless given. */
+  bands?: readonly B[];
   disabled?: boolean;
   testID: string;
 }) {
   const { t } = useTranslation();
   return (
     <ChipGroup label={label}>
-      {CHILD_AGE_BANDS.map((band) => (
+      {bands.map((band) => (
         <Chip
           key={band}
           label={t(ageBandKey(band))}

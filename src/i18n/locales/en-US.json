@@ -483,6 +483,25 @@
       "pescatarian": "Pescatarian",
       "halal": "Halal",
       "kosher": "Kosher"
-    }
+    },
+    "title": "People and allergies",
+    "add": "Add a person",
+    "addTitle": "Add a person",
+    "editTitle": "Edit person",
+    "name": "Name or nickname",
+    "nameHint": "A nickname is fine. We never ask for birthdays.",
+    "nameRequired": "Give this person a name or nickname.",
+    "save": "Save",
+    "remove": "Remove",
+    "removeTitle": "Remove {{name}}?",
+    "removeBody": "Their allergies and diets are removed too.",
+    "cancel": "Cancel",
+    "saveFailed": "We couldn't save that. Check your connection and try again.",
+    "loadFailed": "We can't load your household's people. Check your connection.",
+    "empty": "Add the people you cook for, so we can flag allergens.",
+    "summary": "{{band}} · {{codes}}"
+  },
+  "format": {
+    "listSeparator": ", "
   }
 }
