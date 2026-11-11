@@ -1,7 +1,7 @@
 /**
  * @jest-environment node
  */
-// Two-device sync harness (H-06.3 acceptance, NFR-OFF-5), ported from the H-06.1 spike
+// Two-device sync harness (H-06.3 and H-06.4 acceptance, NFR-OFF-5, NFR-PERF-3), ported from the H-06.1 spike
 // (PR #110) to our own engine. Two "devices" each have their own signed-in Supabase client,
 // their own SQLite file and their own engine, against a local Supabase stack. "Offline"
 // makes the device's fetch fail the way React Native's does. The spike's two failures are
@@ -81,17 +81,36 @@ async function createDevice(name: string): Promise<Device> {
       const row = await device.engine.store.row(TABLE, id);
       return row && !row.deleted_at ? row : null;
     },
+    // What the app does on losing and regaining connectivity (SyncProvider).
     goOffline() {
       net.online = false;
+      device.engine.stopRealtime();
     },
-    // What the app does on regaining connectivity.
     async goOnline() {
       net.online = true;
+      device.engine.startRealtime();
       await device.engine.sync();
+      await waitFor(() => device.engine.getStatus().realtime === 'connected');
     },
   };
-  await device.engine.sync();
+  await device.goOnline();
   return device;
+}
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/** Polls until `predicate` holds; returns the milliseconds it took, or null on timeout. */
+async function waitUntil(predicate: () => boolean | Promise<boolean>, timeoutMs = 10_000) {
+  const start = performance.now();
+  while (performance.now() - start < timeoutMs) {
+    if (await predicate()) return performance.now() - start;
+    await sleep(5);
+  }
+  return null;
+}
+
+async function waitFor(predicate: () => boolean | Promise<boolean>, timeoutMs = 10_000) {
+  if ((await waitUntil(predicate, timeoutMs)) === null) throw new Error('Timed out');
 }
 
 async function serverRow(id: string): Promise<SyncRow | null> {
@@ -141,11 +160,37 @@ beforeAll(async () => {
 
   A = await createDevice('a');
   B = await createDevice('b');
+  // Lets the Realtime subscriptions finish joining before anything is timed.
+  await sleep(1500);
 });
 
 afterAll(() => {
   A?.engine.stop();
   B?.engine.stop();
+});
+
+describe('two devices online (FR-HH-13, NFR-PERF-3)', () => {
+  it('S0 shows a change on the other device within 2 seconds (p95)', async () => {
+    const id = crypto.randomUUID();
+    await A.engine.insert(TABLE, id, { name: 'milk' });
+    expect(await waitUntil(async () => (await B.row(id))?.name === 'milk')).not.toBeNull();
+
+    const timings: number[] = [];
+    for (let i = 0; i < 20; i++) {
+      const value = `milk ${i}`;
+      await A.engine.update(TABLE, id, { name: value });
+      const ms = await waitUntil(async () => (await B.row(id))?.name === value);
+      timings.push(ms ?? Infinity);
+      await sleep(100);
+    }
+    timings.sort((x, y) => x - y);
+    const p50 = timings[Math.floor(timings.length * 0.5)];
+    const p95 = timings[Math.floor(timings.length * 0.95)];
+    console.log(
+      `online edit to the other device: p50 ${p50.toFixed(0)} ms, p95 ${p95.toFixed(0)} ms`,
+    );
+    expect(p95).toBeLessThan(2000);
+  });
 });
 
 describe('two devices offline (architecture section 5)', () => {
@@ -192,6 +237,7 @@ describe('two devices offline (architecture section 5)', () => {
     await B.engine.update(TABLE, ids.staleUncheck, { checked: false });
 
     await A.restart();
+    A.goOffline();
   });
 
   it('S7 keeps queued offline edits across a restart', async () => {
@@ -256,7 +302,19 @@ describe('two devices offline (architecture section 5)', () => {
     expect([A.engine.getStatus().pending, B.engine.getStatus().pending]).toEqual([0, 0]);
   });
 
+  it('S8 delivers live changes again after reconnecting', async () => {
+    const value = 'after reconnect';
+    await B.engine.update(TABLE, ids.different2, { name: value });
+    const ms = await waitUntil(async () => (await A.row(ids.different2))?.name === value);
+    expect(ms).not.toBeNull();
+    expect(ms!).toBeLessThan(2000);
+    server.different2 = await serverRow(ids.different2);
+  });
+
   it('converges: both devices hold exactly the server row, version included', async () => {
+    await waitFor(
+      async () => (await B.row(ids.different2))?.version === server.different2?.version,
+    );
     for (const row of Object.values(server)) {
       for (const device of [A, B]) {
         const local = await device.engine.store.row(TABLE, row!.id);
@@ -315,5 +373,17 @@ describe('queue limits', () => {
     await B.goOnline();
     expect(B.engine.getStatus()).toMatchObject({ pending: 0, rejected: 2 });
     expect((await serverRow(id))?.name).toBe('flour');
+  });
+
+  it('stops sending changes to a removed member (H-06.4)', async () => {
+    // B was removed above and is still subscribed. A's changes must not reach B.
+    const id = crypto.randomUUID();
+    await A.engine.insert(TABLE, id, { name: 'after B left' });
+    const seenByA = await waitUntil(async () => (await serverRow(id))?.version === 1);
+    expect(seenByA).not.toBeNull();
+    await sleep(3000);
+    expect(await B.engine.store.row(TABLE, id)).toBeNull();
+    await B.engine.sync();
+    expect(await B.engine.store.row(TABLE, id)).toBeNull();
   });
 });

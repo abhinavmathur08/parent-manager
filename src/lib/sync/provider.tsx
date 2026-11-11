@@ -8,7 +8,7 @@ import {
   useSyncExternalStore,
   type ReactNode,
 } from 'react';
-import { AppState } from 'react-native';
+import { AppState, type AppStateStatus } from 'react-native';
 
 import { onSignOut } from '@/features/auth/sign-out';
 import { useOnline } from '@/hooks/use-online';
@@ -80,17 +80,22 @@ export function SyncProvider({
     };
   }, [householdId]);
 
-  useEffect(() => {
-    if (engine && online) void engine.sync();
-  }, [engine, online]);
-
+  // Online and in the foreground: listen for changes live (H-06.4) and sync. Joining
+  // Realtime pulls once to catch up. Offline or in the background: stop listening.
   useEffect(() => {
     if (!engine) return;
-    const subscription = AppState.addEventListener('change', (state) => {
-      if (state === 'active') void engine.sync();
-    });
+    const update = (state: AppStateStatus) => {
+      if (online && state === 'active') {
+        engine.startRealtime();
+        void engine.sync();
+      } else if (state === 'background' || !online) {
+        engine.stopRealtime();
+      }
+    };
+    update((AppState.currentState ?? 'active') as AppStateStatus);
+    const subscription = AppState.addEventListener('change', update);
     return () => subscription.remove();
-  }, [engine]);
+  }, [engine, online]);
 
   return <SyncContext.Provider value={engine}>{children}</SyncContext.Provider>;
 }
@@ -100,7 +105,13 @@ export function useSyncEngine(): SyncEngine | null {
   return useContext(SyncContext);
 }
 
-const STARTING: SyncStatus = { state: 'starting', lastSyncedAt: null, pending: 0, rejected: 0 };
+const STARTING: SyncStatus = {
+  state: 'starting',
+  lastSyncedAt: null,
+  pending: 0,
+  rejected: 0,
+  realtime: 'off',
+};
 
 /** What the sync layer is doing, for status UI. */
 export function useSyncStatus(): SyncStatus {

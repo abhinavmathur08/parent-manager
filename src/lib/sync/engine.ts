@@ -1,5 +1,10 @@
 import type { LocalStore, OutboxOp } from '@/lib/sync/local-store';
-import { RemoteError, type PageCursor, type SyncRemote } from '@/lib/sync/remote';
+import {
+  RemoteError,
+  type PageCursor,
+  type RealtimeState,
+  type SyncRemote,
+} from '@/lib/sync/remote';
 import type { SyncRow, SyncValue } from '@/lib/sync/types';
 
 /** What the sync layer is doing, for the UI. */
@@ -13,6 +18,8 @@ export type SyncStatus = {
   pending: number;
   /** Writes the server refused since the user was last told (NFR-OFF-6). */
   rejected: number;
+  /** Whether other members' changes are arriving live (H-06.4). */
+  realtime: RealtimeState;
 };
 
 export const PAGE_SIZE = 500;
@@ -60,7 +67,13 @@ class StopPush extends Error {}
  * (H-06.4) builds on it.
  */
 export class SyncEngine {
-  private status: SyncStatus = { state: 'starting', lastSyncedAt: null, pending: 0, rejected: 0 };
+  private status: SyncStatus = {
+    state: 'starting',
+    lastSyncedAt: null,
+    pending: 0,
+    rejected: 0,
+    realtime: 'off',
+  };
   private readonly listeners = new Set<(status: SyncStatus) => void>();
   private running: Promise<void> | null = null;
   private again = false;
@@ -68,6 +81,7 @@ export class SyncEngine {
   private failures = 0;
   private retryTimer: ReturnType<typeof setTimeout> | null = null;
   private unsubscribeStore: (() => void) | null = null;
+  private unsubscribeRealtime: (() => void) | null = null;
 
   constructor(
     readonly store: LocalStore,
@@ -141,7 +155,55 @@ export class SyncEngine {
     return this.running;
   }
 
+  /**
+   * Applies other members' changes as they happen, so they show within 2 seconds
+   * (FR-HH-13, NFR-PERF-3). Each (re)join pulls once, to catch up on anything missed while
+   * disconnected. Safe to call again.
+   */
+  startRealtime(): void {
+    if (this.stopped || this.unsubscribeRealtime) return;
+    let active = true;
+    const unsubscribe = this.remote.subscribe(this.householdId, this.store.tableNames(), {
+      onRow: (table, row) => {
+        if (active) void this.receive(table, row);
+      },
+      onState: (realtime) => {
+        if (!active || this.stopped || realtime === this.status.realtime) return;
+        this.setStatus({ realtime });
+        if (realtime === 'connected') void this.sync();
+      },
+    });
+    this.unsubscribeRealtime = () => {
+      active = false;
+      unsubscribe();
+    };
+  }
+
+  /** Stops listening, for example while offline or in the background. */
+  stopRealtime(): void {
+    const unsubscribe = this.unsubscribeRealtime;
+    this.unsubscribeRealtime = null;
+    unsubscribe?.();
+    if (!this.stopped) this.setStatus({ realtime: 'off' });
+  }
+
+  /** A row from Realtime. Like a pulled row, it only applies if its version is newer. */
+  private async receive(table: string, row: SyncRow): Promise<void> {
+    if (this.stopped || row.household_id !== this.householdId) return;
+    try {
+      // A large unchanged value can be left out of an event; fetch the whole row then.
+      const columns = Object.keys(this.store.definition(table).columns);
+      const whole = columns.every((c) => c in row)
+        ? row
+        : await this.remote.fetchRow(table, row.id);
+      if (whole && !this.stopped) await this.store.applyServerRows(table, [whole]);
+    } catch {
+      // The next pull brings it.
+    }
+  }
+
   stop(): void {
+    this.stopRealtime();
     this.stopped = true;
     this.clearRetry();
     this.unsubscribeStore?.();

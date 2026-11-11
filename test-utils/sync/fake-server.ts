@@ -3,7 +3,12 @@
 // and who checked an item; tombstones never change; a stale uncheck can't undo a check;
 // removed members can't read or write. The real rules are proved by pgTAP and the
 // two-device harness; this keeps unit tests fast.
-import { RemoteError, type PageRequest, type SyncRemote } from '@/lib/sync/remote';
+import {
+  RemoteError,
+  type ChangeListener,
+  type PageRequest,
+  type SyncRemote,
+} from '@/lib/sync/remote';
 import type { SyncRow, SyncValue } from '@/lib/sync/types';
 
 type Values = Record<string, unknown>;
@@ -17,6 +22,12 @@ export class FakeServer {
   /** Users who are no longer members; RLS hides everything from them. */
   readonly removed = new Set<string>();
   private tick = 0;
+  private readonly subscribers = new Set<{
+    user: string;
+    householdId: string;
+    tables: readonly string[];
+    listener: ChangeListener;
+  }>();
   /** Set to make every request fail as if the device were offline. */
   offline = false;
   requests = 0;
@@ -54,7 +65,22 @@ export class FakeServer {
       row[`${col}_by`] = row[col] ? user : null;
     }
     this.table(name).set(row.id, row);
+    this.notify(name, row);
     return { ...row };
+  }
+
+  /** Realtime: each subscriber who can still see the row gets it, after the write. */
+  private notify(name: string, row: SyncRow) {
+    for (const s of this.subscribers) {
+      if (
+        s.tables.includes(name) &&
+        s.householdId === row.household_id &&
+        !this.removed.has(s.user)
+      ) {
+        const copy = { ...row };
+        queueMicrotask(() => s.listener.onRow(name, copy));
+      }
+    }
   }
 
   private applyUpdate(name: string, old: SyncRow, values: Values, user: string): SyncRow {
@@ -77,6 +103,7 @@ export class FakeServer {
     row.version = old.version + 1;
     row.updated_at = now;
     this.table(name).set(row.id, row);
+    this.notify(name, row);
     return { ...row };
   }
 
@@ -123,6 +150,18 @@ export class FakeServer {
         const old = this.table(name).get(id);
         if (!old || this.removed.has(user)) return null;
         return this.applyUpdate(name, old, values, user);
+      },
+      subscribe: (householdId, tables, listener) => {
+        const subscriber = { user, householdId, tables, listener };
+        this.subscribers.add(subscriber);
+        listener.onState('connecting');
+        queueMicrotask(() => {
+          if (this.subscribers.has(subscriber)) listener.onState('connected');
+        });
+        return () => {
+          this.subscribers.delete(subscriber);
+          listener.onState('off');
+        };
       },
     };
   }
