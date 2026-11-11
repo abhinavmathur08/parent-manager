@@ -7,6 +7,7 @@ import { ListRow } from '@/components/list-row';
 import { PlaceholderScreen } from '@/components/placeholder-screen';
 import { Text } from '@/components/text';
 import { signOut } from '@/features/auth/sign-out';
+import { LockSettingsSection } from '@/features/biometric/lock-settings';
 import { supabaseConfig } from '@/lib/supabase-config';
 
 // Placeholder until the household feature from docs/backlog.md lands.
@@ -29,7 +30,8 @@ export default function HouseholdScreen() {
           testID="open-gallery"
         />
       ) : null}
-      {/* Moves to the Account screen (S-31) when it's built. */}
+      {/* The lock and sign-out move to the Account screen (S-31) when it's built. */}
+      <LockSettingsSection />
       <Button
         variant="secondary"
         label={t('auth.signOut.action')}

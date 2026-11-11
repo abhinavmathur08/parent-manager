@@ -411,5 +411,27 @@
       "body": "Check your connection, then try again.",
       "retry": "Try again"
     }
+  },
+  "biometric": {
+    "faceIdPermission": "Parent Manager uses Face ID to unlock the app when you turn on the lock.",
+    "lockedTitle": "Parent Manager is locked",
+    "lockedBody": "Your household's plans stay private.",
+    "unlock": "Unlock",
+    "unlockFaceId": "Unlock with Face ID",
+    "unlockFingerprint": "Unlock with fingerprint",
+    "unlockPasscode": "Unlock with passcode",
+    "prompt": "Unlock Parent Manager",
+    "confirmPrompt": "Confirm to turn on the lock",
+    "cancel": "Cancel",
+    "setting": "Lock the app",
+    "settingFaceId": "Lock with Face ID",
+    "settingFingerprint": "Lock with fingerprint",
+    "settingDescription": "Ask for Face ID, a fingerprint or your passcode when you come back to the app.",
+    "timeoutTitle": "Lock after",
+    "timeoutImmediately": "Immediately",
+    "timeoutMinutes_one": "After {{minutes}} minute",
+    "timeoutMinutes_other": "After {{minutes}} minutes",
+    "needsPasscode": "Set up Face ID, a fingerprint or a passcode on this device to use the lock.",
+    "turnedOff": "The app lock is off because this device has no Face ID, fingerprint or passcode."
   }
 }

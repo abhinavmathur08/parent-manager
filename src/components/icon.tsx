@@ -26,6 +26,7 @@ const SYMBOLS = {
   recipes: { ios: 'book', android: 'menu_book' },
   household: { ios: 'house', android: 'home' },
   people: { ios: 'person.2', android: 'group' },
+  lock: { ios: 'lock', android: 'lock' },
 } as const;
 
 export type IconName = keyof typeof SYMBOLS;

@@ -1,6 +1,8 @@
 import type { ConfigContext, ExpoConfig } from 'expo/config';
 import { withAndroidManifest } from 'expo/config-plugins';
 
+import enUS from './src/i18n/locales/en-US.json';
+
 /**
  * App variants (F-03.1). Each EAS build profile sets APP_VARIANT in eas.json, so
  * development, preview and production builds get their own app ID and can be
@@ -140,6 +142,8 @@ function buildConfig(
       'expo-apple-authentication',
       'expo-web-browser',
       ...googleSignInPlugins(process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID),
+      // The Face ID permission text comes from the locale file, like all copy (A-03).
+      ['expo-local-authentication', { faceIDPermission: enUS.biometric.faceIdPermission }],
     ],
     experiments: {
       typedRoutes: true,

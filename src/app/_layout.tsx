@@ -7,6 +7,7 @@ import { useEffect, useMemo } from 'react';
 // Registers the Google sign-out cleanup (FR-AUTH-7).
 import '@/features/auth/google';
 import { AuthProvider, useAuth } from '@/features/auth/session';
+import { BiometricLock } from '@/features/biometric/biometric-lock';
 import { HouseholdUnavailable } from '@/features/household/household-unavailable';
 import { HouseholdProvider, useHousehold } from '@/features/household/membership';
 import { useTheme } from '@/hooks/use-theme';
@@ -28,22 +29,24 @@ function RootStack() {
   if (signedIn && household.status === 'error') return <HouseholdUnavailable />;
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="index" />
-      <Stack.Protected guard={signedIn && household.status === 'member'}>
-        <Stack.Screen name="(tabs)" />
-      </Stack.Protected>
-      <Stack.Protected guard={signedIn && household.status === 'none'}>
-        <Stack.Screen name="(onboarding)" />
-      </Stack.Protected>
-      <Stack.Protected guard={!signedIn}>
-        <Stack.Screen name="(auth)" />
-      </Stack.Protected>
-      <Stack.Screen name="auth-callback" />
-      <Stack.Protected guard={__DEV__}>
-        <Stack.Screen name="gallery" />
-      </Stack.Protected>
-    </Stack>
+    <BiometricLock active={signedIn}>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="index" />
+        <Stack.Protected guard={signedIn && household.status === 'member'}>
+          <Stack.Screen name="(tabs)" />
+        </Stack.Protected>
+        <Stack.Protected guard={signedIn && household.status === 'none'}>
+          <Stack.Screen name="(onboarding)" />
+        </Stack.Protected>
+        <Stack.Protected guard={!signedIn}>
+          <Stack.Screen name="(auth)" />
+        </Stack.Protected>
+        <Stack.Screen name="auth-callback" />
+        <Stack.Protected guard={__DEV__}>
+          <Stack.Screen name="gallery" />
+        </Stack.Protected>
+      </Stack>
+    </BiometricLock>
   );
 }
 
