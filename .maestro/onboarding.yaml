@@ -1,5 +1,6 @@
-# A new user creates a household (H-02.1): name, then household name and region, then the
-# Plan tab. Resumes after a restart at the same step (FR-ONB-7). Ends signed out.
+# A new user creates a household (H-02.1, H-02.2): name, then household name and region, who
+# they're feeding (a toddler), allergies, then the Plan tab in at most 4 screens. Resumes after
+# a restart at the same step with its answers (FR-ONB-7). Ends signed out.
 # Needs the local stack; see the Testing section of README.md.
 appId: ${APP_ID || 'com.myparentmanager'}
 tags:
@@ -38,6 +39,50 @@ tags:
       id: create-household-continue
 - tapOn:
     id: create-household-continue
+# S-07: "Expecting, or how old is your youngest?"
+- extendedWaitUntil:
+    visible:
+      id: people-screen-title
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: add-child-toddler
+- tapOn:
+    id: add-child-toddler
+- stopApp
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: people-screen-title
+    timeout: 30000
+- scrollUntilVisible:
+    element:
+      id: child-0-band-toddler
+- assertVisible:
+    id: child-0-band-toddler
+    checked: true
+- scrollUntilVisible:
+    element:
+      id: people-continue
+- tapOn:
+    id: people-continue
+# S-08: allergies with the disclaimer.
+- extendedWaitUntil:
+    visible:
+      id: allergies-screen-title
+    timeout: 10000
+- assertVisible:
+    id: allergy-disclaimer
+- scrollUntilVisible:
+    element:
+      id: dietary-1-allergen.peanut
+- tapOn:
+    id: dietary-1-allergen.peanut
+- scrollUntilVisible:
+    element:
+      id: allergies-finish
+- tapOn:
+    id: allergies-finish
 - extendedWaitUntil:
     visible:
       id: plan-screen-title
