@@ -5,7 +5,7 @@ export type Region = 'US' | 'GB' | 'AU';
 export type InputType = 'link' | 'text' | 'image';
 
 /** What the app sends. The household's locale and region are read on the server. */
-export type ImportRequest = { type: 'text'; text: string };
+export type ImportRequest = { type: 'text'; text: string } | { type: 'link'; url: string };
 
 /** One ingredient line of a draft (spec AI-1, AI-4). */
 export interface DraftIngredientLine {

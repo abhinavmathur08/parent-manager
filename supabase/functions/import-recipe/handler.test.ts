@@ -8,6 +8,7 @@ import {
   parserNotConfigured,
   type RecipeParser,
 } from './parser.ts';
+import { FetchPageError } from './fetch_page.ts';
 import type { RecipeDraft } from './types.ts';
 
 const DRAFT: RecipeDraft = {
@@ -79,6 +80,7 @@ function handler(overrides: Partial<HandlerDeps> = {}) {
     authenticate: (token) => Promise.resolve(token === 'good-token' ? 'user-1' : null),
     jobs: fakeJobs().jobs,
     parser: parserReturning(DRAFT),
+    fetchPage: () => Promise.reject(new Error('no network in tests')),
     log: (event, fields) => logs.push(JSON.stringify({ event, ...fields })),
     ...overrides,
   };
@@ -255,6 +257,126 @@ Deno.test('logs never include the pasted text', async () => {
     logs.some((line) => line.includes('walnut')),
     false,
   );
+});
+
+// ---------------------------------------------------------------------------
+// Link imports (R-05.2)
+// ---------------------------------------------------------------------------
+
+const RECIPE_PAGE = `<html><head><title>Soup</title>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Recipe",
+"name":"Tomato soup","recipeYield":"4","recipeIngredient":["2 tbsp olive oil","1 onion"],
+"recipeInstructions":[{"@type":"HowToStep","text":"Fry the onion."}]}</script>
+</head><body><p>Tomato soup</p></body></html>`;
+
+const PLAIN_PAGE = `<html><body><nav>Home</nav><h1>Tomato soup</h1>
+<ul><li>2 tbsp olive oil</li><li>1 onion</li></ul><p>Fry the onion.</p></body></html>`;
+
+function pageFetcher(html: string, urls: string[] = []) {
+  return (url: string) => {
+    urls.push(url);
+    return Promise.resolve({ url, html });
+  };
+}
+
+const LINK = { input: { type: 'link', url: 'https://recipes.example.com/soup' } };
+
+Deno.test('a page with schema.org data needs no parser call and does not count', async () => {
+  const { jobs, state } = fakeJobs({ allowance: 0 });
+  const seen: ParseRequest[] = [];
+  const { handle } = handler({
+    jobs,
+    parser: parserReturning(DRAFT, seen),
+    fetchPage: pageFetcher(RECIPE_PAGE),
+  });
+  const response = await handle(post(LINK));
+  assertEquals(response.status, 200);
+  const body = await response.json();
+  assertEquals(body.source, 'structured_data');
+  assertEquals(body.counted, false);
+  assertEquals(body.draft.title, 'Tomato soup');
+  assertEquals(body.draft.servings, 4);
+  assertEquals(seen.length, 0);
+  assertEquals(state.used, 0);
+  assertEquals(state.started, [{ userId: 'user-1', inputType: 'link' }]);
+  assertEquals(state.finished.get('job-1')?.status, 'succeeded');
+});
+
+Deno.test('a page without schema.org data sends its readable text to the parser', async () => {
+  const { jobs, state } = fakeJobs();
+  const seen: ParseRequest[] = [];
+  const { handle } = handler({
+    jobs,
+    parser: parserReturning(DRAFT, seen),
+    fetchPage: pageFetcher(PLAIN_PAGE),
+  });
+  const response = await handle(post(LINK));
+  assertEquals(response.status, 200);
+  assertEquals((await response.json()).counted, true);
+  assertEquals(state.used, 1);
+  assertEquals(seen[0].source, {
+    kind: 'text',
+    text: 'Tomato soup\n2 tbsp olive oil\n1 onion\nFry the onion.',
+  });
+  assertEquals(seen[0].locale, 'en-AU');
+});
+
+Deno.test('non-http schemes and private addresses are refused before a job starts', async () => {
+  const { jobs, state } = fakeJobs();
+  const urls: string[] = [];
+  const { handle } = handler({ jobs, fetchPage: pageFetcher(RECIPE_PAGE, urls) });
+  for (const url of [
+    'file:///etc/passwd',
+    'javascript:alert(1)',
+    'ftp://example.com/recipe',
+    'http://127.0.0.1/',
+    'http://169.254.169.254/latest/meta-data/',
+    'http://[::1]/',
+    'http://10.0.0.5/recipe',
+    'http://localhost/',
+    'https://example.com:8443/',
+  ]) {
+    const response = await handle(post({ input: { type: 'link', url } }));
+    assertEquals(response.status, 400, url);
+    assertEquals(await response.json(), { error: { code: 'import.link_refused' } });
+  }
+  assertEquals(urls.length, 0);
+  assertEquals(state.started.length, 0);
+});
+
+Deno.test('a link refused while fetching fails the job without counting', async () => {
+  const { jobs, state } = fakeJobs();
+  const { handle, logs } = handler({
+    jobs,
+    fetchPage: () => Promise.reject(new FetchPageError('import.link_refused')),
+  });
+  const response = await handle(post(LINK));
+  assertEquals(response.status, 422);
+  assertEquals(await response.json(), { error: { code: 'import.link_refused' } });
+  assertEquals(state.used, 0);
+  assertEquals(state.finished.get('job-1'), { status: 'failed', errorCode: 'import.link_refused' });
+  assertEquals(
+    logs.some((line) => line.includes('example.com')),
+    false,
+  );
+});
+
+Deno.test('an unreachable site fails with 502', async () => {
+  const { handle } = handler({
+    fetchPage: () => Promise.reject(new FetchPageError('import.link_unreachable')),
+  });
+  assertEquals((await handle(post(LINK))).status, 502);
+});
+
+Deno.test('a page with no readable text fails without counting', async () => {
+  const { jobs, state } = fakeJobs();
+  const { handle } = handler({
+    jobs,
+    fetchPage: pageFetcher('<html><script>x()</script></html>'),
+  });
+  const response = await handle(post(LINK));
+  assertEquals(await response.json(), { error: { code: 'import.no_recipe_found' } });
+  assertEquals(state.used, 0);
 });
 
 // ---------------------------------------------------------------------------
