@@ -13,5 +13,12 @@
     "crustacean": "Crustaceans",
     "sulphite": "Sulphites",
     "mollusc": "Molluscs"
+  },
+  "household": {
+    "settings": {
+      "unitSystem": {
+        "metric": "Metric: millilitres and grams"
+      }
+    }
   }
 }

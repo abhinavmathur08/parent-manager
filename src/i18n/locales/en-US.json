@@ -547,6 +547,23 @@
         "title": "Make someone else a parent first",
         "body": "You're the household's only parent, and it needs one. Make another member a parent, then you can leave."
       }
+    },
+    "settings": {
+      "title": "Household settings",
+      "parentsOnly": "Only parents can change these settings.",
+      "region": "Region",
+      "units": "Units",
+      "unitSystem": {
+        "us_customary": "US cups, ounces and pounds",
+        "metric": "Metric: milliliters and grams"
+      },
+      "unitExample": "For example, {{example}}",
+      "weekStart": "Week starts on",
+      "timezone": "Time zone",
+      "useDeviceTimezone": "Use this phone's time zone ({{timezone}})",
+      "save": "Save settings",
+      "saved": "Settings saved.",
+      "offline": "You're offline. Connect to the internet to change settings."
     }
   }
 }

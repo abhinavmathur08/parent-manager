@@ -1,0 +1,28 @@
+# A parent changes the household's region (H-04.2, FR-HH-15): units and week start follow,
+# and the change is saved. Needs the local stack; see the Testing section of README.md.
+appId: ${APP_ID || 'com.myparentmanager'}
+tags:
+  - backend
+---
+- runFlow: subflows/create-household.yaml
+- tapOn:
+    id: tab-household
+- tapOn:
+    id: open-settings
+- extendedWaitUntil:
+    visible:
+      id: settings-region-AU
+    timeout: 10000
+- tapOn:
+    id: settings-region-AU
+- assertVisible:
+    id: settings-units-metric
+    checked: true
+- scrollUntilVisible:
+    element:
+      id: settings-save
+- tapOn:
+    id: settings-save
+- extendedWaitUntil:
+    visible: Settings saved.
+    timeout: 10000
