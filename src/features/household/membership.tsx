@@ -8,14 +8,24 @@ import {
   useState,
   type ReactNode,
 } from 'react';
+import { AppState } from 'react-native';
 
 import { useAuth } from '@/features/auth/session';
 import { onSignOut } from '@/features/auth/sign-out';
+import {
+  clearHouseholdData,
+  onHouseholdAccessLost,
+  removalSeen,
+} from '@/features/household/access-lost';
 import { MEMBER_ROLES, type MemberRole } from '@/features/household/invitations';
+import { fetchMembershipStatus } from '@/features/household/leave';
 import { REGIONS } from '@/features/household/region';
 import { setAppLocale, SUPPORTED_LOCALES, type AppLocale, type Region } from '@/i18n';
 import { getSupabase } from '@/lib/supabase';
 import { resetSync } from '@/lib/sync';
+
+// Losing the household (removed, paused or left) clears the synced copy on this device (H-06.4).
+onHouseholdAccessLost(resetSync);
 
 /** The household the signed-in user belongs to. Phase 1 allows one per account. */
 export type Membership = {
@@ -29,6 +39,13 @@ export type HouseholdState =
   | { status: 'loading' }
   | { status: 'none' }
   | { status: 'member'; membership: Membership }
+  /** Access ended: removed by a parent, or paused while the household is on Free (S-35). */
+  | {
+      status: 'ended';
+      reason: 'removed' | 'paused';
+      householdId: string;
+      householdName: string;
+    }
   /** Not known yet and the server can't be reached, for example a new device offline. */
   | { status: 'error' };
 
@@ -109,10 +126,28 @@ export function HouseholdProvider({ children }: { children: ReactNode }) {
     if (!userId) return null;
     try {
       const membership = await fetchMembership(userId);
-      // Removed from the household: its data leaves this device too (H-06.4).
-      if (!membership && readCache(userId)) void resetSync().catch(() => undefined);
+      const hadHousehold = readCache(userId) !== null;
       writeCache(userId, membership);
-      return { userId, state: membership ? { status: 'member', membership } : { status: 'none' } };
+      if (membership) return { userId, state: { status: 'member', membership } };
+      // Access ended on another device or by a parent: clear this device's copy (FR-HH-10).
+      if (hadHousehold) await clearHouseholdData();
+      // RLS hides a removed or paused membership, so ask the server why there's none.
+      const status = await fetchMembershipStatus();
+      if (
+        status.status === 'paused' ||
+        (status.status === 'removed' && !removalSeen(userId, status.householdId))
+      ) {
+        return {
+          userId,
+          state: {
+            status: 'ended',
+            reason: status.status,
+            householdId: status.householdId,
+            householdName: status.householdName,
+          },
+        };
+      }
+      return { userId, state: { status: 'none' } };
     } catch {
       // Offline: keep the last known membership, or say it couldn't be loaded.
       const cached = readCache(userId);
@@ -130,11 +165,18 @@ export function HouseholdProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let active = true;
-    load().then((result) => {
-      if (active && result) setFetched(result);
+    const update = () =>
+      load().then((result) => {
+        if (active && result) setFetched(result);
+      });
+    update();
+    // Check again whenever the app comes back, so a removed member finds out (FR-HH-10).
+    const subscription = AppState.addEventListener('change', (next) => {
+      if (next === 'active') update();
     });
     return () => {
       active = false;
+      subscription.remove();
     };
   }, [load]);
 
