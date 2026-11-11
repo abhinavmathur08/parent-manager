@@ -215,6 +215,14 @@ Export (A-04.2) and deletion must cover every table that holds household data. A
 **Decided (D-13, 2026-11-08): we build our own.** There's no sync vendor. The pieces:
 
 - **Local copy:** `expo-sqlite` in `src/lib/sync` holds the household's working data and is read on start (H-06.2).
+
+#### How the sync layer is built (`src/lib/sync`)
+
+- **Generic over tables.** A feature registers its table with `defineSyncTable({ name, columns })`. The server table needs the system columns (`id`, `household_id`, `version`, `created_at`, `updated_at`, `deleted_at`). The engine has no feature tables of its own.
+- **Local copy (H-06.2).** One SQLite table per registered table, with the system columns and the feature's columns, so features can query it with SQL. `sync_meta` records which household the copy belongs to (another household empties it), each table's column list (a change rebuilds that table and pulls it again) and its pull cursor. All access goes through one queue, because expo-sqlite transactions aren't exclusive.
+- **Encrypted.** The file is encrypted with SQLCipher (`useSQLCipher` on the `expo-sqlite` plugin), using a random 256-bit key in SecureStore. A build without SQLCipher keeps no local copy rather than storing it in the clear. Sign-out deletes the file and its key (FR-AUTH-7).
+- **Reading.** `SyncProvider` (mounted by the tab layout) opens the copy for the member's household. `useSyncedRows(table)` reads live rows from it, so cached data shows offline and after restarts (NFR-OFF-1).
+- **Pulling.** A sync runs on start, on reconnecting and when the app returns to the foreground. The first pull lists the household's live rows. Later pulls fetch rows with `updated_at` at or after the newest one seen, less a 60-second overlap so a late commit isn't missed, including tombstones, in `updated_at`, `id` pages. A row replaces the local one only if its `version` is newer, so repeats and late deliveries are harmless. After 30 days away, the device lists everything again and drops rows the server no longer has (NFR-OFF-6).
 - **Outbox:** writes are queued in order and survive restarts. The server sets `updated_at` and `version`, and deletes are soft (H-06.3).
 - **Realtime:** Supabase Realtime, filtered by household, applies remote changes to the local copy (H-06.4).
 
