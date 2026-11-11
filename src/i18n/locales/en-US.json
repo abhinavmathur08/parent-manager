@@ -403,8 +403,25 @@
     },
     "join": {
       "title": "Join with an invite",
-      "body": "Joining with an invite code is almost ready. Until then, you can start your own household, or ask your partner to check back after the next update.",
-      "back": "Back"
+      "body": "Enter the 6-character code from the person who invited you. Capitals and spaces don't matter.",
+      "codeLabel": "Invite code",
+      "continue": "Continue",
+      "invitedBy": "Invited by {{name}}",
+      "joinAs": "You'll join {{asRole}}.",
+      "accept": "Join household",
+      "offline": "You're offline. Connect to the internet to join a household.",
+      "errors": {
+        "format": "Invite codes have 6 letters and numbers. Check the code and try again.",
+        "invalid": "We couldn't find that code. Check it with the person who invited you.",
+        "rate_limited": "Too many codes didn't work. Wait an hour, then try again.",
+        "revoked": "This invite is no longer valid. Ask for a new one.",
+        "used": "This invite has already been used. Ask for a new one.",
+        "expired": "This invite has expired. Ask for a new one.",
+        "premium_required": "This invite is paused until the household has Premium again. Ask the parent who invited you.",
+        "seat_limit": "This household has no free place for this role. Ask the parent who invited you.",
+        "already_member": "You're already in this household.",
+        "in_other_household": "You're already in another household. Leave it from the Household tab, then join this one."
+      }
     },
     "unavailable": {
       "title": "We can't load your household",

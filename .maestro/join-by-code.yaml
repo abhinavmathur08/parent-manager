@@ -1,0 +1,58 @@
+# A partner joins a household by code (H-03.3, S-09): parent A creates a parent invite and
+# copies the code; B signs up, chooses "Join with an invite", sees the household, inviter
+# and role, accepts and lands on the Plan tab as a member.
+# Needs the local stack; see the Testing section of README.md.
+appId: ${APP_ID || 'com.myparentmanager'}
+tags:
+  - backend
+---
+- runFlow:
+    file: subflows/create-household.yaml
+    env:
+      NAME: Sam
+- tapOn:
+    id: tab-household
+- tapOn:
+    id: open-invite
+- tapOn:
+    id: invite-create
+- extendedWaitUntil:
+    visible:
+      id: invite-code
+    timeout: 10000
+- copyTextFrom:
+    id: invite-code
+# B signs up on the same device; the subflow clears the app's state first.
+- runFlow: subflows/sign-up-with-email.yaml
+- extendedWaitUntil:
+    visible:
+      id: welcome-name
+    timeout: 20000
+- tapOn:
+    id: welcome-name
+- inputText: Alex
+- hideKeyboard
+- tapOn:
+    id: welcome-join
+- extendedWaitUntil:
+    visible:
+      id: join-code
+    timeout: 10000
+- tapOn:
+    id: join-code
+- inputText: ${maestro.copiedText}
+- hideKeyboard
+- tapOn:
+    id: join-continue
+- extendedWaitUntil:
+    visible:
+      id: join-preview
+    timeout: 10000
+- assertVisible: Invited by Sam
+- assertVisible: You'll join as a parent.
+- tapOn:
+    id: join-accept
+- extendedWaitUntil:
+    visible:
+      id: plan-screen-title
+    timeout: 20000
