@@ -347,8 +347,11 @@ max_frequency = "5s"
 # `discord`, `facebook`, `github`, `gitlab`, `google`, `keycloak`, `linkedin_oidc`, `notion`, `twitch`,
 # `twitter`, `x`, `slack_oidc`, `spotify`, `workos`, `zoom`.
 [auth.external.apple]
-enabled = false
-client_id = ""
+# Sign in with Apple (A-02.1). On iOS the app signs in with Apple's ID token, whose audience is
+# the app's bundle ID, one per variant (app.config.ts); no secret is needed for that. Android
+# uses Apple's web sign-in, which needs a Services ID (added to client_id) and the secret.
+enabled = true
+client_id = "com.myparentmanager,com.myparentmanager.dev,com.myparentmanager.preview"
 # DO NOT commit your OAuth provider secret to git. Use environment variable substitution instead:
 secret = "env(SUPABASE_AUTH_EXTERNAL_APPLE_SECRET)"
 # Overrides the default auth callback URL derived from auth.external_url.
@@ -360,6 +363,16 @@ url = ""
 skip_nonce_check = false
 # If enabled, it will allow the user to successfully authenticate when the provider does not return an email address.
 email_optional = false
+
+# Google sign-in (A-02.2). The app signs in with Google's ID token. Client IDs are the web
+# client ID plus the iOS and Android client IDs, comma separated; no secret is needed for ID
+# tokens. Off locally until the product owner creates the OAuth clients. Google's iOS SDK puts
+# a nonce in its tokens that the app can't see, so the nonce check is skipped.
+[auth.external.google]
+enabled = false
+client_id = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID)"
+secret = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET)"
+skip_nonce_check = true
 
 # Allow Solana wallet holders to sign in to your project via the Sign in with Solana (SIWS) standard.
 # You can configure "web3" rate limit in the [auth.rate_limit] section and set up [auth.captcha] if self-hosting.

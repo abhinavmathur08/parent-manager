@@ -19,6 +19,7 @@
     "packageJson": {
       "dependencies": [
         "npm:@expo-google-fonts/fraunces@~0.4.1",
+        "npm:@react-native-google-signin/google-signin@17",
         "npm:@supabase/supabase-js@^2.119.0",
         "npm:@testing-library/react-native@^14.1.0",
         "npm:@types/jest@30.0.0",
@@ -26,6 +27,7 @@
         "npm:eslint-config-expo@~58.0.4",
         "npm:eslint-config-prettier@^10.1.8",
         "npm:eslint@^9.39.5",
+        "npm:expo-apple-authentication@~58.0.2",
         "npm:expo-constants@~58.0.15",
         "npm:expo-crypto@~58.0.7",
         "npm:expo-dev-client@~58.0.18",
@@ -42,6 +44,7 @@
         "npm:expo-symbols@~58.0.4",
         "npm:expo-system-ui@~58.0.7",
         "npm:expo-updates@~58.0.21",
+        "npm:expo-web-browser@~58.0.7",
         "npm:expo@~58.0.23",
         "npm:i18next@^26.7.2",
         "npm:jest-expo@~58.0.14",

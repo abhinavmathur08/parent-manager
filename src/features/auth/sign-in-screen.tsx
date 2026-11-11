@@ -18,9 +18,16 @@ import { useOnline } from '@/hooks/use-online';
 import { useTheme } from '@/hooks/use-theme';
 import { DEFAULT_LOCALE, SUPPORTED_LOCALES, type AppLocale } from '@/i18n';
 
+export type ProviderSlotProps = {
+  /** Offline or busy. */
+  disabled: boolean;
+  /** Shows a failed sign-in. A cancelled one should call nothing (spec 3.1 edge cases). */
+  onError: (error: unknown) => void;
+};
+
 export type SignInScreenProps = {
   /** Other sign-in methods (Apple, Google), shown under the email form. */
-  providers?: ReactNode;
+  providers?: (props: ProviderSlotProps) => ReactNode;
 };
 
 /** S-02: sign in or sign up with an email code (FR-AUTH-1, FR-AUTH-2, FR-PRIV-6). */
@@ -31,6 +38,7 @@ export function SignInScreen({ providers }: SignInScreenProps) {
   const [email, setEmail] = useState(() => readPendingSignIn()?.email ?? '');
   const [error, setError] = useState<string>();
   const [sending, setSending] = useState(false);
+  const [providerError, setProviderError] = useState<string>();
 
   const locale = (SUPPORTED_LOCALES as readonly string[]).includes(i18n.language)
     ? (i18n.language as AppLocale)
@@ -102,13 +110,14 @@ export function SignInScreen({ providers }: SignInScreenProps) {
           testID="sign-in-continue"
         />
       </View>
-      {providers ? (
-        <View style={{ gap: theme.space[3] }}>
-          <Text variant="label" color="textSecondary" style={{ textAlign: 'center' }}>
-            {t('auth.signIn.or')}
-          </Text>
-          {providers}
-        </View>
+      {providers?.({
+        disabled: !online || sending,
+        onError: (caught) => setProviderError(t(`auth.errors.${authErrorKey(caught)}`)),
+      })}
+      {providerError ? (
+        <Text color="error" accessibilityLiveRegion="polite" testID="sign-in-provider-error">
+          {providerError}
+        </Text>
       ) : null}
       <PolicyAgreement />
     </Screen>
