@@ -12,6 +12,7 @@ import { Text } from '@/components/text';
 import { useAuth } from '@/features/auth/session';
 import { revokeInvitation } from '@/features/household/invitations';
 import { InviteSheet } from '@/features/household/invite-sheet';
+import { MemberSheet } from '@/features/household/member-sheet';
 import {
   fetchMembers,
   fetchPendingInvites,
@@ -20,6 +21,7 @@ import {
   type PendingInvite,
 } from '@/features/household/members';
 import { useHousehold } from '@/features/household/membership';
+import { useSeats } from '@/features/household/seats';
 import { useOnline } from '@/hooks/use-online';
 import { useTheme } from '@/hooks/use-theme';
 import { formatDate } from '@/i18n';
@@ -37,9 +39,11 @@ export function MembersScreen() {
   const householdId = membership?.householdId ?? null;
   const isParent = membership?.role === 'parent';
   const myId = auth.status === 'signedIn' ? auth.session.user.id : null;
+  const { seats } = useSeats(householdId, true);
 
   const [loaded, setLoaded] = useState<Loaded>(null);
   const [version, setVersion] = useState(0);
+  const [selected, setSelected] = useState<Member | null>(null);
   const [inviting, setInviting] = useState(false);
   const [revokeError, setRevokeError] = useState<string>();
   const reload = useCallback(() => setVersion((v) => v + 1), []);
@@ -62,6 +66,7 @@ export function MembersScreen() {
   const nameOf = (member: Member) => member.displayName ?? t('household.members.unnamed');
   const date = (iso: string) => formatDate(new Date(iso), i18n.language);
   const data = loaded !== 'error' ? loaded : null;
+  const parents = data?.members.filter((m) => m.role === 'parent').length ?? 0;
 
   return (
     <Screen
@@ -100,6 +105,8 @@ export function MembersScreen() {
                 key={member.userId}
                 title={self ? t('household.members.you', { name: nameOf(member) }) : nameOf(member)}
                 subtitle={t('household.members.roleJoined', { role, date: date(member.joinedAt) })}
+                variant={isParent && !self ? 'navigation' : 'plain'}
+                onPress={isParent && !self ? () => setSelected(member) : undefined}
                 divider={index < data.members.length - 1}
                 testID={`member-${index}`}
               />
@@ -162,7 +169,19 @@ export function MembersScreen() {
         </View>
       ) : null}
       {householdId && isParent ? (
-        <InviteSheet visible={inviting} onClose={() => setInviting(false)} onCreated={reload} />
+        <>
+          <InviteSheet visible={inviting} onClose={() => setInviting(false)} onCreated={reload} />
+          <MemberSheet
+            householdId={householdId}
+            member={selected}
+            name={selected ? nameOf(selected) : ''}
+            parents={parents}
+            premium={seats?.premium ?? false}
+            online={online}
+            onClose={() => setSelected(null)}
+            onChanged={reload}
+          />
+        </>
       ) : null}
     </Screen>
   );
