@@ -4,6 +4,8 @@ import { StyleSheet } from 'react-native';
 
 import { FloatingTabBar, TabButton } from '@/components/floating-tab-bar';
 import type { IconName } from '@/components/icon';
+import { useHousehold } from '@/features/household/membership';
+import { PendingChangesBanner, SyncProvider } from '@/lib/sync';
 
 const TABS: readonly {
   name: string;
@@ -19,7 +21,8 @@ const TABS: readonly {
 /** The main app: Plan, List, Recipes and Household, under the floating tab bar (architecture section 2). */
 export default function TabsLayout() {
   const { t } = useTranslation();
-  return (
+  const { state } = useHousehold();
+  const tabs = (
     <Tabs style={styles.fill}>
       <TabSlot style={styles.fill} />
       <FloatingTabBar accessibilityLabel={t('tabs.label')} testID="tab-bar">
@@ -36,6 +39,15 @@ export default function TabsLayout() {
         ))}
       </TabList>
     </Tabs>
+  );
+  // The root layout only shows the tabs to members; the household's data syncs while they're open.
+  return state.status === 'member' ? (
+    <SyncProvider householdId={state.membership.householdId}>
+      {tabs}
+      <PendingChangesBanner />
+    </SyncProvider>
+  ) : (
+    tabs
   );
 }
 

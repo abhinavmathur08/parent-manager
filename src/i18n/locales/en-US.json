@@ -410,6 +410,29 @@
       "title": "We can't load your household",
       "body": "Check your connection, then try again.",
       "retry": "Try again"
+    },
+    "skip": "Skip for now",
+    "people": {
+      "title": "Who are you feeding?",
+      "subtitle": "We use this to suggest how much to cook. Nicknames are fine, and we never ask for birthdays.",
+      "adults": "Adults",
+      "you": "You",
+      "adultLabel": "Another adult",
+      "adultName": "Adult {{n}}",
+      "addAdult": "Add an adult",
+      "children": "Children",
+      "childLabel": "Name or nickname",
+      "childName": "Child {{n}}",
+      "babyName": "Baby",
+      "youngestQuestion": "Expecting, or how old is your youngest?",
+      "anotherChild": "Add another child: how old?",
+      "remove": "Remove {{name}}",
+      "continue": "Continue"
+    },
+    "allergies": {
+      "title": "Allergies and diets",
+      "subtitle": "We'll flag recipes that contain these allergens. You can change this any time.",
+      "finish": "Finish"
     }
   },
   "biometric": {
@@ -433,5 +456,52 @@
     "timeoutMinutes_other": "After {{minutes}} minutes",
     "needsPasscode": "Set up Face ID, a fingerprint or a passcode on this device to use the lock.",
     "turnedOff": "The app lock is off because this device has no Face ID, fingerprint or passcode."
+  },
+  "sync": {
+    "pending_one": "{{count}} change waiting to sync",
+    "pending_other": "{{count}} changes waiting to sync",
+    "rejected_one": "{{count}} change couldn't be saved, because the household no longer accepts it.",
+    "rejected_other": "{{count}} changes couldn't be saved, because the household no longer accepts them."
+  },
+  "people": {
+    "ageBand": "Age",
+    "ageBands": {
+      "expecting": "Expecting",
+      "infant_0_6m": "0 to 6 months",
+      "infant_6_12m": "6 to 12 months",
+      "toddler": "Toddler",
+      "preschool": "Preschool",
+      "older_child": "Older child",
+      "adult": "Adult"
+    },
+    "dueMonth": "Due month (optional)",
+    "allergies": "Allergies",
+    "dietsLabel": "Diets",
+    "diets": {
+      "vegetarian": "Vegetarian",
+      "vegan": "Vegan",
+      "pescatarian": "Pescatarian",
+      "halal": "Halal",
+      "kosher": "Kosher"
+    },
+    "title": "People and allergies",
+    "add": "Add a person",
+    "addTitle": "Add a person",
+    "editTitle": "Edit person",
+    "name": "Name or nickname",
+    "nameHint": "A nickname is fine. We never ask for birthdays.",
+    "nameRequired": "Give this person a name or nickname.",
+    "save": "Save",
+    "remove": "Remove",
+    "removeTitle": "Remove {{name}}?",
+    "removeBody": "Their allergies and diets are removed too.",
+    "cancel": "Cancel",
+    "saveFailed": "We couldn't save that. Check your connection and try again.",
+    "loadFailed": "We can't load your household's people. Check your connection.",
+    "empty": "Add the people you cook for, so we can flag allergens.",
+    "summary": "{{band}} · {{codes}}"
+  },
+  "format": {
+    "listSeparator": ", "
   }
 }
