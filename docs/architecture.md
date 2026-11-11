@@ -146,13 +146,13 @@ How the catalog is built (R-01.1):
 
 #### AI, notifications and devices
 
-| Table                | Key columns                                                                                                                      |
-| -------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `ai_import_jobs`     | `id`, `household_id`, `user_id`, `input_type`, `locale`, `region`, `status`, `draft` (JSON), `model`, `cost_units`, `error_code` |
-| `ai_usage`           | `household_id`, `period` (month), `imports_used`                                                                                 |
-| `push_tokens`        | `user_id`, `token`, `platform`, `last_seen_at`                                                                                   |
-| `notification_prefs` | `user_id`, `type`, `enabled`, `quiet_start`, `quiet_end`                                                                         |
-| `notifications`      | `user_id`, `household_id`, `type`, `payload`, `read_at` (the in-app inbox)                                                       |
+| Table                | Key columns                                                                                                                                                   |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ai_import_jobs`     | `id`, `household_id`, `user_id`, `input_type`, `locale`, `region`, `status`, `source`, `reserved_period`, `draft` (JSON), `model`, `cost_units`, `error_code` |
+| `ai_usage`           | `household_id`, `period` (month), `imports_used`                                                                                                              |
+| `push_tokens`        | `user_id`, `token`, `platform`, `last_seen_at`                                                                                                                |
+| `notification_prefs` | `user_id`, `type`, `enabled`, `quiet_start`, `quiet_end`                                                                                                      |
+| `notifications`      | `user_id`, `household_id`, `type`, `payload`, `read_at` (the in-app inbox)                                                                                    |
 
 ### How the grocery list is built
 
@@ -183,18 +183,20 @@ The engine is a set of pure TypeScript functions with no side effects, unit-test
 
 Export (A-04.2) and deletion must cover every table that holds household data. Add a row here with each new table.
 
-| Table                    | Export                               | Deletion                                               |
-| ------------------------ | ------------------------------------ | ------------------------------------------------------ |
-| `profiles`               | The user's own row                   | With the account                                       |
-| `households`             | The household                        | When its only member deletes their account             |
-| `household_members`      | All members' roles and join dates    | Cascades from the household                            |
-| `invitations`            | Open invitations, without token hash | Cascades from the household                            |
-| `household_people`       | All people                           | Cascades from the household                            |
-| `person_dietary`         | All diets and allergies              | Cascades from the household                            |
-| `household_entitlements` | Tier and status                      | Cascades from the household                            |
-| `ingredients`            | Rows with the household's ID only    | Household rows cascade; catalog rows are never touched |
-| `ingredient_names`       | Rows with the household's ID only    | Household rows cascade; catalog rows are never touched |
-| `pantry_items`           | All rows                             | Cascades from the household                            |
+| Table                    | Export                               | Deletion                                                                                  |
+| ------------------------ | ------------------------------------ | ----------------------------------------------------------------------------------------- |
+| `profiles`               | The user's own row                   | With the account                                                                          |
+| `households`             | The household                        | When its only member deletes their account                                                |
+| `household_members`      | All members' roles and join dates    | Cascades from the household                                                               |
+| `invitations`            | Open invitations, without token hash | Cascades from the household                                                               |
+| `household_people`       | All people                           | Cascades from the household                                                               |
+| `person_dietary`         | All diets and allergies              | Cascades from the household                                                               |
+| `household_entitlements` | Tier and status                      | Cascades from the household                                                               |
+| `ingredients`            | Rows with the household's ID only    | Household rows cascade; catalog rows are never touched                                    |
+| `ingredient_names`       | Rows with the household's ID only    | Household rows cascade; catalog rows are never touched                                    |
+| `pantry_items`           | All rows                             | Cascades from the household                                                               |
+| `ai_import_jobs`         | The user's own jobs, with drafts     | Cascades from the household; `user_id` is set null with the account; purged after 30 days |
+| `ai_usage`               | Monthly counts                       | Cascades from the household                                                               |
 
 ## 4. Row-level security and household isolation
 
@@ -247,7 +249,7 @@ Most edits are small and touch different rows, so simple rules are enough:
 ### Pipeline
 
 1. **Client:** the parent picks the input: a link, pasted text, a screenshot or a camera photo. Images are compressed on the device and uploaded to the temporary import bucket.
-2. **Edge Function `import-recipe`:** checks the session and household, then reserves quota with an atomic `ai_usage` increment. A failed import releases the reservation.
+2. **Edge Function `import-recipe`:** checks the session, then starts a job with `ai_import_start()`, which refuses caregivers and members over the hourly limit. Right before a parser call it reserves one import with `ai_import_reserve()`, a conditional upsert on the `ai_usage` row, so concurrent requests queue on its lock and can't pass the allowance. `ai_import_finish()` records the outcome, and a failure releases the reservation. These RPCs are callable only by the service role.
 3. **Extraction:**
    - **Links:** the server fetches the page with SSRF guards: http and https only, no private IP addresses, a size cap and a timeout. If the page has schema.org `Recipe` data embedded, it's parsed directly with no LLM call, which is cheaper and exact. Otherwise the readable text is extracted.
    - **Text:** used as given.
@@ -271,9 +273,12 @@ Voice import is out of the MVP. The vision lists it, but it adds speech-recognit
 
 ### Usage limits
 
-- **Monthly allowance per household:** a small number on Free and a large one on Premium. The exact numbers are a **Decision**, which the vision lists as an open question.
-- **Rate limits:** a per-user limit (for example 10 per hour) and a hard ceiling on cost per job.
-- **What counts:** only successful parses count against the allowance. Embedded schema.org imports that need no LLM call could be free.
+- **Monthly allowance per household (D-9):** 5 on Free and 100 on Premium (its fair-use cap), per calendar month in the household's timezone.
+- **Rate limits:** 10 import attempts per member per rolling hour, and a hard ceiling on cost per job (R-05.3).
+- **Server settings:** all of these live in `app_config` under `ai_import.limits`, read on every request, so they're tuned without a release.
+- **What counts:** only successful parses count against the allowance. Embedded schema.org imports that need no LLM call are free, and never reserve.
+- **Housekeeping:** a `pg_cron` job every 10 minutes fails jobs stuck processing for over 2 minutes (releasing their reservation) and purges job records older than 30 days (NFR-SEC-9).
+- **The app's view:** `ai_import_allowance()` returns used, total and the reset date for the import screen (FR-AI-2, FR-AI-10).
 
 ### Privacy
 
