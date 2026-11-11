@@ -363,5 +363,47 @@
       "signUpDisabled": "New accounts can't be created right now. Try again later.",
       "generic": "Something went wrong. Try again."
     }
+  },
+  "onboarding": {
+    "welcome": {
+      "title": "Welcome",
+      "titleNamed": "Welcome, {{name}}",
+      "subtitle": "Is your partner already using Parent Manager?",
+      "name": "Your name",
+      "nameHint": "Your household sees this name. A nickname is fine.",
+      "nameRequired": "Enter a name so your household knows who you are.",
+      "create": "Start a new household",
+      "createDescription": "Set up in about a minute, then invite your partner.",
+      "join": "Join with an invite",
+      "joinDescription": "Use the 6-character code your partner sent.",
+      "signOut": "Sign out"
+    },
+    "household": {
+      "title": "Your household",
+      "name": "Household name",
+      "nameRequired": "Give your household a name.",
+      "defaultName": "{{name}}'s home",
+      "defaultNameNoName": "Our home",
+      "regionTitle": "Where do you shop?",
+      "regionSubtitle": "This sets units and when your week starts. You can change it later.",
+      "continue": "Continue",
+      "creating": "Setting up your household"
+    },
+    "region": {
+      "US": "United States",
+      "GB": "United Kingdom",
+      "AU": "Australia",
+      "description": "For example, {{example}} · Week starts {{weekStart}}"
+    },
+    "join": {
+      "title": "Join with an invite",
+      "body": "Joining with an invite code is almost ready. Until then, you can start your own household, or ask your partner to check back after the next update.",
+      "back": "Back"
+    },
+    "unavailable": {
+      "title": "We can't load your household",
+      "body": "Check your connection, then try again.",
+      "retry": "Try again"
+    }
   }
 }

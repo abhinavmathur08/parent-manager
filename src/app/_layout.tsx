@@ -5,6 +5,8 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useMemo } from 'react';
 
 import { AuthProvider, useAuth } from '@/features/auth/session';
+import { HouseholdUnavailable } from '@/features/household/household-unavailable';
+import { HouseholdProvider, useHousehold } from '@/features/household/membership';
 import { useTheme } from '@/hooks/use-theme';
 
 // S-01: the splash screen stays up until the saved session has been read.
@@ -12,19 +14,25 @@ SplashScreen.preventAutoHideAsync().catch(() => undefined);
 
 function RootStack() {
   const auth = useAuth();
+  const household = useHousehold().state;
   const signedIn = auth.status === 'signedIn';
+  const loading = auth.status === 'loading' || (signedIn && household.status === 'loading');
 
   useEffect(() => {
-    if (auth.status !== 'loading') SplashScreen.hideAsync().catch(() => undefined);
-  }, [auth.status]);
+    if (!loading) SplashScreen.hideAsync().catch(() => undefined);
+  }, [loading]);
 
-  if (auth.status === 'loading') return null;
+  if (loading) return null;
+  if (signedIn && household.status === 'error') return <HouseholdUnavailable />;
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="index" />
-      <Stack.Protected guard={signedIn}>
+      <Stack.Protected guard={signedIn && household.status === 'member'}>
         <Stack.Screen name="(tabs)" />
+      </Stack.Protected>
+      <Stack.Protected guard={signedIn && household.status === 'none'}>
+        <Stack.Screen name="(onboarding)" />
       </Stack.Protected>
       <Stack.Protected guard={!signedIn}>
         <Stack.Screen name="(auth)" />
@@ -57,7 +65,9 @@ export default function RootLayout() {
   return (
     <ThemeProvider value={navigationTheme}>
       <AuthProvider>
-        <RootStack />
+        <HouseholdProvider>
+          <RootStack />
+        </HouseholdProvider>
       </AuthProvider>
     </ThemeProvider>
   );
