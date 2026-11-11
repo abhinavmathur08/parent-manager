@@ -98,7 +98,7 @@ describe('LocalStore', () => {
     store.subscribe(listener);
     expect(await store.removeRowsExcept('items', new Set(['r2']))).toBe(1);
     expect((await store.rows('items')).map((r) => r.id)).toEqual(['r2']);
-    expect(listener).toHaveBeenCalledWith(new Set(['items']));
+    expect(listener).toHaveBeenCalledWith({ tables: new Set(['items']), outbox: false });
   });
 
   it('clears everything for sign-out', async () => {

@@ -223,6 +223,23 @@ Export (A-04.2) and deletion must cover every table that holds household data. A
 - **Encrypted.** The file is encrypted with SQLCipher (`useSQLCipher` on the `expo-sqlite` plugin), using a random 256-bit key in SecureStore. A build without SQLCipher keeps no local copy rather than storing it in the clear. Sign-out deletes the file and its key (FR-AUTH-7).
 - **Reading.** `SyncProvider` (mounted by the tab layout) opens the copy for the member's household. `useSyncedRows(table)` reads live rows from it, so cached data shows offline and after restarts (NFR-OFF-1).
 - **Pulling.** A sync runs on start, on reconnecting and when the app returns to the foreground. The first pull lists the household's live rows. Later pulls fetch rows with `updated_at` at or after the newest one seen, less a 60-second overlap so a late commit isn't missed, including tombstones, in `updated_at`, `id` pages. A row replaces the local one only if its `version` is newer, so repeats and late deliveries are harmless. After 30 days away, the device lists everything again and drops rows the server no longer has (NFR-OFF-6).
+- **Local writes and the outbox (H-06.3).** `useSyncWriter()` gives `insert`, `update` and `remove`. Each write is applied to the local copy at once and queued in `sync_outbox`, in order, in the same transaction, so it survives restarts and reboots (NFR-OFF-3). Each row keeps the last row the server sent (its base); what the app reads is the base with its queued writes replayed on top. A pull, a Realtime event or a push response therefore never hides a waiting write, and once the queue drains the row is exactly the server's.
+- **Pushing.** Writes go in order: runs of creates on one table in one request, and updates and deletes to different rows up to 8 at a time, so 500 queued changes sync well within 10 seconds (NFR-OFF-4). Each update carries the `version` it was based on. A failed write is handled by why it failed:
+  - **Waits:** offline, a 401 while the session refreshes, 408, 429 or a 5xx. It's retried with backoff, however long that takes.
+  - **Refused:** RLS (`42501`, for example after the member was removed) or a constraint (`22xxx`, `23xxx`). It leaves the queue at once and the row shows the server's copy again. A count of refused writes is shown to the user (NFR-OFF-6).
+  - **Anything else:** dropped after 8 attempts.
+
+  So nothing can stall the queue, which was the spike's S6 failure. A create retried after a lost response finds the row already there (`23505`) and completes.
+
+- **Server rules.** `private.enable_sync(table, check_columns)` (migration `20261110100000_sync_rules.sql`) gives a feature table the conflict rules below, through two generic triggers:
+  - The server sets `created_at`, `updated_at` and `version`.
+  - A tombstone never changes, and a late edit gets the tombstone back.
+  - Each check column (such as `checked`) records `<column>_at` and `<column>_by`. A write based on an older `version` can't clear it.
+
+  The function also revokes hard deletes, adds the pull index and publishes the table to Realtime. A feature's migration still writes the table's own RLS policies.
+
+- **Pending indicator.** `PendingChangesBanner`, above the tab bar, shows how many changes are waiting until they sync, and how many the server refused.
+- **Two-device harness.** `test-utils/sync/harness` runs two devices (two users, two SQLite files and two engines) against a local stack, through offline edits, a restart and reconnection, and checks every conflict rule. It includes the spike's S4 and S6 failures as regression cases. It runs as the "Sync harness" CI job (`pnpm run test:sync`).
 - **Outbox:** writes are queued in order and survive restarts. The server sets `updated_at` and `version`, and deletes are soft (H-06.3).
 - **Realtime:** Supabase Realtime, filtered by household, applies remote changes to the local copy (H-06.4).
 
@@ -356,7 +373,7 @@ Supabase Auth, with:
 
 ### CI/CD
 
-- **On every PR:** lint, formatting, types, unit tests and an Expo dependency check, plus pgTAP database tests against a local Supabase stack ("Database tests", F-04.1) and Deno tests for Edge Functions ("Edge Function tests", F-04.2).
+- **On every PR:** lint, formatting, types, unit tests and an Expo dependency check, plus pgTAP database tests against a local Supabase stack ("Database tests", F-04.1), Deno tests for Edge Functions ("Edge Function tests", F-04.2) and the two-device sync harness ("Sync harness", H-06.3).
 - **On `main`:** E2E with Maestro on Android (an emulator on Linux) and iOS (a simulator on a macOS runner, which is free for a public repo, with Xcode 26.4 or later, F-04.3). Both jobs live in `.github/workflows/e2e.yml`, build the production variant as a release, and can also be started on any branch with `workflow_dispatch`.
 - **Database migrations:**
   - **Staging:** `.github/workflows/migrations.yml` applies them after any merge to `main` that changes `supabase/migrations`, usually within 5 minutes (F-04.4). It prints a dry run, then runs `pnpm supabase db push --remote=<ref> --yes`. The "staging" GitHub environment holds a `SUPABASE_ACCESS_TOKEN` secret (a token scoped to the staging project) and a `SUPABASE_PROJECT_REF` variable, both added by the product owner.

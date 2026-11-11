@@ -14,7 +14,11 @@ export function validateDefinition(definition: SyncTableDefinition): SyncTableDe
     throw new Error(`Invalid sync table name: ${definition.name}`);
   }
   for (const column of Object.keys(definition.columns)) {
-    if (!IDENTIFIER.test(column) || (SYSTEM_COLUMNS as readonly string[]).includes(column)) {
+    if (
+      !IDENTIFIER.test(column) ||
+      column.startsWith('sync_') ||
+      (SYSTEM_COLUMNS as readonly string[]).includes(column)
+    ) {
       throw new Error(`Invalid column ${column} on sync table ${definition.name}`);
     }
   }
