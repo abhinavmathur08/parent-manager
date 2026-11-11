@@ -30,7 +30,7 @@ describe('SyncEngine pull', () => {
     const engine = await device();
     await engine.sync();
     expect(await names(engine)).toEqual(['milk']);
-    expect(engine.getStatus()).toEqual({ state: 'idle', lastSyncedAt: expect.any(Number) });
+    expect(engine.getStatus()).toMatchObject({ state: 'idle', lastSyncedAt: expect.any(Number) });
   });
 
   it('shows cached rows after a restart in airplane mode (NFR-OFF-1)', async () => {

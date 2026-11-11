@@ -29,6 +29,12 @@ export class RemoteError extends Error {
 /** The server as the sync engine sees it, so tests can stand in for Supabase. */
 export type SyncRemote = {
   fetchPage(table: string, householdId: string, request: PageRequest): Promise<SyncRow[]>;
+  /** One row, or null if it doesn't exist or the caller can't see it. */
+  fetchRow(table: string, id: string): Promise<SyncRow | null>;
+  /** Creates rows; the server answers with them as stored. */
+  insert(table: string, rows: readonly Record<string, unknown>[]): Promise<SyncRow[]>;
+  /** Updates one row; null if the caller can't see or change it. */
+  update(table: string, id: string, values: Record<string, unknown>): Promise<SyncRow | null>;
 };
 
 type Failure = { message: string; code?: string } | null;
@@ -57,6 +63,32 @@ export function createSupabaseRemote(client: SupabaseClient): SyncRemote {
         .limit(limit);
       if (error) throw toRemoteError(error, status);
       return (data ?? []) as SyncRow[];
+    },
+
+    async fetchRow(table, id) {
+      const { data, error, status } = await client
+        .from(table)
+        .select('*')
+        .eq('id', id)
+        .maybeSingle();
+      if (error) throw toRemoteError(error, status);
+      return (data ?? null) as SyncRow | null;
+    },
+
+    async insert(table, rows) {
+      const { data, error, status } = await client.from(table).insert(rows).select('*');
+      if (error) throw toRemoteError(error, status);
+      return (data ?? []) as SyncRow[];
+    },
+
+    async update(table, id, values) {
+      const { data, error, status } = await client
+        .from(table)
+        .update(values)
+        .eq('id', id)
+        .select('*');
+      if (error) throw toRemoteError(error, status);
+      return ((data ?? [])[0] ?? null) as SyncRow | null;
     },
   };
 }

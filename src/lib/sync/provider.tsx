@@ -3,6 +3,7 @@ import {
   createContext,
   useContext,
   useEffect,
+  useMemo,
   useState,
   useSyncExternalStore,
   type ReactNode,
@@ -17,7 +18,7 @@ import { SyncEngine, type SyncStatus } from '@/lib/sync/engine';
 import { LocalStore } from '@/lib/sync/local-store';
 import { registeredTables } from '@/lib/sync/registry';
 import { createSupabaseRemote } from '@/lib/sync/remote';
-import type { SqlDatabase, SyncRow } from '@/lib/sync/types';
+import type { SqlDatabase, SyncRow, SyncValue } from '@/lib/sync/types';
 
 let database: Promise<SQLiteDatabase> | null = null;
 let current: SyncEngine | null = null;
@@ -99,7 +100,7 @@ export function useSyncEngine(): SyncEngine | null {
   return useContext(SyncContext);
 }
 
-const STARTING: SyncStatus = { state: 'starting', lastSyncedAt: null };
+const STARTING: SyncStatus = { state: 'starting', lastSyncedAt: null, pending: 0, rejected: 0 };
 
 /** What the sync layer is doing, for status UI. */
 export function useSyncStatus(): SyncStatus {
@@ -108,6 +109,27 @@ export function useSyncStatus(): SyncStatus {
     (notify) => engine?.onStatus(notify) ?? (() => undefined),
     () => engine?.getStatus() ?? STARTING,
   );
+}
+
+/**
+ * Local writes for features: shown at once, queued in order, and sent when online
+ * (H-06.3). Throws while the local copy is still opening.
+ */
+export function useSyncWriter() {
+  const engine = useSyncEngine();
+  return useMemo(() => {
+    const ready = () => {
+      if (!engine) throw new Error('The local copy is not open yet');
+      return engine;
+    };
+    return {
+      insert: (table: string, id: string, values: Record<string, SyncValue>) =>
+        ready().insert(table, id, values),
+      update: (table: string, id: string, values: Record<string, SyncValue>) =>
+        ready().update(table, id, values),
+      remove: (table: string, id: string) => ready().remove(table, id),
+    };
+  }, [engine]);
 }
 
 /**
@@ -128,8 +150,8 @@ export function useSyncedRows<T extends SyncRow = SyncRow>(
         (rows) => active && setState({ engine, rows: rows as T[] }),
         () => undefined,
       );
-    const unsubscribe = engine.store.subscribe((tables) => {
-      if (tables.has(table)) void load();
+    const unsubscribe = engine.store.subscribe((change) => {
+      if (change.tables.has(table)) void load();
     });
     void load();
     return () => {
