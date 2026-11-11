@@ -78,7 +78,7 @@ All tables live in Postgres. Every table holding household data has `household_i
 | `households`             | `id`, `name`, `region` (`US`, `GB` or `AU`), `locale` (`en-US`, `en-GB` or `en-AU`), `unit_system` (`us_customary` or `metric`), `timezone`, `week_start` | Region sets the default units, store sections and later holidays.                                                       |
 | `household_members`      | `household_id`, `user_id`, `role` (`parent`, `family` or `caregiver`), `status`, `joined_at`                                                              | Unique on `(household_id, user_id)`. The free tier allows at most 2 members with the `parent` role.                     |
 | `invitations`            | `id`, `household_id`, `role`, `invited_by`, `token_hash`, `email` (optional), `expires_at`, `accepted_by`, `revoked_at`                                   | Accepted by link or short code. Only the token's hash is stored, and a token works once.                                |
-| `household_people`       | `id`, `household_id`, `display_name`, `kind` (`adult` or `child`), `age_band`, `linked_user_id` (optional)                                                | The people being fed, including children without accounts. Age bands, not birth dates (see section 3.3).                |
+| `household_people`       | `id`, `household_id`, `display_name`, `kind` (`adult` or `child`), `age_band`, `due_month` (expecting only), `linked_user_id` (optional)                  | The people being fed, including children without accounts. Age bands, not birth dates (see section 3.3).                |
 | `person_dietary`         | `person_id`, `type` (`allergy`, `diet` or `avoid`), `code`                                                                                                | Codes are fixed identifiers: allergens such as `allergen.peanut`, diets such as `diet.vegetarian`, or an ingredient ID. |
 | `household_entitlements` | `household_id`, `tier` (`free` or `premium`), `status`, `period_ends_at`, `purchaser_user_id`, `rc_app_user_id`, `updated_at`                             | Written only by the RevenueCat webhook (section 8).                                                                     |
 | `app_config`             | `key`, `value`                                                                                                                                            | Minimum supported app version, kill switches. Anyone can read it.                                                       |
@@ -176,7 +176,9 @@ The engine is a set of pure TypeScript functions with no side effects, unit-test
 
 - **Store age bands, not birth dates.** Children are stored as `household_people` with an age band such as `expecting`, `infant_0_6m`, `infant_6_12m`, `toddler`, `preschool` or `older_child`.
 - **No photos, health records or full names are required.** A nickname is enough.
-- **Due date versus age.** Whether onboarding asks for a due date or the baby's age is a vision open question and a **Decision**. If we store a due date, store the month only.
+- **Due month only (D-6).** Onboarding asks "Expecting, or how old is your youngest?". An expecting person has `due_month` as `YYYY-MM` text, which can't hold a day, and the database refuses it for any other age band. Nobody not yet born gets allergies or diets.
+- **Fixed codes.** `person_dietary` accepts only the allergen codes in `catalog-ids.ts` and the diet codes in `src/features/people/codes.ts`. Removing a person soft-deletes their codes with them.
+- **Onboarding is one transaction.** `complete_onboarding()` creates the household, its people and their codes together, so an interrupted onboarding never leaves a household without its answers. Until then the answers stay in the on-device draft (FR-ONB-7).
 - **Allergies and pregnancy status are health-related data.** UK GDPR and some US state laws, such as Washington's My Health My Data Act, treat this kind of data strictly, so legal review must cover it before launch.
 
 ### 3.4 Data export and account deletion coverage
@@ -189,7 +191,7 @@ Export (A-04.2) and deletion must cover every table that holds household data. A
 | `households`             | The household                        | When its only member deletes their account                                                |
 | `household_members`      | All members' roles and join dates    | Cascades from the household                                                               |
 | `invitations`            | Open invitations, without token hash | Cascades from the household                                                               |
-| `household_people`       | All people                           | Cascades from the household                                                               |
+| `household_people`       | All people, with the due month       | Cascades from the household                                                               |
 | `person_dietary`         | All diets and allergies              | Cascades from the household                                                               |
 | `household_entitlements` | Tier and status                      | Cascades from the household                                                               |
 | `ingredients`            | Rows with the household's ID only    | Household rows cascade; catalog rows are never touched                                    |
