@@ -1,0 +1,28 @@
+# Shared steps: sign up a new account with an email code from the local stack's Mailpit
+# inbox. Ends signed in. Not run on its own (config.yaml runs top-level flows only).
+appId: ${APP_ID || 'com.myparentmanager'}
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible:
+      id: sign-in-screen-title
+    timeout: 60000
+- runScript: ../scripts/new-email.js
+- tapOn:
+    id: sign-in-email
+- inputText: ${output.email}
+- hideKeyboard
+- tapOn:
+    id: sign-in-continue
+- extendedWaitUntil:
+    visible:
+      id: verify-screen-title
+    timeout: 20000
+- runScript:
+    file: ../scripts/read-code.js
+    env:
+      EMAIL: ${output.email}
+- tapOn:
+    id: verify-code
+- inputText: ${output.code}
