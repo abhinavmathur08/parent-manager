@@ -4,6 +4,8 @@ import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useMemo } from 'react';
 
+// Registers the Google sign-out cleanup (FR-AUTH-7).
+import '@/features/auth/google';
 import { AuthProvider, useAuth } from '@/features/auth/session';
 import { HouseholdUnavailable } from '@/features/household/household-unavailable';
 import { HouseholdProvider, useHousehold } from '@/features/household/membership';

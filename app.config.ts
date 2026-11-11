@@ -59,6 +59,26 @@ export default ({ config }: ConfigContext): ExpoConfig => {
   return process.env.E2E_LOCAL_BACKEND === '1' ? withLocalBackendCleartext(expoConfig) : expoConfig;
 };
 
+/**
+ * Google sign-in's iOS URL scheme is the iOS client ID reversed
+ * (`com.googleusercontent.apps.<id>`). Without a client ID the plugin is left out: with no
+ * options it would expect Firebase files. The app then hides the Google button
+ * (src/features/auth/provider-config.ts).
+ */
+export function googleSignInPlugins(
+  iosClientId: string | undefined,
+): [string, { iosUrlScheme: string }][] {
+  const id = iosClientId?.trim().replace(/\.apps\.googleusercontent\.com$/, '');
+  return id
+    ? [
+        [
+          '@react-native-google-signin/google-signin',
+          { iosUrlScheme: `com.googleusercontent.apps.${id}` },
+        ],
+      ]
+    : [];
+}
+
 function buildConfig(
   config: ConfigContext['config'],
   variant: AppVariant,
@@ -119,6 +139,7 @@ function buildConfig(
       'expo-secure-store',
       'expo-apple-authentication',
       'expo-web-browser',
+      ...googleSignInPlugins(process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID),
     ],
     experiments: {
       typedRoutes: true,
