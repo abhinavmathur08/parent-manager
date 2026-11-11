@@ -168,6 +168,8 @@ export class SyncEngine {
     try {
       await this.pushAll();
       await this.pullAll();
+      // So the pending count is exact when the sync reports it is done.
+      await this.refreshCounts();
       this.failures = 0;
       this.setStatus({ state: 'idle', lastSyncedAt: this.now() });
     } catch {

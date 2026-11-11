@@ -278,7 +278,7 @@ describe('queue limits', () => {
     const created = Array.from({ length: 250 }, () => crypto.randomUUID());
     for (const id of created) await A.engine.insert(TABLE, id, { name: 'bulk' });
     for (const id of created) await A.engine.update(TABLE, id, { checked: true });
-    expect(A.engine.getStatus().pending).toBe(500);
+    expect(await A.engine.store.pendingCount()).toBe(500);
 
     const start = performance.now();
     await A.goOnline();
