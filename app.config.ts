@@ -136,7 +136,8 @@ function buildConfig(
           ],
         },
       ],
-      'expo-sqlite',
+      // The local copy of household data is encrypted with SQLCipher (H-06.2, FR-AUTH-7).
+      ['expo-sqlite', { useSQLCipher: true }],
       'expo-localization',
       'expo-secure-store',
       'expo-apple-authentication',

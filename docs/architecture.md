@@ -79,7 +79,7 @@ All tables live in Postgres. Every table holding household data has `household_i
 | `household_members`      | `household_id`, `user_id`, `role` (`parent`, `family` or `caregiver`), `status`, `joined_at`                                                              | Unique on `(household_id, user_id)`. The free tier allows at most 2 members with the `parent` role.                     |
 | `invitations`            | `id`, `household_id`, `role`, `invited_by`, `token_hash`, `email` (optional), `expires_at`, `accepted_by`, `revoked_at`                                   | Accepted by link or short code. Only the token's hash is stored, and a token works once.                                |
 | `invite_attempts`        | `user_id`, `attempted_at`                                                                                                                                 | Wrong invite codes and tokens, for the limit of 10 an hour per user (NFR-SEC-8). No client access.                      |
-| `household_people`       | `id`, `household_id`, `display_name`, `kind` (`adult` or `child`), `age_band`, `linked_user_id` (optional)                                                | The people being fed, including children without accounts. Age bands, not birth dates (see section 3.3).                |
+| `household_people`       | `id`, `household_id`, `display_name`, `kind` (`adult` or `child`), `age_band`, `due_month` (expecting only), `linked_user_id` (optional)                  | The people being fed, including children without accounts. Age bands, not birth dates (see section 3.3).                |
 | `person_dietary`         | `person_id`, `type` (`allergy`, `diet` or `avoid`), `code`                                                                                                | Codes are fixed identifiers: allergens such as `allergen.peanut`, diets such as `diet.vegetarian`, or an ingredient ID. |
 | `household_entitlements` | `household_id`, `tier` (`free` or `premium`), `status`, `period_ends_at`, `purchaser_user_id`, `rc_app_user_id`, `updated_at`                             | Written only by the RevenueCat webhook (section 8).                                                                     |
 | `app_config`             | `key`, `value`                                                                                                                                            | Minimum supported app version, kill switches. Anyone can read it.                                                       |
@@ -147,13 +147,13 @@ How the catalog is built (R-01.1):
 
 #### AI, notifications and devices
 
-| Table                | Key columns                                                                                                                      |
-| -------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `ai_import_jobs`     | `id`, `household_id`, `user_id`, `input_type`, `locale`, `region`, `status`, `draft` (JSON), `model`, `cost_units`, `error_code` |
-| `ai_usage`           | `household_id`, `period` (month), `imports_used`                                                                                 |
-| `push_tokens`        | `user_id`, `token`, `platform`, `last_seen_at`                                                                                   |
-| `notification_prefs` | `user_id`, `type`, `enabled`, `quiet_start`, `quiet_end`                                                                         |
-| `notifications`      | `user_id`, `household_id`, `type`, `payload`, `read_at` (the in-app inbox)                                                       |
+| Table                | Key columns                                                                                                                                                   |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ai_import_jobs`     | `id`, `household_id`, `user_id`, `input_type`, `locale`, `region`, `status`, `source`, `reserved_period`, `draft` (JSON), `model`, `cost_units`, `error_code` |
+| `ai_usage`           | `household_id`, `period` (month), `imports_used`                                                                                                              |
+| `push_tokens`        | `user_id`, `token`, `platform`, `last_seen_at`                                                                                                                |
+| `notification_prefs` | `user_id`, `type`, `enabled`, `quiet_start`, `quiet_end`                                                                                                      |
+| `notifications`      | `user_id`, `household_id`, `type`, `payload`, `read_at` (the in-app inbox)                                                                                    |
 
 ### How the grocery list is built
 
@@ -177,26 +177,30 @@ The engine is a set of pure TypeScript functions with no side effects, unit-test
 
 - **Store age bands, not birth dates.** Children are stored as `household_people` with an age band such as `expecting`, `infant_0_6m`, `infant_6_12m`, `toddler`, `preschool` or `older_child`.
 - **No photos, health records or full names are required.** A nickname is enough.
-- **Due date versus age.** Whether onboarding asks for a due date or the baby's age is a vision open question and a **Decision**. If we store a due date, store the month only.
+- **Due month only (D-6).** Onboarding asks "Expecting, or how old is your youngest?". An expecting person has `due_month` as `YYYY-MM` text, which can't hold a day, and the database refuses it for any other age band. Nobody not yet born gets allergies or diets.
+- **Fixed codes.** `person_dietary` accepts only the allergen codes in `catalog-ids.ts` and the diet codes in `src/features/people/codes.ts`. Removing a person soft-deletes their codes with them.
+- **Onboarding is one transaction.** `complete_onboarding()` creates the household, its people and their codes together, so an interrupted onboarding never leaves a household without its answers. Until then the answers stay in the on-device draft (FR-ONB-7).
 - **Allergies and pregnancy status are health-related data.** UK GDPR and some US state laws, such as Washington's My Health My Data Act, treat this kind of data strictly, so legal review must cover it before launch.
 
 ### 3.4 Data export and account deletion coverage
 
 Export (A-04.2) and deletion must cover every table that holds household data. Add a row here with each new table.
 
-| Table                    | Export                               | Deletion                                               |
-| ------------------------ | ------------------------------------ | ------------------------------------------------------ |
-| `profiles`               | The user's own row                   | With the account                                       |
-| `households`             | The household                        | When its only member deletes their account             |
-| `household_members`      | All members' roles and join dates    | Cascades from the household                            |
-| `invitations`            | Open invitations, without token hash | Cascades from the household                            |
-| `invite_attempts`        | Not exported (security record)       | Cascades from the account                              |
-| `household_people`       | All people                           | Cascades from the household                            |
-| `person_dietary`         | All diets and allergies              | Cascades from the household                            |
-| `household_entitlements` | Tier and status                      | Cascades from the household                            |
-| `ingredients`            | Rows with the household's ID only    | Household rows cascade; catalog rows are never touched |
-| `ingredient_names`       | Rows with the household's ID only    | Household rows cascade; catalog rows are never touched |
-| `pantry_items`           | All rows                             | Cascades from the household                            |
+| Table                    | Export                               | Deletion                                                                                  |
+| ------------------------ | ------------------------------------ | ----------------------------------------------------------------------------------------- |
+| `profiles`               | The user's own row                   | With the account                                                                          |
+| `households`             | The household                        | When its only member deletes their account                                                |
+| `household_members`      | All members' roles and join dates    | Cascades from the household                                                               |
+| `invitations`            | Open invitations, without token hash | Cascades from the household                                                               |
+| `invite_attempts`        | Not exported (security record)       | Cascades from the account                                                                 |
+| `household_people`       | All people, with the due month       | Cascades from the household                                                               |
+| `person_dietary`         | All diets and allergies              | Cascades from the household                                                               |
+| `household_entitlements` | Tier and status                      | Cascades from the household                                                               |
+| `ingredients`            | Rows with the household's ID only    | Household rows cascade; catalog rows are never touched                                    |
+| `ingredient_names`       | Rows with the household's ID only    | Household rows cascade; catalog rows are never touched                                    |
+| `pantry_items`           | All rows                             | Cascades from the household                                                               |
+| `ai_import_jobs`         | The user's own jobs, with drafts     | Cascades from the household; `user_id` is set null with the account; purged after 30 days |
+| `ai_usage`               | Monthly counts                       | Cascades from the household                                                               |
 
 ## 4. Row-level security and household isolation
 
@@ -219,6 +223,31 @@ Export (A-04.2) and deletion must cover every table that holds household data. A
 **Decided (D-13, 2026-11-08): we build our own.** There's no sync vendor. The pieces:
 
 - **Local copy:** `expo-sqlite` in `src/lib/sync` holds the household's working data and is read on start (H-06.2).
+
+#### How the sync layer is built (`src/lib/sync`)
+
+- **Generic over tables.** A feature registers its table with `defineSyncTable({ name, columns })`. The server table needs the system columns (`id`, `household_id`, `version`, `created_at`, `updated_at`, `deleted_at`). The engine has no feature tables of its own.
+- **Local copy (H-06.2).** One SQLite table per registered table, with the system columns and the feature's columns, so features can query it with SQL. `sync_meta` records which household the copy belongs to (another household empties it), each table's column list (a change rebuilds that table and pulls it again) and its pull cursor. All access goes through one queue, because expo-sqlite transactions aren't exclusive.
+- **Encrypted.** The file is encrypted with SQLCipher (`useSQLCipher` on the `expo-sqlite` plugin), using a random 256-bit key in SecureStore. A build without SQLCipher keeps no local copy rather than storing it in the clear. Sign-out deletes the file and its key (FR-AUTH-7).
+- **Reading.** `SyncProvider` (mounted by the tab layout) opens the copy for the member's household. `useSyncedRows(table)` reads live rows from it, so cached data shows offline and after restarts (NFR-OFF-1).
+- **Pulling.** A sync runs on start, on reconnecting and when the app returns to the foreground. The first pull lists the household's live rows. Later pulls fetch rows with `updated_at` at or after the newest one seen, less a 60-second overlap so a late commit isn't missed, including tombstones, in `updated_at`, `id` pages. A row replaces the local one only if its `version` is newer, so repeats and late deliveries are harmless. After 30 days away, the device lists everything again and drops rows the server no longer has (NFR-OFF-6).
+- **Local writes and the outbox (H-06.3).** `useSyncWriter()` gives `insert`, `update` and `remove`. Each write is applied to the local copy at once and queued in `sync_outbox`, in order, in the same transaction, so it survives restarts and reboots (NFR-OFF-3). Each row keeps the last row the server sent (its base); what the app reads is the base with its queued writes replayed on top. A pull, a Realtime event or a push response therefore never hides a waiting write, and once the queue drains the row is exactly the server's.
+- **Pushing.** Writes go in order: runs of creates on one table in one request, and updates and deletes to different rows up to 8 at a time, so 500 queued changes sync well within 10 seconds (NFR-OFF-4). Each update carries the `version` it was based on. A failed write is handled by why it failed:
+  - **Waits:** offline, a 401 while the session refreshes, 408, 429 or a 5xx. It's retried with backoff, however long that takes.
+  - **Refused:** RLS (`42501`, for example after the member was removed) or a constraint (`22xxx`, `23xxx`). It leaves the queue at once and the row shows the server's copy again. A count of refused writes is shown to the user (NFR-OFF-6).
+  - **Anything else:** dropped after 8 attempts.
+
+  So nothing can stall the queue, which was the spike's S6 failure. A create retried after a lost response finds the row already there (`23505`) and completes.
+
+- **Server rules.** `private.enable_sync(table, check_columns)` (migration `20261110100000_sync_rules.sql`) gives a feature table the conflict rules below, through two generic triggers:
+  - The server sets `created_at`, `updated_at` and `version`.
+  - A tombstone never changes, and a late edit gets the tombstone back.
+  - Each check column (such as `checked`) records `<column>_at` and `<column>_by`. A write based on an older `version` can't clear it.
+
+  The function also revokes hard deletes, adds the pull index and publishes the table to Realtime. A feature's migration still writes the table's own RLS policies.
+
+- **Pending indicator.** `PendingChangesBanner`, above the tab bar, shows how many changes are waiting until they sync, and how many the server refused.
+- **Two-device harness.** `test-utils/sync/harness` runs two devices (two users, two SQLite files and two engines) against a local stack, through offline edits, a restart and reconnection, and checks every conflict rule. It includes the spike's S4 and S6 failures as regression cases. It runs as the "Sync harness" CI job (`pnpm run test:sync`).
 - **Outbox:** writes are queued in order and survive restarts. The server sets `updated_at` and `version`, and deletes are soft (H-06.3).
 - **Realtime:** Supabase Realtime, filtered by household, applies remote changes to the local copy (H-06.4).
 
@@ -244,6 +273,13 @@ Most edits are small and touch different rows, so simple rules are enough:
 ### Realtime
 
 - **What we subscribe to:** Supabase Realtime database-change events on the household's tables, filtered by `household_id`. Realtime enforces RLS on what each client receives.
+- **How (H-06.4):**
+  - The engine joins one channel per household (`sync:<household_id>`), with a `postgres_changes` listener per registered table filtered by `household_id`. `private.enable_sync()` adds each table to the `supabase_realtime` publication.
+  - An event is applied like a pulled row: only if its `version` is newer, and with queued writes replayed on top. An event missing a column (a large unchanged value) is fetched whole.
+  - Each (re)join pulls once, to catch up on what was missed while disconnected.
+  - `SyncProvider` listens only while the app is online and in the foreground.
+  - The harness measures delivery between two devices against the 2-second p95 target (FR-HH-13, NFR-PERF-3).
+- **Removed members:** Realtime checks RLS for every change, through `private.household_role()`, so a removed member stops receiving changes at once, and the harness checks this. When the app next loads membership and finds the user no longer belongs to the household, it deletes the local copy (`resetSync`).
 - **Presence:** "Sam is shopping" is optional polish for later.
 
 ## 6. AI recipe import
@@ -251,9 +287,11 @@ Most edits are small and touch different rows, so simple rules are enough:
 ### Pipeline
 
 1. **Client:** the parent picks the input: a link, pasted text, a screenshot or a camera photo. Images are compressed on the device and uploaded to the temporary import bucket.
-2. **Edge Function `import-recipe`:** checks the session and household, then reserves quota with an atomic `ai_usage` increment. A failed import releases the reservation.
+2. **Edge Function `import-recipe`:** checks the session, then starts a job with `ai_import_start()`, which refuses caregivers and members over the hourly limit. Right before a parser call it reserves one import with `ai_import_reserve()`, a conditional upsert on the `ai_usage` row, so concurrent requests queue on its lock and can't pass the allowance. `ai_import_finish()` records the outcome, and a failure releases the reservation. These RPCs are callable only by the service role.
 3. **Extraction:**
-   - **Links:** the server fetches the page with SSRF guards: http and https only, no private IP addresses, a size cap and a timeout. If the page has schema.org `Recipe` data embedded, it's parsed directly with no LLM call, which is cheaper and exact. Otherwise the readable text is extracted.
+   - **Links:** the server fetches the page with SSRF guards (`fetch_page.ts`): http and https on default ports only, no credentials in the URL, and every resolved address public (no private, loopback, link-local, metadata or IPv6 forms of them). Redirects are followed by hand, at most 3, and each hop is checked again. Pages are HTML only, capped at 2 MB and 10 seconds. The runtime's fetch resolves the host again, so DNS rebinding between check and fetch is a known remaining risk.
+   - **Embedded data:** if the page has a complete schema.org `Recipe` (a title, ingredients and steps), it's parsed directly with no LLM call, which is cheaper and exact, and the import doesn't count. Its ingredient lines keep their original text with zero confidence until normalization (R-05.3) matches them to the catalog.
+   - **Otherwise** the readable text is extracted (scripts, styles and page furniture removed, capped at 20,000 characters) and goes to the parser like pasted text.
    - **Text:** used as given.
    - **Images:** passed to the LLM's image input.
 4. **LLM parsing** with a strict JSON output schema:
@@ -275,9 +313,12 @@ Voice import is out of the MVP. The vision lists it, but it adds speech-recognit
 
 ### Usage limits
 
-- **Monthly allowance per household:** a small number on Free and a large one on Premium. The exact numbers are a **Decision**, which the vision lists as an open question.
-- **Rate limits:** a per-user limit (for example 10 per hour) and a hard ceiling on cost per job.
-- **What counts:** only successful parses count against the allowance. Embedded schema.org imports that need no LLM call could be free.
+- **Monthly allowance per household (D-9):** 5 on Free and 100 on Premium (its fair-use cap), per calendar month in the household's timezone.
+- **Rate limits:** 10 import attempts per member per rolling hour, and a hard ceiling on cost per job (R-05.3).
+- **Server settings:** all of these live in `app_config` under `ai_import.limits`, read on every request, so they're tuned without a release.
+- **What counts:** only successful parses count against the allowance. Embedded schema.org imports that need no LLM call are free, and never reserve.
+- **Housekeeping:** a `pg_cron` job every 10 minutes fails jobs stuck processing for over 2 minutes (releasing their reservation) and purges job records older than 30 days (NFR-SEC-9).
+- **The app's view:** `ai_import_allowance()` returns used, total and the reset date for the import screen (FR-AI-2, FR-AI-10).
 
 ### Privacy
 
@@ -352,7 +393,7 @@ Supabase Auth, with:
 
 ### CI/CD
 
-- **On every PR:** lint, formatting, types, unit tests and an Expo dependency check, plus pgTAP database tests against a local Supabase stack ("Database tests", F-04.1) and Deno tests for Edge Functions ("Edge Function tests", F-04.2).
+- **On every PR:** lint, formatting, types, unit tests and an Expo dependency check, plus pgTAP database tests against a local Supabase stack ("Database tests", F-04.1), Deno tests for Edge Functions ("Edge Function tests", F-04.2) and the two-device sync harness ("Sync harness", H-06.3).
 - **On `main`:** E2E with Maestro on Android (an emulator on Linux) and iOS (a simulator on a macOS runner, which is free for a public repo, with Xcode 26.4 or later, F-04.3). Both jobs live in `.github/workflows/e2e.yml`, build the production variant as a release, and can also be started on any branch with `workflow_dispatch`.
 - **Database migrations:**
   - **Staging:** `.github/workflows/migrations.yml` applies them after any merge to `main` that changes `supabase/migrations`, usually within 5 minutes (F-04.4). It prints a dry run, then runs `pnpm supabase db push --remote=<ref> --yes`. The "staging" GitHub environment holds a `SUPABASE_ACCESS_TOKEN` secret (a token scoped to the staging project) and a `SUPABASE_PROJECT_REF` variable, both added by the product owner.

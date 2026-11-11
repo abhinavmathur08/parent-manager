@@ -68,6 +68,7 @@
     "catalog:check": "node scripts/catalog-seed.js --check",
     "catalog:seed": "node scripts/catalog-seed.js --new",
     "test:db": "supabase test db",
+    "test:sync": "jest --config test-utils/sync/harness/jest.config.js --ci --runInBand",
     "test:functions": "deno test --permit-no-files --lock=supabase/functions/deno.lock supabase/functions",
     "update:preview": "APP_VARIANT=preview pnpm dlx eas-cli@latest update --channel preview --environment preview",
     "email:check": "node scripts/email-templates.js --check",

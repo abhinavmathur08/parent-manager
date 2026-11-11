@@ -12,7 +12,11 @@ import { AppState } from 'react-native';
 
 import { useAuth } from '@/features/auth/session';
 import { onSignOut } from '@/features/auth/sign-out';
-import { clearHouseholdData, removalSeen } from '@/features/household/access-lost';
+import {
+  clearHouseholdData,
+  onHouseholdAccessLost,
+  removalSeen,
+} from '@/features/household/access-lost';
 import { MEMBER_ROLES, type MemberRole } from '@/features/household/invitations';
 import { fetchMembershipStatus } from '@/features/household/leave';
 import { REGIONS } from '@/features/household/region';
@@ -24,6 +28,10 @@ import {
   type UnitSystem,
 } from '@/i18n';
 import { getSupabase } from '@/lib/supabase';
+import { resetSync } from '@/lib/sync';
+
+// Losing the household (removed, paused or left) clears the synced copy on this device (H-06.4).
+onHouseholdAccessLost(resetSync);
 
 /** The household the signed-in user belongs to. Phase 1 allows one per account. */
 export type Membership = {

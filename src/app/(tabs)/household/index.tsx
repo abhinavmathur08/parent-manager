@@ -29,6 +29,12 @@ export default function HouseholdScreen() {
         testID="open-members"
       />
       <ListRow
+        title={t('people.title')}
+        variant="navigation"
+        onPress={() => router.push('/household/people')}
+        testID="open-people"
+      />
+      <ListRow
         title={t('household.settings.title')}
         variant="navigation"
         onPress={() => router.push('/household/settings')}
