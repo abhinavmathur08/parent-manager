@@ -265,6 +265,13 @@ Most edits are small and touch different rows, so simple rules are enough:
 ### Realtime
 
 - **What we subscribe to:** Supabase Realtime database-change events on the household's tables, filtered by `household_id`. Realtime enforces RLS on what each client receives.
+- **How (H-06.4):**
+  - The engine joins one channel per household (`sync:<household_id>`), with a `postgres_changes` listener per registered table filtered by `household_id`. `private.enable_sync()` adds each table to the `supabase_realtime` publication.
+  - An event is applied like a pulled row: only if its `version` is newer, and with queued writes replayed on top. An event missing a column (a large unchanged value) is fetched whole.
+  - Each (re)join pulls once, to catch up on what was missed while disconnected.
+  - `SyncProvider` listens only while the app is online and in the foreground.
+  - The harness measures delivery between two devices against the 2-second p95 target (FR-HH-13, NFR-PERF-3).
+- **Removed members:** Realtime checks RLS for every change, through `private.household_role()`, so a removed member stops receiving changes at once, and the harness checks this. When the app next loads membership and finds the user no longer belongs to the household, it deletes the local copy (`resetSync`).
 - **Presence:** "Sam is shopping" is optional polish for later.
 
 ## 6. AI recipe import

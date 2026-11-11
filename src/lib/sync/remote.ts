@@ -35,6 +35,19 @@ export type SyncRemote = {
   insert(table: string, rows: readonly Record<string, unknown>[]): Promise<SyncRow[]>;
   /** Updates one row; null if the caller can't see or change it. */
   update(table: string, id: string, values: Record<string, unknown>): Promise<SyncRow | null>;
+  /**
+   * Listens for changes to the household's rows of `tables` (H-06.4). The server applies
+   * RLS to each change, so a removed member stops receiving them. Returns a function that
+   * stops listening.
+   */
+  subscribe(householdId: string, tables: readonly string[], listener: ChangeListener): () => void;
+};
+
+export type RealtimeState = 'off' | 'connecting' | 'connected';
+
+export type ChangeListener = {
+  onRow(table: string, row: SyncRow): void;
+  onState(state: RealtimeState): void;
 };
 
 type Failure = { message: string; code?: string } | null;
@@ -89,6 +102,31 @@ export function createSupabaseRemote(client: SupabaseClient): SyncRemote {
         .select('*');
       if (error) throw toRemoteError(error, status);
       return ((data ?? [])[0] ?? null) as SyncRow | null;
+    },
+
+    subscribe(householdId, tables, listener) {
+      const channel = client.channel(`sync:${householdId}`);
+      for (const table of tables) {
+        channel.on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table, filter: `household_id=eq.${householdId}` },
+          (payload) => {
+            // Rows are only ever soft-deleted, so inserts and updates carry everything.
+            if (payload.eventType !== 'DELETE') listener.onRow(table, payload.new as SyncRow);
+          },
+        );
+      }
+      channel.subscribe((status) => {
+        // The client rejoins by itself after an error or a timeout.
+        if (status === 'SUBSCRIBED') listener.onState('connected');
+        else if (status === 'CLOSED') listener.onState('off');
+        else listener.onState('connecting');
+      });
+      listener.onState('connecting');
+      return () => {
+        void client.removeChannel(channel);
+        listener.onState('off');
+      };
     },
   };
 }
