@@ -14,6 +14,7 @@ import { onSignOut } from '@/features/auth/sign-out';
 import { REGIONS } from '@/features/household/region';
 import { setAppLocale, SUPPORTED_LOCALES, type AppLocale, type Region } from '@/i18n';
 import { getSupabase } from '@/lib/supabase';
+import { resetSync } from '@/lib/sync';
 
 /** The household the signed-in user belongs to. Phase 1 allows one per account. */
 export type Membership = { householdId: string; region: Region; locale: AppLocale };
@@ -94,6 +95,8 @@ export function HouseholdProvider({ children }: { children: ReactNode }) {
     if (!userId) return null;
     try {
       const membership = await fetchMembership(userId);
+      // Removed from the household: its data leaves this device too (H-06.4).
+      if (!membership && readCache(userId)) void resetSync().catch(() => undefined);
       writeCache(userId, membership);
       return { userId, state: membership ? { status: 'member', membership } : { status: 'none' } };
     } catch {

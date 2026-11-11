@@ -1,5 +1,5 @@
 // Job records and the allowance, through the database RPCs in migration
-// 20261110100000_ai_import_jobs.sql. Only the service role may call them.
+// 20261111100000_ai_import_jobs.sql. Only the service role may call them.
 
 import type { DraftSource, InputType, Locale, RecipeDraft, Region } from './types.ts';
 
