@@ -457,6 +457,12 @@
     "needsPasscode": "Set up Face ID, a fingerprint or a passcode on this device to use the lock.",
     "turnedOff": "The app lock is off because this device has no Face ID, fingerprint or passcode."
   },
+  "sync": {
+    "pending_one": "{{count}} change waiting to sync",
+    "pending_other": "{{count}} changes waiting to sync",
+    "rejected_one": "{{count}} change couldn't be saved, because the household no longer accepts it.",
+    "rejected_other": "{{count}} changes couldn't be saved, because the household no longer accepts them."
+  },
   "people": {
     "ageBand": "Age",
     "ageBands": {

@@ -56,6 +56,31 @@ jobs:
       - name: Run pgTAP tests
         run: pnpm run test:db
 
+  sync:
+    name: Sync harness
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6 # version comes from packageManager in package.json
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # Postgres, Auth, the API gateway and Realtime: the harness signs in two users and
+      # syncs through PostgREST and Realtime, as devices do.
+      - name: Start local Supabase and apply migrations
+        run: pnpm supabase start -x storage-api,imgproxy,mailpit,postgres-meta,studio,edge-runtime,logflare,vector,supavisor
+      - name: Add the harness table
+        run: docker exec -i supabase_db_parent-manager psql -v ON_ERROR_STOP=1 -U postgres -d postgres < test-utils/sync/harness/schema.sql
+      - name: Run the two-device harness
+        run: |
+          pnpm supabase status -o env > "$RUNNER_TEMP/status.env"
+          sed 's/=.*//' "$RUNNER_TEMP/status.env" # variable names only
+          set -a; . "$RUNNER_TEMP/status.env"; set +a
+          pnpm run test:sync
+
   functions:
     name: Edge Function tests
     runs-on: ubuntu-latest
