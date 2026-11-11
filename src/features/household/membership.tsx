@@ -11,12 +11,18 @@ import {
 
 import { useAuth } from '@/features/auth/session';
 import { onSignOut } from '@/features/auth/sign-out';
+import { MEMBER_ROLES, type MemberRole } from '@/features/household/invitations';
 import { REGIONS } from '@/features/household/region';
 import { setAppLocale, SUPPORTED_LOCALES, type AppLocale, type Region } from '@/i18n';
 import { getSupabase } from '@/lib/supabase';
 
 /** The household the signed-in user belongs to. Phase 1 allows one per account. */
-export type Membership = { householdId: string; region: Region; locale: AppLocale };
+export type Membership = {
+  householdId: string;
+  role: MemberRole;
+  region: Region;
+  locale: AppLocale;
+};
 
 export type HouseholdState =
   | { status: 'loading' }
@@ -43,7 +49,8 @@ function readCache(userId: string): Membership | null {
     const stored = Storage.getItemSync(CACHE_KEY);
     if (!stored) return null;
     const { userId: owner, ...membership } = JSON.parse(stored) as Cached;
-    return owner === userId ? membership : null;
+    // A cache from before roles were saved is ignored, so the next load fills it in.
+    return owner === userId && membership.role ? membership : null;
   } catch {
     return null;
   }
@@ -60,13 +67,17 @@ function writeCache(userId: string, membership: Membership | null) {
 
 onSignOut(() => writeCache('', null));
 
-type Row = { household_id: string; households: { region: string; locale: string } | null };
+type Row = {
+  household_id: string;
+  role: string;
+  households: { region: string; locale: string } | null;
+};
 
 /** Reads the caller's active membership. RLS returns only households they belong to. */
 export async function fetchMembership(userId: string): Promise<Membership | null> {
   const { data, error } = await getSupabase()
     .from('household_members')
-    .select('household_id, households(region, locale)')
+    .select('household_id, role, households(region, locale)')
     .eq('user_id', userId)
     .eq('status', 'active')
     .is('deleted_at', null)
@@ -81,7 +92,10 @@ export async function fetchMembership(userId: string): Promise<Membership | null
   const locale = (SUPPORTED_LOCALES as readonly string[]).includes(household.locale)
     ? (household.locale as AppLocale)
     : 'en-US';
-  return { householdId: data.household_id, region, locale };
+  const role = (MEMBER_ROLES as readonly string[]).includes(data.role)
+    ? (data.role as MemberRole)
+    : 'caregiver';
+  return { householdId: data.household_id, role, region, locale };
 }
 
 /** Follows whether the signed-in user has a household, for the onboarding guard (FR-ONB-1). */
