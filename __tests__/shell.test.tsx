@@ -21,6 +21,22 @@ jest.mock('@/features/auth/session', () => ({
       ? { status: 'signedIn', session: { user: { id: 'user-1' } } }
       : { status: 'signedOut' },
 }));
+let mockHousehold: 'member' | 'none' = 'member';
+
+jest.mock('@/features/household/membership', () => ({
+  HouseholdProvider: ({ children }: { children: React.ReactNode }) => children,
+  useHousehold: () => ({
+    state:
+      mockHousehold === 'member'
+        ? { status: 'member', membership: { householdId: 'h1', region: 'US', locale: 'en-US' } }
+        : { status: 'none' },
+    refresh: async () => undefined,
+  }),
+}));
+jest.mock('@/features/onboarding/profile', () => ({
+  fetchDisplayName: async () => null,
+  saveDisplayName: async () => undefined,
+}));
 jest.mock('expo-network', () => ({
   useNetworkState: () => ({ isConnected: true, isInternetReachable: true }),
 }));
@@ -52,6 +68,14 @@ function flat(testID: string) {
 describe('navigation shell', () => {
   afterEach(() => {
     mockAuthStatus = 'signedIn';
+    mockHousehold = 'member';
+  });
+
+  it('opens on onboarding when signed in without a household', async () => {
+    mockHousehold = 'none';
+    await renderRouter(`${process.cwd()}/src/app`, { initialUrl: '/' });
+    expect(await screen.findByTestId('welcome-screen')).toBeOnTheScreen();
+    expect(screen.queryByTestId('tab-bar')).toBeNull();
   });
 
   it('opens on sign-in when signed out, and the tabs are out of reach', async () => {
