@@ -1,4 +1,5 @@
 import { router } from 'expo-router';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/button';
@@ -8,11 +9,16 @@ import { PlaceholderScreen } from '@/components/placeholder-screen';
 import { Text } from '@/components/text';
 import { signOut } from '@/features/auth/sign-out';
 import { LockSettingsSection } from '@/features/biometric/lock-settings';
+import { InviteSheet } from '@/features/household/invite-sheet';
+import { useHousehold } from '@/features/household/membership';
 import { supabaseConfig } from '@/lib/supabase-config';
 
 // Placeholder until the household feature from docs/backlog.md lands.
 export default function HouseholdScreen() {
   const { t } = useTranslation();
+  const household = useHousehold().state;
+  const isParent = household.status === 'member' && household.membership.role === 'parent';
+  const [inviting, setInviting] = useState(false);
   return (
     <PlaceholderScreen title={t('tabs.household')} icon="household" testID="household-screen">
       <Card testID="household-status">
@@ -28,6 +34,16 @@ export default function HouseholdScreen() {
         onPress={() => router.push('/household/people')}
         testID="open-people"
       />
+      {/* Moves to the members screen (S-26, H-04.1). Only parents invite (FR-HH-1). */}
+      {isParent ? (
+        <Button
+          label={t('household.invite.open')}
+          icon="add"
+          onPress={() => setInviting(true)}
+          fullWidth
+          testID="open-invite"
+        />
+      ) : null}
       {__DEV__ ? (
         <ListRow
           title={t('gallery.title')}
@@ -47,6 +63,7 @@ export default function HouseholdScreen() {
         fullWidth
         testID="sign-out"
       />
+      <InviteSheet visible={inviting} onClose={() => setInviting(false)} />
     </PlaceholderScreen>
   );
 }

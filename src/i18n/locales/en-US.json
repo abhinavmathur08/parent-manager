@@ -503,5 +503,47 @@
   },
   "format": {
     "listSeparator": ", "
+  },
+  "household": {
+    "roles": {
+      "parent": "Parent",
+      "family": "Family member",
+      "caregiver": "Caregiver"
+    },
+    "invite": {
+      "open": "Invite someone",
+      "title": "Invite someone",
+      "roleDescription": {
+        "parent": "Your partner. Parents manage the household, its members and settings.",
+        "family": "A grandparent or relative who helps plan meals and shop.",
+        "caregiver": "A nanny or babysitter. They see the plan and list, and check things off."
+      },
+      "unavailable": {
+        "seat_limit": "Your household already has 2 parents, the most it can have.",
+        "premium_required": "Family members and caregivers are part of Premium."
+      },
+      "upgradeTitle": "Invite more helpers with Premium",
+      "upgradeBody": "Premium adds up to 6 family members and caregivers. Upgrading from the app is coming soon.",
+      "create": "Create invite",
+      "codeLabel": "Invite code",
+      "codeA11y": "Invite code {{code}}",
+      "expires": "{{forRole}}. Works once, until {{date}}.",
+      "share": "Share invite",
+      "copy": "Copy invite",
+      "copied": "Copied",
+      "shareMessage": "Join our household on Parent Manager {{asRole}}. Open the app, choose \"Join with an invite\" and enter this code: {{code}}. It works once, for 7 days.",
+      "shareMessageWithLink": "Join our household on Parent Manager {{asRole}}: {{link}}\nOr open the app, choose \"Join with an invite\" and enter this code: {{code}}. It works once, for 7 days.",
+      "offline": "You're offline. Connect to the internet to create an invite.",
+      "asRole": {
+        "parent": "as a parent",
+        "family": "as a family member",
+        "caregiver": "as a caregiver"
+      },
+      "forRole": {
+        "parent": "For a parent",
+        "family": "For a family member",
+        "caregiver": "For a caregiver"
+      }
+    }
   }
 }

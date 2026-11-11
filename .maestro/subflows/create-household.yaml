@@ -1,0 +1,28 @@
+# Shared steps: a new account names itself and creates a household with the default name
+# and region, ending on the Plan tab. Not run on its own (config.yaml runs top-level flows only).
+appId: ${APP_ID || 'com.myparentmanager'}
+---
+- runFlow: sign-up-with-email.yaml
+- extendedWaitUntil:
+    visible:
+      id: welcome-name
+    timeout: 20000
+- tapOn:
+    id: welcome-name
+- inputText: ${NAME || 'Sam'}
+- hideKeyboard
+- tapOn:
+    id: welcome-create
+- extendedWaitUntil:
+    visible:
+      id: create-household-screen-title
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: create-household-continue
+- tapOn:
+    id: create-household-continue
+- extendedWaitUntil:
+    visible:
+      id: plan-screen-title
+    timeout: 20000
