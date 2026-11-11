@@ -410,6 +410,29 @@
       "title": "We can't load your household",
       "body": "Check your connection, then try again.",
       "retry": "Try again"
+    },
+    "skip": "Skip for now",
+    "people": {
+      "title": "Who are you feeding?",
+      "subtitle": "We use this to suggest how much to cook. Nicknames are fine, and we never ask for birthdays.",
+      "adults": "Adults",
+      "you": "You",
+      "adultLabel": "Another adult",
+      "adultName": "Adult {{n}}",
+      "addAdult": "Add an adult",
+      "children": "Children",
+      "childLabel": "Name or nickname",
+      "childName": "Child {{n}}",
+      "babyName": "Baby",
+      "youngestQuestion": "Expecting, or how old is your youngest?",
+      "anotherChild": "Add another child: how old?",
+      "remove": "Remove {{name}}",
+      "continue": "Continue"
+    },
+    "allergies": {
+      "title": "Allergies and diets",
+      "subtitle": "We'll flag recipes that contain these allergens. You can change this any time.",
+      "finish": "Finish"
     }
   },
   "biometric": {
@@ -433,5 +456,27 @@
     "timeoutMinutes_other": "After {{minutes}} minutes",
     "needsPasscode": "Set up Face ID, a fingerprint or a passcode on this device to use the lock.",
     "turnedOff": "The app lock is off because this device has no Face ID, fingerprint or passcode."
+  },
+  "people": {
+    "ageBand": "Age",
+    "ageBands": {
+      "expecting": "Expecting",
+      "infant_0_6m": "0 to 6 months",
+      "infant_6_12m": "6 to 12 months",
+      "toddler": "Toddler",
+      "preschool": "Preschool",
+      "older_child": "Older child",
+      "adult": "Adult"
+    },
+    "dueMonth": "Due month (optional)",
+    "allergies": "Allergies",
+    "dietsLabel": "Diets",
+    "diets": {
+      "vegetarian": "Vegetarian",
+      "vegan": "Vegan",
+      "pescatarian": "Pescatarian",
+      "halal": "Halal",
+      "kosher": "Kosher"
+    }
   }
 }

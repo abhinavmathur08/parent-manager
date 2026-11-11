@@ -5,27 +5,14 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
-import { Banner } from '@/components/banner';
 import { Button } from '@/components/button';
 import { RadioOption } from '@/components/radio-option';
 import { Screen } from '@/components/screen';
 import { Text } from '@/components/text';
 import { TextField } from '@/components/text-field';
-import { authErrorKey } from '@/features/auth/auth-errors';
-import { useHousehold } from '@/features/household/membership';
-import {
-  deviceRegion,
-  deviceTimeZone,
-  REGION_SETTINGS,
-  REGIONS,
-} from '@/features/household/region';
-import {
-  createHousehold,
-  isAlreadyMember,
-  MAX_HOUSEHOLD_NAME,
-} from '@/features/onboarding/create-household';
+import { deviceRegion, REGION_SETTINGS, REGIONS } from '@/features/household/region';
+import { MAX_HOUSEHOLD_NAME } from '@/features/onboarding/create-household';
 import { useOnboardingDraft } from '@/features/onboarding/draft';
-import { useOnline } from '@/hooks/use-online';
 import { useTheme } from '@/hooks/use-theme';
 import { displayQuantity, formatDate, formatQuantity, type Region } from '@/i18n';
 
@@ -61,11 +48,8 @@ export function regionDescription(region: Region, t: TFunction) {
 export function CreateHouseholdScreen({ displayName }: { displayName: string | null }) {
   const { t } = useTranslation();
   const theme = useTheme();
-  const online = useOnline();
-  const { refresh } = useHousehold();
-  const [draft, setDraft, clearDraft] = useOnboardingDraft();
+  const [draft, setDraft] = useOnboardingDraft();
   const [error, setError] = useState<string>();
-  const [creating, setCreating] = useState(false);
   const [deviceDefault] = useState(readDeviceRegion);
 
   const defaultName = displayName
@@ -78,26 +62,14 @@ export function CreateHouseholdScreen({ displayName }: { displayName: string | n
     [t],
   );
 
-  async function submit() {
+  // The household is created at the end of step 4, with its people (FR-ONB-2).
+  function submit() {
     if (householdName.trim() === '') {
       setError(t('onboarding.household.nameRequired'));
       return;
     }
-    setCreating(true);
-    setError(undefined);
-    try {
-      await createHousehold({ name: householdName, region, timezone: deviceTimeZone() });
-    } catch (caught) {
-      if (!isAlreadyMember(caught)) {
-        setError(t(`auth.errors.${authErrorKey(caught)}`));
-        setCreating(false);
-        return;
-      }
-    }
-    // The household guard moves the app to the Plan tab once the membership is loaded.
-    clearDraft();
-    await refresh();
-    setCreating(false);
+    setDraft((d) => ({ ...d, householdName, region, step: 'people' }));
+    router.push('/people');
   }
 
   return (
@@ -110,11 +82,6 @@ export function CreateHouseholdScreen({ displayName }: { displayName: string | n
       }}
       hasTabBar={false}
       testID="create-household-screen"
-      banner={
-        online ? null : (
-          <Banner variant="offline" message={t('auth.offline')} testID="offline-banner" />
-        )
-      }
     >
       <TextField
         label={t('onboarding.household.name')}
@@ -127,7 +94,6 @@ export function CreateHouseholdScreen({ displayName }: { displayName: string | n
         maxLength={MAX_HOUSEHOLD_NAME}
         autoCapitalize="words"
         returnKeyType="done"
-        disabled={creating}
         testID="household-name"
       />
       <View style={{ gap: theme.space[2] }}>
@@ -144,7 +110,6 @@ export function CreateHouseholdScreen({ displayName }: { displayName: string | n
             description={descriptions[r]}
             selected={region === r}
             onPress={() => setDraft((d) => ({ ...d, region: r }))}
-            disabled={creating}
             testID={`region-${r}`}
           />
         ))}
@@ -152,9 +117,6 @@ export function CreateHouseholdScreen({ displayName }: { displayName: string | n
       <Button
         label={t('onboarding.household.continue')}
         onPress={submit}
-        loading={creating}
-        disabled={!online || creating}
-        accessibilityHint={creating ? t('onboarding.household.creating') : undefined}
         fullWidth
         testID="create-household-continue"
       />
