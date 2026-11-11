@@ -25,6 +25,17 @@ export function formatDate(
   return new Intl.DateTimeFormat(locale, options).format(date);
 }
 
+/**
+ * A short list such as "Peanuts, Egg and Milk", in the locale's list format. Hermes may not
+ * have Intl.ListFormat, so it falls back to the locale file's separator.
+ */
+export function formatList(items: readonly string[], locale: string): string {
+  if (typeof Intl.ListFormat === 'function') {
+    return new Intl.ListFormat(locale, { style: 'long', type: 'conjunction' }).format(items);
+  }
+  return items.join(i18n.getFixedT(locale)('format.listSeparator'));
+}
+
 const FRACTIONS: Record<number, string> = { 0.25: '¼', 0.5: '½', 0.75: '¾' };
 
 /** 1.5 becomes "1½" and 0.25 becomes "¼". Other values fall back to locale decimals. */

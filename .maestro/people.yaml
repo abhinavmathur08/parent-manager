@@ -1,0 +1,86 @@
+# H-05: a parent adds a child with an allergy on S-28 and sees it listed with the disclaimer.
+# Onboarding is skipped through. Removal is covered by unit and database tests. Ends signed out.
+# Needs the local stack; see the Testing section of README.md.
+appId: ${APP_ID || 'com.myparentmanager'}
+tags:
+  - backend
+---
+- runFlow: subflows/sign-up-with-email.yaml
+- extendedWaitUntil:
+    visible:
+      id: welcome-name
+    timeout: 20000
+- tapOn:
+    id: welcome-name
+- inputText: Sam
+- hideKeyboard
+- tapOn:
+    id: welcome-create
+- extendedWaitUntil:
+    visible:
+      id: create-household-screen-title
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: create-household-continue
+- tapOn:
+    id: create-household-continue
+- scrollUntilVisible:
+    element:
+      id: people-skip
+- tapOn:
+    id: people-skip
+- scrollUntilVisible:
+    element:
+      id: allergies-skip
+- tapOn:
+    id: allergies-skip
+- extendedWaitUntil:
+    visible:
+      id: plan-screen-title
+    timeout: 20000
+# S-25 to S-28.
+- tapOn:
+    id: tab-household
+- tapOn:
+    id: open-people
+- extendedWaitUntil:
+    visible:
+      id: person-0
+    timeout: 10000
+- assertVisible:
+    id: people-disclaimer
+- tapOn:
+    id: people-add
+- tapOn:
+    id: person-name
+- inputText: Mo
+- hideKeyboard
+- tapOn:
+    id: person-band-toddler
+- scrollUntilVisible:
+    element:
+      id: person-allergen.peanut
+- tapOn:
+    id: person-allergen.peanut
+- tapOn:
+    id: person-save
+- extendedWaitUntil:
+    visible:
+      text: '.*Toddler · Peanuts.*'
+    timeout: 10000
+- assertVisible:
+    id: people-disclaimer
+- tapOn:
+    id: people-profiles-title-back
+- tapOn:
+    id: tab-household
+- scrollUntilVisible:
+    element:
+      id: sign-out
+- tapOn:
+    id: sign-out
+- extendedWaitUntil:
+    visible:
+      id: sign-in-screen-title
+    timeout: 10000
