@@ -1,6 +1,8 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { roleChangeAvailability } from '@/features/household/member-sheet';
+import type { Member } from '@/features/household/members';
 import { MembersScreen } from '@/features/household/members-screen';
 
 const mockRpc = jest.fn();
@@ -68,6 +70,22 @@ beforeEach(() => {
   ];
 });
 
+const member = (role: Member['role']): Member => ({
+  userId: 'u',
+  role,
+  joinedAt: '2026-11-01',
+  displayName: null,
+});
+
+describe('role change rules (FR-HH-10, FR-HH-14)', () => {
+  it('keeps two parents at most and always one parent', () => {
+    expect(roleChangeAvailability(member('caregiver'), 'parent', 2, true)).toBe('seat_limit');
+    expect(roleChangeAvailability(member('caregiver'), 'parent', 1, true)).toBe('available');
+    expect(roleChangeAvailability(member('parent'), 'family', 1, true)).toBe('last_parent');
+    expect(roleChangeAvailability(member('parent'), 'family', 2, false)).toBe('premium_required');
+  });
+});
+
 describe('S-26 members and invitations (FR-HH-9, FR-HH-10)', () => {
   it('lists members with roles and join dates, and pending invites with expiry', async () => {
     await renderScreen();
@@ -84,11 +102,39 @@ describe('S-26 members and invitations (FR-HH-9, FR-HH-10)', () => {
     expect(mockRpc).toHaveBeenCalledWith('revoke_invitation', { invitation_id: 'i1' });
   });
 
+  it('changes a role and removes a member after confirming', async () => {
+    await renderScreen();
+    await fireEvent.press(await screen.findByTestId('member-1'));
+    await fireEvent.press(screen.getByTestId('member-role-family'));
+    expect(mockRpc).toHaveBeenCalledWith('change_member_role', {
+      household_id: 'h1',
+      user_id: 'c1',
+      role: 'family',
+    });
+
+    await fireEvent.press(await screen.findByTestId('member-1'));
+    await fireEvent.press(screen.getByTestId('member-remove'));
+    expect(screen.getByTestId('member-remove-warning')).toHaveTextContent(/Rosa will lose access/);
+    expect(mockRpc).not.toHaveBeenCalledWith('remove_member', expect.anything());
+    await fireEvent.press(screen.getByTestId('member-remove-confirm'));
+    expect(mockRpc).toHaveBeenCalledWith('remove_member', { household_id: 'h1', user_id: 'c1' });
+  });
+
+  it('shows a server refusal', async () => {
+    mockRpc.mockResolvedValue({ data: null, error: { hint: 'member.seat_limit' } });
+    await renderScreen();
+    await fireEvent.press(await screen.findByTestId('member-1'));
+    await fireEvent.press(screen.getByTestId('member-role-family'));
+    expect(await screen.findByTestId('member-error')).toHaveTextContent(/no free place/);
+  });
+
   it('is read-only for other roles', async () => {
     mockRole = 'caregiver';
     await renderScreen();
     expect(await screen.findByText('Rosa')).toBeOnTheScreen();
     expect(screen.queryByTestId('open-invite')).toBeNull();
     expect(screen.queryByTestId('invite-0')).toBeNull();
+    await fireEvent.press(screen.getByTestId('member-1'));
+    expect(screen.queryByTestId('member-remove')).toBeNull();
   });
 });
