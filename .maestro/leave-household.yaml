@@ -1,0 +1,24 @@
+# The only member leaves their household (H-04.2, FR-HH-8): the sheet says the household
+# will be deleted, and afterwards the app is back at create or join.
+# Needs the local stack; see the Testing section of README.md.
+appId: ${APP_ID || 'com.myparentmanager'}
+tags:
+  - backend
+---
+- runFlow: subflows/create-household.yaml
+- tapOn:
+    id: tab-household
+- tapOn:
+    id: open-members
+- scrollUntilVisible:
+    element:
+      id: open-leave
+- tapOn:
+    id: open-leave
+- assertVisible: Delete household and leave
+- tapOn:
+    id: leave-confirm
+- extendedWaitUntil:
+    visible:
+      id: welcome-create
+    timeout: 20000
