@@ -1,0 +1,39 @@
+# A parent manages members and invites (H-04.1, S-26): sees themselves with role and join
+# date, creates an invite, sees it pending with its expiry, then revokes it.
+# Needs the local stack; see the Testing section of README.md.
+appId: ${APP_ID || 'com.myparentmanager'}
+tags:
+  - backend
+---
+- runFlow: subflows/create-household.yaml
+- tapOn:
+    id: tab-household
+- tapOn:
+    id: open-members
+- extendedWaitUntil:
+    visible:
+      id: member-0
+    timeout: 10000
+- assertVisible: Sam (you)
+- assertVisible:
+    id: invites-empty
+- tapOn:
+    id: open-invite
+- tapOn:
+    id: invite-create
+- extendedWaitUntil:
+    visible:
+      id: invite-code
+    timeout: 10000
+- tapOn:
+    id: invite-sheet-close
+- extendedWaitUntil:
+    visible:
+      id: invite-0
+    timeout: 10000
+- tapOn:
+    id: invite-0-revoke
+- extendedWaitUntil:
+    visible:
+      id: invites-empty
+    timeout: 10000

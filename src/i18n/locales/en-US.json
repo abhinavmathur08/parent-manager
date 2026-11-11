@@ -561,6 +561,20 @@
         "family": "For a family member",
         "caregiver": "For a caregiver"
       }
+    },
+    "members": {
+      "title": "Members and invites",
+      "membersSection": "Members",
+      "invitesSection": "Pending invites",
+      "you": "{{name}} (you)",
+      "unnamed": "Member",
+      "roleJoined": "{{role}} · Joined {{date}}",
+      "noInvites": "No pending invites.",
+      "expires": "Expires {{date}}",
+      "expired": "Expired {{date}}. Revoke it and send a new one.",
+      "revoke": "Revoke",
+      "retry": "Try again",
+      "offline": "You're offline. Changes to members and invites need a connection."
     }
   }
 }
