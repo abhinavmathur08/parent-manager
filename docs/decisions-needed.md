@@ -4,7 +4,7 @@ This is the decision log. Each entry names the backlog items and GitHub issues i
 
 ## Status at a glance
 
-Updated 2026-11-08.
+Updated 2026-11-12.
 
 | ID   | Decision                                   | Status                                                 | Needed by                                                                      |
 | ---- | ------------------------------------------ | ------------------------------------------------------ | ------------------------------------------------------------------------------ |
@@ -101,7 +101,8 @@ These don't block development or staging. Each is listed with the point by which
   - Free projects pause after a week of inactivity.
   - The free plan has no automatic backups, and keeps only 1 day of logs.
 - **Recommendation:** Supabase Pro (from USD 25 a month, first project included), in a new "Parent Manager" organization, created shortly before the external beta.
-- **In the meantime (decided 2026-11-09):** one hosted project, `parent-manager`, serves both development and staging builds, on the Free plan, with test data only. The Migrations workflow (F-04.4, #15) deploys to it after each merge. Automated tests use the local stack. F-03.2 (#10) and F-04.4's production half wait for this decision.
+- **In the meantime (decided 2026-11-09):** one hosted project, `parent-manager`, serves both development and staging builds, on the Free plan, with test data only. The Migrations workflow (F-04.4, #15) deploys to it after each merge. Automated tests use the local stack.
+- **Production builds too (decided 2026-11-12):** all three EAS environments, production included, point at `parent-manager` until D-1, so crash reporting, analytics and remote config (F-07.1, F-07.2, F-09) can be built now. Only giving production its own project (F-03.2, #10) and F-04.4's production half wait for this decision. No real family may use a build until then.
 
 ### D-8 Starter recipe content: needed before the internal beta
 
