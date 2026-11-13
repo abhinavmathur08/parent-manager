@@ -88,6 +88,10 @@ tags:
     centerElement: true
 - tapOn:
     id: recipe-add-step
+- scrollUntilVisible:
+    element:
+      id: recipe-step-0
+    centerElement: true
 - tapOn:
     id: recipe-step-0
 - inputText: Mix everything and cook in a hot pan.
