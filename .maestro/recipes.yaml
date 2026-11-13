@@ -27,16 +27,33 @@ tags:
 - tapOn:
     id: recipe-quick-add
 - inputText: 1 1/2 cups milk
-- pressKey: Enter
-- assertVisible:
-    id: recipe-line-0
+- tapOn:
+    id: recipe-quick-add-submit
+- scrollUntilVisible:
+    element:
+      id: recipe-line-0
+    direction: UP
+- scrollUntilVisible:
+    element:
+      id: recipe-quick-add
+- tapOn:
+    id: recipe-quick-add
 - inputText: 2 onions
-- pressKey: Enter
-- assertVisible:
-    id: recipe-line-1
+- tapOn:
+    id: recipe-quick-add-submit
+- scrollUntilVisible:
+    element:
+      id: recipe-line-1
+    direction: UP
 # An unknown ingredient opens the line sheet, prefilled, to add it as new.
+- scrollUntilVisible:
+    element:
+      id: recipe-quick-add
+- tapOn:
+    id: recipe-quick-add
 - inputText: 2 tbsp grandmas chutney
-- pressKey: Enter
+- tapOn:
+    id: recipe-quick-add-submit
 - extendedWaitUntil:
     visible:
       id: line-sheet
@@ -54,8 +71,9 @@ tags:
     id: line-section-condiments
 - tapOn:
     id: line-done
-- assertVisible:
-    id: recipe-line-2
+- scrollUntilVisible:
+    element:
+      id: recipe-line-2
 - scrollUntilVisible:
     element:
       id: recipe-add-step

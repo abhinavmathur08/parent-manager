@@ -232,17 +232,28 @@ export function RecipeEditor({
           );
         })}
         {errors.lines ? <Text color="error">{t(errors.lines)}</Text> : null}
-        <TextField
-          label={t('recipes.editor.quickAdd')}
-          hint={t('recipes.editor.quickAddHint')}
-          value={quickText}
-          onChangeText={setQuickText}
-          onSubmitEditing={quickAdd}
-          submitBehavior="submit"
-          returnKeyType="next"
-          autoCorrect={false}
-          testID="recipe-quick-add"
-        />
+        <View style={[styles.row, styles.bottom, { gap: theme.space[2] }]}>
+          <TextField
+            label={t('recipes.editor.quickAdd')}
+            hint={t('recipes.editor.quickAddHint')}
+            value={quickText}
+            onChangeText={setQuickText}
+            onSubmitEditing={quickAdd}
+            submitBehavior="submit"
+            returnKeyType="next"
+            autoCorrect={false}
+            style={styles.grow}
+            testID="recipe-quick-add"
+          />
+          <IconButton
+            icon="add"
+            variant="tinted"
+            accessibilityLabel={t('recipes.editor.quickAddButton')}
+            onPress={quickAdd}
+            disabled={!quickText.trim()}
+            testID="recipe-quick-add-submit"
+          />
+        </View>
         <Button
           variant="secondary"
           icon="search"
@@ -356,6 +367,9 @@ export function RecipeEditor({
 }
 
 const styles = StyleSheet.create({
+  bottom: {
+    alignItems: 'flex-start',
+  },
   grow: {
     flex: 1,
   },
