@@ -105,10 +105,18 @@ tags:
 # R-03.2: saving opens the recipe; the stepper rescales it on screen.
 - extendedWaitUntil:
     visible:
-      id: recipe-detail-line-0
+      id: recipe-detail-edit
     timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: recipe-detail-line-0
+    centerElement: true
 - assertVisible:
     text: 1½ cups milk
+- scrollUntilVisible:
+    element:
+      id: recipe-detail-servings-increase
+    centerElement: true
 - tapOn:
     id: recipe-detail-servings-increase
 - tapOn:
