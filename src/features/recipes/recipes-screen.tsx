@@ -17,6 +17,8 @@ import type { AppLocale } from '@/i18n';
 import { useRecipeRows } from './data';
 import { RecipeCard } from './recipe-card';
 import { indexRecipe, searchRecipes, sortRecipes, type RecipeEntry } from './search';
+import { STARTER_RECIPES } from './starter/library';
+import { starterEntry } from './starter/view';
 import { RECIPE_TAGS, type RecipeIngredientRow, type RecipeTag } from './tables';
 
 const totalMinutes = (prep: number | null, cook: number | null) =>
@@ -56,11 +58,28 @@ export function RecipesScreen({ locale, canWrite }: { locale: AppLocale; canWrit
     return sortRecipes(entries, locale).map((entry) => indexRecipe(entry, tagName));
   }, [recipes, lines, ingredients, locale, t]);
 
+  // The starter library (R-04.1), the same for every household, read from the app bundle.
+  const starters = useMemo(() => {
+    const tagName = (tag: RecipeTag) => t(`recipes.tags.${tag.slice(4)}`);
+    return STARTER_RECIPES.map((recipe) =>
+      indexRecipe(
+        starterEntry(recipe, locale, (id) => ingredients.name(id)),
+        tagName,
+      ),
+    );
+  }, [ingredients, locale, t]);
+
   const results = useMemo(() => searchRecipes(searchable, query, tags), [searchable, query, tags]);
+  const starterResults = useMemo(
+    () => searchRecipes(starters, query, tags),
+    [starters, query, tags],
+  );
   const filtering = query.trim() !== '' || tags.length > 0;
 
   const add = () => router.push('/recipes/edit');
   const open = (id: string) => router.push({ pathname: '/recipes/[id]', params: { id } });
+  const openStarter = (key: string) =>
+    router.push({ pathname: '/recipes/starter/[key]', params: { key } });
 
   return (
     <Screen
@@ -137,13 +156,32 @@ export function RecipesScreen({ locale, canWrite }: { locale: AppLocale; canWrit
               testID={`recipe-card-${i}`}
             />
           ))}
-          {filtering && results.length === 0 ? (
+          {filtering && results.length === 0 && starterResults.length === 0 ? (
             <Text color="textSecondary" testID="recipes-no-results">
               {t('recipes.noResults')}
             </Text>
           ) : null}
         </View>
       )}
+
+      {starterResults.length || !filtering ? (
+        <View style={{ gap: theme.space[3] }}>
+          <SectionHeader
+            title={t('recipes.starterLibrary')}
+            trailing={filtering ? t('recipes.count', { count: starterResults.length }) : undefined}
+            testID="recipes-starter-header"
+          />
+          {starterResults.map((recipe, i) => (
+            <RecipeCard
+              key={recipe.id}
+              recipe={recipe}
+              locale={locale}
+              onPress={() => openStarter(recipe.id)}
+              testID={`starter-card-${i}`}
+            />
+          ))}
+        </View>
+      ) : null}
     </Screen>
   );
 }

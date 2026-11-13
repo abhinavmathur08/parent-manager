@@ -49,6 +49,19 @@ describe('S-16 Recipes tab (FR-REC-1, FR-REC-10)', () => {
     expect(mockPush).toHaveBeenCalledWith('/recipes/import');
   });
 
+  it('shows the starter library to every household, even with no recipes of its own (R-04.1)', async () => {
+    await show(false);
+    expect(screen.getByTestId('recipes-starter-header')).toBeOnTheScreen();
+    expect(screen.getByTestId('starter-card-0')).toHaveTextContent(/Overnight oats/);
+    await fireEvent.changeText(screen.getByTestId('recipes-search'), 'lentils');
+    expect(screen.getByTestId('starter-card-0')).toHaveTextContent(/Lentil and tomato soup/);
+    await fireEvent.press(screen.getByTestId('starter-card-0'));
+    expect(mockPush).toHaveBeenCalledWith({
+      pathname: '/recipes/starter/[key]',
+      params: { key: 'starter.lentil_tomato_soup' },
+    });
+  });
+
   it("doesn't offer caregivers add or import", async () => {
     await show(false);
     expect(screen.queryByTestId('recipes-empty-action')).toBeNull();
@@ -85,7 +98,9 @@ describe('S-16 Recipes tab (FR-REC-1, FR-REC-10)', () => {
     await fireEvent.changeText(screen.getByTestId('recipes-search'), '');
     await fireEvent.press(screen.getByTestId('recipes-filter-freezer_friendly'));
     expect(screen.getByTestId('recipe-card-0')).toHaveTextContent(/Batch chili/);
-    expect(screen.getByText('1 recipe')).toBeOnTheScreen();
+    // One household recipe and one starter (the soup) are freezer-friendly.
+    expect(screen.getAllByText('1 recipe')).toHaveLength(2);
+    expect(screen.getByTestId('starter-card-0')).toHaveTextContent(/Lentil and tomato soup/);
 
     await fireEvent.press(screen.getByTestId('recipes-filter-no_cook'));
     expect(screen.getByTestId('recipes-no-results')).toBeOnTheScreen();

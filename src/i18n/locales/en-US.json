@@ -767,6 +767,11 @@
         "voice": "Imported from a voice note",
         "library": "From the starter library"
       }
+    },
+    "starterLibrary": "Starter library",
+    "starter": {
+      "saveCopy": "Save a copy to edit",
+      "copyFailed": "Couldn't save a copy. Try again."
     }
   }
 }
