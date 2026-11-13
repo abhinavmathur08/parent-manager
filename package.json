@@ -28,6 +28,7 @@
     "expo-updates": "~58.0.21",
     "expo-web-browser": "~58.0.7",
     "i18next": "^26.7.2",
+    "posthog-react-native": "^4.86.0",
     "react": "19.3.0",
     "react-i18next": "^17.1.13",
     "react-native": "0.88.1",
