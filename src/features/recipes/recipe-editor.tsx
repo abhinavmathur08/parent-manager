@@ -2,7 +2,7 @@ import { randomUUID } from 'expo-crypto';
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, View } from 'react-native';
+import { Keyboard, StyleSheet, View } from 'react-native';
 
 import { Button } from '@/components/button';
 import { Chip } from '@/components/chip';
@@ -78,6 +78,17 @@ export function RecipeEditor({
 
   const update = (patch: Partial<RecipeDraft>) => setDraft((d) => ({ ...d, ...patch }));
 
+  // The line sheet has its own fields, so the editor's keyboard goes down when it opens and
+  // the sheet's goes down when it closes (Android keeps it up after the sheet unmounts).
+  const openLine = (line: NonNullable<Editing>) => {
+    Keyboard.dismiss();
+    setEditing(line);
+  };
+  const closeLine = () => {
+    Keyboard.dismiss();
+    setEditing(null);
+  };
+
   const lineName = (line: DraftLine) =>
     draft.newIngredients.find((n) => n.ingredientId === line.ingredientId)?.name ??
     ingredients.nameFor(line.ingredientId, line.quantity) ??
@@ -94,7 +105,7 @@ export function RecipeEditor({
     if (confident) {
       update({ lines: [...draft.lines, line] });
     } else {
-      setEditing({ ...line, isNew: true, searchText });
+      openLine({ ...line, isNew: true, searchText });
     }
     setQuickText('');
   }
@@ -108,7 +119,7 @@ export function RecipeEditor({
         newIngredients: newIngredient ? [...d.newIngredients, newIngredient] : d.newIngredients,
       };
     });
-    setEditing(null);
+    closeLine();
   }
 
   async function save() {
@@ -224,7 +235,7 @@ export function RecipeEditor({
               title={text}
               subtitle={line.optional ? t('recipes.line.optional') : undefined}
               variant="navigation"
-              onPress={() => setEditing({ ...line, isNew: false })}
+              onPress={() => openLine({ ...line, isNew: false })}
               accessibilityHint={t('recipes.editor.editLine', { line: text })}
               divider={i < draft.lines.length - 1}
               testID={`recipe-line-${i}`}
@@ -259,7 +270,7 @@ export function RecipeEditor({
           icon="search"
           label={t('recipes.editor.chooseIngredient')}
           onPress={() =>
-            setEditing({
+            openLine({
               id: randomUUID(),
               ingredientId: '',
               quantity: null,
@@ -357,9 +368,9 @@ export function RecipeEditor({
           onDone={finishLine}
           onRemove={() => {
             update({ lines: draft.lines.filter((l) => l.id !== editing.id) });
-            setEditing(null);
+            closeLine();
           }}
-          onClose={() => setEditing(null)}
+          onClose={closeLine}
         />
       ) : null}
     </Screen>
