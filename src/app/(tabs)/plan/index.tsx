@@ -1,9 +1,19 @@
-import { useTranslation } from 'react-i18next';
+import { useHousehold } from '@/features/household/membership';
+import { PlanWeekScreen } from '@/features/planner/week-screen';
 
-import { PlaceholderScreen } from '@/components/placeholder-screen';
-
-// Placeholder until the plan feature from docs/backlog.md lands.
-export default function PlanScreen() {
-  const { t } = useTranslation();
-  return <PlaceholderScreen title={t('tabs.plan')} icon="plan" testID="plan-screen" />;
+export default function PlanRoute() {
+  const { state } = useHousehold();
+  if (state.status !== 'member') return null;
+  const { membership } = state;
+  return (
+    <PlanWeekScreen
+      household={{
+        id: membership.householdId,
+        locale: membership.locale,
+        weekStart: membership.weekStart === 1 ? 1 : 7,
+        timezone: membership.timezone ?? null,
+      }}
+      canWrite={membership.role !== 'caregiver'}
+    />
+  );
 }
