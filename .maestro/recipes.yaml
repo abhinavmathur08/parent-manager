@@ -8,8 +8,9 @@ tags:
 - runFlow: subflows/create-household.yaml
 - tapOn:
     id: tab-recipes
+# S-16's top bar always offers "Add", above the search, filters and starter library.
 - tapOn:
-    id: recipes-empty-action
+    id: recipes-add
 - extendedWaitUntil:
     visible:
       id: recipe-title
@@ -24,6 +25,7 @@ tags:
 - scrollUntilVisible:
     element:
       id: recipe-quick-add
+    centerElement: true
 - tapOn:
     id: recipe-quick-add
 - inputText: 1 1/2 cups milk
@@ -32,10 +34,12 @@ tags:
 - scrollUntilVisible:
     element:
       id: recipe-line-0
+    centerElement: true
     direction: UP
 - scrollUntilVisible:
     element:
       id: recipe-quick-add
+    centerElement: true
 - tapOn:
     id: recipe-quick-add
 - inputText: 2 onions
@@ -44,11 +48,13 @@ tags:
 - scrollUntilVisible:
     element:
       id: recipe-line-1
+    centerElement: true
     direction: UP
 # An unknown ingredient opens the line sheet, prefilled, to add it as new.
 - scrollUntilVisible:
     element:
       id: recipe-quick-add
+    centerElement: true
 - tapOn:
     id: recipe-quick-add
 - inputText: 2 tbsp grandmas chutney
@@ -62,11 +68,13 @@ tags:
 - scrollUntilVisible:
     element:
       id: line-add-new
+    centerElement: true
 - tapOn:
     id: line-add-new
 - scrollUntilVisible:
     element:
       id: line-section-condiments
+    centerElement: true
 - tapOn:
     id: line-section-condiments
 - tapOn:
@@ -74,9 +82,11 @@ tags:
 - scrollUntilVisible:
     element:
       id: recipe-line-2
+    centerElement: true
 - scrollUntilVisible:
     element:
       id: recipe-add-step
+    centerElement: true
 - tapOn:
     id: recipe-add-step
 - tapOn:
@@ -86,6 +96,7 @@ tags:
 - scrollUntilVisible:
     element:
       id: recipe-save
+    centerElement: true
 - tapOn:
     id: recipe-save
 # R-03.2: saving opens the recipe; the stepper rescales it on screen.
@@ -123,6 +134,7 @@ tags:
 - scrollUntilVisible:
     element:
       id: sign-out
+    centerElement: true
 - tapOn:
     id: sign-out
 - extendedWaitUntil:
