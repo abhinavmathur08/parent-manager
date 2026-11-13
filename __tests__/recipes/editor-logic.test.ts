@@ -256,10 +256,7 @@ describe('planSave', () => {
       },
     });
     expect(ops[3]).toMatchObject({ values: { recipe_id: 'r1', position: 1 } });
-    expect((ops[3] as { values: { quantity_base: number } }).values.quantity_base).toBeCloseTo(
-      14.7868,
-      3,
-    );
+    expect(ops[3]).toMatchObject({ values: { quantity_base: expect.closeTo(14.7868, 3) } });
   });
 
   it('writes only what changed when editing', () => {
