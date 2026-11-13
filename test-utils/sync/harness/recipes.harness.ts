@@ -172,6 +172,9 @@ it('delivers a new recipe with its lines and steps to the partner', async () => 
     text: 'Stir.',
   });
   await A.engine.sync();
+  // Delivery speed is the two-device harness's job (S0); here B pulls, as it does on start
+  // and on reconnecting, so the check doesn't depend on Realtime timing.
+  await B.engine.sync();
 
   await waitFor(async () => (await B.row(RECIPE_STEPS.name, firstStep)) !== null);
   expect((await B.row(RECIPES.name, recipeId))?.tags).toEqual(['tag.no_cook']);
@@ -212,8 +215,10 @@ it('shows edits made offline on the partner after both reconnect (FR-REC-12)', a
 it('deletes the lines and steps with the recipe on both devices', async () => {
   await A.engine.remove(RECIPES.name, recipeId);
   await A.engine.sync();
-  await waitFor(async () => (await B.row(RECIPE_STEPS.name, stepOnB)) === null);
+  // The server tombstones the lines and steps; both devices pull them.
   await A.engine.sync();
+  await B.engine.sync();
+  await waitFor(async () => (await B.row(RECIPE_STEPS.name, stepOnB)) === null);
   for (const device of [A, B]) {
     expect(await device.row(RECIPES.name, recipeId)).toBeNull();
     expect(await device.row(RECIPE_INGREDIENTS.name, milkLine)).toBeNull();
