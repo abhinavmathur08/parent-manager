@@ -1,5 +1,5 @@
-# R-02.2: a parent creates a recipe on S-18: title, a tag, typed lines with a mixed number,
-# an unknown ingredient added as a household ingredient, and a step. Ends signed out.
+# R-02.2 and R-03.1: a parent creates a recipe on S-18: title, a tag, typed lines with a mixed number,
+# an unknown ingredient added as a household ingredient, and a step, then finds it on S-16 by ingredient and tag. Ends signed out.
 # Needs the local stack; see the Testing section of README.md.
 appId: ${APP_ID || 'com.myparentmanager'}
 tags:
@@ -75,7 +75,18 @@ tags:
       text: Weeknight flatbread
     timeout: 10000
 - assertVisible:
-    id: recipes-row-0
+    id: recipe-card-0
+# R-03.1: search finds it by an ingredient name, and a tag filter keeps it.
+- tapOn:
+    id: recipes-search
+- inputText: chutney
+- hideKeyboard
+- assertVisible:
+    text: Weeknight flatbread
+- tapOn:
+    id: recipes-filter-one_handed
+- assertVisible:
+    id: recipe-card-0
 - tapOn:
     id: tab-household
 - scrollUntilVisible:
