@@ -246,6 +246,7 @@ Export (A-04.2) and deletion must cover every table that holds household data. A
 
   The function also revokes hard deletes, adds the pull index and publishes the table to Realtime. A feature's migration still writes the table's own RLS policies.
 
+- **First load on a new device (A-01.3).** A device that has never pulled the household (no table has a `pulledAt` mark) reports `firstLoad` until its first sync finishes. A table added by an app update doesn't count. Meanwhile `FirstLoadGate` shows a loading state in place of the tabs, which then open on the Plan tab; offline it asks for a connection and offers to try again. Tables are pulled in parallel, with the local store writing one at a time, so a household with 200 recipes loads within 5 seconds on 4G (FR-AUTH-8; checked in `__tests__/sync/first-load.test.ts` with a simulated 150 ms, 5 Mbit/s link).
 - **Pending indicator.** `PendingChangesBanner`, above the tab bar, shows how many changes are waiting until they sync, and how many the server refused.
 - **Two-device harness.** `test-utils/sync/harness` runs two devices (two users, two SQLite files and two engines) against a local stack, through offline edits, a restart and reconnection, and checks every conflict rule. It includes the spike's S4 and S6 failures as regression cases. It runs as the "Sync harness" CI job (`pnpm run test:sync`).
 - **Outbox:** writes are queued in order and survive restarts. The server sets `updated_at` and `version`, and deletes are soft (H-06.3).
