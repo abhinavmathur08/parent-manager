@@ -102,6 +102,13 @@ tags:
     centerElement: true
 - tapOn:
     id: recipe-save
+# Saving raises no error and leaves the editor.
+- assertNotVisible:
+    id: recipe-error
+- extendedWaitUntil:
+    notVisible:
+      id: recipe-editor
+    timeout: 10000
 # R-03.2: saving opens the recipe; the stepper rescales it on screen.
 - extendedWaitUntil:
     visible:
