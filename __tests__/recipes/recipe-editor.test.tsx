@@ -45,7 +45,7 @@ it('adds typed lines with fractions, one after another (R-02.2)', async () => {
   await fireEvent.changeText(quick, '1 1/2 cups milk');
   await fireEvent(quick, 'submitEditing');
   await fireEvent.changeText(quick, '2 onions');
-  await fireEvent(quick, 'submitEditing');
+  await fireEvent.press(screen.getByTestId('recipe-quick-add-submit'));
   expect(screen.getByText('1½ cups milk')).toBeTruthy();
   expect(screen.getByText('2 onions')).toBeTruthy();
 });
