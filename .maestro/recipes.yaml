@@ -64,7 +64,6 @@ tags:
     visible:
       id: line-sheet
     timeout: 5000
-- hideKeyboard
 - scrollUntilVisible:
     element:
       id: line-add-new
