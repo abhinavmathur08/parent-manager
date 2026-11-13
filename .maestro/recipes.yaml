@@ -8,8 +8,9 @@ tags:
 - runFlow: subflows/create-household.yaml
 - tapOn:
     id: tab-recipes
+# S-16's top bar always offers "Add", above the search, filters and starter library.
 - tapOn:
-    id: recipes-empty-action
+    id: recipes-add
 - extendedWaitUntil:
     visible:
       id: recipe-title
