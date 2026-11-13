@@ -713,7 +713,8 @@
         "saveFailed": "Couldn't save the recipe. Try again.",
         "notReady": "Your recipes are still loading. Try again in a moment.",
         "check": "Check the highlighted fields."
-      }
+      },
+      "quickAddButton": "Add this ingredient"
     },
     "lineSheet": {
       "addTitle": "Add an ingredient",
