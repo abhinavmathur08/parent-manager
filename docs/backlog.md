@@ -82,7 +82,7 @@ Add `app.config.ts` so development, preview and production builds get their own 
 
 ### 4. F-03.2 Point each EAS environment at its own Supabase project
 
-Development uses local Supabase, preview uses the existing staging project, production uses a new project. EAS environment variables are set per environment.
+Until D-1, every EAS environment (development, preview and production) uses the hosted `parent-manager` project, with its URL and publishable key set as EAS environment variables (decided 2026-11-12). This item gives production its own project once D-1 is made: a new project, its migrations, and production's EAS variables.
 
 - **Area:** Infrastructure
 - **Size:** XS
@@ -225,7 +225,7 @@ Add `@sentry/react-native` with the Expo plugin and source maps from EAS builds,
 - **Area:** Infrastructure
 - **Size:** S
 - **Spec:** NFR-OBS-1, NFR-SEC-6
-- **Depends on:** F-03.2
+- **Depends on:** F-03.1
 - **Acceptance:**
   - A test crash appears with readable stack traces
   - `sendDefaultPii` is off and `beforeSend` strips user content (unit test)
@@ -237,7 +237,7 @@ A typed analytics wrapper that only accepts IDs, counts and fixed values, sends 
 - **Area:** Infrastructure
 - **Size:** S
 - **Spec:** NFR-OBS-2, NFR-SEC-6, FR-PRIV-5
-- **Depends on:** F-03.2
+- **Depends on:** F-03.1
 - **Acceptance:**
   - Unit test proves free-text properties are rejected
   - Opt-out stops all events on that device
@@ -263,7 +263,7 @@ An `app_config` table read at launch: a minimum version shows the blocking updat
 - **Area:** Infrastructure
 - **Size:** S
 - **Spec:** NFR-REL-4
-- **Depends on:** F-03.2, F-06.5
+- **Depends on:** F-03.1, F-06.5
 - **Acceptance:**
   - Raising the minimum version shows the update screen; lowering it removes it
   - The check fails open offline
@@ -1123,7 +1123,7 @@ Add `react-native-purchases` with the Supabase user ID and the household attribu
 - **Area:** Subscriptions
 - **Size:** S
 - **Spec:** FR-PAY-7
-- **Depends on:** H-04.1, F-03.2; decisions D-10
+- **Depends on:** H-04.1, F-03.1; decisions D-10
 - **Acceptance:**
   - Sandbox purchase and restore work on both platforms
   - No billing configuration is changed by code or Claude
