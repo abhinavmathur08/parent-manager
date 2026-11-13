@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
+import { Keyboard } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { RecipeEditor } from '@/features/recipes/recipe-editor';
@@ -37,7 +38,11 @@ async function show(onSaved = jest.fn()) {
   return onSaved;
 }
 
-beforeEach(() => jest.clearAllMocks());
+let dismiss: jest.SpyInstance;
+beforeEach(() => {
+  jest.clearAllMocks();
+  dismiss = jest.spyOn(Keyboard, 'dismiss').mockImplementation(() => undefined);
+});
 
 it('adds typed lines with fractions, one after another (R-02.2)', async () => {
   await show();
@@ -57,10 +62,13 @@ it('makes an unknown ingredient a household ingredient and saves through the syn
   await fireEvent.changeText(quick, '2 tbsp grandmas chutney');
   await fireEvent(quick, 'submitEditing');
   expect(screen.getByTestId('line-sheet')).toBeTruthy();
+  // The editor's keyboard goes down for the sheet, and the sheet's goes down after it.
+  expect(dismiss).toHaveBeenCalledTimes(1);
   await fireEvent.press(screen.getByTestId('line-add-new'));
   await fireEvent.press(screen.getByTestId('line-section-condiments'));
   await fireEvent.press(screen.getByTestId('line-done'));
   expect(screen.getByText('2 tbsp grandmas chutney')).toBeTruthy();
+  expect(dismiss).toHaveBeenCalledTimes(2);
 
   await fireEvent.press(screen.getByTestId('recipe-save'));
   expect(mockInsert.mock.calls.map((c) => c[0])).toEqual([
