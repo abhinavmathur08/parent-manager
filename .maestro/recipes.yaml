@@ -1,0 +1,89 @@
+# R-02.2: a parent creates a recipe on S-18: title, a tag, typed lines with a mixed number,
+# an unknown ingredient added as a household ingredient, and a step. Ends signed out.
+# Needs the local stack; see the Testing section of README.md.
+appId: ${APP_ID || 'com.myparentmanager'}
+tags:
+  - backend
+---
+- runFlow: subflows/create-household.yaml
+- tapOn:
+    id: tab-recipes
+- tapOn:
+    id: recipes-empty-action
+- extendedWaitUntil:
+    visible:
+      id: recipe-title
+    timeout: 10000
+- tapOn:
+    id: recipe-title
+- inputText: Weeknight flatbread
+- hideKeyboard
+- tapOn:
+    id: recipe-tag-one_handed
+# Typed lines go straight in when the ingredient is known.
+- scrollUntilVisible:
+    element:
+      id: recipe-quick-add
+- tapOn:
+    id: recipe-quick-add
+- inputText: 1 1/2 cups milk
+- pressKey: Enter
+- assertVisible:
+    id: recipe-line-0
+- inputText: 2 onions
+- pressKey: Enter
+- assertVisible:
+    id: recipe-line-1
+# An unknown ingredient opens the line sheet, prefilled, to add it as new.
+- inputText: 2 tbsp grandmas chutney
+- pressKey: Enter
+- extendedWaitUntil:
+    visible:
+      id: line-sheet
+    timeout: 5000
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: line-add-new
+- tapOn:
+    id: line-add-new
+- scrollUntilVisible:
+    element:
+      id: line-section-condiments
+- tapOn:
+    id: line-section-condiments
+- tapOn:
+    id: line-done
+- assertVisible:
+    id: recipe-line-2
+- scrollUntilVisible:
+    element:
+      id: recipe-add-step
+- tapOn:
+    id: recipe-add-step
+- tapOn:
+    id: recipe-step-0
+- inputText: Mix everything and cook in a hot pan.
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: recipe-save
+- tapOn:
+    id: recipe-save
+- extendedWaitUntil:
+    visible:
+      text: Weeknight flatbread
+    timeout: 10000
+- assertVisible:
+    id: recipes-row-0
+- tapOn:
+    id: tab-household
+- scrollUntilVisible:
+    element:
+      id: sign-out
+- tapOn:
+    id: sign-out
+- extendedWaitUntil:
+    visible:
+      id: sign-in-screen-title
+    timeout: 10000
