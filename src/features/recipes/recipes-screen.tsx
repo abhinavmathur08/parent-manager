@@ -60,9 +60,7 @@ export function RecipesScreen({ locale, canWrite }: { locale: AppLocale; canWrit
   const filtering = query.trim() !== '' || tags.length > 0;
 
   const add = () => router.push('/recipes/edit');
-  // Recipe detail (S-17) arrives with R-03.2; until then a card opens the editor for writers.
-  const open = (id: string) =>
-    canWrite ? router.push({ pathname: '/recipes/edit', params: { id } }) : undefined;
+  const open = (id: string) => router.push({ pathname: '/recipes/[id]', params: { id } });
 
   return (
     <Screen

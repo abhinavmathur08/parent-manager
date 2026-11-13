@@ -27,9 +27,13 @@ export default function RecipeEditRoute() {
       recipeId={id ?? newId}
       draftKey={id ? `recipe:${id}` : 'recipe:new'}
       household={{ locale, region, unitSystem }}
-      onSaved={() => {
-        if (!id) clearNewId();
-        router.back();
+      onSaved={(savedId) => {
+        if (id) {
+          router.back();
+          return;
+        }
+        clearNewId();
+        router.replace({ pathname: '/recipes/[id]', params: { id: savedId } });
       }}
     />
   );

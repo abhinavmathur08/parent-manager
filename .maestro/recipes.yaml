@@ -1,4 +1,4 @@
-# R-02.2 and R-03.1: a parent creates a recipe on S-18: title, a tag, typed lines with a mixed number,
+# R-02.2, R-03.1 and R-03.2: a parent creates a recipe on S-18: title, a tag, typed lines with a mixed number,
 # an unknown ingredient added as a household ingredient, and a step, then finds it on S-16 by ingredient and tag. Ends signed out.
 # Needs the local stack; see the Testing section of README.md.
 appId: ${APP_ID || 'com.myparentmanager'}
@@ -70,12 +70,25 @@ tags:
       id: recipe-save
 - tapOn:
     id: recipe-save
+# R-03.2: saving opens the recipe; the stepper rescales it on screen.
 - extendedWaitUntil:
     visible:
-      text: Weeknight flatbread
+      id: recipe-detail-line-0
     timeout: 10000
 - assertVisible:
-    id: recipe-card-0
+    text: 1½ cups milk
+- tapOn:
+    id: recipe-detail-servings-increase
+- tapOn:
+    id: recipe-detail-servings-increase
+- assertVisible:
+    text: 2¼ cups milk
+- tapOn:
+    id: recipe-detail-title-back
+- extendedWaitUntil:
+    visible:
+      id: recipe-card-0
+    timeout: 10000
 # R-03.1: search finds it by an ingredient name, and a tag filter keeps it.
 - tapOn:
     id: recipes-search
