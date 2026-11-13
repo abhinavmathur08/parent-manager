@@ -147,7 +147,19 @@
     "entryLabel": "{{title}}, {{servings}}",
     "entryActionsHint": "Long-press for more actions",
     "deletedRecipe": "Deleted recipe",
-    "allergiesUnavailable": "Allergen markers need one online load of your household's people."
+    "allergiesUnavailable": "Allergen markers need one online load of your household's people.",
+    "add": {
+      "title": "{{slot}}, {{day}}",
+      "servings": "Servings",
+      "search": "Search recipes or type a meal",
+      "recent": "Recent",
+      "household": "Your recipes",
+      "starter": "Starter recipes",
+      "freeText": "Add “{{text}}”",
+      "freeTextHint": "As a note, with no shopping",
+      "noResults": "No recipes match. You can still add it as a note.",
+      "failed": "Couldn't add that. Try again."
+    }
   },
   "placeholder": {
     "comingSoon": "This part of the app is on its way."

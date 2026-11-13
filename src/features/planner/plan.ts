@@ -82,7 +82,7 @@ export function compareEntries(a: PlanEntryRow, b: PlanEntryRow): number {
     a.date.localeCompare(b.date) ||
     (SLOT_ORDER.get(a.slot) ?? 0) - (SLOT_ORDER.get(b.slot) ?? 0) ||
     a.position - b.position ||
-    (a.created_at ?? '￿').localeCompare(b.created_at ?? '￿') ||
+    (a.created_at ?? '\uffff').localeCompare(b.created_at ?? '\uffff') ||
     a.id.localeCompare(b.id)
   );
 }
@@ -99,4 +99,42 @@ export function slotEntries(
   slot: Slot,
 ): PlanEntryRow[] {
   return entries.filter((e) => e.date === date && e.slot === slot);
+}
+
+/**
+ * R-SERV-1 default servings for a new entry: the sum of the household people's default
+ * portions, rounded up to the nearest ½. Null when no one would eat (or people aren't
+ * known), so the caller can fall back.
+ */
+export function defaultServings(people: readonly PlanPerson[]): number | null {
+  const total = people.reduce((sum, p) => sum + defaultPortion(p.ageBand).portions, 0);
+  return total > 0 ? Math.ceil(total * 2) / 2 : null;
+}
+
+/** The position for a new entry at the end of a slot (FR-PLAN-4). */
+export function nextPosition(entries: readonly PlanEntryRow[], date: PlanDate, slot: Slot): number {
+  const live = entries.filter((e) => !e.deleted_at && e.date === date && e.slot === slot);
+  return live.length ? Math.min(999, Math.max(...live.map((e) => e.position)) + 1) : 0;
+}
+
+/**
+ * Recently planned household recipes, newest use first (FR-PLAN-3), then the most recently
+ * changed recipes to fill up to `limit`.
+ */
+export function recentRecipeIds(
+  entries: readonly PlanEntryRow[],
+  recipes: readonly { id: string; updated_at: string | null; deleted_at: string | null }[],
+  limit: number,
+): string[] {
+  const live = new Set(recipes.filter((r) => !r.deleted_at).map((r) => r.id));
+  const stamp = (value: string | null) => value ?? '\uffff';
+  const used = entries
+    .filter((e) => !e.deleted_at && e.recipe_id && live.has(e.recipe_id))
+    .sort((a, b) => stamp(b.updated_at).localeCompare(stamp(a.updated_at)))
+    .map((e) => e.recipe_id as string);
+  const changed = recipes
+    .filter((r) => !r.deleted_at)
+    .sort((a, b) => stamp(b.updated_at).localeCompare(stamp(a.updated_at)))
+    .map((r) => r.id);
+  return [...new Set([...used, ...changed])].slice(0, limit);
 }
