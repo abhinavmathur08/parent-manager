@@ -12,6 +12,10 @@ import { AccessEnded } from '@/features/household/access-ended';
 import { HouseholdUnavailable } from '@/features/household/household-unavailable';
 import { HouseholdProvider, useHousehold } from '@/features/household/membership';
 import { useTheme } from '@/hooks/use-theme';
+import { initCrashReporting, wrapRoot } from '@/lib/crash-reporting';
+
+// F-07.1: crash reporting starts first, so launch errors are caught (no-op without a DSN).
+initCrashReporting();
 
 // S-01: the splash screen stays up until the saved session has been read.
 SplashScreen.preventAutoHideAsync().catch(() => undefined);
@@ -62,7 +66,7 @@ function RootStack() {
   );
 }
 
-export default function RootLayout() {
+function RootLayout() {
   const theme = useTheme();
   const navigationTheme = useMemo(() => {
     const base = theme.scheme === 'dark' ? DarkTheme : DefaultTheme;
@@ -89,3 +93,5 @@ export default function RootLayout() {
     </ThemeProvider>
   );
 }
+
+export default wrapRoot(RootLayout);
