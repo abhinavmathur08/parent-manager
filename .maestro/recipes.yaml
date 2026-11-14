@@ -1,4 +1,4 @@
-# R-02.2 and R-03.1: a parent creates a recipe on S-18: title, a tag, typed lines with a mixed number,
+# R-02.2, R-03.1 and R-03.2: a parent creates a recipe on S-18: title, a tag, typed lines with a mixed number,
 # an unknown ingredient added as a household ingredient, and a step, then finds it on S-16 by ingredient and tag. Ends signed out.
 # Needs the local stack; see the Testing section of README.md.
 appId: ${APP_ID || 'com.myparentmanager'}
@@ -109,6 +109,41 @@ tags:
     centerElement: true
 - tapOn:
     id: recipe-save
+# Saving raises no error and leaves the editor.
+- assertNotVisible:
+    id: recipe-error
+- extendedWaitUntil:
+    notVisible:
+      id: recipe-editor
+    timeout: 10000
+# R-03.2: saving opens the recipe; the stepper rescales it on screen.
+- extendedWaitUntil:
+    visible:
+      id: recipe-detail-edit
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: recipe-detail-line-0
+    centerElement: true
+- assertVisible:
+    text: 1½ cups milk
+- scrollUntilVisible:
+    element:
+      id: recipe-detail-servings-increase
+    centerElement: true
+- tapOn:
+    id: recipe-detail-servings-increase
+- tapOn:
+    id: recipe-detail-servings-increase
+- assertVisible:
+    text: 2¼ cups milk
+# The top bar scrolls with the content.
+- scrollUntilVisible:
+    element:
+      id: recipe-detail-title-back
+    direction: UP
+- tapOn:
+    id: recipe-detail-title-back
 - extendedWaitUntil:
     visible:
       id: recipes-screen

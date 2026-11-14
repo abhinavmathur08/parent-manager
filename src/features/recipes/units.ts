@@ -27,3 +27,37 @@ export function unitChoices(
 export function isMeasured(unitId: string | null): unitId is UnitId {
   return unitId !== null && unitId in UNITS;
 }
+
+/** Which units belong to each unit system, as the `units.systems` column says (R-UNIT-3). */
+const SYSTEM_UNITS: Record<UnitSystem, readonly UnitId[]> = {
+  us_customary: [
+    'unit.tsp_us',
+    'unit.tbsp_us',
+    'unit.cup_us',
+    'unit.floz_us',
+    'unit.pint_us',
+    'unit.qt_us',
+    'unit.oz',
+    'unit.lb',
+    'unit.g',
+    'unit.ml',
+    'unit.each',
+  ],
+  metric: [
+    'unit.g',
+    'unit.kg',
+    'unit.ml',
+    'unit.l',
+    'unit.tsp_metric',
+    'unit.tbsp_metric',
+    'unit.tbsp_au',
+    'unit.cup_metric',
+    'unit.pint_imperial',
+    'unit.floz_imperial',
+    'unit.each',
+  ],
+};
+
+export function inSystem(unitId: UnitId, system: UnitSystem): boolean {
+  return SYSTEM_UNITS[system].includes(unitId);
+}

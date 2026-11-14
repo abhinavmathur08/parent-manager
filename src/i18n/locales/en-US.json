@@ -762,6 +762,25 @@
     "noResults": "No recipes match. Try fewer words or tags.",
     "card": {
       "minutes": "{{minutes}} min"
+    },
+    "detail": {
+      "prep": "Prep {{minutes}} min",
+      "cook": "Cook {{minutes}} min",
+      "separator": " · ",
+      "servings_one": "{{value}} serving",
+      "servings_other": "{{value}} servings",
+      "edit": "Edit recipe",
+      "missing": "This recipe was deleted.",
+      "allergiesUnavailable": "Connect to the internet to check this recipe against your household's allergies.",
+      "openSource": "Open the original recipe",
+      "source": {
+        "url": "Imported from a link",
+        "photo": "Imported from a photo",
+        "screenshot": "Imported from a screenshot",
+        "text": "Imported from pasted text",
+        "voice": "Imported from a voice note",
+        "library": "From the starter library"
+      }
     }
   }
 }

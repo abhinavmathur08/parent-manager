@@ -3,6 +3,7 @@ import { useCallback, useMemo } from 'react';
 import { useSyncedRows, useSyncWriter } from '@/lib/sync';
 
 import type { SaveOp, SavedRecipe } from './draft';
+import type { RecipeView } from './recipe-detail';
 import {
   RECIPE_INGREDIENTS,
   RECIPE_STEPS,
@@ -56,4 +57,30 @@ export function useApplyOps() {
     },
     [writer],
   );
+}
+
+/** A saved household recipe as recipe detail (S-17) shows it. */
+export function viewFromSaved({ recipe, lines, steps }: SavedRecipe): RecipeView {
+  const byPosition = <T extends { position: number }>(rows: readonly T[]) =>
+    [...rows].sort((a, b) => a.position - b.position);
+  return {
+    id: recipe.id,
+    title: recipe.title,
+    servings: recipe.servings,
+    prepMinutes: recipe.prep_minutes,
+    cookMinutes: recipe.cook_minutes,
+    tags: recipe.tags,
+    notes: recipe.notes,
+    sourceType: recipe.source_type,
+    sourceUrl: recipe.source_url,
+    lines: byPosition(lines).map((l) => ({
+      id: l.id,
+      ingredientId: l.ingredient_id,
+      quantity: l.quantity,
+      unitId: l.unit_id,
+      note: l.note,
+      optional: l.optional,
+    })),
+    steps: byPosition(steps).map((s) => ({ id: s.id, text: s.text })),
+  };
 }
