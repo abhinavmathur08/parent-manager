@@ -154,7 +154,6 @@ export function RecipeEditor({
       actions={[
         { label: t('recipes.editor.save'), onPress: () => void save(), testID: 'recipe-save-top' },
       ]}
-      hasTabBar={false}
       testID="recipe-editor"
     >
       <View style={{ gap: theme.space[4] }}>
