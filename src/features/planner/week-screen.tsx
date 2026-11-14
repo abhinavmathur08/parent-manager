@@ -1,6 +1,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ComponentRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppState, PanResponder, Pressable, StyleSheet, View, type ScrollView } from 'react-native';
+import {
+  Alert,
+  AppState,
+  PanResponder,
+  Pressable,
+  StyleSheet,
+  View,
+  type ScrollView,
+} from 'react-native';
 
 import { AllergenNotice } from '@/components/allergen-notice';
 import { Button } from '@/components/button';
@@ -10,18 +18,21 @@ import { PRESSED_OPACITY } from '@/components/focus-ring';
 import { IconButton } from '@/components/icon-button';
 import { Screen } from '@/components/screen';
 import { Tag } from '@/components/tag';
-import { Text } from '@/components/text';
 import { EmptyState } from '@/components/empty-state';
+import { Text } from '@/components/text';
+import { Toast } from '@/components/toast';
 import { useIngredients } from '@/features/ingredients/use-ingredients';
 import { useTheme } from '@/hooks/use-theme';
 import { formatDate, formatList, formatNumber, type AppLocale } from '@/i18n';
 
 import { usePlanWeek } from './data';
 import { AddSheet, type AddTarget } from './add-sheet';
+import { EntryActionsSheet, type EntryTarget } from './entry-actions-sheet';
 import { defaultServings, entryAllergens, nextPosition, slotEntries, weekEntries } from './plan';
 import { SLOTS, type PlanEntryRow, type Slot } from './tables';
 import { usePlanPeople } from './use-plan-people';
-import { useAddEntry } from './writes';
+import { useUndoable } from './use-undoable';
+import { useAddEntry, useEntryActions } from './writes';
 import {
   addDays,
   startOfWeek,
@@ -115,9 +126,54 @@ export function PlanWeekScreen({
   const ingredients = useIngredients(locale);
   const addEntry = useAddEntry(locale);
   const [adding, setAdding] = useState<AddTarget | null>(null);
+  const [acting, setActing] = useState<PlanEntryRow | null>(null);
+  const entryActions = useEntryActions();
+  const failed = useCallback(() => Alert.alert(t('plan.actions.failed')), [t]);
+  const undoable = useUndoable(failed);
   const actions: PlanWeekActions = {
     onAdd: canWrite ? (date, slot) => setAdding({ date, slot }) : undefined,
+    onEntryActions: canWrite ? setActing : undefined,
     ...overrides,
+  };
+  // Entries waiting on an undo bar are hidden until it goes (FR-PLAN-7).
+  const shownEntries = useMemo(() => {
+    const hidden = new Set(undoable.hidden);
+    return week.entries.filter((e) => !hidden.has(e.id));
+  }, [week.entries, undoable.hidden]);
+  const titleOf = (entry: PlanEntryRow) =>
+    (entry.recipe_id ? week.titles.get(entry.recipe_id) : undefined) ??
+    entry.free_text ??
+    t('plan.deletedRecipe');
+
+  const runAction = async (task: () => Promise<unknown>) => {
+    setActing(null);
+    try {
+      await task();
+    } catch {
+      failed();
+    }
+  };
+  const moveEntry = (entry: PlanEntryRow, target: EntryTarget) =>
+    runAction(() =>
+      entryActions.move(entry, {
+        ...target,
+        position: nextPosition(week.all, target.date, target.slot),
+      }),
+    );
+  const duplicateEntry = (entry: PlanEntryRow, target: EntryTarget) =>
+    runAction(() =>
+      entryActions.duplicate(entry, week.portions, {
+        ...target,
+        position: nextPosition(week.all, target.date, target.slot),
+      }),
+    );
+  const removeEntry = (entry: PlanEntryRow) => {
+    setActing(null);
+    undoable.hold({
+      message: t('plan.actions.removed', { title: titleOf(entry) }),
+      hidden: [entry.id],
+      commit: () => entryActions.remove([entry.id]),
+    });
   };
 
   const goTo = useCallback(
@@ -152,151 +208,168 @@ export function PlanWeekScreen({
   const firstAddDate = isCurrent ? today : start;
 
   return (
-    <Screen title={t('plan.title')} scrollRef={scrollRef} testID="plan-screen">
-      <View style={[styles.row, { gap: theme.space[2] }]}>
-        <IconButton
-          icon="back"
-          accessibilityLabel={t('plan.previousWeek')}
-          onPress={() => goTo(addDays(start, -7))}
-          testID="plan-previous"
-        />
-        <Text
-          variant="sectionLabel"
-          style={styles.grow}
-          accessibilityRole="header"
-          testID="plan-range"
-        >
-          {range}
-        </Text>
-        <IconButton
-          icon="forward"
-          accessibilityLabel={t('plan.nextWeek')}
-          onPress={() => goTo(addDays(start, 7))}
-          testID="plan-next"
-        />
-      </View>
-      {!isCurrent ? (
-        <Button
-          variant="ghost"
-          label={t('plan.today')}
-          onPress={() => goTo(currentStart)}
-          testID="plan-today"
-        />
-      ) : null}
-
-      {!week.loading && week.entries.length === 0 ? (
-        <Card testID="plan-empty">
-          <EmptyState
-            icon="plan"
-            message={t(canWrite ? 'plan.empty' : 'plan.emptyReadOnly')}
-            actionLabel={canWrite && actions.onAdd ? t('plan.addMeal') : undefined}
-            onAction={() => actions.onAdd?.(firstAddDate, 'dinner')}
-            testID="plan-empty-state"
+    <View style={styles.grow}>
+      <Screen title={t('plan.title')} scrollRef={scrollRef} testID="plan-screen">
+        <View style={[styles.row, { gap: theme.space[2] }]}>
+          <IconButton
+            icon="back"
+            accessibilityLabel={t('plan.previousWeek')}
+            onPress={() => goTo(addDays(start, -7))}
+            testID="plan-previous"
           />
-          {canWrite && lastWeekHasEntries && actions.onCopyLastWeek ? (
-            <Button
-              variant="secondary"
-              label={t('plan.copyLastWeek')}
-              onPress={() => actions.onCopyLastWeek?.(start)}
-              testID="plan-copy-last-week"
-            />
-          ) : null}
-          {canWrite && actions.onApplyTemplate ? (
-            <Button
-              variant="ghost"
-              label={t('plan.applyTemplate')}
-              onPress={() => actions.onApplyTemplate?.(start)}
-              testID="plan-apply-template"
-            />
-          ) : null}
-        </Card>
-      ) : null}
+          <Text
+            variant="sectionLabel"
+            style={styles.grow}
+            accessibilityRole="header"
+            testID="plan-range"
+          >
+            {range}
+          </Text>
+          <IconButton
+            icon="forward"
+            accessibilityLabel={t('plan.nextWeek')}
+            onPress={() => goTo(addDays(start, 7))}
+            testID="plan-next"
+          />
+        </View>
+        {!isCurrent ? (
+          <Button
+            variant="ghost"
+            label={t('plan.today')}
+            onPress={() => goTo(currentStart)}
+            testID="plan-today"
+          />
+        ) : null}
 
-      <View
-        {...swipe.panHandlers}
-        onLayout={(e) => {
-          layout.current.days = e.nativeEvent.layout.y;
-          scrollToToday();
-        }}
-        style={{ gap: theme.space[3] }}
-        testID="plan-days"
-      >
-        {days.map((date, index) => {
-          const isToday = date === today;
-          return (
-            <View
-              key={date}
-              onLayout={
-                isToday
-                  ? (e) => {
-                      layout.current.today = e.nativeEvent.layout.y;
-                      scrollToToday();
-                    }
-                  : undefined
-              }
-            >
-              <Card
-                variant={isToday ? 'highlight' : 'default'}
-                testID={`plan-day-${date}`}
-                style={{ gap: theme.space[3] }}
+        {!week.loading && shownEntries.length === 0 ? (
+          <Card testID="plan-empty">
+            <EmptyState
+              icon="plan"
+              message={t(canWrite ? 'plan.empty' : 'plan.emptyReadOnly')}
+              actionLabel={canWrite && actions.onAdd ? t('plan.addMeal') : undefined}
+              onAction={() => actions.onAdd?.(firstAddDate, 'dinner')}
+              testID="plan-empty-state"
+            />
+            {canWrite && lastWeekHasEntries && actions.onCopyLastWeek ? (
+              <Button
+                variant="secondary"
+                label={t('plan.copyLastWeek')}
+                onPress={() => actions.onCopyLastWeek?.(start)}
+                testID="plan-copy-last-week"
+              />
+            ) : null}
+            {canWrite && actions.onApplyTemplate ? (
+              <Button
+                variant="ghost"
+                label={t('plan.applyTemplate')}
+                onPress={() => actions.onApplyTemplate?.(start)}
+                testID="plan-apply-template"
+              />
+            ) : null}
+          </Card>
+        ) : null}
+
+        <View
+          {...swipe.panHandlers}
+          onLayout={(e) => {
+            layout.current.days = e.nativeEvent.layout.y;
+            scrollToToday();
+          }}
+          style={{ gap: theme.space[3] }}
+          testID="plan-days"
+        >
+          {days.map((date, index) => {
+            const isToday = date === today;
+            return (
+              <View
+                key={date}
+                onLayout={
+                  isToday
+                    ? (e) => {
+                        layout.current.today = e.nativeEvent.layout.y;
+                        scrollToToday();
+                      }
+                    : undefined
+                }
               >
-                <View style={[styles.row, { gap: theme.space[2] }]}>
-                  <Text variant="cardTitle" accessibilityRole="header" style={styles.grow}>
-                    {formatDate(toDate(date), locale, dayFormat)}
-                  </Text>
-                  {isToday ? <Tag label={t('plan.today')} testID="plan-today-tag" /> : null}
-                </View>
-                <DaySlots
-                  date={date}
-                  index={index}
-                  entries={week.entries}
-                  canWrite={canWrite}
-                  actions={actions}
-                  titleOf={(entry) =>
-                    (entry.recipe_id ? week.titles.get(entry.recipe_id) : undefined) ??
-                    entry.free_text ??
-                    t('plan.deletedRecipe')
-                  }
-                  allergensOf={(entry) =>
-                    entryAllergens(
-                      entry,
-                      week.ingredientIdsOf,
-                      (id) => ingredients.allergens(id),
-                      people.people,
-                      week.portions,
-                    )
-                  }
-                  locale={locale}
-                />
-              </Card>
-            </View>
-          );
-        })}
-      </View>
-      {people.status === 'unavailable' ? (
-        <Text variant="caption" color="textSecondary" testID="plan-allergies-unavailable">
-          {t('plan.allergiesUnavailable')}
-        </Text>
-      ) : null}
-      <AddSheet
-        target={adding}
-        locale={locale}
-        entries={week.all}
-        defaultServings={defaultServings(people.people) ?? DEFAULT_SERVINGS}
-        onAdd={async (choice, servings, via) => {
-          if (!adding) return;
-          await addEntry({
-            ...adding,
-            position: nextPosition(week.all, adding.date, adding.slot),
-            servings,
-            choice,
-            via,
-          });
-          setAdding(null);
-        }}
-        onClose={() => setAdding(null)}
+                <Card
+                  variant={isToday ? 'highlight' : 'default'}
+                  testID={`plan-day-${date}`}
+                  style={{ gap: theme.space[3] }}
+                >
+                  <View style={[styles.row, { gap: theme.space[2] }]}>
+                    <Text variant="cardTitle" accessibilityRole="header" style={styles.grow}>
+                      {formatDate(toDate(date), locale, dayFormat)}
+                    </Text>
+                    {isToday ? <Tag label={t('plan.today')} testID="plan-today-tag" /> : null}
+                  </View>
+                  <DaySlots
+                    date={date}
+                    index={index}
+                    entries={shownEntries}
+                    canWrite={canWrite}
+                    actions={actions}
+                    titleOf={titleOf}
+                    allergensOf={(entry) =>
+                      entryAllergens(
+                        entry,
+                        week.ingredientIdsOf,
+                        (id) => ingredients.allergens(id),
+                        people.people,
+                        week.portions,
+                      )
+                    }
+                    locale={locale}
+                  />
+                </Card>
+              </View>
+            );
+          })}
+        </View>
+        {people.status === 'unavailable' ? (
+          <Text variant="caption" color="textSecondary" testID="plan-allergies-unavailable">
+            {t('plan.allergiesUnavailable')}
+          </Text>
+        ) : null}
+        <AddSheet
+          target={adding}
+          locale={locale}
+          entries={week.all}
+          defaultServings={defaultServings(people.people) ?? DEFAULT_SERVINGS}
+          onAdd={async (choice, servings, via) => {
+            if (!adding) return;
+            await addEntry({
+              ...adding,
+              position: nextPosition(week.all, adding.date, adding.slot),
+              servings,
+              choice,
+              via,
+            });
+            setAdding(null);
+          }}
+          onClose={() => setAdding(null)}
+        />
+        <EntryActionsSheet
+          entry={acting}
+          title={acting ? titleOf(acting) : ''}
+          days={days}
+          locale={locale}
+          onMove={(entry, target) => void moveEntry(entry, target)}
+          onDuplicate={(entry, target) => void duplicateEntry(entry, target)}
+          onRemove={removeEntry}
+          onClose={() => setActing(null)}
+        />
+      </Screen>
+      <Toast
+        visible={undoable.current !== null}
+        message={undoable.current?.message ?? ''}
+        variant="undo"
+        actionLabel={t('plan.actions.undo')}
+        onAction={undoable.undo}
+        onDismiss={undoable.settle}
+        testID="plan-undo"
       />
-    </Screen>
+    </View>
   );
 }
 

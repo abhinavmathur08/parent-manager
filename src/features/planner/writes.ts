@@ -9,7 +9,7 @@ import { copyStarter } from '@/features/recipes/starter/view';
 import type { AppLocale } from '@/i18n';
 import { useSyncWriter } from '@/lib/sync';
 
-import { trackPlanEvent } from './analytics';
+import { track } from '@/lib/analytics';
 import {
   PLAN_ENTRIES,
   PLAN_ENTRY_PORTIONS,
@@ -82,7 +82,7 @@ export function useAddEntry(locale: AppLocale) {
         servings,
         leftover_of_entry_id: null,
       });
-      trackPlanEvent('plan_entry_added', {
+      track('plan_entry_added', {
         slot,
         source:
           choice.kind === 'recipe'
@@ -137,7 +137,7 @@ export function useEntryActions() {
         slot: target.slot,
         position: target.position,
       });
-      trackPlanEvent('plan_entry_moved', {
+      track('plan_entry_moved', {
         slot_changed: target.slot !== entry.slot,
         day_changed: target.date !== entry.date,
       });
@@ -149,7 +149,10 @@ export function useEntryActions() {
     ) => copyEntry(writer, entry, portions, target),
     /** Removes entries for good. The server tombstones their portions. */
     remove: async (ids: readonly string[]) => {
-      for (const id of ids) await writer.remove(PLAN_ENTRIES.name, id);
+      for (const id of ids) {
+        await writer.remove(PLAN_ENTRIES.name, id);
+        track('plan_entry_removed');
+      }
     },
     writer,
   };
