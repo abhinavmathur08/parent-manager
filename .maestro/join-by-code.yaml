@@ -63,5 +63,5 @@ tags:
     id: join-accept
 - extendedWaitUntil:
     visible:
-      id: plan-screen-title
+      id: plan-days
     timeout: 20000
