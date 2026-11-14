@@ -4,3 +4,4 @@ nodeLinker: hoisted
 allowBuilds:
   supabase: true # downloads the pinned Supabase CLI binary
   '@parcel/watcher': false # ships prebuilt binaries; the script only builds from source
+  '@sentry/cli': false # its binary comes from the platform package (@sentry/cli-<os>); the script only re-checks it
