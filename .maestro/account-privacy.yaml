@@ -1,5 +1,6 @@
 # The Household tab's account and privacy screens (A-04.1, FR-PRIV-1, FR-PRIV-5): turn off
-# usage sharing on this device, rename yourself, then sign out from Account.
+# usage sharing on this device, rename yourself, then sign out from Account. The subflow names
+# the account Sam, so the new name differs and Save appears.
 # Needs the local stack; see the Testing section of README.md.
 appId: ${APP_ID || 'com.myparentmanager'}
 tags:
@@ -37,7 +38,7 @@ tags:
 - tapOn:
     id: account-display-name
 - eraseText: 40
-- inputText: Sam
+- inputText: Sam Lee
 - hideKeyboard
 - tapOn:
     id: account-save-name
