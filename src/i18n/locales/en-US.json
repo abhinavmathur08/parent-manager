@@ -751,6 +751,17 @@
       "done": "Done",
       "remove": "Remove ingredient",
       "ingredientRequired": "Choose an ingredient, or add a new one."
+    },
+    "addShort": "Add",
+    "import": "Import a recipe",
+    "search": "Search recipes, ingredients or tags",
+    "filters": "Filter by tag",
+    "household": "Your recipes",
+    "count_one": "{{count}} recipe",
+    "count_other": "{{count}} recipes",
+    "noResults": "No recipes match. Try fewer words or tags.",
+    "card": {
+      "minutes": "{{minutes}} min"
     }
   }
 }
