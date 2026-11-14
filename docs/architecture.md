@@ -421,6 +421,8 @@ Supabase Auth, with:
 - **Sentry** (`@sentry/react-native` with its Expo plugin):
   - **What it captures:** crashes, performance traces and source maps uploaded from EAS builds.
   - **Privacy settings:** `sendDefaultPii: false`, a `beforeSend` that strips user content, and the user ID only.
+  - **Wrapper (F-07.1):** `src/lib/crash-reporting.ts`. Without `EXPO_PUBLIC_SENTRY_DSN` it does nothing (D-4), so turning Sentry on needs only EAS environment variables. Events lose request data, extras, unlisted contexts and the device name; messages lose emails, double-quoted text and Postgres key details; URLs lose their query and fragment; console breadcrumbs are dropped. Screenshots, view hierarchy and replays are off, and 20% of sessions send traces.
+  - **Turning it on:** set `EXPO_PUBLIC_SENTRY_DSN` (plain text) in each EAS environment. For readable stack traces, also set `SENTRY_ORG` and `SENTRY_PROJECT` (plain text) and `SENTRY_AUTH_TOKEN` (secret), then make new builds; without the org and project the plugin skips the source-map upload (`app.config.ts`). After `pnpm run update:preview`, run `pnpm exec sentry-expo-upload-sourcemaps dist` with `SENTRY_AUTH_TOKEN` set to upload the update's source maps.
 - **PostHog:**
   - **Events:** carry only IDs, counts and fixed values, never names or content.
   - **Session replay:** off.
