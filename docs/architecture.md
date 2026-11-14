@@ -154,6 +154,7 @@ How the plan is stored (P-01.1):
 - **Portions.** One row per entry and person (a unique index): 0, ½, 1 or 2, or a baby plate at ¼ (FR-PLAN-6). The app derives the row's ID from the entry and person IDs (`portionId`), so two partners setting the same portion offline write one row.
 - **Writes.** Parents and family members write the plan; caregivers read it.
 - **The week on the device (P-01.2).** `src/features/planner/week.ts` does date arithmetic on `YYYY-MM-DD` dates as whole UTC days, so weeks cross month ends and daylight-saving changes exactly. Only "today" depends on a timezone: the household's (`Membership.timezone`), falling back to the device's. S-10 reads entries from the local copy. Allergen markers use the household's people, fetched online and kept in memory for the session like recipe detail's, with each person's portion on the entry or their R-SERV-1 default.
+- **Adding (P-01.3).** S-11 searches household and starter recipes with R-03.1's `searchRecipes`, and lists recently planned recipes first. Planning a starter saves a household copy first (or reuses an existing copy of it), because entries reference household recipes only. Servings default to the people's R-SERV-1 portions, rounded up to ½. Planner analytics go through `src/features/planner/analytics.ts`, a no-op until the F-07.2 wrapper (`@/lib/analytics`) is on main.
 
 #### Grocery and pantry
 

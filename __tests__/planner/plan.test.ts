@@ -1,6 +1,9 @@
 import {
   compareEntries,
   defaultPortion,
+  defaultServings,
+  nextPosition,
+  recentRecipeIds,
   entryAllergens,
   portionsFor,
   weekEntries,
@@ -97,5 +100,43 @@ describe('week entries (FR-PLAN-1, FR-PLAN-4)', () => {
     ];
     expect(weekEntries(rows, '2026-11-15').map((e) => e.id)).toEqual(['c', 'd', 'b', 'a']);
     expect(compareEntries(rows[0], rows[0])).toBe(0);
+  });
+});
+
+describe('adding entries (FR-PLAN-3 to FR-PLAN-5)', () => {
+  it('defaults servings to the people, rounded up to the nearest ½ (R-SERV-1)', () => {
+    // 1 + ½ + 0 = 1.5.
+    expect(defaultServings(people)).toBe(1.5);
+    // 1 + ¼ (baby plate) rounds up to 1.5.
+    expect(defaultServings([people[0], { ...people[1], ageBand: 'infant_6_12m' }])).toBe(1.5);
+    expect(defaultServings([people[2]])).toBeNull();
+    expect(defaultServings([])).toBeNull();
+  });
+
+  it("puts a new entry after the slot's last live entry", () => {
+    const rows = [
+      entry({ id: 'a', position: 0 }),
+      entry({ id: 'b', position: 3, deleted_at: '2026-11-10T00:00:00Z' }),
+      entry({ id: 'c', position: 1 }),
+      entry({ id: 'd', slot: 'lunch', position: 5 }),
+    ];
+    expect(nextPosition(rows, '2026-11-16', 'dinner')).toBe(2);
+    expect(nextPosition(rows, '2026-11-17', 'dinner')).toBe(0);
+  });
+
+  it('lists recently planned recipes first, then recently changed ones', () => {
+    const recipes = [
+      { id: 'r1', updated_at: '2026-11-01T00:00:00Z', deleted_at: null },
+      { id: 'r2', updated_at: '2026-11-11T00:00:00Z', deleted_at: null },
+      { id: 'r3', updated_at: '2026-11-05T00:00:00Z', deleted_at: null },
+      { id: 'gone', updated_at: '2026-11-12T00:00:00Z', deleted_at: '2026-11-12T00:00:00Z' },
+    ];
+    const rows = [
+      entry({ id: 'a', recipe_id: 'r1', updated_at: '2026-11-09T00:00:00Z' }),
+      entry({ id: 'b', recipe_id: 'r3', updated_at: '2026-11-10T00:00:00Z' }),
+      entry({ id: 'c', recipe_id: 'gone', updated_at: '2026-11-12T00:00:00Z' }),
+    ];
+    expect(recentRecipeIds(rows, recipes, 3)).toEqual(['r3', 'r1', 'r2']);
+    expect(recentRecipeIds([], recipes, 2)).toEqual(['r2', 'r3']);
   });
 });

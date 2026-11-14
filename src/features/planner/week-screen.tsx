@@ -17,9 +17,11 @@ import { useTheme } from '@/hooks/use-theme';
 import { formatDate, formatList, formatNumber, type AppLocale } from '@/i18n';
 
 import { usePlanWeek } from './data';
-import { entryAllergens, slotEntries, weekEntries } from './plan';
+import { AddSheet, type AddTarget } from './add-sheet';
+import { defaultServings, entryAllergens, nextPosition, slotEntries, weekEntries } from './plan';
 import { SLOTS, type PlanEntryRow, type Slot } from './tables';
 import { usePlanPeople } from './use-plan-people';
+import { useAddEntry } from './writes';
 import {
   addDays,
   startOfWeek,
@@ -77,6 +79,9 @@ function useWeekSwipe(onSwipe: (direction: -1 | 1) => void) {
   );
 }
 
+/** Servings for a new entry until the household's people are known. */
+const DEFAULT_SERVINGS = 2;
+
 const dayFormat = { weekday: 'long', month: 'short', day: 'numeric', timeZone: 'UTC' } as const;
 const rangeFormat = { month: 'short', day: 'numeric', timeZone: 'UTC' } as const;
 
@@ -89,10 +94,11 @@ const rangeFormat = { month: 'short', day: 'numeric', timeZone: 'UTC' } as const
 export function PlanWeekScreen({
   household,
   canWrite,
-  actions = {},
+  actions: overrides = {},
 }: {
   household: PlanHousehold;
   canWrite: boolean;
+  /** Replaces the screen's own handlers, for tests and later items. */
   actions?: PlanWeekActions;
 }) {
   const { t } = useTranslation();
@@ -107,6 +113,12 @@ export function PlanWeekScreen({
   const week = usePlanWeek(start);
   const people = usePlanPeople(household.id);
   const ingredients = useIngredients(locale);
+  const addEntry = useAddEntry(locale);
+  const [adding, setAdding] = useState<AddTarget | null>(null);
+  const actions: PlanWeekActions = {
+    onAdd: canWrite ? (date, slot) => setAdding({ date, slot }) : undefined,
+    ...overrides,
+  };
 
   const goTo = useCallback(
     (next: PlanDate) => setShown(next === currentStart ? null : next),
@@ -209,7 +221,7 @@ export function PlanWeekScreen({
         style={{ gap: theme.space[3] }}
         testID="plan-days"
       >
-        {days.map((date) => {
+        {days.map((date, index) => {
           const isToday = date === today;
           return (
             <View
@@ -236,6 +248,7 @@ export function PlanWeekScreen({
                 </View>
                 <DaySlots
                   date={date}
+                  index={index}
                   entries={week.entries}
                   canWrite={canWrite}
                   actions={actions}
@@ -265,12 +278,31 @@ export function PlanWeekScreen({
           {t('plan.allergiesUnavailable')}
         </Text>
       ) : null}
+      <AddSheet
+        target={adding}
+        locale={locale}
+        entries={week.all}
+        defaultServings={defaultServings(people.people) ?? DEFAULT_SERVINGS}
+        onAdd={async (choice, servings, via) => {
+          if (!adding) return;
+          await addEntry({
+            ...adding,
+            position: nextPosition(week.all, adding.date, adding.slot),
+            servings,
+            choice,
+            via,
+          });
+          setAdding(null);
+        }}
+        onClose={() => setAdding(null)}
+      />
     </Screen>
   );
 }
 
 function DaySlots({
   date,
+  index,
   entries,
   canWrite,
   actions,
@@ -279,6 +311,8 @@ function DaySlots({
   locale,
 }: {
   date: PlanDate;
+  /** The day's place in the week, 0 to 6, for stable test IDs. */
+  index: number;
   entries: readonly PlanEntryRow[];
   canWrite: boolean;
   actions: PlanWeekActions;
@@ -297,7 +331,7 @@ function DaySlots({
       {filled
         .filter((s) => s.list.length > 0)
         .map(({ slot, list }) => (
-          <View key={slot} style={{ gap: theme.space[1] }} testID={`plan-slot-${date}-${slot}`}>
+          <View key={slot} style={{ gap: theme.space[1] }} testID={`plan-slot-${index}-${slot}`}>
             <View style={[styles.row, { gap: theme.space[2] }]}>
               <Text variant="overline" color="textSecondary" style={styles.grow}>
                 {t(`plan.slots.${slot}`)}
@@ -310,7 +344,7 @@ function DaySlots({
                     day: formatDate(toDate(date), locale, dayFormat),
                   })}
                   onPress={() => actions.onAdd?.(date, slot)}
-                  testID={`plan-add-${date}-${slot}`}
+                  testID={`plan-add-${index}-${slot}`}
                 />
               ) : null}
             </View>
@@ -335,7 +369,7 @@ function DaySlots({
               variant="action"
               label={t(`plan.slots.${slot}`)}
               onPress={() => actions.onAdd?.(date, slot)}
-              testID={`plan-add-${date}-${slot}`}
+              testID={`plan-add-${index}-${slot}`}
             />
           ))}
         </View>

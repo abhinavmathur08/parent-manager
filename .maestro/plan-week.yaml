@@ -1,0 +1,113 @@
+# P-01.3 (FR-PLAN-3, FR-PLAN-4): a new household plans a week of dinners from the Plan tab.
+# The first dinner comes from a starter recipe found by search (saved as a household copy);
+# the rest are the recent recipe in one tap each. A second entry in one slot is free text.
+# Ends signed out. Needs the local stack; see the Testing section of README.md.
+appId: ${APP_ID || 'com.myparentmanager'}
+tags:
+  - backend
+---
+- runFlow: subflows/create-household.yaml
+# The week opens scrolled to today; the empty state is above the days.
+- scrollUntilVisible:
+    element:
+      id: plan-empty
+    direction: UP
+
+# Day 1: search the starter library.
+- scrollUntilVisible:
+    element:
+      id: plan-add-0-dinner
+    centerElement: true
+- tapOn:
+    id: plan-add-0-dinner
+- extendedWaitUntil:
+    visible:
+      id: add-search
+    timeout: 10000
+- tapOn:
+    id: add-search
+- inputText: lentil
+# The keyboard can cover the sheet's results.
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: add-starter-0
+- tapOn:
+    id: add-starter-0
+- extendedWaitUntil:
+    notVisible:
+      id: add-search
+    timeout: 10000
+# The empty state goes once the week has an entry, which moves the days up.
+- scrollUntilVisible:
+    element:
+      id: plan-range
+    direction: UP
+- scrollUntilVisible:
+    element:
+      id: plan-slot-0-dinner
+- assertNotVisible:
+    id: plan-empty
+
+# Days 2 to 7: the recent recipe, one tap after the sheet opens.
+- runFlow:
+    file: subflows/plan-recent-dinner.yaml
+    env:
+      DAY: '1'
+- runFlow:
+    file: subflows/plan-recent-dinner.yaml
+    env:
+      DAY: '2'
+- runFlow:
+    file: subflows/plan-recent-dinner.yaml
+    env:
+      DAY: '3'
+- runFlow:
+    file: subflows/plan-recent-dinner.yaml
+    env:
+      DAY: '4'
+- runFlow:
+    file: subflows/plan-recent-dinner.yaml
+    env:
+      DAY: '5'
+- runFlow:
+    file: subflows/plan-recent-dinner.yaml
+    env:
+      DAY: '6'
+
+# A second entry in a filled slot (FR-PLAN-4): free text.
+- scrollUntilVisible:
+    element:
+      id: plan-add-6-dinner
+    centerElement: true
+- tapOn:
+    id: plan-add-6-dinner
+- extendedWaitUntil:
+    visible:
+      id: add-search
+    timeout: 10000
+- tapOn:
+    id: add-search
+- inputText: Garlic bread
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: add-free-text
+- tapOn:
+    id: add-free-text
+- extendedWaitUntil:
+    visible:
+      text: .*Garlic bread.*
+    timeout: 10000
+
+- tapOn:
+    id: tab-household
+- scrollUntilVisible:
+    element:
+      id: sign-out
+- tapOn:
+    id: sign-out
+- extendedWaitUntil:
+    visible:
+      id: sign-in-screen-title
+    timeout: 10000
