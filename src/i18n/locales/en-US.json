@@ -479,6 +479,12 @@
       "finish": "Finish"
     }
   },
+  "forcedUpdate": {
+    "title": "Time to update",
+    "body": "This version of Parent Manager is no longer supported. Update it to keep planning and shopping together. Your household's data is safe.",
+    "action": "Update",
+    "noStore": "Update Parent Manager from the App Store or Google Play."
+  },
   "biometric": {
     "faceIdPermission": "Parent Manager uses Face ID to unlock the app when you turn on the lock.",
     "lockedTitle": "Parent Manager is locked",
@@ -505,7 +511,14 @@
     "pending_one": "{{count}} change waiting to sync",
     "pending_other": "{{count}} changes waiting to sync",
     "rejected_one": "{{count}} change couldn't be saved, because the household no longer accepts it.",
-    "rejected_other": "{{count}} changes couldn't be saved, because the household no longer accepts them."
+    "rejected_other": "{{count}} changes couldn't be saved, because the household no longer accepts them.",
+    "firstLoad": {
+      "title": "Getting your household ready",
+      "body": "We're bringing your recipes, plans and lists to this phone. It only takes a few seconds the first time.",
+      "offlineTitle": "We can't load your household yet",
+      "offlineBody": "Connect to the internet to bring your household to this phone. After that, it works offline.",
+      "retry": "Try again"
+    }
   },
   "people": {
     "ageBand": "Age",
