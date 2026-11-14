@@ -17,6 +17,7 @@ tags:
 - scrollUntilVisible:
     element:
       id: plan-add-0-dinner
+    centerElement: true
 - tapOn:
     id: plan-add-0-dinner
 - extendedWaitUntil:
@@ -86,6 +87,7 @@ tags:
 - scrollUntilVisible:
     element:
       id: plan-add-6-dinner
+    centerElement: true
 - tapOn:
     id: plan-add-6-dinner
 - extendedWaitUntil:
