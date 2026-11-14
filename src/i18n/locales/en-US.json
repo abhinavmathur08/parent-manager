@@ -681,6 +681,38 @@
         "apple": "Signed in with Apple",
         "google": "Signed in with Google"
       }
+    },
+    "delete": {
+      "title": "Delete account",
+      "action": "Delete account",
+      "offline": "You're offline. Deleting your account needs a connection.",
+      "outcome": {
+        "delete_household": "This deletes your account and {{household}}, with all its recipes, plans, lists, people and allergies. Nobody else is left to keep it. This can't be undone.",
+        "leave": "This deletes your account and profile. {{household}} carries on for its other members, and what you added stays there, shown as added by a former member. This can't be undone.",
+        "last_parent": "You're the only parent in {{household}}. Make another member a parent first, or delete the household from its settings.",
+        "no_household": "This deletes your account. This can't be undone."
+      },
+      "openMembers": "Go to members",
+      "backups": "Your data leaves our servers at once, and our backups within 30 days.",
+      "subscriptionIos": "Deleting your account doesn't cancel a subscription. If you subscribed, cancel it in the App Store.",
+      "subscriptionAndroid": "Deleting your account doesn't cancel a subscription. If you subscribed, cancel it in Google Play.",
+      "manageSubscriptions": "Manage subscriptions"
+    },
+    "reauth": {
+      "title": "Sign in again to confirm",
+      "email": "To confirm it's you, we'll email a code to {{email}}.",
+      "codeSent": "Enter the code we sent to {{email}}.",
+      "sendCode": "Send code",
+      "provider": {
+        "apple": "To confirm it's you, sign in with Apple again.",
+        "google": "To confirm it's you, sign in with Google again."
+      },
+      "continueWith": {
+        "apple": "Sign in with Apple and delete",
+        "google": "Sign in with Google and delete"
+      },
+      "differentAccount": "That's a different account, so nothing was deleted.",
+      "expired": "That took too long. Sign in again to confirm."
     }
   },
   "plan": {

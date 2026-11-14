@@ -1,0 +1,55 @@
+# The only member deletes their account (A-04.3, FR-PRIV-3): the screen says the household
+# goes too, they sign in again with an emailed code, and the app returns to sign-in.
+# Needs the local stack; see the Testing section of README.md.
+appId: ${APP_ID || 'com.myparentmanager'}
+tags:
+  - backend
+---
+- runFlow: subflows/create-household.yaml
+- tapOn:
+    id: tab-household
+- scrollUntilVisible:
+    element:
+      id: open-account
+- tapOn:
+    id: open-account
+- scrollUntilVisible:
+    element:
+      id: open-delete-account
+- tapOn:
+    id: open-delete-account
+- extendedWaitUntil:
+    visible:
+      id: delete-account-outcome
+    timeout: 10000
+- assertVisible:
+    text: '.*with all its recipes.*'
+- assertVisible:
+    id: delete-account-subscription
+- scrollUntilVisible:
+    element:
+      id: delete-account-start
+- tapOn:
+    id: delete-account-start
+# Supabase keeps a gap between codes to one address, and sign-up just sent one.
+- runScript: scripts/wait-for-new-code.js
+- tapOn:
+    id: delete-account-reauth-send
+# The code field has focus, and on Android the keyboard can cover the sheet, so wait for the
+# sheet's text and type straight into the focused field.
+- extendedWaitUntil:
+    visible:
+      text: 'Enter the code we sent.*'
+    timeout: 10000
+- runScript:
+    file: scripts/read-code.js
+    env:
+      EMAIL: ${output.email}
+- inputText: ${output.code}
+- hideKeyboard
+- tapOn:
+    id: delete-account-reauth-confirm
+- extendedWaitUntil:
+    visible:
+      id: sign-in-screen-title
+    timeout: 20000

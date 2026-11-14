@@ -20,13 +20,11 @@ import { useTheme } from '@/hooks/use-theme';
 
 const MAX_DISPLAY_NAME = 100;
 
-export type AccountScreenProps = {
-  /** The danger zone, such as delete account (A-04.3), shown under sign out. */
-  footer?: React.ReactNode;
-};
-
-/** S-31 Account: profile, biometric lock, sign out (FR-AUTH-4, FR-AUTH-6, FR-PRIV-1). */
-export function AccountScreen({ footer }: AccountScreenProps) {
+/**
+ * S-31 Account: profile, biometric lock, sign out and delete account (FR-AUTH-4, FR-AUTH-6,
+ * FR-PRIV-1). Delete account is two taps from the Household tab (FR-PRIV-3).
+ */
+export function AccountScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
   const online = useOnline();
@@ -137,7 +135,13 @@ export function AccountScreen({ footer }: AccountScreenProps) {
         fullWidth
         testID="sign-out"
       />
-      {footer}
+      <Button
+        variant="ghost"
+        label={t('account.delete.title')}
+        onPress={() => router.push('/household/delete-account')}
+        fullWidth
+        testID="open-delete-account"
+      />
     </Screen>
   );
 }
