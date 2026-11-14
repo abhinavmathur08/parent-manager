@@ -200,9 +200,7 @@ export function BottomSheet({
         {variant === 'form' ? (
           // Padding on Android too: a modal with a translucent status bar isn't resized for
           // the keyboard there, so without it the keyboard covers the sheet's fields.
-          <KeyboardAvoidingView behavior="padding">
-            {sheet}
-          </KeyboardAvoidingView>
+          <KeyboardAvoidingView behavior="padding">{sheet}</KeyboardAvoidingView>
         ) : (
           sheet
         )}
