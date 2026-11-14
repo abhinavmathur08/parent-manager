@@ -1,0 +1,20 @@
+# Shared steps: sign out from the Account screen (S-31). Starts anywhere in the tabs and ends
+# on the sign-in screen. Not run on its own (config.yaml runs top-level flows only).
+appId: ${APP_ID || 'com.myparentmanager'}
+---
+- tapOn:
+    id: tab-household
+- scrollUntilVisible:
+    element:
+      id: open-account
+- tapOn:
+    id: open-account
+- scrollUntilVisible:
+    element:
+      id: sign-out
+- tapOn:
+    id: sign-out
+- extendedWaitUntil:
+    visible:
+      id: sign-in-screen-title
+    timeout: 10000

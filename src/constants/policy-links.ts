@@ -1,4 +1,4 @@
-import type { AppLocale } from '@/i18n';
+import { DEFAULT_LOCALE, SUPPORTED_LOCALES, type AppLocale } from '@/i18n';
 
 /**
  * Where the terms and privacy policy live (FR-PRIV-6). They need the product domain (D-2)
@@ -18,4 +18,16 @@ export function policyUrl(
 ): string | null {
   if (!base) return null;
   return `${base.replace(/\/+$/, '')}/${locale.toLowerCase()}/${kind}`;
+}
+
+/** The policy page for the app's current language, falling back to the default locale. */
+export function policyUrlForLanguage(
+  kind: PolicyKind,
+  language: string,
+  base: string | null = POLICY_BASE_URL,
+): string | null {
+  const locale = (SUPPORTED_LOCALES as readonly string[]).includes(language)
+    ? (language as AppLocale)
+    : DEFAULT_LOCALE;
+  return policyUrl(kind, locale, base);
 }

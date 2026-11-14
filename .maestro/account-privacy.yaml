@@ -1,0 +1,48 @@
+# The Household tab's account and privacy screens (A-04.1, FR-PRIV-1, FR-PRIV-5): turn off
+# usage sharing on this device, rename yourself, then sign out from Account.
+# Needs the local stack; see the Testing section of README.md.
+appId: ${APP_ID || 'com.myparentmanager'}
+tags:
+  - backend
+---
+- runFlow: subflows/create-household.yaml
+- tapOn:
+    id: tab-household
+- scrollUntilVisible:
+    element:
+      id: open-privacy
+- tapOn:
+    id: open-privacy
+- assertVisible:
+    id: analytics-switch
+    checked: true
+- tapOn:
+    id: analytics-switch
+- assertVisible:
+    id: analytics-switch
+    checked: false
+- assertVisible:
+    id: privacy-policy-privacy
+- tapOn:
+    id: privacy-screen-title-back
+- scrollUntilVisible:
+    element:
+      id: open-account
+- tapOn:
+    id: open-account
+- extendedWaitUntil:
+    visible:
+      id: account-email
+    timeout: 10000
+- tapOn:
+    id: account-display-name
+- eraseText: 40
+- inputText: Sam
+- hideKeyboard
+- tapOn:
+    id: account-save-name
+- extendedWaitUntil:
+    visible:
+      id: account-message
+    timeout: 10000
+- runFlow: subflows/sign-out.yaml

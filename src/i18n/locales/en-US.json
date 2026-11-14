@@ -648,5 +648,39 @@
       "saved": "Settings saved.",
       "offline": "You're offline. Connect to the internet to change settings."
     }
+  },
+  "householdHub": {
+    "you": "You",
+    "about": "About",
+    "version": "Version"
+  },
+  "privacy": {
+    "title": "Privacy and data",
+    "usage": {
+      "title": "Usage",
+      "share": "Share anonymous usage",
+      "description": "Counts and app events only, from this device. Never names, children's details or list contents. Crash reports stay on."
+    },
+    "policies": {
+      "title": "Policies",
+      "privacy": "Privacy policy",
+      "terms": "Terms of use",
+      "unavailable": "Available before launch"
+    }
+  },
+  "account": {
+    "title": "Account",
+    "security": "Security",
+    "profile": {
+      "displayName": "Your name",
+      "save": "Save name",
+      "saved": "Name saved.",
+      "noEmail": "No email address",
+      "method": {
+        "email": "Signed in with an email code",
+        "apple": "Signed in with Apple",
+        "google": "Signed in with Google"
+      }
+    }
   }
 }
