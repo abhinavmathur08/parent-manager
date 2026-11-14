@@ -1049,6 +1049,47 @@
       "start": "Starts",
       "end": "Ends",
       "note": "Notifications wait until quiet hours end, and never make a sound. Times are in the household's time zone ({{timezone}})."
+    },
+    "messages": {
+      "plan_week": {
+        "title": "Time to plan next week",
+        "body": "Next week isn't planned yet. A few minutes now makes the week easier."
+      },
+      "list_ready": {
+        "title": "The grocery list is ready",
+        "body": "It's ready to shop. Open the list to get started."
+      },
+      "test": {
+        "title": "Notifications are working",
+        "body": "This is a test notification for this phone."
+      },
+      "member_joined": {
+        "title": "Someone joined your household",
+        "body": "Open members to see who's in your household."
+      },
+      "member_left": {
+        "title": "Someone left your household",
+        "body": "Open members to see who's in your household."
+      }
+    },
+    "turnOffType": "Turn off this type",
+    "inbox": {
+      "title": "Inbox",
+      "open": "Notifications",
+      "openUnread_one": "Notifications, {{count}} unread",
+      "openUnread_other": "Notifications, {{count}} unread",
+      "markAllRead": "Mark all read",
+      "empty": {
+        "title": "Nothing yet",
+        "body": "Reminders and household updates will show up here."
+      },
+      "unread": "Unread",
+      "failed": "Couldn't load notifications. Pull down to try again."
+    },
+    "test": {
+      "send": "Send a test notification",
+      "sent": "Test sent. It arrives in a minute or so, after quiet hours if they're on.",
+      "failed": "Couldn't send a test. Check your connection and try again."
     }
   }
 }

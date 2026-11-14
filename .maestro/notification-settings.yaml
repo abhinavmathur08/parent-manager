@@ -1,4 +1,4 @@
-# N-01.2 (FR-NOT-3, FR-NOT-6, FR-NOT-7): a member turns "list is ready" off, moves the
+# N-01.2 (FR-NOT-3, FR-NOT-6, FR-NOT-7): after a look at the empty inbox, a member turns "list is ready" off, moves the
 # "plan your week" reminder and the start of quiet hours, and finds the settings kept on the
 # server when they come back. Maestro grants notification permission at launch, so turning a
 # type back on doesn't ask. Ends signed out. Needs the local stack; see README.md.
@@ -7,6 +7,24 @@ tags:
   - backend
 ---
 - runFlow: subflows/create-household.yaml
+# N-01.3 (FR-NOT-8): the header bell on Plan opens the inbox, empty for a new household.
+- scrollUntilVisible:
+    element:
+      id: inbox-bell
+    direction: UP
+- tapOn:
+    id: inbox-bell
+- extendedWaitUntil:
+    visible:
+      id: inbox-empty
+    timeout: 10000
+- tapOn:
+    id: inbox-screen-title-back
+- extendedWaitUntil:
+    visible:
+      id: plan-days
+    timeout: 10000
+
 - tapOn:
     id: tab-household
 - scrollUntilVisible:

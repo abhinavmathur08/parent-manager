@@ -28,6 +28,8 @@ const SYMBOLS = {
   people: { ios: 'person.2', android: 'group' },
   lock: { ios: 'lock', android: 'lock' },
   share: { ios: 'square.and.arrow.up', android: 'share' },
+  bell: { ios: 'bell', android: 'notifications' },
+  bellUnread: { ios: 'bell.badge', android: 'notifications_active' },
 } as const;
 
 export type IconName = keyof typeof SYMBOLS;

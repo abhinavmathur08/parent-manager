@@ -2,13 +2,16 @@ import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 
 import { Button } from '@/components/button';
+import type { IconName } from '@/components/icon';
 import { IconButton } from '@/components/icon-button';
 import { Text } from '@/components/text';
 import { useTheme } from '@/hooks/use-theme';
 
 export type TopBarAction = {
-  /** Translated text action ("Edit"). */
+  /** Translated text action ("Edit"), or the accessibility label of an icon action. */
   label: string;
+  /** Shows the action as an icon button, such as the inbox bell (S-24). */
+  icon?: IconName;
   onPress: () => void;
   testID: string;
 };
@@ -18,7 +21,7 @@ export type TopBarProps = {
   title: string;
   /** Shows a back button on the leading side. */
   onBack?: () => void;
-  /** At most two trailing text actions. */
+  /** At most two trailing actions: text, or an icon with a label. */
   actions?: readonly [TopBarAction] | readonly [TopBarAction, TopBarAction];
   testID: string;
 };
@@ -55,15 +58,26 @@ export function TopBar({ title, onBack, actions, testID }: TopBarProps) {
           )}
           {actions ? (
             <View style={[styles.actions, { gap: theme.space[1] }]}>
-              {actions.map((action) => (
-                <Button
-                  key={action.testID}
-                  variant="ghost"
-                  label={action.label}
-                  onPress={action.onPress}
-                  testID={action.testID}
-                />
-              ))}
+              {actions.map((action) =>
+                action.icon ? (
+                  <IconButton
+                    key={action.testID}
+                    icon={action.icon}
+                    accessibilityLabel={action.label}
+                    onPress={action.onPress}
+                    color="primary"
+                    testID={action.testID}
+                  />
+                ) : (
+                  <Button
+                    key={action.testID}
+                    variant="ghost"
+                    label={action.label}
+                    onPress={action.onPress}
+                    testID={action.testID}
+                  />
+                ),
+              )}
             </View>
           ) : null}
         </View>
