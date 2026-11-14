@@ -647,6 +647,21 @@
       "save": "Save settings",
       "saved": "Settings saved.",
       "offline": "You're offline. Connect to the internet to change settings."
+    },
+    "delete": {
+      "title": "Delete household",
+      "action": "Delete household",
+      "ask": "Ask to delete household",
+      "body": "This deletes the household for everyone, with all its recipes, plans, lists, people and allergies. This can't be undone.",
+      "bodyAsk": "This deletes the household for everyone, with all its recipes, plans, lists, people and allergies. {{name}} must confirm within 7 days. This can't be undone.",
+      "waiting": "You asked to delete the household. It's deleted if {{name}} confirms by {{date}}.",
+      "asked": "{{name}} asked to delete the household, with all its recipes, plans, lists, people and allergies. Confirm by {{date}} to delete it for everyone, or keep it. This can't be undone.",
+      "withdraw": "Cancel request",
+      "keep": "Keep household",
+      "keepAccounts": "Everyone keeps their account and can start or join another household. Our backups lose the data within 30 days.",
+      "notice": "A parent asked to delete this household. It's deleted only if the other parent confirms by {{date}}.",
+      "parentsOnly": "Only parents can delete the household.",
+      "offline": "You're offline. Deleting the household needs a connection."
     }
   },
   "householdHub": {
@@ -708,8 +723,8 @@
         "google": "To confirm it's you, sign in with Google again."
       },
       "continueWith": {
-        "apple": "Sign in with Apple and delete",
-        "google": "Sign in with Google and delete"
+        "apple": "Sign in with Apple to confirm",
+        "google": "Sign in with Google to confirm"
       },
       "differentAccount": "That's a different account, so nothing was deleted.",
       "expired": "That took too long. Sign in again to confirm."

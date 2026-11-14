@@ -23,6 +23,8 @@ jest.mock('@/features/auth/session', () => ({
 }));
 let mockHousehold: 'member' | 'none' = 'member';
 
+// The deletion notice reads the server on focus; the hub tests here render outside a navigator.
+jest.mock('@/features/household/deletion-notice', () => ({ DeletionNotice: () => null }));
 jest.mock('@/features/household/membership', () => ({
   HouseholdProvider: ({ children }: { children: React.ReactNode }) => children,
   useHousehold: () => ({
