@@ -6,6 +6,11 @@ tags:
   - backend
 ---
 - runFlow: subflows/create-household.yaml
+# The week opens scrolled to today; start from the top.
+- scrollUntilVisible:
+    element:
+      id: plan-range
+    direction: UP
 - scrollUntilVisible:
     element:
       id: plan-add-0-dinner
