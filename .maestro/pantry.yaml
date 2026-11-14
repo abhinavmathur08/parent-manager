@@ -1,0 +1,113 @@
+# G-03.2 (FR-PAN-2, FR-PAN-4, FR-PAN-5): a parent sees the default staples by section, adds a
+# staple and removes it, marks a list item "I already have this", finds it under "at home
+# this week" in the pantry, and puts it back. Ends signed out. Needs the local stack; see
+# README.md.
+appId: ${APP_ID || 'com.myparentmanager'}
+tags:
+  - backend
+---
+- runFlow: subflows/create-household.yaml
+
+# The default staples arrive with the household (FR-PAN-1).
+- tapOn:
+    id: tab-household
+- tapOn:
+    id: open-pantry
+- extendedWaitUntil:
+    visible:
+      id: pantry-staple-spices-1
+      text: .*salt.*
+    timeout: 15000
+- assertVisible:
+    id: pantry-staple-spices-0
+    text: .*pepper.*
+
+# Add a staple, then remove it again (FR-PAN-2).
+- scrollUntilVisible:
+    element:
+      id: pantry-add
+    centerElement: true
+- tapOn:
+    id: pantry-add
+- extendedWaitUntil:
+    visible:
+      id: pantry-add-search
+    timeout: 10000
+- tapOn:
+    id: pantry-add-search
+- inputText: cinnamon
+- hideKeyboard
+- tapOn:
+    id: pantry-add-suggestion-0
+- scrollUntilVisible:
+    element:
+      id: pantry-staple-spices-1
+      text: .*cinnamon.*
+    direction: UP
+    centerElement: true
+- tapOn:
+    id: pantry-staple-spices-1-action
+- extendedWaitUntil:
+    visible:
+      id: pantry-staple-spices-1
+      text: .*salt.*
+    timeout: 10000
+
+# "I already have this" on a list item puts it under "at home this week" (FR-PAN-4).
+- tapOn:
+    id: tab-list
+- extendedWaitUntil:
+    visible:
+      id: list-empty-add
+    timeout: 15000
+- tapOn:
+    id: list-empty-add
+- extendedWaitUntil:
+    visible:
+      id: add-item-search
+    timeout: 10000
+- tapOn:
+    id: add-item-search
+- inputText: bananas
+- hideKeyboard
+- tapOn:
+    id: add-item-suggestion-0
+- tapOn:
+    id: add-item-done
+- extendedWaitUntil:
+    visible:
+      id: list-item-produce-0
+    timeout: 10000
+- tapOn:
+    id: list-item-produce-0-details
+- extendedWaitUntil:
+    visible:
+      id: item-name
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: item-have
+    centerElement: true
+- tapOn:
+    id: item-have
+- extendedWaitUntil:
+    notVisible:
+      id: list-item-produce-0
+    timeout: 10000
+
+# Undo "have" in the pantry (FR-PAN-5).
+- tapOn:
+    id: tab-household
+- extendedWaitUntil:
+    visible:
+      id: pantry-have-0
+      text: .*banana.*
+    timeout: 10000
+- tapOn:
+    id: pantry-have-0-action
+- extendedWaitUntil:
+    visible:
+      id: pantry-have-empty
+    timeout: 10000
+
+- runFlow: subflows/sign-out.yaml

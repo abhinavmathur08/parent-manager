@@ -387,6 +387,21 @@ describe('S-15 item detail (FR-LIST-7, FR-LIST-12)', () => {
     expect(mockRemove).toHaveBeenCalledWith('grocery_items', 'milk');
   });
 
+  it('marks "have" again after an undo, under a new row ID (G-03.2)', async () => {
+    withMilk();
+    // The first ID is held by the undone "have" row's tombstone.
+    mockInsert.mockImplementationOnce(async () => {
+      throw new Error('Row already exists: pantry_items x');
+    });
+    await openMilk();
+    await fireEvent.press(screen.getByTestId('item-have'));
+    await act(async () => undefined);
+    expect(mockInsert).toHaveBeenCalledTimes(2);
+    const calls = mockInsert.mock.calls as unknown as [string, string][];
+    expect(calls[1][1]).not.toBe(calls[0][1]);
+    expect(mockRemove).toHaveBeenCalledWith('grocery_items', 'milk');
+  });
+
   it('holds a delete behind the undo bar, and undo keeps the item', async () => {
     withMilk();
     await openMilk();
@@ -426,5 +441,76 @@ describe('S-15 item detail (FR-LIST-7, FR-LIST-12)', () => {
     await fireEvent.press(screen.getByTestId('list-item-dairy-0-details'));
     expect(screen.getByTestId('item-no-sources')).toHaveTextContent('Added to the list by hand.');
     expect(screen.queryByTestId('item-have')).toBeNull();
+  });
+});
+
+describe('"assumed at home" (FR-PAN-3, R-PAN-3)', () => {
+  const planned = () => {
+    mockRows = {
+      grocery_lists: [list],
+      grocery_items: [item('milk')],
+      pantry_items: [
+        {
+          ...base,
+          id: 's1',
+          ingredient_id: 'ingredient.salt',
+          status: 'staple',
+          have_week_start: null,
+        },
+      ],
+      plan_entries: [
+        {
+          ...base,
+          id: 'e1',
+          date: '2026-11-17',
+          slot: 'dinner',
+          position: 0,
+          recipe_id: 'r1',
+          free_text: null,
+          servings: 2,
+          leftover_of_entry_id: null,
+        },
+      ],
+      recipes: [{ ...base, id: 'r1', title: 'Soup', servings: 2 }],
+      recipe_ingredients: [
+        {
+          ...base,
+          id: 'l1',
+          recipe_id: 'r1',
+          ingredient_id: 'ingredient.salt',
+          quantity: 1,
+          unit_id: 'unit.tsp',
+          quantity_base: 4.93,
+          position: 0,
+        },
+      ],
+    };
+  };
+
+  it('shows the staples the plan uses, collapsed, with a count', async () => {
+    planned();
+    await show();
+    expect(screen.getByTestId('list-assumed-toggle')).toHaveTextContent(/1 item/);
+    expect(screen.queryByTestId('list-assumed-item-0')).toBeNull();
+    await fireEvent.press(screen.getByTestId('list-assumed-toggle'));
+    expect(screen.getByTestId('list-assumed-item-0')).toHaveTextContent(/salt/i);
+  });
+
+  it("puts a staple on this week's list with one tap", async () => {
+    planned();
+    await show();
+    await fireEvent.press(screen.getByTestId('list-assumed-toggle'));
+    await fireEvent.press(screen.getByTestId('list-assumed-item-0'));
+    expect(mockInsert).toHaveBeenCalledWith(
+      'grocery_items',
+      'new-item-id',
+      expect.objectContaining({ ingredient_id: 'ingredient.salt', origin: 'manual' }),
+    );
+  });
+
+  it('is hidden when no staple is needed', async () => {
+    mockRows = { grocery_lists: [list], grocery_items: [item('milk')] };
+    await show();
+    expect(screen.queryByTestId('list-assumed')).toBeNull();
   });
 });

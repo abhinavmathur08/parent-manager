@@ -16,6 +16,9 @@ import { Toast } from '@/components/toast';
 import type { TopBarAction } from '@/components/top-bar';
 import { nameKey } from '@/features/ingredients/catalog-ids';
 import { useIngredients } from '@/features/ingredients/use-ingredients';
+import { AssumedAtHome } from '@/features/pantry/assumed-at-home';
+import { assumedAtHome } from '@/features/pantry/pantry';
+import { weekPantry } from '@/features/pantry/tables';
 import { usePlanRows } from '@/features/planner/data';
 import { useUndoable } from '@/features/planner/use-undoable';
 import { startOfWeek, todayIn, type WeekStart } from '@/features/planner/week';
@@ -30,6 +33,7 @@ import { AddItemSheet } from './add-item-sheet';
 import { itemSources } from './detail';
 import { ItemSheet, type ItemEdit } from './item-sheet';
 import { useGroceryRows, useListIngredientFacts } from './data';
+import { weekNeeds } from './engine';
 import { onListUpdated, requestRegenerate, useOpenListWeek, type ListUpdated } from './list-events';
 import type { GroceryItemRow } from './tables';
 import { buildListView, type ListRowView } from './view';
@@ -107,6 +111,26 @@ export function ListScreen({ household }: { household: ListHousehold }) {
     });
   }, [listId, items, hidden, sources, unitSystem, locale, ingredients, people, nameOf]);
 
+  // FR-PAN-3: the staples this week's plan uses, which the list leaves off.
+  const staples = useMemo(() => {
+    if (!listId) return [];
+    const needs = weekNeeds({
+      entries: plan.entries,
+      recipes: recipeRows.recipes,
+      lines: recipeRows.lines,
+      weekStart,
+      ingredients: facts,
+      pantry: weekPantry(pantry, weekStart),
+    });
+    return assumedAtHome({
+      staples: needs.staples,
+      listId,
+      items,
+      nameOf: (id) => ingredients.name(id) ?? t('list.unknownItem'),
+      locale,
+    });
+  }, [listId, plan.entries, recipeRows, weekStart, facts, pantry, items, ingredients, locale, t]);
+
   // FR-LIST-3: a short summary when a recalculation changes the open list.
   useEffect(
     () =>
@@ -140,7 +164,7 @@ export function ListScreen({ household }: { household: ListHousehold }) {
   const add = async (
     choice: AddChoice,
     amount: AddAmount | null,
-    source: 'typed' | 'suggestion_catalog',
+    source: 'typed' | 'suggestion_catalog' | 'assumed_at_home',
   ) => {
     if (!listId) return;
     setAdding(false);
@@ -155,6 +179,15 @@ export function ListScreen({ household }: { household: ListHousehold }) {
         : result.kind === 'merge'
           ? t('list.add.merged', { name })
           : t('list.add.exists', { name }),
+    );
+  };
+
+  // FR-PAN-3, R-PAN-3: one tap puts a staple on this week's list, overriding the staple.
+  const addStaple = (ingredientId: string) => {
+    void add(
+      { kind: 'ingredient', ingredientId, sectionId: facts.section(ingredientId) },
+      null,
+      'assumed_at_home',
     );
   };
 
@@ -289,6 +322,7 @@ export function ListScreen({ household }: { household: ListHousehold }) {
             </View>
           </View>
         ))}
+        <AssumedAtHome staples={staples} onAdd={addStaple} />
         {view.cart.length ? (
           <View testID="list-cart">
             <ListRow
