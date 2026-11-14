@@ -804,7 +804,14 @@
       "listName": "Groceries",
       "line": "{{quantity}} {{name}}",
       "checked": "Checked",
-      "unchecked": "Not checked"
+      "unchecked": "Not checked",
+      "share": "Share as text",
+      "copy": "Copy as text",
+      "copied": "Copied. Paste it into any app.",
+      "textTitle": "{{title}}, {{week}}",
+      "textItem": "{{box}} {{line}}",
+      "box": "☐",
+      "boxChecked": "☑"
     }
   },
   "plan": {
