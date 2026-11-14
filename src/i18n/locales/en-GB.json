@@ -70,6 +70,19 @@
     }
   },
   "list": {
-    "partnerActivity": "Someone else is updating the list."
+    "partnerActivity": "Someone else is updating the list.",
+    "finish": {
+      "action": "Finish shopping",
+      "title": "Finish shopping?",
+      "moved_one": "{{count}} checked item moves to this week's history.",
+      "moved_other": "{{count}} checked items move to this week's history.",
+      "staying_one": "{{count}} unchecked item stays on your list for next time.",
+      "staying_other": "{{count}} unchecked items stay on your list for next time.",
+      "nothingLeft": "Nothing is left on your list.",
+      "confirm": "Finish shopping",
+      "done_one": "Shopping finished. {{count}} item moved to history.",
+      "done_other": "Shopping finished. {{count}} items moved to history.",
+      "failed": "That didn't save. Try again."
+    }
   }
 }

@@ -31,6 +31,7 @@ import { formatList, formatQuantity, type AppLocale, type Region, type UnitSyste
 import type { AddAmount, AddChoice } from './add-item';
 import { AddItemSheet } from './add-item-sheet';
 import { itemSources } from './detail';
+import { FinishShoppingSheet } from './finish-shopping-sheet';
 import { ItemSheet, type ItemEdit } from './item-sheet';
 import { useGroceryRows, useListIngredientFacts } from './data';
 import { weekNeeds } from './engine';
@@ -38,7 +39,14 @@ import { onListUpdated, requestRegenerate, useOpenListWeek, type ListUpdated } f
 import type { GroceryItemRow } from './tables';
 import { usePartnerActivity, useListMembers } from './use-shopping';
 import { buildListView, type ListRowView } from './view';
-import { useAddItem, useDeleteItem, useEditItem, useMarkHave, useToggleItem } from './writes';
+import {
+  useAddItem,
+  useDeleteItem,
+  useEditItem,
+  useFinishShopping,
+  useMarkHave,
+  useToggleItem,
+} from './writes';
 
 export type ListHousehold = {
   id: string;
@@ -70,7 +78,7 @@ export function ListScreen({ household }: { household: ListHousehold }) {
   );
   useOpenListWeek(weekStart);
 
-  const { lists, items, sources, pantry, loading } = useGroceryRows();
+  const { lists, items, sources, pantry, purchases, loading } = useGroceryRows();
   const plan = usePlanRows();
   const recipeRows = useRecipeRows();
   const ingredients = useIngredients(locale);
@@ -87,6 +95,8 @@ export function ListScreen({ household }: { household: ListHousehold }) {
   const deleteItem = useDeleteItem();
   const undoable = useUndoable(() => setMessage(null));
   const members = useListMembers(household.id);
+  const finishShopping = useFinishShopping();
+  const [finishing, setFinishing] = useState<'confirm' | 'saving' | null>(null);
   const me = household.userId ?? null;
 
   const list = lists.find((l) => !l.deleted_at && l.is_default && l.week_start === weekStart);
@@ -197,6 +207,21 @@ export function ListScreen({ household }: { household: ListHousehold }) {
     );
   };
 
+  // FR-LIST-10: purchases for anything checked without one, and the cart moves to history.
+  const finish = async () => {
+    if (!listId) return;
+    setFinishing('saving');
+    try {
+      const done = await finishShopping({ listId, items, events: purchases });
+      setCartOpen(false);
+      setMessage(t('list.finish.done', { count: done.checkedCount }));
+    } catch {
+      setMessage(t('list.finish.failed'));
+    } finally {
+      setFinishing(null);
+    }
+  };
+
   const detailItem = detailId ? byId.get(detailId) : undefined;
   const closeDetail = () => setDetailId(null);
 
@@ -242,7 +267,7 @@ export function ListScreen({ household }: { household: ListHousehold }) {
           checked={row.checked}
           checkedBy={checkedByOf(row)}
           onToggle={(checked) => {
-            if (item) void toggleItem(item, checked);
+            if (item) void toggleItem(item, checked, purchases);
           }}
           details={{
             accessibilityLabel: t('list.item.details', { name: row.name }),
@@ -368,8 +393,22 @@ export function ListScreen({ household }: { household: ListHousehold }) {
                 {view.cart.map((row, i) => renderRow(row, `list-cart-item-${i}`))}
               </View>
             ) : null}
+            <Button
+              variant={allDone ? 'primary' : 'secondary'}
+              label={t('list.finish.action')}
+              onPress={() => setFinishing('confirm')}
+              testID="list-finish"
+            />
           </View>
         ) : null}
+        <FinishShoppingSheet
+          visible={finishing !== null}
+          checkedCount={view.cart.length}
+          uncheckedCount={view.total - view.cart.length}
+          busy={finishing === 'saving'}
+          onConfirm={() => void finish()}
+          onClose={() => setFinishing(null)}
+        />
         <AddItemSheet
           visible={adding}
           ingredients={ingredients}

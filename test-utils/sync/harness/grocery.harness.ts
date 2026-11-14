@@ -1,14 +1,22 @@
 /**
  * @jest-environment node
  */
-// Two partners shopping from one list (G-04.1 acceptance, FR-LIST-8, FR-LIST-9, FR-LIST-11,
-// NFR-OFF-5): a check-off reaches the partner within 2 seconds online with who checked it,
-// both partners ticking the same list offline end with one consistent list, and a stale
-// offline uncheck never undoes a newer check. Runs against the real grocery tables from the
-// migrations, through the engine.
+// Two partners shopping from one list (G-04.1 and G-04.2 acceptance, FR-LIST-8, FR-LIST-9,
+// FR-LIST-11, FR-MEM-1, NFR-OFF-5): a check-off reaches the partner within 2 seconds online
+// with who checked it, both partners ticking the same list offline end with one consistent
+// list, a stale offline uncheck never undoes a newer check, and both partners checking the
+// same item off offline leave one purchase event. Runs against the real grocery tables from
+// the migrations, through the engine.
 import { createClient } from '@supabase/supabase-js';
 
-import { GROCERY_ITEMS, GROCERY_TABLES } from '@/features/grocery/tables';
+import { planCheckEvent, purchaseEventId } from '@/features/grocery/purchases';
+import {
+  GROCERY_ITEMS,
+  GROCERY_TABLES,
+  PURCHASE_EVENTS,
+  type GroceryItemRow,
+  type PurchaseEventRow,
+} from '@/features/grocery/tables';
 import { SyncEngine } from '@/lib/sync/engine';
 import { LocalStore } from '@/lib/sync/local-store';
 import { createSupabaseRemote } from '@/lib/sync/remote';
@@ -246,5 +254,66 @@ it('never lets a stale offline uncheck undo a newer check (spec 3.8)', async () 
   for (const device of [A, B]) {
     expect(device.engine.getStatus()).toMatchObject({ pending: 0, rejected: 0 });
     expect(await checked(device, nappies)).toEqual({ checked: true, checked_by: B.userId });
+  }
+});
+
+/** What the app does on a check-off (useToggleItem): the check, then its purchase event. */
+async function checkOff(device: ShoppingDevice, id: string) {
+  await device.engine.update(GROCERY_ITEMS.name, id, { checked: true });
+  const item = (await device.row(GROCERY_ITEMS.name, id)) as GroceryItemRow;
+  const events = (await device.engine.store.rows(PURCHASE_EVENTS.name)) as PurchaseEventRow[];
+  const event = planCheckEvent(item, events, Date.now());
+  if (event) await device.engine.insert(PURCHASE_EVENTS.name, purchaseEventId(id, 0), event.values);
+}
+
+async function liveEvents(itemId: string) {
+  const { data, error } = await admin
+    .from('purchase_events')
+    .select('id, recorded_by')
+    .eq('item_id', itemId)
+    .is('deleted_at', null);
+  if (error) throw error;
+  return data;
+}
+
+it('keeps one purchase event when both partners check an item off offline (R-MEM-1)', async () => {
+  const yoghurt = await addItem('Yoghurt');
+  A.goOffline();
+  B.goOffline();
+  await checkOff(A, yoghurt);
+  await checkOff(B, yoghurt);
+  await A.goOnline();
+  await B.goOnline();
+  await A.engine.sync();
+
+  const events = await liveEvents(yoghurt);
+  expect(events).toHaveLength(1);
+  expect(events[0].recorded_by).toBe(A.userId);
+  for (const device of [A, B]) {
+    expect(device.engine.getStatus()).toMatchObject({ pending: 0, rejected: 0 });
+    const local = (await device.engine.store.rows(PURCHASE_EVENTS.name)).filter(
+      (e) => e.item_id === yoghurt,
+    );
+    expect(local.map((e) => e.id)).toEqual([events[0].id]);
+  }
+});
+
+it('keeps one live event when the partners chose different IDs (R-MEM-1)', async () => {
+  const butter = await addItem('Butter');
+  A.goOffline();
+  B.goOffline();
+  await checkOff(A, butter);
+  // B had already used the first ID (an undone purchase), so it writes under the next one.
+  await B.engine.update(GROCERY_ITEMS.name, butter, { checked: true });
+  const item = (await B.row(GROCERY_ITEMS.name, butter)) as GroceryItemRow;
+  const event = planCheckEvent(item, [], Date.now())!;
+  await B.engine.insert(PURCHASE_EVENTS.name, purchaseEventId(butter, 1), event.values);
+  await A.goOnline();
+  await B.goOnline();
+  await A.engine.sync();
+
+  expect(await liveEvents(butter)).toHaveLength(1);
+  for (const device of [A, B]) {
+    expect(device.engine.getStatus()).toMatchObject({ pending: 0, rejected: 0 });
   }
 });

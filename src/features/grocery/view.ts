@@ -79,7 +79,8 @@ export function buildListView(input: ListViewInput): ListView {
   }
 
   const rows = input.items
-    .filter((item) => item.list_id === input.listId && !item.deleted_at)
+    // Items moved to the week's history by "finish shopping" leave the list (FR-LIST-10).
+    .filter((item) => item.list_id === input.listId && !item.deleted_at && !item.shopped_at)
     .map((item): ListRowView => ({
       id: item.id,
       name: input.nameOf(item),

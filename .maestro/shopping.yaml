@@ -1,5 +1,6 @@
-# G-04.1 (FR-LIST-4, FR-LIST-8, FR-LIST-11): a member checks items off with one tap, they move
-# to "in the cart", and an unticked item goes back on the list. Two partners shopping together
+# G-04.1 and G-04.2 (FR-LIST-4, FR-LIST-8, FR-LIST-10, FR-LIST-11): a member checks items off
+# with one tap, they move to "in the cart", an unticked item goes back on the list, and
+# "finish shopping" moves the cart to the week's history while unchecked items stay. Two partners shopping together
 # (who checked, the partner banner, offline convergence) is covered by the two-device harness,
 # test-utils/sync/harness/grocery.harness.ts. Ends signed out. Needs the local stack; see
 # README.md.
@@ -86,5 +87,35 @@ tags:
     text: .*banana.*
 - assertNotVisible:
     id: list-cart-toggle
+
+# Finish shopping (FR-LIST-10): the cart moves to history, and the eggs stay for next time.
+- tapOn:
+    id: list-item-produce-0
+- scrollUntilVisible:
+    element:
+      id: list-finish
+    centerElement: true
+- tapOn:
+    id: list-finish
+- extendedWaitUntil:
+    visible:
+      id: list-finish-body
+      text: .*1 checked item.*
+    timeout: 10000
+- tapOn:
+    id: list-finish-confirm
+- extendedWaitUntil:
+    notVisible:
+      id: list-cart-toggle
+    timeout: 10000
+- assertNotVisible:
+    id: list-finish
+- scrollUntilVisible:
+    element:
+      id: list-item-dairy-0
+    direction: UP
+- assertVisible:
+    id: list-item-dairy-0
+    text: .*egg.*
 
 - runFlow: subflows/sign-out.yaml

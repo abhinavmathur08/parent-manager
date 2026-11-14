@@ -32,6 +32,7 @@ export const GROCERY_ITEMS = {
     checked_at: 'text',
     checked_by: 'text',
     updated_by: 'text',
+    shopped_at: 'text',
   },
 } as const satisfies SyncTableDefinition;
 
@@ -45,7 +46,27 @@ export const GROCERY_ITEM_SOURCES = {
   },
 } as const satisfies SyncTableDefinition;
 
-export const GROCERY_TABLES = [GROCERY_LISTS, GROCERY_ITEMS, GROCERY_ITEM_SOURCES] as const;
+/** Purchase memory (FR-MEM-1, R-MEM-1): at most one live event per item, set by the device. */
+export const PURCHASE_EVENTS = {
+  name: 'purchase_events',
+  columns: {
+    list_id: 'text',
+    item_id: 'text',
+    ingredient_id: 'text',
+    dimension: 'text',
+    quantity_base: 'real',
+    occurred_at: 'text',
+    source: 'text',
+    recorded_by: 'text',
+  },
+} as const satisfies SyncTableDefinition;
+
+export const GROCERY_TABLES = [
+  GROCERY_LISTS,
+  GROCERY_ITEMS,
+  GROCERY_ITEM_SOURCES,
+  PURCHASE_EVENTS,
+] as const;
 
 export type GroceryListRow = SyncRow & {
   /** The first day of the list's week, `YYYY-MM-DD` (FR-LIST-1). */
@@ -83,6 +104,8 @@ export type GroceryItemRow = SyncRow & {
   checked_by: string | null;
   /** The member whose write the server last took (G-04.1), for the partner-activity banner. */
   updated_by: string | null;
+  /** When "finish shopping" moved the item to the week's history (FR-LIST-10); set by the server. */
+  shopped_at: string | null;
 };
 
 export type GroceryItemSourceRow = SyncRow & {
@@ -91,4 +114,20 @@ export type GroceryItemSourceRow = SyncRow & {
   recipe_ingredient_id: string;
   /** What this entry's line adds, in the item's base unit; null for no quantity. */
   quantity_base: number | null;
+};
+
+export type PurchaseSource = 'checked_off' | 'confirmed' | 'receipt';
+
+export type PurchaseEventRow = SyncRow & {
+  list_id: string;
+  item_id: string;
+  /** The ingredient, or null for a free-text item, which the item ID stands for. */
+  ingredient_id: string | null;
+  dimension: Dimension | null;
+  /** In g, ml or each; null for no quantity. */
+  quantity_base: number | null;
+  occurred_at: string;
+  source: PurchaseSource;
+  /** The member who bought it; set by the server. */
+  recorded_by: string | null;
 };

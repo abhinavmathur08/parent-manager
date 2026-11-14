@@ -11,21 +11,65 @@ import { useSyncWriter } from '@/lib/sync';
 
 import { planAddItem, type AddAmount, type AddChoice, type AddResult } from './add-item';
 import { haveId, planHave, planItemDelete, planItemEdit } from './detail';
-import { GROCERY_ITEMS, type GroceryItemRow } from './tables';
+import {
+  planCheckEvent,
+  planFinishShopping,
+  planUncheckEvent,
+  purchaseEventId,
+  UNDO_WINDOW_MS,
+  type NewPurchaseEvent,
+} from './purchases';
+import {
+  GROCERY_ITEMS,
+  PURCHASE_EVENTS,
+  type GroceryItemRow,
+  type PurchaseEventRow,
+} from './tables';
 
-/** Unchecking within this long counts as undoing a mistake (FR-LIST-8, PROPOSED). */
-export const UNDO_WINDOW_MS = 10 * 60 * 1000;
+export { UNDO_WINDOW_MS } from './purchases';
+
+/** Writes purchase events, each under its item's next free stable ID (R-MEM-1). */
+function useRecordPurchases() {
+  const writer = useSyncWriter();
+  return useCallback(
+    async (events: readonly NewPurchaseEvent[]) => {
+      for (const event of events) {
+        await insertStable(
+          writer,
+          PURCHASE_EVENTS.name,
+          (index) => purchaseEventId(event.itemId, index),
+          event.values,
+        );
+      }
+    },
+    [writer],
+  );
+}
 
 /**
  * Checks an item off or back on through the sync layer, so it shows at once and works
- * offline (FR-LIST-8, FR-LIST-11, NFR-PERF-2). The server records who and when.
+ * offline (FR-LIST-8, FR-LIST-11, NFR-PERF-2). The server records who and when. A check-off
+ * records a purchase event, and unchecking within 10 minutes deletes it (FR-MEM-1, R-MEM-1).
  */
 export function useToggleItem() {
   const writer = useSyncWriter();
+  const apply = useApplyOps();
+  const record = useRecordPurchases();
   const online = useOnline();
   return useCallback(
-    async (item: GroceryItemRow, checked: boolean, now: number = Date.now()) => {
+    async (
+      item: GroceryItemRow,
+      checked: boolean,
+      events: readonly PurchaseEventRow[],
+      now: number = Date.now(),
+    ) => {
       await writer.update(GROCERY_ITEMS.name, item.id, { checked });
+      if (checked) {
+        const event = planCheckEvent(item, events, now);
+        if (event) await record([event]);
+      } else {
+        await apply(planUncheckEvent(item, events, now));
+      }
       if (checked) {
         track('list_item_checked', { offline: !online, section_id: item.section_id });
       } else {
@@ -35,7 +79,35 @@ export function useToggleItem() {
         });
       }
     },
-    [writer, online],
+    [writer, apply, record, online],
+  );
+}
+
+/**
+ * "Finish shopping" (FR-LIST-10): purchase events for checked items without one, then the
+ * checked items move to the week's history. Returns the counts for the confirmation.
+ */
+export function useFinishShopping() {
+  const apply = useApplyOps();
+  const record = useRecordPurchases();
+  return useCallback(
+    async (input: {
+      listId: string;
+      items: readonly GroceryItemRow[];
+      events: readonly PurchaseEventRow[];
+      now?: number;
+    }) => {
+      const plan = planFinishShopping({ ...input, now: input.now ?? Date.now() });
+      await record(plan.events);
+      await apply(plan.ops);
+      track('shopping_finished', {
+        checked_count: plan.checkedCount,
+        unchecked_count: plan.uncheckedCount,
+        members_who_checked_count: plan.membersWhoChecked,
+      });
+      return plan;
+    },
+    [apply, record],
   );
 }
 
@@ -96,7 +168,7 @@ export function useMarkHave(householdId: string) {
             writer,
             op.table,
             (index) => haveId(householdId, ingredientId, weekStart, index),
-            op.values as Record<string, string>,
+            op.values,
           );
         } else {
           await apply([op]);
