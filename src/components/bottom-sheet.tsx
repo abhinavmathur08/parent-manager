@@ -6,7 +6,6 @@ import {
   KeyboardAvoidingView,
   Modal,
   PanResponder,
-  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -199,7 +198,9 @@ export function BottomSheet({
           />
         </Animated.View>
         {variant === 'form' ? (
-          <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+          // Padding on Android too: a modal with a translucent status bar isn't resized for
+          // the keyboard there, so without it the keyboard covers the sheet's fields.
+          <KeyboardAvoidingView behavior="padding">
             {sheet}
           </KeyboardAvoidingView>
         ) : (
