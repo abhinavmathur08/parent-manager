@@ -33,7 +33,9 @@ appId: ${APP_ID || 'com.myparentmanager'}
       id: allergies-skip
 - tapOn:
     id: allergies-skip
+# The Plan tab scrolls today into view (FR-PLAN-1), which can take its title off screen, so
+# wait for the day list.
 - extendedWaitUntil:
     visible:
-      id: plan-screen-title
+      id: plan-days
     timeout: 20000

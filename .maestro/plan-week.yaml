@@ -7,10 +7,11 @@ tags:
   - backend
 ---
 - runFlow: subflows/create-household.yaml
-- extendedWaitUntil:
-    visible:
+# The week opens scrolled to today; the empty state is above the days.
+- scrollUntilVisible:
+    element:
       id: plan-empty
-    timeout: 10000
+    direction: UP
 
 # Day 1: search the starter library.
 - scrollUntilVisible:
