@@ -5,6 +5,7 @@ import { StyleSheet } from 'react-native';
 import { FloatingTabBar, TabButton } from '@/components/floating-tab-bar';
 import type { IconName } from '@/components/icon';
 import { useHousehold } from '@/features/household/membership';
+import '@/features/ingredients/sync';
 import '@/features/recipes/sync';
 import { FirstLoadGate, PendingChangesBanner, SyncProvider } from '@/lib/sync';
 
