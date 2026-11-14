@@ -4,6 +4,7 @@ import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useMemo } from 'react';
 
+import { AnalyticsIdentity } from '@/features/auth/analytics-identity';
 // Registers the Google sign-out cleanup (FR-AUTH-7).
 import '@/features/auth/google';
 import { AuthProvider, useAuth } from '@/features/auth/session';
@@ -87,6 +88,7 @@ function RootLayout() {
     <ThemeProvider value={navigationTheme}>
       <AuthProvider>
         <HouseholdProvider>
+          <AnalyticsIdentity />
           <RootStack />
         </HouseholdProvider>
       </AuthProvider>

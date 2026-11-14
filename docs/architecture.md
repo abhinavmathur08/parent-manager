@@ -428,6 +428,10 @@ Supabase Auth, with:
   - **Session replay:** off.
   - **Region:** US data region at launch. EU hosting can be reviewed for the UK.
   - **Uses:** activation and retention funnels from the vision's metrics, plus feature flags.
+  - **Wrapper (F-07.2):** `src/lib/analytics`. `track(event, properties)` takes only events in the schema (`schema.ts`, one entry per event in spec section 3), with each property an ID (UUID), a count, a duration, a flag, a value from a fixed set, or a fixed lowercase code. It checks them again at runtime and drops, and reports by name only, anything that doesn't fit. A `before_send` filter drops SDK events we don't send (screens, lifecycle) and properties that could identify someone (`$device_name`, URLs, person properties). GeoIP, autocapture and surveys are off. `AnalyticsIdentity` identifies the user by ID and registers `household_id`, `role`, `tier`, `region` and `locale`; `platform` and `app_version` are always set.
+  - **Offline:** the SDK keeps its queue in expo-sqlite's `localStorage` and keeps events after a network error, so they send once the device is back online.
+  - **Opt-out (FR-PRIV-5):** `setAnalyticsOptOut` stores the choice on the device (`analytics.opted_out`), even while PostHog is off, and stops every event. It survives sign-out. The setting's screen is A-04.1.
+  - **Turning it on:** without `EXPO_PUBLIC_POSTHOG_KEY`, nothing is sent (D-4). Set it, and optionally `EXPO_PUBLIC_POSTHOG_HOST` (default `https://us.i.posthog.com`), as plain-text EAS environment variables. The project key is public by design.
 - **Forced updates and kill switches:** these live in `app_config` in Supabase rather than PostHog, so they work even if analytics is blocked.
 - **Supabase:** its logs cover the database and Edge Functions, with alerts on webhook failures and AI cost.
 
