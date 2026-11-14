@@ -621,7 +621,32 @@ grant execute on function public.confirm_household_deletion(uuid) to authenticat
 grant execute on function public.cancel_household_deletion(uuid) to authenticated;
 
 -- ---------------------------------------------------------------------------
--- Registrations for the tables on main so far
+-- Recipe authorship (R-02.1) keeps created_by on every update, which would put a deleted
+-- user's ID back. While erasing, the row is left as erasure sets it.
+-- ---------------------------------------------------------------------------
+create or replace function private.set_recipe_authors()
+returns trigger
+language plpgsql
+set search_path = ''
+as $$
+begin
+  if private.is_erasing() then
+    return new;
+  end if;
+  if tg_op = 'INSERT' then
+    new.created_by := (select auth.uid());
+  else
+    new.created_by := old.created_by;
+  end if;
+  new.updated_by := (select auth.uid());
+  return new;
+end;
+$$;
+
+revoke all on function private.set_recipe_authors() from public;
+
+-- ---------------------------------------------------------------------------
+-- Registrations for the tables on main so far (to the planner, P-01)
 -- ---------------------------------------------------------------------------
 
 -- Household data, deleted with the household.
@@ -636,6 +661,14 @@ select private.register_for_deletion('public.ingredient_names', 'household_id', 
 select private.register_for_deletion('public.pantry_items', 'household_id', 'household');
 select private.register_for_deletion('public.ai_import_jobs', 'household_id', 'household');
 select private.register_for_deletion('public.ai_usage', 'household_id', 'household');
+-- Registered after ingredients, so recipe lines go before the household ingredients they use;
+-- plan entries go before the recipes they point to.
+select private.register_for_deletion('public.household_ingredients', 'household_id', 'household');
+select private.register_for_deletion('public.recipes', 'household_id', 'household');
+select private.register_for_deletion('public.recipe_ingredients', 'household_id', 'household');
+select private.register_for_deletion('public.recipe_steps', 'household_id', 'household');
+select private.register_for_deletion('public.plan_entries', 'household_id', 'household');
+select private.register_for_deletion('public.plan_entry_portions', 'household_id', 'household');
 select private.register_for_deletion('public.household_deletion_requests', 'household_id', 'household');
 
 -- A user's own rows, deleted with the account.
@@ -650,3 +683,5 @@ select private.register_for_deletion('public.invitations', 'accepted_by', 'user'
 select private.register_for_deletion('public.household_entitlements', 'purchaser_user_id', 'user', 'set_null');
 select private.register_for_deletion('public.household_people', 'linked_user_id', 'user', 'set_null');
 select private.register_for_deletion('public.ai_import_jobs', 'user_id', 'user', 'set_null');
+select private.register_for_deletion('public.recipes', 'created_by', 'user', 'set_null');
+select private.register_for_deletion('public.recipes', 'updated_by', 'user', 'set_null');

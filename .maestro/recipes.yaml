@@ -1,0 +1,183 @@
+# R-02.2, R-03.1 and R-03.2: a parent creates a recipe on S-18: title, a tag, typed lines with a mixed number,
+# an unknown ingredient added as a household ingredient, and a step, then finds it on S-16 by ingredient and tag. Ends signed out.
+# Needs the local stack; see the Testing section of README.md.
+appId: ${APP_ID || 'com.myparentmanager'}
+tags:
+  - backend
+---
+- runFlow: subflows/create-household.yaml
+- tapOn:
+    id: tab-recipes
+# S-16's top bar always offers "Add", above the search, filters and starter library.
+- tapOn:
+    id: recipes-add
+- extendedWaitUntil:
+    visible:
+      id: recipe-title
+    timeout: 10000
+- tapOn:
+    id: recipe-title
+- inputText: Weeknight flatbread
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: recipe-tag-one_handed
+    centerElement: true
+- tapOn:
+    id: recipe-tag-one_handed
+- assertVisible:
+    id: recipe-tag-one_handed
+    checked: true
+# Typed lines go straight in when the ingredient is known.
+- scrollUntilVisible:
+    element:
+      id: recipe-quick-add
+    centerElement: true
+- tapOn:
+    id: recipe-quick-add
+- inputText: 1 1/2 cups milk
+- tapOn:
+    id: recipe-quick-add-submit
+- scrollUntilVisible:
+    element:
+      id: recipe-line-0
+    centerElement: true
+    direction: UP
+- scrollUntilVisible:
+    element:
+      id: recipe-quick-add
+    centerElement: true
+- tapOn:
+    id: recipe-quick-add
+- inputText: 2 onions
+- tapOn:
+    id: recipe-quick-add-submit
+- scrollUntilVisible:
+    element:
+      id: recipe-line-1
+    centerElement: true
+    direction: UP
+# An unknown ingredient opens the line sheet, prefilled, to add it as new.
+- scrollUntilVisible:
+    element:
+      id: recipe-quick-add
+    centerElement: true
+- tapOn:
+    id: recipe-quick-add
+- inputText: 2 tbsp grandmas chutney
+- tapOn:
+    id: recipe-quick-add-submit
+- extendedWaitUntil:
+    visible:
+      id: line-sheet
+    timeout: 5000
+- scrollUntilVisible:
+    element:
+      id: line-add-new
+    centerElement: true
+- tapOn:
+    id: line-add-new
+- scrollUntilVisible:
+    element:
+      id: line-section-condiments
+    centerElement: true
+- tapOn:
+    id: line-section-condiments
+- tapOn:
+    id: line-done
+- scrollUntilVisible:
+    element:
+      id: recipe-line-2
+    centerElement: true
+- scrollUntilVisible:
+    element:
+      id: recipe-add-step
+    centerElement: true
+- tapOn:
+    id: recipe-add-step
+- scrollUntilVisible:
+    element:
+      id: recipe-step-0
+    centerElement: true
+- tapOn:
+    id: recipe-step-0
+- inputText: Mix everything and cook in a hot pan.
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: recipe-save
+    centerElement: true
+- tapOn:
+    id: recipe-save
+# Saving raises no error and leaves the editor.
+- assertNotVisible:
+    id: recipe-error
+- extendedWaitUntil:
+    notVisible:
+      id: recipe-editor
+    timeout: 10000
+# R-03.2: saving opens the recipe; the stepper rescales it on screen.
+- extendedWaitUntil:
+    visible:
+      id: recipe-detail-edit
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: recipe-detail-line-0
+    centerElement: true
+- assertVisible:
+    text: 1½ cups milk
+- scrollUntilVisible:
+    element:
+      id: recipe-detail-servings-increase
+    centerElement: true
+- tapOn:
+    id: recipe-detail-servings-increase
+- tapOn:
+    id: recipe-detail-servings-increase
+- assertVisible:
+    text: 2¼ cups milk
+# The top bar scrolls with the content.
+- scrollUntilVisible:
+    element:
+      id: recipe-detail-title-back
+    direction: UP
+- tapOn:
+    id: recipe-detail-title-back
+- extendedWaitUntil:
+    visible:
+      id: recipes-screen
+    timeout: 10000
+# On a small screen the tag filters fill the view, so scroll to the card.
+- scrollUntilVisible:
+    element:
+      id: recipe-card-0
+    centerElement: true
+- assertVisible:
+    text: Weeknight flatbread
+# R-03.1: search finds it by an ingredient name, and a tag filter keeps it.
+- scrollUntilVisible:
+    element:
+      id: recipes-search
+    direction: UP
+- tapOn:
+    id: recipes-search
+- inputText: chutney
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      text: Weeknight flatbread
+    centerElement: true
+- scrollUntilVisible:
+    element:
+      id: recipes-filter-one_handed
+    direction: UP
+- tapOn:
+    id: recipes-filter-one_handed
+- scrollUntilVisible:
+    element:
+      id: recipe-card-0
+    centerElement: true
+- assertVisible:
+    text: Weeknight flatbread
+- runFlow: subflows/sign-out.yaml

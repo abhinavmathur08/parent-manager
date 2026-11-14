@@ -1,9 +1,13 @@
-import { useTranslation } from 'react-i18next';
+import { useHousehold } from '@/features/household/membership';
+import { RecipesScreen } from '@/features/recipes/recipes-screen';
 
-import { PlaceholderScreen } from '@/components/placeholder-screen';
-
-// Placeholder until the recipes feature from docs/backlog.md lands.
-export default function RecipesScreen() {
-  const { t } = useTranslation();
-  return <PlaceholderScreen title={t('tabs.recipes')} icon="recipes" testID="recipes-screen" />;
+export default function RecipesRoute() {
+  const { state } = useHousehold();
+  if (state.status !== 'member') return null;
+  return (
+    <RecipesScreen
+      locale={state.membership.locale}
+      canWrite={state.membership.role !== 'caregiver'}
+    />
+  );
 }
