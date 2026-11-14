@@ -755,7 +755,24 @@
     "changed_other": "{{count}} changed",
     "removed_one": "{{count}} removed",
     "removed_other": "{{count}} removed",
-    "upToDate": "Your list is already up to date."
+    "upToDate": "Your list is already up to date.",
+    "addShort": "Add",
+    "addItem": "Add an item",
+    "add": {
+      "title": "Add an item",
+      "search": "What do you need?",
+      "asTyped": "Add “{{name}}” as typed",
+      "section": "Section",
+      "quantity": "Amount (optional)",
+      "quantityHint": "For example 2, 1/2 or 1 1/2",
+      "quantityInvalid": "Enter a number, like 2 or 1 1/2.",
+      "unit": "Unit",
+      "noUnit": "No unit",
+      "done": "Add to list",
+      "added": "{{name}} added.",
+      "merged": "Added to {{name}} on your list.",
+      "exists": "{{name}} is already on your list."
+    }
   },
   "plan": {
     "title": "Plan",

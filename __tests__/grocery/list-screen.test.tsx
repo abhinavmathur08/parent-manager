@@ -7,11 +7,13 @@ import { weekListId } from '@/features/grocery/weekly';
 
 let mockRows: Record<string, unknown[]> = {};
 const mockUpdate = jest.fn(async () => ({}));
+const mockInsert = jest.fn(async () => ({}));
 let mockOnline = true;
 jest.mock('@/lib/sync', () => ({
   useSyncedRows: (table: string) => ({ rows: mockRows[table] ?? [], loading: false }),
-  useSyncWriter: () => ({ insert: jest.fn(), update: mockUpdate, remove: jest.fn() }),
+  useSyncWriter: () => ({ insert: mockInsert, update: mockUpdate, remove: jest.fn() }),
 }));
+jest.mock('expo-crypto', () => ({ randomUUID: () => 'new-item-id' }));
 jest.mock('@/hooks/use-online', () => ({ useOnline: () => mockOnline }));
 jest.mock('@/features/people/data', () => ({
   fetchPeople: async () => [
@@ -75,6 +77,7 @@ const source = (itemId: string, entryId: string) => ({
 const household: ListHousehold = {
   id: 'hh',
   locale: 'en-US',
+  region: 'US',
   unitSystem: 'us_customary',
   weekStart: 7,
   timezone: 'UTC',
@@ -95,6 +98,7 @@ beforeEach(() => {
   mockRows = {};
   mockOnline = true;
   mockUpdate.mockClear();
+  mockInsert.mockClear();
   mockNavigate.mockClear();
 });
 afterEach(() => jest.useRealTimers());
@@ -223,5 +227,86 @@ describe('S-13 grocery list (FR-LIST-4, FR-LIST-5)', () => {
     };
     await show();
     expect(screen.getByTestId('list-empty')).toBeOnTheScreen();
+  });
+});
+
+describe('S-14 add an item (FR-LIST-6)', () => {
+  const open = async () => {
+    await fireEvent.press(screen.getByTestId('list-add'));
+  };
+
+  it('adds a catalog suggestion as a manual item in its section', async () => {
+    mockRows = { grocery_lists: [list] };
+    await show();
+    await fireEvent.press(screen.getByTestId('list-empty-add'));
+    await fireEvent.changeText(screen.getByTestId('add-item-search'), 'diap');
+    expect(screen.getByTestId('add-item-suggestion-0')).toHaveTextContent(/diaper/);
+    await fireEvent.press(screen.getByTestId('add-item-suggestion-0'));
+    await fireEvent.press(screen.getByTestId('add-item-done'));
+    expect(mockInsert).toHaveBeenCalledWith(
+      'grocery_items',
+      'new-item-id',
+      expect.objectContaining({
+        list_id: LIST,
+        ingredient_id: 'ingredient.diapers',
+        section_id: 'section.baby',
+        origin: 'manual',
+      }),
+    );
+    expect(screen.getByTestId('list-updated')).toHaveTextContent(/diapers? added/);
+  });
+
+  it('merges an amount into the generated item and marks it user-modified', async () => {
+    mockRows = { grocery_lists: [list], grocery_items: [item('milk')] };
+    await show();
+    await open();
+    await fireEvent.changeText(screen.getByTestId('add-item-search'), 'milk');
+    await fireEvent.press(screen.getByTestId('add-item-suggestion-0'));
+    await fireEvent.changeText(screen.getByTestId('add-item-quantity'), '1');
+    await fireEvent.press(screen.getByTestId('add-item-unit-cup_us'));
+    await fireEvent.press(screen.getByTestId('add-item-done'));
+    expect(mockInsert).not.toHaveBeenCalled();
+    expect(mockUpdate).toHaveBeenCalledWith('grocery_items', 'milk', {
+      quantity_base: 709.764 + 236.588,
+      user_modified: true,
+    });
+    expect(screen.getByTestId('list-updated')).toHaveTextContent('Added to milk on your list.');
+  });
+
+  it('adds text as typed in the chosen section', async () => {
+    mockRows = { grocery_lists: [list] };
+    await show();
+    await open();
+    await fireEvent.changeText(screen.getByTestId('add-item-search'), 'Birthday card');
+    await fireEvent.press(screen.getByTestId('add-item-as-typed'));
+    await fireEvent.press(screen.getByTestId('add-item-section-household'));
+    await fireEvent.press(screen.getByTestId('add-item-done'));
+    expect(mockInsert).toHaveBeenCalledWith(
+      'grocery_items',
+      'new-item-id',
+      expect.objectContaining({
+        ingredient_id: null,
+        custom_name: 'Birthday card',
+        section_id: 'section.household',
+      }),
+    );
+  });
+
+  it('refuses an amount that is not a number', async () => {
+    mockRows = { grocery_lists: [list] };
+    await show();
+    await open();
+    await fireEvent.changeText(screen.getByTestId('add-item-search'), 'Wipes');
+    await fireEvent.press(screen.getByTestId('add-item-as-typed'));
+    await fireEvent.changeText(screen.getByTestId('add-item-quantity'), 'lots');
+    await fireEvent.press(screen.getByTestId('add-item-done'));
+    expect(mockInsert).not.toHaveBeenCalled();
+    expect(screen.getByText('Enter a number, like 2 or 1 1/2.')).toBeOnTheScreen();
+  });
+
+  it('waits for the week list before offering to add', async () => {
+    await show();
+    expect(screen.queryByTestId('list-add')).toBeNull();
+    expect(screen.queryByTestId('list-empty-add')).toBeNull();
   });
 });
