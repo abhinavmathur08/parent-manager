@@ -771,7 +771,12 @@
       "done": "Add to list",
       "added": "{{name}} added.",
       "merged": "Added to {{name}} on your list.",
-      "exists": "{{name}} is already on your list."
+      "exists": "{{name}} is already on your list.",
+      "frequent": "Frequently bought",
+      "frequentHint": "Adds {{name}} to your list",
+      "dontSuggest": "Don't suggest",
+      "dontSuggestHint": "Stops suggesting {{name}} for 90 days",
+      "hideFailed": "That didn't save. Try again."
     },
     "item": {
       "details": "Details for {{name}}",

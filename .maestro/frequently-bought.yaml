@@ -1,0 +1,87 @@
+# G-09 (FR-MEM-1, FR-MEM-3, FR-MEM-5): bananas checked off twice become a frequently bought
+# suggestion in add item, and "don't suggest" hides them. Ends signed out. Needs the local
+# stack; see README.md.
+appId: ${APP_ID || 'com.myparentmanager'}
+tags:
+  - backend
+---
+- runFlow: subflows/create-household.yaml
+
+- tapOn:
+    id: tab-list
+- extendedWaitUntil:
+    visible:
+      id: list-empty-add
+    timeout: 15000
+
+# Buy bananas twice: each check-off records a purchase.
+- tapOn:
+    id: list-empty-add
+- extendedWaitUntil:
+    visible:
+      id: add-item-search
+    timeout: 10000
+- assertNotVisible:
+    id: add-item-frequent
+- tapOn:
+    id: add-item-search
+- inputText: bananas
+- hideKeyboard
+- tapOn:
+    id: add-item-suggestion-0
+- tapOn:
+    id: add-item-done
+- extendedWaitUntil:
+    visible:
+      id: list-item-produce-0
+    timeout: 10000
+- tapOn:
+    id: list-item-produce-0
+- extendedWaitUntil:
+    notVisible:
+      id: list-item-produce-0
+    timeout: 10000
+- tapOn:
+    id: list-add
+- extendedWaitUntil:
+    visible:
+      id: add-item-search
+    timeout: 10000
+- tapOn:
+    id: add-item-search
+- inputText: bananas
+- hideKeyboard
+- tapOn:
+    id: add-item-suggestion-0
+- tapOn:
+    id: add-item-done
+- extendedWaitUntil:
+    visible:
+      id: list-item-produce-0
+    timeout: 10000
+- tapOn:
+    id: list-item-produce-0
+- extendedWaitUntil:
+    notVisible:
+      id: list-item-produce-0
+    timeout: 10000
+
+# Now they're suggested, and "don't suggest" hides them for 90 days.
+- tapOn:
+    id: list-add
+- extendedWaitUntil:
+    visible:
+      id: add-item-frequent-0
+      text: .*banana.*
+    timeout: 10000
+# The search field takes focus when the sheet opens; the keyboard can cover the rows.
+- hideKeyboard
+- tapOn:
+    id: add-item-frequent-0-hide
+- extendedWaitUntil:
+    notVisible:
+      id: add-item-frequent
+    timeout: 10000
+- tapOn:
+    id: add-item-sheet-close
+- runFlow: subflows/sign-out.yaml

@@ -678,3 +678,59 @@ describe('purchase events and finish shopping (FR-LIST-10, FR-MEM-1)', () => {
     expect(screen.getByTestId('list-item-bakery-0')).toBeOnTheScreen();
   });
 });
+
+describe('frequently bought (FR-MEM-3, FR-MEM-5)', () => {
+  const bought = (id: string, daysAgo: number) => ({
+    ...base,
+    id,
+    list_id: 'old',
+    item_id: `item-${id}`,
+    ingredient_id: 'ingredient.banana',
+    dimension: null,
+    quantity_base: null,
+    occurred_at: new Date(Date.parse('2026-11-18T12:00:00Z') - daysAgo * 86_400_000).toISOString(),
+    source: 'checked_off',
+    recorded_by: 'me',
+  });
+
+  it('suggests items bought often, and one tap adds one', async () => {
+    mockRows = {
+      grocery_lists: [list],
+      grocery_items: [item('milk')],
+      purchase_events: [bought('e1', 1), bought('e2', 8), bought('e3', 15)],
+    };
+    await show();
+    await fireEvent.press(screen.getByTestId('list-add'));
+    expect(screen.getByTestId('add-item-frequent-0')).toHaveTextContent(/banana/i);
+    await fireEvent.press(screen.getByTestId('add-item-frequent-0'));
+    await act(async () => undefined);
+    expect(mockInsert).toHaveBeenCalledWith(
+      'grocery_items',
+      'new-item-id',
+      expect.objectContaining({ ingredient_id: 'ingredient.banana', origin: 'manual' }),
+    );
+  });
+
+  it('hides an item with "don\'t suggest"', async () => {
+    mockRows = {
+      grocery_lists: [list],
+      grocery_items: [item('milk')],
+      purchase_events: [bought('e1', 1), bought('e2', 8)],
+    };
+    await show();
+    await fireEvent.press(screen.getByTestId('list-add'));
+    await fireEvent.press(screen.getByTestId('add-item-frequent-0-hide'));
+    await act(async () => undefined);
+    expect(mockInsert).toHaveBeenCalledWith('frequent_suggestion_hides', expect.any(String), {
+      ingredient_id: 'ingredient.banana',
+      hidden_until: expect.any(String),
+    });
+  });
+
+  it('shows no frequently bought section for a household with no history', async () => {
+    mockRows = { grocery_lists: [list], grocery_items: [item('milk')] };
+    await show();
+    await fireEvent.press(screen.getByTestId('list-add'));
+    expect(screen.queryByTestId('add-item-frequent')).toBeNull();
+  });
+});
