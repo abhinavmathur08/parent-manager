@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react-native';
+import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { PlanWeekScreen, type PlanWeekActions } from '@/features/planner/week-screen';
@@ -7,12 +7,16 @@ let mockRows: Record<string, unknown[]> = {};
 const mockPeople = jest.fn();
 
 const mockInsert = jest.fn(async () => ({}));
+const mockUpdate = jest.fn(async () => ({}));
+const mockRemove = jest.fn(async () => ({}));
 jest.mock('@/lib/sync', () => ({
   useSyncedRows: (table: string) => ({ rows: mockRows[table] ?? [], loading: false }),
-  useSyncWriter: () => ({ insert: mockInsert, update: jest.fn(), remove: jest.fn() }),
+  useSyncWriter: () => ({ insert: mockInsert, update: mockUpdate, remove: mockRemove }),
 }));
 let mockUuid = 0;
-jest.mock('expo-crypto', () => ({ randomUUID: () => `uuid-${++mockUuid}` }));
+jest.mock('expo-crypto', () => ({
+  randomUUID: () => `00000000-0000-4000-8000-${String(++mockUuid).padStart(12, '0')}`,
+}));
 jest.mock('@/features/people/data', () => ({ fetchPeople: () => mockPeople() }));
 
 const metrics = {
@@ -50,6 +54,8 @@ const show = (canWrite = true, actions: PlanWeekActions = {}) =>
 
 beforeEach(() => {
   mockInsert.mockClear();
+  mockUpdate.mockClear();
+  mockRemove.mockClear();
   mockUuid = 0;
   jest.useFakeTimers({ now: new Date('2026-11-18T12:00:00Z'), advanceTimers: true });
   mockRows = {};
@@ -236,5 +242,85 @@ describe('S-11 add to a slot (FR-PLAN-3 to FR-PLAN-5)', () => {
     expect(screen.getByTestId('add-recipe-1')).toHaveTextContent('Pasta');
     await fireEvent.press(screen.getByTestId('add-recipe-1'));
     expect(insertsInto('plan_entries')[0][2]).toMatchObject({ recipe_id: 'r2', position: 1 });
+  });
+});
+
+const PERSON = 'a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d';
+
+describe('entry actions (FR-PLAN-7)', () => {
+  const planned = () => ({
+    plan_entries: [entry('e1', '2026-11-16', 'dinner', { free_text: 'Soup' })],
+    plan_entry_portions: [
+      { ...base, id: 'x', entry_id: 'e1', person_id: PERSON, portions: 2, variant: 'standard' },
+    ],
+  });
+
+  it('moves an entry to another day and slot', async () => {
+    mockRows = planned();
+    await show();
+    await fireEvent(screen.getByTestId('plan-entry-e1'), 'longPress');
+    await fireEvent.press(screen.getByTestId('entry-actions-day-3'));
+    await fireEvent.press(screen.getByTestId('entry-actions-slot-lunch'));
+    await fireEvent.press(screen.getByTestId('entry-actions-move'));
+    expect(mockUpdate).toHaveBeenCalledWith('plan_entries', 'e1', {
+      date: '2026-11-18',
+      slot: 'lunch',
+      position: 0,
+    });
+  });
+
+  it('duplicates an entry with its portions', async () => {
+    mockRows = planned();
+    await show();
+    await fireEvent(screen.getByTestId('plan-entry-e1'), 'longPress');
+    await fireEvent.press(screen.getByTestId('entry-actions-duplicate'));
+    const [[, id, values]] = insertsInto('plan_entries');
+    // Same day and slot by default, after the original.
+    expect(values).toMatchObject({
+      date: '2026-11-16',
+      slot: 'dinner',
+      position: 1,
+      free_text: 'Soup',
+    });
+    expect(insertsInto('plan_entry_portions')[0][2]).toEqual({
+      entry_id: id,
+      person_id: PERSON,
+      portions: 2,
+      variant: 'standard',
+    });
+  });
+
+  it('hides a removed entry at once and removes it after 5 seconds', async () => {
+    mockRows = planned();
+    await show();
+    await fireEvent(screen.getByTestId('plan-entry-e1'), 'longPress');
+    await fireEvent.press(screen.getByTestId('entry-actions-remove'));
+    expect(screen.queryByTestId('plan-entry-e1')).toBeNull();
+    expect(screen.getByTestId('plan-undo')).toHaveTextContent(/Removed Soup/);
+    expect(mockRemove).not.toHaveBeenCalled();
+    await act(async () => {
+      jest.advanceTimersByTime(5000);
+    });
+    expect(mockRemove).toHaveBeenCalledWith('plan_entries', 'e1');
+  });
+
+  it('brings a removed entry back with undo, and never removes it', async () => {
+    mockRows = planned();
+    await show();
+    await fireEvent(screen.getByTestId('plan-entry-e1'), 'longPress');
+    await fireEvent.press(screen.getByTestId('entry-actions-remove'));
+    await fireEvent.press(screen.getByTestId('plan-undo-action'));
+    expect(screen.getByTestId('plan-entry-e1')).toBeOnTheScreen();
+    await act(async () => {
+      jest.advanceTimersByTime(6000);
+    });
+    expect(mockRemove).not.toHaveBeenCalled();
+  });
+
+  it("doesn't offer caregivers entry actions", async () => {
+    mockRows = planned();
+    await show(false);
+    await fireEvent(screen.getByTestId('plan-entry-e1'), 'longPress');
+    expect(screen.queryByTestId('entry-actions-move')).toBeNull();
   });
 });

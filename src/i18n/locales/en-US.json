@@ -159,6 +159,16 @@
       "freeTextHint": "As a note, with no shopping",
       "noResults": "No recipes match. You can still add it as a note.",
       "failed": "Couldn't add that. Try again."
+    },
+    "actions": {
+      "day": "Day",
+      "slot": "Meal",
+      "move": "Move here",
+      "duplicate": "Duplicate here",
+      "remove": "Remove",
+      "removed": "Removed {{title}}",
+      "undo": "Undo",
+      "failed": "Couldn't change the plan. Try again."
     }
   },
   "placeholder": {
