@@ -17,8 +17,6 @@ export type Ingredients = {
   index: NameIndex;
   /** The ingredient's name in the locale, or null for an ID the device doesn't know yet. */
   name(id: string): string | null;
-  /** The name to show next to an amount: the plural for more than one, where there is one. */
-  nameFor(id: string, count: number | null): string | null;
   /** Its default dimension, which decides whether a line without a unit is a count (FR-REC-6). */
   dimension(id: string): Dimension;
   allergens(id: string): readonly AllergenCode[];
@@ -48,12 +46,9 @@ export function buildIngredients(
       })),
     ],
   );
-  const plurals = new Map(catalog.names.map((n) => [n.ingredientId, n.plural]));
-  const name = (id: string) => index.displayName.get(id) ?? null;
   return {
     index,
-    name,
-    nameFor: (id, count) => ((count ?? 0) > 1 ? plurals.get(id) : null) ?? name(id),
+    name: (id) => index.displayName.get(id) ?? null,
     dimension: (id) =>
       index.info.get(id)?.defaultDimension ?? catalogIngredient(id)?.dimension ?? 'count',
     allergens: (id) => catalogIngredient(id)?.allergens ?? [],

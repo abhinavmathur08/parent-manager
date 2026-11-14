@@ -20,10 +20,5 @@
         "metric": "Metric: millilitres and grams"
       }
     }
-  },
-  "recipes": {
-    "unitNames": {
-      "l": "litre"
-    }
   }
 }
