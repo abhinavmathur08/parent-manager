@@ -191,6 +191,15 @@ export function HouseholdSettingsScreen() {
               testID="settings-save"
             />
           ) : null}
+          {canEdit ? (
+            <Button
+              variant="ghost"
+              label={t('household.delete.title')}
+              onPress={() => router.push('/household/delete-household')}
+              fullWidth
+              testID="open-delete-household"
+            />
+          ) : null}
         </>
       ) : null}
     </Screen>

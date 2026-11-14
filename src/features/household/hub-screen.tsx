@@ -7,6 +7,7 @@ import { ListRow } from '@/components/list-row';
 import { Screen } from '@/components/screen';
 import { SectionHeader } from '@/components/section-header';
 import { Text } from '@/components/text';
+import { DeletionNotice } from '@/features/household/deletion-notice';
 import { supabaseConfig } from '@/lib/supabase-config';
 
 type Row = { key: string; title: string; href: Href };
@@ -43,6 +44,7 @@ export function HouseholdHubScreen() {
 
   return (
     <Screen title={t('tabs.household')} testID="household-screen">
+      <DeletionNotice />
       <View>
         <Rows rows={household} />
       </View>

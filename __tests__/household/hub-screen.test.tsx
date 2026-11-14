@@ -4,7 +4,10 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { HouseholdHubScreen } from '@/features/household/hub-screen';
 
 const mockPush = jest.fn();
-jest.mock('expo-router', () => ({ router: { push: (href: string) => mockPush(href) } }));
+jest.mock('expo-router', () => ({
+  router: { push: (href: string) => mockPush(href) },
+  useFocusEffect: jest.fn(),
+}));
 
 const metrics = {
   frame: { x: 0, y: 0, width: 390, height: 844 },

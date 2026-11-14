@@ -1,0 +1,46 @@
+# The only parent deletes the household from its settings (A-04.3, FR-PRIV-7): they sign in
+# again with an emailed code, the household goes at once, and the app returns to create or
+# join with the account kept. The two-parent confirmation is covered by the database tests.
+# Needs the local stack; see the Testing section of README.md.
+appId: ${APP_ID || 'com.myparentmanager'}
+tags:
+  - backend
+---
+- runFlow: subflows/create-household.yaml
+- tapOn:
+    id: tab-household
+- tapOn:
+    id: open-settings
+- scrollUntilVisible:
+    element:
+      id: open-delete-household
+- tapOn:
+    id: open-delete-household
+- extendedWaitUntil:
+    visible:
+      id: delete-household-body
+    timeout: 10000
+- tapOn:
+    id: delete-household-start
+# Supabase keeps a gap between codes to one address, and sign-up just sent one.
+- runScript: scripts/wait-for-new-code.js
+- tapOn:
+    id: delete-household-reauth-send
+# The code field has focus, and on Android the keyboard can cover the sheet, so wait for the
+# sheet's text and type straight into the focused field.
+- extendedWaitUntil:
+    visible:
+      text: 'Enter the code we sent.*'
+    timeout: 10000
+- runScript:
+    file: scripts/read-code.js
+    env:
+      EMAIL: ${output.email}
+- inputText: ${output.code}
+- hideKeyboard
+- tapOn:
+    id: delete-household-reauth-confirm
+- extendedWaitUntil:
+    visible:
+      id: welcome-create
+    timeout: 20000
