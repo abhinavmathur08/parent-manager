@@ -81,6 +81,25 @@ export function googleSignInPlugins(
     : [];
 }
 
+/**
+ * Sentry (F-07.1). The plugin is always on, so its native SDK is in every build. Source maps
+ * upload from builds only when `SENTRY_ORG` and `SENTRY_PROJECT` are set, which also needs
+ * the `SENTRY_AUTH_TOKEN` secret in EAS; without them builds skip the upload rather than
+ * fail. Setting them changes the build script and so the runtime fingerprint: turn them on
+ * with a new build, not an OTA update.
+ */
+export function sentryPlugin(
+  organization: string | undefined,
+  project: string | undefined,
+): [string, Record<string, string | boolean>] {
+  const org = organization?.trim();
+  const name = project?.trim();
+  return [
+    '@sentry/react-native/expo',
+    org && name ? { organization: org, project: name } : { disableAutoUpload: true },
+  ];
+}
+
 function buildConfig(
   config: ConfigContext['config'],
   variant: AppVariant,
@@ -143,6 +162,7 @@ function buildConfig(
       'expo-apple-authentication',
       'expo-web-browser',
       ...googleSignInPlugins(process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID),
+      sentryPlugin(process.env.SENTRY_ORG, process.env.SENTRY_PROJECT),
       // The Face ID permission text comes from the locale file, like all copy (A-03).
       ['expo-local-authentication', { faceIDPermission: enUS.biometric.faceIdPermission }],
     ],
