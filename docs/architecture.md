@@ -146,6 +146,14 @@ How recipes are stored (R-02.1):
 | `plan_entry_portions`                     | `entry_id`, `person_id`, `portions`, `variant` (`standard` or `baby_plate`)                                                                               |                                                             |
 | `plan_templates`, `plan_template_entries` | `weekday`, `slot`, `recipe_id`, `servings`                                                                                                                | Premium feature.                                            |
 
+How the plan is stored (P-01.1):
+
+- **Synced.** `plan_entries` and `plan_entry_portions` use `private.enable_sync()` (section 5), and the app registers them in `src/features/planner/tables.ts`. A delete is a tombstone, so a delete by one partner wins over a move by the other. Removing an entry tombstones its portions on the server.
+- **Dates, not moments.** `date` is a Postgres `date`: the calendar day in the household's timezone. A clock or timezone change never moves an entry, and changing the week start only regroups the display.
+- **Entries.** A household recipe or free text, servings in quarter steps (a baby plate is ¼), and `position` for order within a slot, which can hold several entries (FR-PLAN-4). A starter recipe is saved as a household copy before it's planned. The recipe and the "leftovers of" entry must be in the entry's household.
+- **Portions.** One row per entry and person (a unique index): 0, ½, 1 or 2, or a baby plate at ¼ (FR-PLAN-6). The app derives the row's ID from the entry and person IDs (`portionId`), so two partners setting the same portion offline write one row.
+- **Writes.** Parents and family members write the plan; caregivers read it.
+
 #### Grocery and pantry
 
 | Table                  | Key columns                                                                                                                                                                                                                        | Notes                                                                                                                                                                                                |
@@ -213,6 +221,8 @@ Export (A-04.2) and deletion must cover every table that holds household data. A
 | `recipes`                | All rows, with lines and steps       | Cascades from the household; `created_by` and `updated_by` are set null with the account  |
 | `recipe_ingredients`     | With their recipe                    | Cascades from the household                                                               |
 | `recipe_steps`           | With their recipe                    | Cascades from the household                                                               |
+| `plan_entries`           | All rows                             | Cascades from the household                                                               |
+| `plan_entry_portions`    | With their entry                     | Cascades from the household and from the person                                           |
 | `pantry_items`           | All rows                             | Cascades from the household                                                               |
 | `ai_import_jobs`         | The user's own jobs, with drafts     | Cascades from the household; `user_id` is set null with the account; purged after 30 days |
 | `ai_usage`               | Monthly counts                       | Cascades from the household                                                               |
