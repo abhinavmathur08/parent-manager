@@ -329,7 +329,7 @@ export function ListScreen({ household }: { household: ListHousehold }) {
             view={view}
             weekStart={list.week_start}
             locale={locale}
-            onMessage={setMessage}
+            householdId={household.id}
           />
         ) : null}
         <AddItemSheet
