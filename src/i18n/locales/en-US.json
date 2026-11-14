@@ -1017,6 +1017,38 @@
       "turnOn": "Turn on",
       "offInSystem": "Off in system settings. Turn notifications on there to get reminders.",
       "openSettings": "Open system settings"
+    },
+    "saveFailed": "Couldn't save that change. Check your connection and try again.",
+    "types": {
+      "section": "What to send",
+      "offInSystem": "Off in system settings",
+      "plan_week": {
+        "title": "Plan your week",
+        "description": "A reminder before the week starts, unless it's already planned."
+      },
+      "list_ready": {
+        "title": "List is ready",
+        "description": "When someone marks the grocery list ready to shop."
+      },
+      "defrost": {
+        "title": "Defrost tonight",
+        "description": "A morning reminder when tonight's dinner needs defrosting."
+      },
+      "household_changes": {
+        "title": "Household changes",
+        "description": "Members joining or leaving. In the app only."
+      }
+    },
+    "planWeek": {
+      "section": "Plan your week",
+      "day": "Day",
+      "time": "Time"
+    },
+    "quiet": {
+      "section": "Quiet hours",
+      "start": "Starts",
+      "end": "Ends",
+      "note": "Notifications wait until quiet hours end, and never make a sound. Times are in the household's time zone ({{timezone}})."
     }
   }
 }
