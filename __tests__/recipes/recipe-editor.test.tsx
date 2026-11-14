@@ -1,7 +1,8 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
-import { Keyboard } from 'react-native';
+import { Keyboard, StyleSheet } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { theme } from '@/constants/theme';
 import { RecipeEditor } from '@/features/recipes/recipe-editor';
 
 const mockInsert = jest.fn().mockResolvedValue({});
@@ -90,4 +91,12 @@ it('asks for a title before saving', async () => {
   await fireEvent.press(screen.getByTestId('recipe-save'));
   expect(screen.getByText('Give the recipe a title.')).toBeTruthy();
   expect(mockInsert).not.toHaveBeenCalled();
+});
+
+it('leaves room for the floating tab bar, so Save never sits under it', async () => {
+  await show();
+  const content = StyleSheet.flatten(
+    screen.getByTestId('recipe-editor-scroll').props.contentContainerStyle,
+  );
+  expect(content.paddingBottom).toBeGreaterThanOrEqual(theme.layout.tabBarClearance);
 });
