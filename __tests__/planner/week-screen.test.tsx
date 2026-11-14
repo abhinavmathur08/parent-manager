@@ -324,3 +324,80 @@ describe('entry actions (FR-PLAN-7)', () => {
     expect(screen.queryByTestId('entry-actions-move')).toBeNull();
   });
 });
+
+describe('S-12 portions and baby plates (FR-PLAN-5, FR-PLAN-6)', () => {
+  const BABY = 'b1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d';
+  const ADULT = 'c1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d';
+  const ENTRY = 'd1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d';
+  const updatesTo = (table: string) =>
+    (mockUpdate.mock.calls as unknown as [string, string, Record<string, unknown>][]).filter(
+      ([name]) => name === table,
+    );
+
+  beforeEach(() => {
+    mockPeople.mockResolvedValue([
+      { id: ADULT, displayName: 'Sam', ageBand: 'adult', dueMonth: null, allergies: [], diets: [] },
+      {
+        id: BABY,
+        displayName: 'Ivy',
+        ageBand: 'infant_6_12m',
+        dueMonth: null,
+        allergies: [],
+        diets: [],
+      },
+    ]);
+    mockRows = {
+      plan_entries: [entry(ENTRY, '2026-11-16', 'dinner', { recipe_id: 'r1', servings: 1.5 })],
+    };
+  });
+
+  it('starts on the R-SERV-1 defaults, and the baby plate is labelled on the entry', async () => {
+    await show();
+    expect(await screen.findByTestId(`plan-entry-${ENTRY}-baby-plate`)).toHaveTextContent(
+      'Baby plate',
+    );
+    await fireEvent.press(screen.getByTestId(`plan-entry-${ENTRY}`));
+    expect(screen.getByTestId('entry-person-0-portion-2').props.accessibilityState).toMatchObject({
+      checked: true,
+    });
+    expect(screen.getByTestId('entry-person-1-baby-plate').props.accessibilityState).toMatchObject({
+      checked: true,
+    });
+    // Only the 6 to 12 month band gets a baby plate.
+    expect(screen.queryByTestId('entry-person-0-baby-plate')).toBeNull();
+  });
+
+  it('saves portions for everyone and makes servings their sum', async () => {
+    await show();
+    await screen.findByTestId(`plan-entry-${ENTRY}-baby-plate`);
+    await fireEvent.press(screen.getByTestId(`plan-entry-${ENTRY}`));
+    await fireEvent.press(screen.getByTestId('entry-person-0-portion-4'));
+    expect(screen.getByTestId('entry-servings')).toHaveTextContent('2.25');
+    await fireEvent.press(screen.getByTestId('entry-save'));
+    const rows = insertsInto('plan_entry_portions').map(([, , values]) => values);
+    expect(rows).toEqual([
+      { entry_id: ENTRY, person_id: ADULT, portions: 2, variant: 'standard' },
+      { entry_id: ENTRY, person_id: BABY, portions: 0.25, variant: 'baby_plate' },
+    ]);
+    expect(updatesTo('plan_entries')).toEqual([['plan_entries', ENTRY, { servings: 2.25 }]]);
+  });
+
+  it("won't save when nobody eats", async () => {
+    await show();
+    await screen.findByTestId(`plan-entry-${ENTRY}-baby-plate`);
+    await fireEvent.press(screen.getByTestId(`plan-entry-${ENTRY}`));
+    await fireEvent.press(screen.getByTestId('entry-person-0-portion-0'));
+    await fireEvent.press(screen.getByTestId('entry-person-1-portion-0'));
+    expect(screen.getByTestId('entry-nobody-eats')).toBeOnTheScreen();
+    expect(screen.getByTestId('entry-save')).toBeDisabled();
+  });
+
+  it('sets servings directly without touching portions', async () => {
+    await show();
+    await fireEvent.press(screen.getByTestId(`plan-entry-${ENTRY}`));
+    await fireEvent.press(screen.getByTestId('entry-servings-increase'));
+    await fireEvent.press(screen.getByTestId('entry-save'));
+    expect(insertsInto('plan_entry_portions')).toHaveLength(0);
+    expect(updatesTo('plan_entries')).toEqual([['plan_entries', ENTRY, { servings: 2 }]]);
+  });
+});

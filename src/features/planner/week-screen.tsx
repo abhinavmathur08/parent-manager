@@ -28,11 +28,20 @@ import { formatDate, formatList, formatNumber, type AppLocale } from '@/i18n';
 import { usePlanWeek } from './data';
 import { AddSheet, type AddTarget } from './add-sheet';
 import { EntryActionsSheet, type EntryTarget } from './entry-actions-sheet';
-import { defaultServings, entryAllergens, nextPosition, slotEntries, weekEntries } from './plan';
+import { EntrySheet, type EntryChange } from './entry-sheet';
+import {
+  defaultServings,
+  entryAllergens,
+  hasBabyPlate,
+  nextPosition,
+  portionsFor,
+  slotEntries,
+  weekEntries,
+} from './plan';
 import { SLOTS, type PlanEntryRow, type Slot } from './tables';
 import { usePlanPeople } from './use-plan-people';
 import { useUndoable } from './use-undoable';
-import { useAddEntry, useEntryActions } from './writes';
+import { useAddEntry, useEntryActions, useSetPortions, useSetServings } from './writes';
 import {
   addDays,
   startOfWeek,
@@ -127,11 +136,15 @@ export function PlanWeekScreen({
   const addEntry = useAddEntry(locale);
   const [adding, setAdding] = useState<AddTarget | null>(null);
   const [acting, setActing] = useState<PlanEntryRow | null>(null);
+  const [opened, setOpened] = useState<PlanEntryRow | null>(null);
+  const setPortions = useSetPortions();
+  const setServings = useSetServings();
   const entryActions = useEntryActions();
   const failed = useCallback(() => Alert.alert(t('plan.actions.failed')), [t]);
   const undoable = useUndoable(failed);
   const actions: PlanWeekActions = {
     onAdd: canWrite ? (date, slot) => setAdding({ date, slot }) : undefined,
+    onOpenEntry: setOpened,
     onEntryActions: canWrite ? setActing : undefined,
     ...overrides,
   };
@@ -167,6 +180,14 @@ export function PlanWeekScreen({
         position: nextPosition(week.all, target.date, target.slot),
       }),
     );
+  const saveEntry = (entry: PlanEntryRow, change: EntryChange) => {
+    setOpened(null);
+    void runAction(() =>
+      change.kind === 'portions'
+        ? setPortions(entry, change.portions, week.portions)
+        : setServings(entry, change.servings),
+    );
+  };
   const removeEntry = (entry: PlanEntryRow) => {
     setActing(null);
     undoable.hold({
@@ -310,6 +331,9 @@ export function PlanWeekScreen({
                     canWrite={canWrite}
                     actions={actions}
                     titleOf={titleOf}
+                    babyPlateOf={(entry) =>
+                      hasBabyPlate(portionsFor(entry.id, people.people, week.portions).values())
+                    }
                     allergensOf={(entry) =>
                       entryAllergens(
                         entry,
@@ -349,6 +373,17 @@ export function PlanWeekScreen({
           }}
           onClose={() => setAdding(null)}
         />
+        <EntrySheet
+          entry={opened}
+          title={opened ? titleOf(opened) : ''}
+          people={people.people}
+          peopleStatus={people.status}
+          portionRows={week.portions}
+          locale={locale}
+          canWrite={canWrite}
+          onSave={saveEntry}
+          onClose={() => setOpened(null)}
+        />
         <EntryActionsSheet
           entry={acting}
           title={acting ? titleOf(acting) : ''}
@@ -380,6 +415,7 @@ function DaySlots({
   canWrite,
   actions,
   titleOf,
+  babyPlateOf,
   allergensOf,
   locale,
 }: {
@@ -390,6 +426,7 @@ function DaySlots({
   canWrite: boolean;
   actions: PlanWeekActions;
   titleOf: (entry: PlanEntryRow) => string;
+  babyPlateOf: (entry: PlanEntryRow) => boolean;
   allergensOf: (entry: PlanEntryRow) => ReturnType<typeof entryAllergens>;
   locale: AppLocale;
 }) {
@@ -426,6 +463,7 @@ function DaySlots({
                 key={entry.id}
                 entry={entry}
                 title={titleOf(entry)}
+                babyPlate={babyPlateOf(entry)}
                 matches={allergensOf(entry)}
                 locale={locale}
                 onPress={actions.onOpenEntry}
@@ -457,6 +495,7 @@ function DaySlots({
 function EntryRow({
   entry,
   title,
+  babyPlate,
   matches,
   locale,
   onPress,
@@ -464,6 +503,8 @@ function EntryRow({
 }: {
   entry: PlanEntryRow;
   title: string;
+  /** Someone eats it from a baby plate, which the entry says (FR-PLAN-6). */
+  babyPlate: boolean;
   matches: ReturnType<typeof entryAllergens>;
   locale: AppLocale;
   onPress?: (entry: PlanEntryRow) => void;
@@ -501,6 +542,9 @@ function EntryRow({
           {servings}
         </Text>
       </View>
+      {babyPlate ? (
+        <Tag label={t('plan.entry.babyPlate')} testID={`plan-entry-${entry.id}-baby-plate`} />
+      ) : null}
       {matches.map((match) => (
         <AllergenNotice
           key={match.allergen}

@@ -157,3 +157,59 @@ export function useEntryActions() {
     writer,
   };
 }
+
+/**
+ * Sets portions per person on an entry (FR-PLAN-5, FR-PLAN-6). Every person gets a row, so
+ * the entry no longer follows the defaults, and the entry's servings become their sum
+ * (R-SERV-2). Rows are never deleted; "not eating" is a portion of 0.
+ */
+export function useSetPortions() {
+  const writer = useSyncWriter();
+  return useCallback(
+    async (
+      entry: PlanEntryRow,
+      portions: ReadonlyMap<string, { portions: number; variant: 'standard' | 'baby_plate' }>,
+      rows: readonly PlanEntryPortionRow[],
+    ) => {
+      let servings = 0;
+      let babyPlate = false;
+      let eating = 0;
+      for (const [personId, value] of portions) {
+        servings += value.portions;
+        if (value.portions > 0) eating += 1;
+        if (value.variant === 'baby_plate' && value.portions > 0) babyPlate = true;
+        const id = portionId(entry.id, personId);
+        const existing = rows.find((r) => r.id === id && !r.deleted_at);
+        if (!existing) {
+          await writer.insert(PLAN_ENTRY_PORTIONS.name, id, {
+            entry_id: entry.id,
+            person_id: personId,
+            portions: value.portions,
+            variant: value.variant,
+          });
+        } else if (existing.portions !== value.portions || existing.variant !== value.variant) {
+          await writer.update(PLAN_ENTRY_PORTIONS.name, id, {
+            portions: value.portions,
+            variant: value.variant,
+          });
+        }
+      }
+      if (servings <= 0) throw new Error('Someone has to eat the entry');
+      if (servings !== entry.servings) {
+        await writer.update(PLAN_ENTRIES.name, entry.id, { servings });
+      }
+      track('portions_set', { people_count: eating, has_baby_plate: babyPlate });
+    },
+    [writer],
+  );
+}
+
+/** Changes an entry's servings directly (FR-PLAN-5). */
+export function useSetServings() {
+  const writer = useSyncWriter();
+  return useCallback(
+    (entry: PlanEntryRow, servings: number) =>
+      writer.update(PLAN_ENTRIES.name, entry.id, { servings }),
+    [writer],
+  );
+}
