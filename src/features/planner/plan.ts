@@ -138,3 +138,54 @@ export function recentRecipeIds(
     .map((r) => r.id);
   return [...new Set([...used, ...changed])].slice(0, limit);
 }
+
+/** Whether a person can have a baby plate: the 6 to 12 month band (FR-PLAN-6). */
+export function canHaveBabyPlate(ageBand: AgeBand): boolean {
+  return ageBand === 'infant_6_12m';
+}
+
+/**
+ * R-SERV-2: when portions per person are set, the entry's servings are their sum. Null when
+ * no one eats, which an entry can't save (servings are above 0).
+ */
+export function servingsFromPortions(portions: Iterable<PersonPortion>): number | null {
+  let total = 0;
+  for (const p of portions) total += p.portions;
+  return total > 0 ? total : null;
+}
+
+/** Whether anyone eats the entry from a baby plate, so the entry says so (FR-PLAN-6). */
+export function hasBabyPlate(portions: Iterable<PersonPortion>): boolean {
+  for (const p of portions) if (p.variant === 'baby_plate' && p.portions > 0) return true;
+  return false;
+}
+
+/** R-SERV-2: an entry's quantity factor is its servings over the recipe's. */
+export function quantityFactor(entryServings: number, recipeServings: number): number {
+  return recipeServings > 0 ? entryServings / recipeServings : 0;
+}
+
+/**
+ * What an entry asks of each recipe line, in base units (g, ml or each), scaled by R-SERV-2.
+ * Lines without a base quantity ("a pinch") stay null. Free-text entries ask for nothing
+ * (R-SERV-4). Leftover links (R-SERV-3) are the list engine's job (G-01.1, P-04).
+ */
+export function entryLineQuantities(
+  entry: Pick<PlanEntryRow, 'recipe_id' | 'servings'>,
+  recipe: { id: string; servings: number } | undefined,
+  lines: readonly {
+    recipe_id: string;
+    ingredient_id: string;
+    quantity_base: number | null;
+    deleted_at: string | null;
+  }[],
+): { ingredientId: string; quantityBase: number | null }[] {
+  if (!entry.recipe_id || !recipe || recipe.id !== entry.recipe_id) return [];
+  const factor = quantityFactor(entry.servings, recipe.servings);
+  return lines
+    .filter((l) => l.recipe_id === recipe.id && !l.deleted_at)
+    .map((l) => ({
+      ingredientId: l.ingredient_id,
+      quantityBase: l.quantity_base === null ? null : l.quantity_base * factor,
+    }));
+}

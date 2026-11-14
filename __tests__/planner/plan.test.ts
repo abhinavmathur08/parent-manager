@@ -1,12 +1,18 @@
 import {
   compareEntries,
+  canHaveBabyPlate,
   defaultPortion,
+  entryLineQuantities,
+  hasBabyPlate,
+  quantityFactor,
+  servingsFromPortions,
   defaultServings,
   nextPosition,
   recentRecipeIds,
   entryAllergens,
   portionsFor,
   weekEntries,
+  type PersonPortion,
   type PlanPerson,
 } from '@/features/planner/plan';
 import type { PlanEntryPortionRow, PlanEntryRow } from '@/features/planner/tables';
@@ -138,5 +144,63 @@ describe('adding entries (FR-PLAN-3 to FR-PLAN-5)', () => {
     ];
     expect(recentRecipeIds(rows, recipes, 3)).toEqual(['r3', 'r1', 'r2']);
     expect(recentRecipeIds([], recipes, 2)).toEqual(['r2', 'r3']);
+  });
+});
+
+describe('portions and servings (FR-PLAN-6, R-SERV-2)', () => {
+  const recipe = { id: 'r1', servings: 4 };
+  const lines = [
+    { recipe_id: 'r1', ingredient_id: 'ingredient.pasta', quantity_base: 400, deleted_at: null },
+    { recipe_id: 'r1', ingredient_id: 'ingredient.salt', quantity_base: null, deleted_at: null },
+    { recipe_id: 'r1', ingredient_id: 'ingredient.gone', quantity_base: 50, deleted_at: 'x' },
+    { recipe_id: 'r2', ingredient_id: 'ingredient.rice', quantity_base: 100, deleted_at: null },
+  ];
+  const pasta = (portions: Map<string, PersonPortion>) =>
+    entryLineQuantities(
+      { recipe_id: 'r1', servings: servingsFromPortions(portions.values()) ?? 0 },
+      recipe,
+      lines,
+    );
+
+  it('offers a baby plate only from 6 to 12 months', () => {
+    expect(canHaveBabyPlate('infant_6_12m')).toBe(true);
+    expect(canHaveBabyPlate('infant_0_6m')).toBe(false);
+    expect(canHaveBabyPlate('toddler')).toBe(false);
+  });
+
+  it('makes servings the sum of portions, and needs someone eating', () => {
+    const portions = [
+      { portions: 1, variant: 'standard' as const },
+      { portions: 0.5, variant: 'standard' as const },
+      { portions: 0.25, variant: 'baby_plate' as const },
+    ];
+    expect(servingsFromPortions(portions)).toBe(1.75);
+    expect(hasBabyPlate(portions)).toBe(true);
+    expect(servingsFromPortions([{ portions: 0, variant: 'standard' }])).toBeNull();
+    expect(hasBabyPlate([{ portions: 1, variant: 'standard' }])).toBe(false);
+  });
+
+  it('changes list quantities when portions change', () => {
+    const portions = new Map<string, PersonPortion>([
+      ['adult', { portions: 1, variant: 'standard' }],
+      ['toddler', { portions: 0.5, variant: 'standard' }],
+    ]);
+    // 1.5 servings of a 4-serving recipe: 400 g x 0.375.
+    expect(pasta(portions)).toEqual([
+      { ingredientId: 'ingredient.pasta', quantityBase: 150 },
+      { ingredientId: 'ingredient.salt', quantityBase: null },
+    ]);
+    portions.set('adult', { portions: 2, variant: 'standard' });
+    portions.set('baby', { portions: 0.25, variant: 'baby_plate' });
+    // 2.75 servings: 400 g x 0.6875.
+    expect(pasta(portions)[0].quantityBase).toBe(275);
+    portions.set('toddler', { portions: 0, variant: 'standard' });
+    expect(pasta(portions)[0].quantityBase).toBe(225);
+  });
+
+  it('asks nothing of free text or a missing recipe (R-SERV-4)', () => {
+    expect(entryLineQuantities({ recipe_id: null, servings: 2 }, recipe, lines)).toEqual([]);
+    expect(entryLineQuantities({ recipe_id: 'r1', servings: 2 }, undefined, lines)).toEqual([]);
+    expect(quantityFactor(2, 0)).toBe(0);
   });
 });

@@ -1,0 +1,52 @@
+# P-03 (FR-PLAN-5, FR-PLAN-6): opening a planned meal shows servings and portions per person,
+# and saving a change closes the sheet. Ends signed out.
+# Needs the local stack; see the Testing section of README.md.
+appId: ${APP_ID || 'com.myparentmanager'}
+tags:
+  - backend
+---
+- runFlow: subflows/create-household.yaml
+- scrollUntilVisible:
+    element:
+      id: plan-add-0-dinner
+- tapOn:
+    id: plan-add-0-dinner
+- extendedWaitUntil:
+    visible:
+      id: add-search
+    timeout: 10000
+- tapOn:
+    id: add-search
+- inputText: lentil
+- tapOn:
+    id: add-starter-0
+- extendedWaitUntil:
+    visible:
+      id: plan-slot-0-dinner
+    timeout: 10000
+- tapOn:
+    id: plan-entry-.*
+    index: 0
+- extendedWaitUntil:
+    visible:
+      id: entry-servings
+    timeout: 10000
+- tapOn:
+    id: entry-servings-increase
+- tapOn:
+    id: entry-save
+- extendedWaitUntil:
+    notVisible:
+      id: entry-sheet
+    timeout: 10000
+- tapOn:
+    id: tab-household
+- scrollUntilVisible:
+    element:
+      id: sign-out
+- tapOn:
+    id: sign-out
+- extendedWaitUntil:
+    visible:
+      id: sign-in-screen-title
+    timeout: 10000

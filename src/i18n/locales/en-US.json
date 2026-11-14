@@ -169,6 +169,17 @@
       "removed": "Removed {{title}}",
       "undo": "Undo",
       "failed": "Couldn't change the plan. Try again."
+    },
+    "entry": {
+      "servings": "Servings",
+      "portions": "Portions",
+      "person": "{{name}} ({{band}})",
+      "notEating": "Not eating",
+      "babyPlate": "Baby plate",
+      "freeTextNote": "Notes like this don't add anything to the list.",
+      "peopleUnavailable": "Portions need one online load of your household's people.",
+      "nobodyEats": "At least one person needs a portion.",
+      "save": "Save"
     }
   },
   "placeholder": {
