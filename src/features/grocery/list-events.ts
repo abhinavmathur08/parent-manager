@@ -42,7 +42,13 @@ export function useOpenListWeeks(): readonly PlanDate[] {
   );
 }
 
-export type ListUpdated = { listId: string; summary: ReconcileSummary };
+export type ListUpdated = {
+  /** The list recalculated, or null when "Regenerate" found nothing to change. */
+  listId: string | null;
+  summary: ReconcileSummary;
+  /** The member asked for it ("Regenerate"), rather than a change to the plan. */
+  regenerated: boolean;
+};
 
 const updateListeners = new Set<(update: ListUpdated) => void>();
 
@@ -56,5 +62,19 @@ export function onListUpdated(listener: (update: ListUpdated) => void): () => vo
   updateListeners.add(listener);
   return () => {
     updateListeners.delete(listener);
+  };
+}
+
+const regenerateListeners = new Set<() => void>();
+
+/** Asks the keeper to recalculate now ("Regenerate", FR-LIST-3), with the same rules. */
+export function requestRegenerate(): void {
+  for (const listener of regenerateListeners) listener();
+}
+
+export function onRegenerate(listener: () => void): () => void {
+  regenerateListeners.add(listener);
+  return () => {
+    regenerateListeners.delete(listener);
   };
 }

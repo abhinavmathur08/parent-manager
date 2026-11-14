@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { useHousehold } from '@/features/household/membership';
 import { usePlanRows } from '@/features/planner/data';
@@ -9,7 +9,7 @@ import { reportError } from '@/lib/crash-reporting';
 import { useSyncStatus } from '@/lib/sync';
 
 import { useGroceryRows, useListIngredientFacts } from './data';
-import { emitListUpdated, useOpenListWeeks } from './list-events';
+import { emitListUpdated, onRegenerate, useOpenListWeeks } from './list-events';
 import { weeklyListUpdates, type WeeklyInput } from './weekly';
 
 /** How long to wait for a burst of changes (a week copy, a pull) to settle. */
@@ -88,24 +88,20 @@ function useGroceryKeeper() {
   // list's rows, working them out again would repeat those writes.
   const written = useRef<WeeklyInput | null>(null);
 
-  useEffect(() => {
-    if (!input) return;
-    const timer = setTimeout(() => {
+  const run = useCallback(
+    (regenerate: boolean) => {
       queue.current = queue.current.then(async () => {
         // Work from the newest rows, which may have moved on while this waited.
         const now = latest.current;
         const last = written.current;
         if (!now) return;
-        if (
-          last &&
+        const unread =
+          last !== null &&
           last.lists === now.lists &&
           last.items === now.items &&
-          last.sources === now.sources
-        ) {
-          return;
-        }
+          last.sources === now.sources;
         try {
-          const updates = weeklyListUpdates(now);
+          const updates = unread ? [] : weeklyListUpdates(now);
           if (updates.length) written.current = now;
           for (const update of updates) {
             await apply(update.ops);
@@ -115,15 +111,34 @@ function useGroceryKeeper() {
               merged_count: needs.mergedCount,
               staples_excluded_count: needs.staples.length,
               have_excluded_count: needs.have.length,
-              trigger: update.created ? 'auto' : 'plan_change',
+              trigger: update.created ? 'auto' : regenerate ? 'regenerate' : 'plan_change',
             });
-            emitListUpdated({ listId: update.listId, summary: update.summary });
+            emitListUpdated({
+              listId: update.listId,
+              summary: update.summary,
+              regenerated: regenerate,
+            });
+          }
+          if (regenerate && !updates.length) {
+            emitListUpdated({
+              listId: null,
+              summary: { added: 0, changed: 0, removed: 0 },
+              regenerated: true,
+            });
           }
         } catch (error) {
           reportError(error);
         }
       });
-    }, SETTLE_MS);
+    },
+    [apply],
+  );
+
+  useEffect(() => {
+    if (!input) return;
+    const timer = setTimeout(() => run(false), SETTLE_MS);
     return () => clearTimeout(timer);
-  }, [input, apply]);
+  }, [input, run]);
+
+  useEffect(() => onRegenerate(() => run(true)), [run]);
 }

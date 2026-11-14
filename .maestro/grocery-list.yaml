@@ -1,0 +1,89 @@
+# G-02.1 (FR-LIST-2 to FR-LIST-5, FR-PAN-3): planning a recipe builds the week's list by store
+# section, staples stay off it, and checking an item off moves it to "in the cart".
+# Ends signed out. Needs the local stack; see the Testing section of README.md.
+appId: ${APP_ID || 'com.myparentmanager'}
+tags:
+  - backend
+---
+- runFlow: subflows/create-household.yaml
+
+# Plan lentil and tomato soup (onion, carrots, garlic, lentils, stock, salt...) for day 1.
+# The week opens scrolled to today; the empty state is above the days.
+- scrollUntilVisible:
+    element:
+      id: plan-empty
+    direction: UP
+- scrollUntilVisible:
+    element:
+      id: plan-add-0-dinner
+    centerElement: true
+- tapOn:
+    id: plan-add-0-dinner
+- extendedWaitUntil:
+    visible:
+      id: add-search
+    timeout: 10000
+- tapOn:
+    id: add-search
+- inputText: lentil
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: add-starter-0
+- tapOn:
+    id: add-starter-0
+- extendedWaitUntil:
+    notVisible:
+      id: add-search
+    timeout: 10000
+
+# The List tab already has the generated list (FR-LIST-2), grouped by section.
+- tapOn:
+    id: tab-list
+- extendedWaitUntil:
+    visible:
+      id: list-section-produce
+    timeout: 15000
+# Produce, alphabetical: carrots, garlic, onion.
+- assertVisible:
+    id: list-item-produce-0
+    text: .*carrot.*
+- assertVisible:
+    id: list-item-produce-2
+    text: .*onion.*
+- scrollUntilVisible:
+    element:
+      id: list-section-pantry
+- assertVisible:
+    id: list-item-pantry-0
+    text: .*lentils.*
+# Salt is a default staple, assumed at home (FR-PAN-3).
+- assertNotVisible:
+    text: .*salt.*
+
+# Check off the carrots with one tap on the row; they move to "in the cart".
+- scrollUntilVisible:
+    element:
+      id: list-item-produce-0
+    direction: UP
+    centerElement: true
+- tapOn:
+    id: list-item-produce-0
+- assertVisible:
+    id: list-item-produce-0
+    text: .*garlic.*
+- scrollUntilVisible:
+    element:
+      id: list-cart-toggle
+    centerElement: true
+- tapOn:
+    id: list-cart-toggle
+- scrollUntilVisible:
+    element:
+      id: list-cart-item-0
+    centerElement: true
+- assertVisible:
+    id: list-cart-item-0
+    text: .*carrot.*
+
+- runFlow: subflows/sign-out.yaml
