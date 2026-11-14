@@ -82,12 +82,7 @@ export function RecipeDetail({
   const sourceUrl = recipe.sourceUrl;
 
   return (
-    <Screen
-      title={recipe.title}
-      onBack={() => router.back()}
-      hasTabBar={false}
-      testID="recipe-detail"
-    >
+    <Screen title={recipe.title} onBack={() => router.back()} testID="recipe-detail">
       <View style={{ gap: theme.space[3] }}>
         {times.length ? (
           <Text color="textSecondary" testID="recipe-detail-times">
