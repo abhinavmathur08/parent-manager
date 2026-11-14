@@ -211,27 +211,41 @@ The engine is a set of pure TypeScript functions with no side effects, unit-test
 
 Export (A-04.2) and deletion must cover every table that holds household data. Add a row here with each new table.
 
-| Table                    | Export                               | Deletion                                                                                  |
-| ------------------------ | ------------------------------------ | ----------------------------------------------------------------------------------------- |
-| `profiles`               | The user's own row                   | With the account                                                                          |
-| `households`             | The household                        | When its only member deletes their account                                                |
-| `household_members`      | All members' roles and join dates    | Cascades from the household                                                               |
-| `invitations`            | Open invitations, without token hash | Cascades from the household                                                               |
-| `invite_attempts`        | Not exported (security record)       | Cascades from the account                                                                 |
-| `household_people`       | All people, with the due month       | Cascades from the household                                                               |
-| `person_dietary`         | All diets and allergies              | Cascades from the household                                                               |
-| `household_entitlements` | Tier and status                      | Cascades from the household                                                               |
-| `ingredients`            | Rows with the household's ID only    | Household rows cascade; catalog rows are never touched                                    |
-| `ingredient_names`       | Rows with the household's ID only    | Household rows cascade; catalog rows are never touched                                    |
-| `household_ingredients`  | All rows                             | Cascades from the household                                                               |
-| `recipes`                | All rows, with lines and steps       | Cascades from the household; `created_by` and `updated_by` are set null with the account  |
-| `recipe_ingredients`     | With their recipe                    | Cascades from the household                                                               |
-| `recipe_steps`           | With their recipe                    | Cascades from the household                                                               |
-| `plan_entries`           | All rows                             | Cascades from the household                                                               |
-| `plan_entry_portions`    | With their entry                     | Cascades from the household and from the person                                           |
-| `pantry_items`           | All rows                             | Cascades from the household                                                               |
-| `ai_import_jobs`         | The user's own jobs, with drafts     | Cascades from the household; `user_id` is set null with the account; purged after 30 days |
-| `ai_usage`               | Monthly counts                       | Cascades from the household                                                               |
+**Deletion registry (A-04.3).** Deletion doesn't rely on foreign-key cascades alone. Every column that ties a row to a household or a user is registered in `private.deletion_registry`, in the migration that creates the table:
+
+```sql
+select private.register_for_deletion('public.recipes', 'household_id', 'household');
+select private.register_for_deletion('public.recipes', 'created_by', 'user', 'set_null');
+```
+
+- **Deleting a household** (`private.erase_household`) deletes every row registered against it, newest registration first, then the household. Leaving as the only member, account deletion and FR-PRIV-7 all use it.
+- **Deleting an account** (`private.erase_user`) deletes the user's own rows (`delete`), clears the user from shared rows that stay with the household (`set_null`, shown as "former member"), then deletes the auth user, which removes their sessions and identities. It fails, changing nothing, if a registered column still holds the user's ID afterwards.
+- **While erasing,** `auth.uid()` reads as null and `private.is_erasing()` is true, so triggers that stamp the current user or guard a column can't put the ID back.
+- **`supabase/tests/data_deletion.test.sql` fails** if a public table has a `household_id`, a foreign key to `auth.users` or `households`, or a uuid column named `*_by` or `*user_id` that isn't registered.
+- **Backups (FR-PRIV-4).** Deleted rows leave the live database at once. They stay in Supabase's daily backups until those expire (7 days on Pro, 14 on Team, up to 30 on Enterprise), so the promise is 30 days at most, and the plan chosen in D-1 must keep it. Point-in-time recovery, if it's turned on, must keep a window of 30 days or less. The privacy policy states this period (L-01.2).
+
+| Table                         | Export                               | Deletion                                                                      |
+| ----------------------------- | ------------------------------------ | ----------------------------------------------------------------------------- |
+| `profiles`                    | The user's own row                   | With the account; `active_household_id` is cleared with the household         |
+| `households`                  | The household                        | Last row of `erase_household`                                                 |
+| `household_members`           | All members' roles and join dates    | With the household; the user's own row with the account                       |
+| `invitations`                 | Open invitations, without token hash | With the household; `invited_by` and `accepted_by` set null with the account  |
+| `invite_attempts`             | Not exported (security record)       | With the account                                                              |
+| `household_people`            | All people, with the due month       | With the household; `linked_user_id` set null with the account                |
+| `person_dietary`              | All diets and allergies              | With the household                                                            |
+| `household_entitlements`      | Tier and status                      | With the household; `purchaser_user_id` set null with the account             |
+| `ingredients`                 | Rows with the household's ID only    | Household rows with the household; catalog rows are never touched             |
+| `ingredient_names`            | Rows with the household's ID only    | Household rows with the household; catalog rows are never touched             |
+| `household_ingredients`       | All rows                             | With the household                                                            |
+| `recipes`                     | All rows, with lines and steps       | With the household; `created_by` and `updated_by` set null with the account   |
+| `recipe_ingredients`          | With their recipe                    | With the household                                                            |
+| `recipe_steps`                | With their recipe                    | With the household                                                            |
+| `plan_entries`                | All rows                             | With the household                                                            |
+| `plan_entry_portions`         | With their entry                     | With the household; with the person when they are removed                     |
+| `pantry_items`                | All rows                             | With the household                                                            |
+| `ai_import_jobs`              | The user's own jobs, with drafts     | With the household; `user_id` set null with the account; purged after 30 days |
+| `ai_usage`                    | Monthly counts                       | With the household                                                            |
+| `household_deletion_requests` | Not exported (a pending action)      | With the household; with the account of the parent who asked                  |
 
 ## 4. Row-level security and household isolation
 
@@ -276,6 +290,8 @@ Export (A-04.2) and deletion must cover every table that holds household data. A
   - Each check column (such as `checked`) records `<column>_at` and `<column>_by`. A write based on an older `version` can't clear it.
 
   The function also revokes hard deletes, adds the pull index and publishes the table to Realtime. A feature's migration still writes the table's own RLS policies.
+
+  Erasure for a deletion (section 3.4) is the one exception: while `private.is_erasing()` is true, the update trigger lets the change through, tombstones included, and only bumps `version` and `updated_at`. A feature's own trigger that guards a column (such as keeping `created_by`) must also let erasure through.
 
 - **First load on a new device (A-01.3).** A device that has never pulled the household (no table has a `pulledAt` mark) reports `firstLoad` until its first sync finishes. A table added by an app update doesn't count. Meanwhile `FirstLoadGate` shows a loading state in place of the tabs, which then open on the Plan tab; offline it asks for a connection and offers to try again. Tables are pulled in parallel, with the local store writing one at a time, so a household with 200 recipes loads within 5 seconds on 4G (FR-AUTH-8; checked in `__tests__/sync/first-load.test.ts` with a simulated 150 ms, 5 Mbit/s link).
 - **Pending indicator.** `PendingChangesBanner`, above the tab bar, shows how many changes are waiting until they sync, and how many the server refused.
@@ -399,7 +415,8 @@ Supabase Auth, with:
 - **Sign-out (FR-AUTH-7):** `signOut()` in `src/features/auth/sign-out.ts` runs every cleanup registered with `onSignOut()`, clears all drafts, then deletes the session on the device and asks the server to revoke the refresh token, which works offline. Modules that keep data on the device register a cleanup: the sync layer for its encrypted copy of household data, and notifications for this device's push token.
 - **Biometric unlock:** `expo-local-authentication` locks the app over an existing session. It isn't a sign-in method. `BiometricLock` (`src/features/biometric`) wraps the signed-in app. The setting is per device, off by default, with a timeout of immediately, 1, 5 or 15 minutes (default 5). It's saved in the device's key-value store with the time the app last went to the background, and both are cleared at sign-out. When the lock is on, a cold start or a return after the timeout shows S-04 over the app, which hides it from screen readers too, and it also covers the app in the app switcher. The system prompt falls back to the device passcode. If the device has neither biometrics nor a passcode any more, the lock turns itself off with a notice. The switch is on the Account screen (S-31), and sign-out is there too. The Household tab (S-25) is a hub that opens members, people, settings, privacy and data (S-30) and Account.
 - **Session storage:** encrypted (F-08). `createEncryptedStorage` in `src/lib/encrypted-storage.ts` gives each storage key a random AES-256 key, stored in `expo-secure-store` and readable after first unlock, and seals the value with AES-GCM from `expo-crypto`. Only the ciphertext goes to SQLite storage (`expo-sqlite/localStorage`), which avoids SecureStore's size limits. Removing the item (sign-out) deletes both the ciphertext and the key. Data without its key, or data that fails authentication, reads as signed out and is cleared. A SecureStore error is passed on rather than treated as a sign-out.
-- **Account deletion:** in the app, which Apple requires. It removes the user, and either hands their households to a remaining parent or deletes households where they're the only member, after a confirmation.
+- **Account deletion (A-04.3, FR-PRIV-3):** in the app, which Apple requires. `delete_account()` needs a sign-in in the last 10 minutes, read from the token's `amr` sign-in times, so the app has the user sign in again (email code, Apple or Google) first and checks it's still the same account. If nobody who could keep the household would remain, the household goes too (the FR-HH-8 rule); the last parent with others is refused until they promote someone or delete the household (FR-HH-14); otherwise the household carries on without them. `account_deletion_preview()` tells the confirmation which of these applies. Store subscriptions aren't cancelled: the app links to the store.
+- **Household deletion (FR-PRIV-7):** `request_household_deletion()` deletes at once when the caller is the only parent. With two parents it records a request in `household_deletion_requests`, which every member can read, and the other parent has 7 days to `confirm_household_deletion()`; either parent can `cancel_household_deletion()`. Asking and confirming both need a recent sign-in. Push notifications for the request come with N-01.
 
 ### Notifications
 
