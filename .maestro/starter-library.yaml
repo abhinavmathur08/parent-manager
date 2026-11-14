@@ -11,6 +11,7 @@ tags:
 - scrollUntilVisible:
     element:
       id: starter-card-0
+    centerElement: true
 - tapOn:
     id: starter-card-0
 - extendedWaitUntil:
@@ -36,6 +37,7 @@ tags:
 - scrollUntilVisible:
     element:
       id: sign-out
+    centerElement: true
 - tapOn:
     id: sign-out
 - extendedWaitUntil:
