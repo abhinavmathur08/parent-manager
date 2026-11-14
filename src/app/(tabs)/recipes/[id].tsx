@@ -16,12 +16,7 @@ export default function RecipeDetailRoute() {
   if (state.status !== 'member' || loading) return null;
   if (!saved) {
     return (
-      <Screen
-        title={t('recipes.title')}
-        onBack={() => router.back()}
-        hasTabBar={false}
-        testID="recipe-missing"
-      >
+      <Screen title={t('recipes.title')} onBack={() => router.back()} testID="recipe-missing">
         <EmptyState
           icon="recipes"
           message={t('recipes.detail.missing')}
