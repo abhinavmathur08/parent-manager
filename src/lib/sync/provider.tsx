@@ -50,6 +50,7 @@ export async function resetSync(): Promise<void> {
 onSignOut(resetSync);
 
 const SyncContext = createContext<SyncEngine | null>(null);
+const SyncOpeningContext = createContext(false);
 
 /**
  * Runs the sync layer for the member's household. Cached rows are readable as soon as the
@@ -64,16 +65,22 @@ export function SyncProvider({
   children: ReactNode;
 }) {
   const [engine, setEngine] = useState<SyncEngine | null>(null);
+  // The household whose local copy finished opening, or failed to.
+  const [opened, setOpened] = useState<string | null>(null);
   const online = useOnline();
 
   useEffect(() => {
     let active = true;
     startSync(householdId).then(
       (started) => {
-        if (active) setEngine(started);
-        else started.stop();
+        if (!active) return started.stop();
+        setEngine(started);
+        setOpened(householdId);
       },
-      () => undefined, // No local copy on this build; screens read nothing and say so.
+      () => {
+        // No local copy on this build; screens read nothing and say so.
+        if (active) setOpened(householdId);
+      },
     );
     return () => {
       active = false;
@@ -97,7 +104,16 @@ export function SyncProvider({
     return () => subscription.remove();
   }, [engine, online]);
 
-  return <SyncContext.Provider value={engine}>{children}</SyncContext.Provider>;
+  return (
+    <SyncOpeningContext.Provider value={opened !== householdId}>
+      <SyncContext.Provider value={engine}>{children}</SyncContext.Provider>
+    </SyncOpeningContext.Provider>
+  );
+}
+
+/** Whether the local copy is still opening. False once it opens, or fails to. */
+export function useSyncOpening(): boolean {
+  return useContext(SyncOpeningContext);
 }
 
 /** The running engine, or null while the local copy opens. */
@@ -111,6 +127,7 @@ const STARTING: SyncStatus = {
   pending: 0,
   rejected: 0,
   realtime: 'off',
+  firstLoad: false,
 };
 
 /** What the sync layer is doing, for status UI. */
