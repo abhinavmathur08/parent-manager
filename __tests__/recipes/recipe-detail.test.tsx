@@ -1,6 +1,8 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
+import { StyleSheet } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { theme } from '@/constants/theme';
 import { RecipeDetail, type RecipeView } from '@/features/recipes/recipe-detail';
 import { clearAllergyCache } from '@/features/recipes/use-household-allergies';
 
@@ -110,5 +112,13 @@ describe('S-17 recipe detail (FR-REC-8, FR-REC-9, FR-AI-15)', () => {
       /example\.com\/pancakes/,
     );
     expect(screen.getByTestId('recipe-detail-times')).toHaveTextContent('Prep 5 min · Cook 15 min');
+  });
+
+  it('leaves room for the floating tab bar', async () => {
+    await show();
+    const content = StyleSheet.flatten(
+      screen.getByTestId('recipe-detail-scroll').props.contentContainerStyle,
+    );
+    expect(content.paddingBottom).toBeGreaterThanOrEqual(theme.layout.tabBarClearance);
   });
 });
