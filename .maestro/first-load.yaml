@@ -1,0 +1,41 @@
+# First load on a new device (A-01.3, FR-AUTH-8): a member who already has a household signs
+# in on a phone with nothing on it, sees the household download, then lands on the Plan tab.
+# Needs the local stack; see the Testing section of README.md.
+appId: ${APP_ID || 'com.myparentmanager'}
+tags:
+  - backend
+---
+- runFlow: subflows/create-household.yaml
+- runScript: scripts/wait-for-new-code.js
+# A new device: nothing on it, so the household has to come from the server.
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible:
+      id: sign-in-screen-title
+    timeout: 60000
+- tapOn:
+    id: sign-in-email
+- inputText: ${output.email}
+- hideKeyboard
+- tapOn:
+    id: sign-in-continue
+- extendedWaitUntil:
+    visible:
+      id: verify-screen-title
+    timeout: 20000
+- runScript:
+    file: scripts/read-code.js
+    env:
+      EMAIL: ${output.email}
+- tapOn:
+    id: verify-code
+- inputText: ${output.code}
+- extendedWaitUntil:
+    visible:
+      id: plan-screen-title
+    timeout: 20000
+- assertVisible:
+    id: tab-bar
+- assertNotVisible:
+    id: first-load

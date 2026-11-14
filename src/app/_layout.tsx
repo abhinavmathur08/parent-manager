@@ -4,6 +4,7 @@ import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useMemo } from 'react';
 
+import { AnalyticsIdentity } from '@/features/auth/analytics-identity';
 // Registers the Google sign-out cleanup (FR-AUTH-7).
 import '@/features/auth/google';
 import { AuthProvider, useAuth } from '@/features/auth/session';
@@ -11,7 +12,13 @@ import { BiometricLock } from '@/features/biometric/biometric-lock';
 import { AccessEnded } from '@/features/household/access-ended';
 import { HouseholdUnavailable } from '@/features/household/household-unavailable';
 import { HouseholdProvider, useHousehold } from '@/features/household/membership';
+import { ForcedUpdateGate } from '@/features/remote-config/forced-update';
+import { RemoteConfigProvider } from '@/features/remote-config/provider';
 import { useTheme } from '@/hooks/use-theme';
+import { initCrashReporting, wrapRoot } from '@/lib/crash-reporting';
+
+// F-07.1: crash reporting starts first, so launch errors are caught (no-op without a DSN).
+initCrashReporting();
 
 // S-01: the splash screen stays up until the saved session has been read.
 SplashScreen.preventAutoHideAsync().catch(() => undefined);
@@ -62,7 +69,7 @@ function RootStack() {
   );
 }
 
-export default function RootLayout() {
+function RootLayout() {
   const theme = useTheme();
   const navigationTheme = useMemo(() => {
     const base = theme.scheme === 'dark' ? DarkTheme : DefaultTheme;
@@ -81,11 +88,18 @@ export default function RootLayout() {
   }, [theme]);
   return (
     <ThemeProvider value={navigationTheme}>
-      <AuthProvider>
-        <HouseholdProvider>
-          <RootStack />
-        </HouseholdProvider>
-      </AuthProvider>
+      <RemoteConfigProvider>
+        <ForcedUpdateGate>
+          <AuthProvider>
+            <HouseholdProvider>
+              <AnalyticsIdentity />
+              <RootStack />
+            </HouseholdProvider>
+          </AuthProvider>
+        </ForcedUpdateGate>
+      </RemoteConfigProvider>
     </ThemeProvider>
   );
 }
+
+export default wrapRoot(RootLayout);
