@@ -23,6 +23,11 @@ tags:
 - tapOn:
     id: add-search
 - inputText: lentil
+# The keyboard can cover the sheet's results.
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: add-starter-0
 - tapOn:
     id: add-starter-0
 - extendedWaitUntil:
