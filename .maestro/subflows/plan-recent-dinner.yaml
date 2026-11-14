@@ -5,6 +5,7 @@ appId: ${APP_ID || 'com.myparentmanager'}
 - scrollUntilVisible:
     element:
       id: plan-add-${DAY}-dinner
+    centerElement: true
 - tapOn:
     id: plan-add-${DAY}-dinner
 - extendedWaitUntil:
