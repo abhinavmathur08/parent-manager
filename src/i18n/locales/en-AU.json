@@ -63,5 +63,8 @@
       "add": "Tap to add to this week's list",
       "addHint": "Adds {{name}} to this week's list"
     }
+  },
+  "list": {
+    "partnerActivity": "Someone else is updating the list."
   }
 }

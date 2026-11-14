@@ -790,7 +790,8 @@
       "haveDone": "{{name}} is marked as at home this week.",
       "deleted": "{{name}} deleted.",
       "undo": "Undo"
-    }
+    },
+    "partnerActivity": "Someone else is updating the list."
   },
   "plan": {
     "title": "Plan",
