@@ -19,8 +19,15 @@ tags:
     id: recipe-title
 - inputText: Weeknight flatbread
 - hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: recipe-tag-one_handed
+    centerElement: true
 - tapOn:
     id: recipe-tag-one_handed
+- assertVisible:
+    id: recipe-tag-one_handed
+    checked: true
 # Typed lines go straight in when the ingredient is known.
 - scrollUntilVisible:
     element:
