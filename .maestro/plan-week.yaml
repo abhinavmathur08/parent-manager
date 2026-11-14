@@ -26,6 +26,11 @@ tags:
 - tapOn:
     id: add-search
 - inputText: lentil
+# The keyboard can cover the sheet's results.
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: add-starter-0
 - tapOn:
     id: add-starter-0
 - extendedWaitUntil:
@@ -74,6 +79,10 @@ tags:
 - tapOn:
     id: add-search
 - inputText: Garlic bread
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: add-free-text
 - tapOn:
     id: add-free-text
 - extendedWaitUntil:
