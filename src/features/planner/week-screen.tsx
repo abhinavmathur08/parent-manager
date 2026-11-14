@@ -16,6 +16,7 @@ import { Card } from '@/components/card';
 import { Chip } from '@/components/chip';
 import { PRESSED_OPACITY } from '@/components/focus-ring';
 import { IconButton } from '@/components/icon-button';
+import { ProgressBar } from '@/components/progress-bar';
 import { Screen } from '@/components/screen';
 import { Tag } from '@/components/tag';
 import { EmptyState } from '@/components/empty-state';
@@ -43,6 +44,7 @@ import {
 import { SLOTS, type PlanEntryRow, type Slot } from './tables';
 import { usePlanPeople } from './use-plan-people';
 import { useUndoable } from './use-undoable';
+import { dinnersPlanned, useWeekPlannedEvent } from './week-planned';
 import {
   useAddEntry,
   useCopyWeek,
@@ -164,6 +166,9 @@ export function PlanWeekScreen({
     const hidden = new Set(undoable.hidden);
     return week.entries.filter((e) => !hidden.has(e.id));
   }, [week.entries, undoable.hidden]);
+  // "6 of 7 dinners planned" and the week-planned event (FR-PLAN-12).
+  const dinners = dinnersPlanned(shownEntries, start);
+  const noteChange = useWeekPlannedEvent(household.id, start, today, dinners);
   const titleOf = (entry: PlanEntryRow) =>
     (entry.recipe_id ? week.titles.get(entry.recipe_id) : undefined) ??
     entry.free_text ??
@@ -171,6 +176,7 @@ export function PlanWeekScreen({
 
   const runAction = async (task: () => Promise<unknown>) => {
     setActing(null);
+    noteChange();
     try {
       await task();
     } catch {
@@ -202,6 +208,7 @@ export function PlanWeekScreen({
   const lastWeekCount = weekEntries(week.all, addDays(start, -7)).length;
   const copyLastWeek = async (mode: 'add' | 'replace') => {
     setChoosingCopy(false);
+    noteChange();
     const kept = mode === 'add' ? shownEntries : [];
     const copies = planWeekCopy(week.all, addDays(start, -7), start, kept);
     const replaced = mode === 'replace' ? shownEntries.map((e) => e.id) : [];
@@ -226,6 +233,7 @@ export function PlanWeekScreen({
   }
   const removeEntry = (entry: PlanEntryRow) => {
     setActing(null);
+    noteChange();
     undoable.hold({
       message: t('plan.actions.removed', { title: titleOf(entry) }),
       hidden: [entry.id],
@@ -293,6 +301,18 @@ export function PlanWeekScreen({
           />
         ) : null}
 
+        {shownEntries.length > 0 ? (
+          <ProgressBar
+            variant="segmented"
+            value={dinners}
+            total={7}
+            label={t('plan.progress', {
+              planned: formatNumber(dinners, locale),
+              total: formatNumber(7, locale),
+            })}
+            testID="plan-progress"
+          />
+        ) : null}
         {canWrite && shownEntries.length > 0 && lastWeekCount > 0 && actions.onCopyLastWeek ? (
           <Button
             variant="ghost"
@@ -401,6 +421,7 @@ export function PlanWeekScreen({
           defaultServings={defaultServings(people.people) ?? DEFAULT_SERVINGS}
           onAdd={async (choice, servings, via) => {
             if (!adding) return;
+            noteChange();
             await addEntry({
               ...adding,
               position: nextPosition(week.all, adding.date, adding.slot),

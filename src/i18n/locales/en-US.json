@@ -188,7 +188,8 @@
       "add": "Add to this week",
       "replace": "Replace this week",
       "replaced": "Replaced this week with last week"
-    }
+    },
+    "progress": "{{planned}} of {{total}} dinners planned"
   },
   "placeholder": {
     "comingSoon": "This part of the app is on its way."
