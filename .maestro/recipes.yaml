@@ -1,0 +1,128 @@
+# R-02.2: a parent creates a recipe on S-18: title, a tag, typed lines with a mixed number,
+# an unknown ingredient added as a household ingredient, and a step. Ends signed out.
+# Needs the local stack; see the Testing section of README.md.
+appId: ${APP_ID || 'com.myparentmanager'}
+tags:
+  - backend
+---
+- runFlow: subflows/create-household.yaml
+- tapOn:
+    id: tab-recipes
+- tapOn:
+    id: recipes-empty-action
+- extendedWaitUntil:
+    visible:
+      id: recipe-title
+    timeout: 10000
+- tapOn:
+    id: recipe-title
+- inputText: Weeknight flatbread
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: recipe-tag-one_handed
+    centerElement: true
+- tapOn:
+    id: recipe-tag-one_handed
+- assertVisible:
+    id: recipe-tag-one_handed
+    checked: true
+# Typed lines go straight in when the ingredient is known.
+- scrollUntilVisible:
+    element:
+      id: recipe-quick-add
+    centerElement: true
+- tapOn:
+    id: recipe-quick-add
+- inputText: 1 1/2 cups milk
+- tapOn:
+    id: recipe-quick-add-submit
+- scrollUntilVisible:
+    element:
+      id: recipe-line-0
+    centerElement: true
+    direction: UP
+- scrollUntilVisible:
+    element:
+      id: recipe-quick-add
+    centerElement: true
+- tapOn:
+    id: recipe-quick-add
+- inputText: 2 onions
+- tapOn:
+    id: recipe-quick-add-submit
+- scrollUntilVisible:
+    element:
+      id: recipe-line-1
+    centerElement: true
+    direction: UP
+# An unknown ingredient opens the line sheet, prefilled, to add it as new.
+- scrollUntilVisible:
+    element:
+      id: recipe-quick-add
+    centerElement: true
+- tapOn:
+    id: recipe-quick-add
+- inputText: 2 tbsp grandmas chutney
+- tapOn:
+    id: recipe-quick-add-submit
+- extendedWaitUntil:
+    visible:
+      id: line-sheet
+    timeout: 5000
+- scrollUntilVisible:
+    element:
+      id: line-add-new
+    centerElement: true
+- tapOn:
+    id: line-add-new
+- scrollUntilVisible:
+    element:
+      id: line-section-condiments
+    centerElement: true
+- tapOn:
+    id: line-section-condiments
+- tapOn:
+    id: line-done
+- scrollUntilVisible:
+    element:
+      id: recipe-line-2
+    centerElement: true
+- scrollUntilVisible:
+    element:
+      id: recipe-add-step
+    centerElement: true
+- tapOn:
+    id: recipe-add-step
+- scrollUntilVisible:
+    element:
+      id: recipe-step-0
+    centerElement: true
+- tapOn:
+    id: recipe-step-0
+- inputText: Mix everything and cook in a hot pan.
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: recipe-save
+    centerElement: true
+- tapOn:
+    id: recipe-save
+- extendedWaitUntil:
+    visible:
+      text: Weeknight flatbread
+    timeout: 10000
+- assertVisible:
+    id: recipes-row-0
+- tapOn:
+    id: tab-household
+- scrollUntilVisible:
+    element:
+      id: sign-out
+    centerElement: true
+- tapOn:
+    id: sign-out
+- extendedWaitUntil:
+    visible:
+      id: sign-in-screen-title
+    timeout: 10000
