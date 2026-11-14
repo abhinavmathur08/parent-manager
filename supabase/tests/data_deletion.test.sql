@@ -3,7 +3,7 @@
 begin;
 create extension if not exists pgtap with schema extensions;
 
-select plan(59);
+select plan(66);
 
 create schema tests;
 grant usage on schema tests to anon, authenticated;
@@ -37,6 +37,16 @@ begin
   end loop;
   return total + (select count(*) from public.households where id = hid);
 end;
+$$;
+
+-- Rows of a household in the recipe and planner tables (R-02, P-01).
+create function tests.recipe_and_plan_rows(hid uuid) returns bigint language sql as $$
+  select (select count(*) from public.household_ingredients where household_id = hid)
+       + (select count(*) from public.recipes where household_id = hid)
+       + (select count(*) from public.recipe_ingredients where household_id = hid)
+       + (select count(*) from public.recipe_steps where household_id = hid)
+       + (select count(*) from public.plan_entries where household_id = hid)
+       + (select count(*) from public.plan_entry_portions where household_id = hid);
 $$;
 
 -- ---------------------------------------------------------------------------
@@ -186,6 +196,57 @@ update public.household_entitlements set purchaser_user_id = 'aaaaaaaa-0000-0000
 where household_id = '00000000-0000-0000-0000-00000000000a';
 insert into public.invite_attempts (user_id) values ('bbbbbbbb-0000-0000-0000-000000000001');
 
+-- Recipes and plans in A, B and D, each written by a parent: a household ingredient, a recipe
+-- that uses it with one step, a dinner of that recipe, its leftovers, and a child's portion.
+insert into public.household_people (id, household_id, display_name, kind, age_band) values
+  ('10000000-0000-0000-0000-00000000000d', '00000000-0000-0000-0000-00000000000d', 'Child', 'child', 'toddler');
+create function tests.add_recipe_and_plan(h text, author uuid, locale text) returns void
+language plpgsql as $$
+declare
+  hid constant uuid := ('00000000-0000-0000-0000-0000000000' || h)::uuid;
+  ingredient_row constant uuid := ('30000000-0000-0000-0000-0000000000' || h)::uuid;
+  recipe constant uuid := ('40000000-0000-0000-0000-0000000000' || h)::uuid;
+  dinner constant uuid := ('70000000-0000-0000-0000-0000000000' || h)::uuid;
+begin
+  perform set_config('request.jwt.claims',
+    json_build_object('sub', author, 'role', 'authenticated')::text, true);
+  insert into public.household_ingredients (id, household_id, name, locale)
+  values (ingredient_row, hid, 'Grandma''s rub', locale);
+  insert into public.recipes (id, household_id, title, content_locale)
+  values (recipe, hid, 'Weeknight flatbread', locale);
+  insert into public.recipe_ingredients (id, household_id, recipe_id, position, ingredient_id, quantity)
+  values (('50000000-0000-0000-0000-0000000000' || h)::uuid, hid, recipe, 0,
+          'ingredient.h.' || replace(ingredient_row::text, '-', ''), 2);
+  insert into public.recipe_steps (id, household_id, recipe_id, position, text)
+  values (('60000000-0000-0000-0000-0000000000' || h)::uuid, hid, recipe, 0, 'Bake.');
+  insert into public.plan_entries (id, household_id, date, slot, recipe_id, servings)
+  values (dinner, hid, '2026-11-16', 'dinner', recipe, 4);
+  insert into public.plan_entries (id, household_id, date, slot, free_text, servings, leftover_of_entry_id)
+  values (('71000000-0000-0000-0000-0000000000' || h)::uuid, hid, '2026-11-17', 'lunch', 'Leftovers', 2, dinner);
+  insert into public.plan_entry_portions (id, household_id, entry_id, person_id, portions)
+  values (('80000000-0000-0000-0000-0000000000' || h)::uuid, hid, dinner,
+          ('10000000-0000-0000-0000-0000000000' || h)::uuid, 0.5);
+end;
+$$;
+select tests.add_recipe_and_plan('0a', 'aaaaaaaa-0000-0000-0000-000000000001', 'en-US');
+select tests.add_recipe_and_plan('0b', 'bbbbbbbb-0000-0000-0000-000000000001', 'en-GB');
+select tests.add_recipe_and_plan('0d', 'dddddddd-0000-0000-0000-000000000001', 'en-US');
+select is(
+  tests.recipe_and_plan_rows('00000000-0000-0000-0000-00000000000a')
+    + tests.recipe_and_plan_rows('00000000-0000-0000-0000-00000000000b')
+    + tests.recipe_and_plan_rows('00000000-0000-0000-0000-00000000000d'),
+  21::bigint, 'households A, B and D each have recipe and plan rows in all six tables');
+
+-- A2 edits A1's recipe: outside erasure the server still keeps the creator.
+select tests.as_user('aaaaaaaa-0000-0000-0000-000000000002');
+reset role;
+update public.recipes set title = 'Friday flatbread', version = 1
+where id = '40000000-0000-0000-0000-00000000000a';
+select is(
+  (select array[created_by, updated_by] from public.recipes where id = '40000000-0000-0000-0000-00000000000a'),
+  array['aaaaaaaa-0000-0000-0000-000000000001', 'aaaaaaaa-0000-0000-0000-000000000002']::uuid[],
+  'editing a recipe keeps its creator and records the editor');
+
 -- A synced table with a check column and a creator, like recipes and list items: the sync
 -- rules freeze tombstones and keep who checked a row, and erasure must get past both.
 create table public.erasure_probe (
@@ -270,6 +331,11 @@ select is(public.delete_account(), '{"household_deleted": true}'::jsonb,
 reset role;
 select is(tests.household_rows('00000000-0000-0000-0000-00000000000b'), 0::bigint,
   'no row of household B remains in any registered table');
+select is(tests.recipe_and_plan_rows('00000000-0000-0000-0000-00000000000b'), 0::bigint,
+  'household B''s recipes, lines, steps, ingredients, plan entries and portions are gone');
+select is((select count(*)::int from public.ingredients
+           where id = 'ingredient.h.' || replace('30000000-0000-0000-0000-00000000000b', '-', '')), 0,
+  'and so is the catalog row its household ingredient made');
 select is((select count(*)::int from auth.users where id = 'bbbbbbbb-0000-0000-0000-000000000001'), 0,
   'the auth user is gone, so they cannot sign in to it again');
 select is((select count(*)::int from auth.identities where user_id = 'bbbbbbbb-0000-0000-0000-000000000001'), 0,
@@ -315,6 +381,12 @@ select is((select count(*)::int from public.erasure_probe
 select is((select count(*)::int from public.erasure_probe
            where id = '20000000-0000-0000-0000-000000000002' and created_by is null and deleted_at is not null), 1,
   'a tombstone they created no longer names them');
+select is(
+  (select array[created_by, updated_by] from public.recipes where id = '40000000-0000-0000-0000-00000000000a'),
+  array[null, 'aaaaaaaa-0000-0000-0000-000000000002']::uuid[],
+  'their recipe stays with the household, no longer naming them as its creator');
+select is(tests.recipe_and_plan_rows('00000000-0000-0000-0000-00000000000a'), 7::bigint,
+  'the household keeps its recipes and plan');
 select is(private.erasure_leftovers('aaaaaaaa-0000-0000-0000-000000000001'), array[]::text[],
   'no registered column names A1');
 
@@ -404,6 +476,8 @@ select lives_ok($$select public.confirm_household_deletion('00000000-0000-0000-0
 reset role;
 select is(tests.household_rows('00000000-0000-0000-0000-00000000000d'), 0::bigint,
   'no row of household D remains, the request included');
+select is(tests.recipe_and_plan_rows('00000000-0000-0000-0000-00000000000d'), 0::bigint,
+  'its recipes and plan are gone too');
 select is((select count(*)::int from auth.users where id in
   ('dddddddd-0000-0000-0000-000000000001', 'dddddddd-0000-0000-0000-000000000002')), 2,
   'both parents keep their accounts, ready to create or join another household');
