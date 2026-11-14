@@ -121,11 +121,19 @@ How the catalog is built (R-01.1):
 
 #### Recipes
 
-| Table                | Key columns                                                                                                                                                                                                                                            | Notes                                                                                                 |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------- |
-| `recipes`            | `id`, `household_id` (null for the starter library), `title`, `servings`, `prep_minutes`, `cook_minutes`, `tags[]`, `source_type` (`manual`, `url`, `photo`, `screenshot`, `text`, `voice` or `library`), `source_url`, `content_locale`, `created_by` | Titles and steps are user content and are never translated. Tags are fixed IDs such as `tag.no_cook`. |
-| `recipe_ingredients` | `id`, `recipe_id`, `position`, `ingredient_id`, `quantity`, `unit_id`, `quantity_base`, `raw_text`, `note`, `optional`                                                                                                                                 | `raw_text` keeps the original line ("2 cups whole milk, warm") for review and future re-parsing.      |
-| `recipe_steps`       | `recipe_id`, `position`, `text`                                                                                                                                                                                                                        |                                                                                                       |
+| Table                | Key columns                                                                                                                                                                                                                                                         | Notes                                                                                                 |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `recipes`            | `id`, `household_id`, `title`, `servings`, `prep_minutes`, `cook_minutes`, `tags[]`, `notes`, `source_type` (`manual`, `url`, `photo`, `screenshot`, `text`, `voice` or `library`), `source_url`, `library_recipe_id`, `content_locale`, `created_by`, `updated_by` | Titles and steps are user content and are never translated. Tags are fixed IDs such as `tag.no_cook`. |
+| `recipe_ingredients` | `id`, `household_id`, `recipe_id`, `position`, `ingredient_id`, `quantity`, `unit_id`, `quantity_base`, `raw_text`, `note`, `optional`                                                                                                                              | `raw_text` keeps the original line ("2 cups whole milk, warm") for review and future re-parsing.      |
+| `recipe_steps`       | `id`, `household_id`, `recipe_id`, `position`, `text`                                                                                                                                                                                                               |                                                                                                       |
+
+How recipes are stored (R-02.1):
+
+- **Synced.** All three tables use `private.enable_sync()` (section 5), and the app registers them in `src/features/recipes/tables.ts`. Each line and step is its own row. Deleting a recipe tombstones its lines and steps on the server, so they sync too.
+- **Server-set values.** The server records `created_by` and `updated_by`, and works out `quantity_base` (R-ING-3): quantity times the unit's `to_base`; a count ingredient with no unit counts each; anything else (no quantity, "a pinch", "salt to taste") is null. `src/features/recipes/quantity.ts` does the same on the device, so offline lines show the same.
+- **Checks.** Lines and steps must belong to a recipe of their own household, and a line's ingredient must be the catalog's or the household's own. A line or step added offline to a recipe deleted meanwhile arrives deleted. A recipe has at most 100 lines and 50 steps (FR-REC-4).
+- **Writes.** Parents and family members write recipes; caregivers read them.
+- **The starter library isn't in these tables.** It ships with the app as versioned seed data per locale (R-04.1), so it works offline and is read-only by construction. "Save a copy" writes an ordinary household recipe with `source_type` `library` and the starter's ID in `library_recipe_id` (FR-REC-3).
 
 #### Planner
 
@@ -198,6 +206,9 @@ Export (A-04.2) and deletion must cover every table that holds household data. A
 | `household_entitlements` | Tier and status                      | Cascades from the household                                                               |
 | `ingredients`            | Rows with the household's ID only    | Household rows cascade; catalog rows are never touched                                    |
 | `ingredient_names`       | Rows with the household's ID only    | Household rows cascade; catalog rows are never touched                                    |
+| `recipes`                | All rows, with lines and steps       | Cascades from the household; `created_by` and `updated_by` are set null with the account  |
+| `recipe_ingredients`     | With their recipe                    | Cascades from the household                                                               |
+| `recipe_steps`           | With their recipe                    | Cascades from the household                                                               |
 | `pantry_items`           | All rows                             | Cascades from the household                                                               |
 | `ai_import_jobs`         | The user's own jobs, with drafts     | Cascades from the household; `user_id` is set null with the account; purged after 30 days |
 | `ai_usage`               | Monthly counts                       | Cascades from the household                                                               |
