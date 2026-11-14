@@ -1,0 +1,70 @@
+# G-02.2 (FR-LIST-2, FR-LIST-6, R-LIST-6): opening the List tab creates the week's list; a
+# member types "diap", picks the diapers suggestion and finds it under its store section, then
+# adds free text as typed. Ends signed out. Needs the local stack; see README.md.
+appId: ${APP_ID || 'com.myparentmanager'}
+tags:
+  - backend
+---
+- runFlow: subflows/create-household.yaml
+
+# Nothing planned yet: the empty list offers "add an item" once the week's list exists.
+- tapOn:
+    id: tab-list
+- extendedWaitUntil:
+    visible:
+      id: list-empty-add
+    timeout: 15000
+- tapOn:
+    id: list-empty-add
+- extendedWaitUntil:
+    visible:
+      id: add-item-search
+    timeout: 10000
+- tapOn:
+    id: add-item-search
+- inputText: diap
+- hideKeyboard
+- tapOn:
+    id: add-item-suggestion-0
+- assertVisible:
+    id: add-item-chosen
+    text: .*diaper.*
+- tapOn:
+    id: add-item-done
+- extendedWaitUntil:
+    visible:
+      id: list-section-baby
+    timeout: 10000
+- assertVisible:
+    id: list-item-baby-0
+    text: .*diaper.*
+
+# Free text stays its own row, in the section the member picks.
+- tapOn:
+    id: list-add
+- extendedWaitUntil:
+    visible:
+      id: add-item-search
+    timeout: 10000
+- tapOn:
+    id: add-item-search
+- inputText: Birthday card
+- hideKeyboard
+- tapOn:
+    id: add-item-as-typed
+- scrollUntilVisible:
+    element:
+      id: add-item-section-household
+    centerElement: true
+- tapOn:
+    id: add-item-section-household
+- tapOn:
+    id: add-item-done
+- scrollUntilVisible:
+    element:
+      id: list-section-household
+- assertVisible:
+    id: list-item-household-0
+    text: .*Birthday card.*
+
+- runFlow: subflows/sign-out.yaml

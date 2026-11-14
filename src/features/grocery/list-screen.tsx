@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 
 import { AllergenNotice } from '@/components/allergen-notice';
+import { Button } from '@/components/button';
 import { Banner } from '@/components/banner';
 import { CheckboxRow } from '@/components/checkbox-row';
 import { EmptyState } from '@/components/empty-state';
@@ -12,23 +13,27 @@ import { Screen } from '@/components/screen';
 import { SectionHeader } from '@/components/section-header';
 import { Text } from '@/components/text';
 import { Toast } from '@/components/toast';
+import type { TopBarAction } from '@/components/top-bar';
 import { nameKey } from '@/features/ingredients/catalog-ids';
 import { useIngredients } from '@/features/ingredients/use-ingredients';
 import { startOfWeek, todayIn, type WeekStart } from '@/features/planner/week';
 import { useHouseholdAllergies } from '@/features/recipes/use-household-allergies';
 import { useOnline } from '@/hooks/use-online';
 import { useTheme } from '@/hooks/use-theme';
-import { formatList, formatQuantity, type AppLocale, type UnitSystem } from '@/i18n';
+import { formatList, formatQuantity, type AppLocale, type Region, type UnitSystem } from '@/i18n';
 
-import { useGroceryRows } from './data';
+import type { AddAmount, AddChoice } from './add-item';
+import { AddItemSheet } from './add-item-sheet';
+import { useGroceryRows, useListIngredientFacts } from './data';
 import { onListUpdated, requestRegenerate, useOpenListWeek, type ListUpdated } from './list-events';
 import type { GroceryItemRow } from './tables';
 import { buildListView, type ListRowView } from './view';
-import { useToggleItem } from './writes';
+import { useAddItem, useToggleItem } from './writes';
 
 export type ListHousehold = {
   id: string;
   locale: AppLocale;
+  region: Region;
   unitSystem: UnitSystem;
   weekStart: WeekStart;
   timezone: string | null;
@@ -57,6 +62,9 @@ export function ListScreen({ household }: { household: ListHousehold }) {
   const ingredients = useIngredients(locale);
   const { people } = useHouseholdAllergies(household.id);
   const toggleItem = useToggleItem();
+  const addItem = useAddItem();
+  const { facts } = useListIngredientFacts();
+  const [adding, setAdding] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
@@ -113,6 +121,27 @@ export function ListScreen({ household }: { household: ListHousehold }) {
       .filter((p): p is string => p !== null)
       .join(t('list.detailSeparator'));
 
+  const add = async (
+    choice: AddChoice,
+    amount: AddAmount | null,
+    source: 'typed' | 'suggestion_catalog',
+  ) => {
+    if (!listId) return;
+    setAdding(false);
+    const result = await addItem({ listId, items, choice, amount, source });
+    const name =
+      choice.kind === 'text'
+        ? choice.name.trim()
+        : (ingredients.name(choice.ingredientId) ?? t('list.unknownItem'));
+    setMessage(
+      result.kind === 'insert'
+        ? t('list.add.added', { name })
+        : result.kind === 'merge'
+          ? t('list.add.merged', { name })
+          : t('list.add.exists', { name }),
+    );
+  };
+
   const renderRow = (row: ListRowView, testID: string) => {
     const item = byId.get(row.id);
     return (
@@ -141,23 +170,30 @@ export function ListScreen({ household }: { household: ListHousehold }) {
   };
 
   const empty = !loading && view.total === 0;
+  const actions: TopBarAction[] = [];
+  if (household.canRegenerate && view.total > 0) {
+    actions.push({
+      label: t('list.regenerate'),
+      onPress: requestRegenerate,
+      testID: 'list-regenerate',
+    });
+  }
+  if (listId) {
+    actions.push({ label: t('list.addShort'), onPress: () => setAdding(true), testID: 'list-add' });
+  }
+  const topActions =
+    actions.length === 2
+      ? ([actions[0], actions[1]] as const)
+      : actions.length === 1
+        ? ([actions[0]] as const)
+        : undefined;
   const allDone = !loading && view.total > 0 && view.sections.length === 0;
 
   return (
     <View style={styles.fill}>
       <Screen
         title={t('list.title')}
-        actions={
-          household.canRegenerate && view.total > 0
-            ? [
-                {
-                  label: t('list.regenerate'),
-                  onPress: requestRegenerate,
-                  testID: 'list-regenerate',
-                },
-              ]
-            : undefined
-        }
+        actions={topActions}
         banner={
           online ? null : (
             <Banner variant="offline" message={t('list.offline')} testID="list-offline" />
@@ -172,6 +208,15 @@ export function ListScreen({ household }: { household: ListHousehold }) {
             actionLabel={t('list.planMeals')}
             onAction={() => router.navigate('/plan')}
             testID="list-empty"
+          />
+        ) : null}
+        {empty && listId ? (
+          <Button
+            variant="secondary"
+            icon="add"
+            label={t('list.addItem')}
+            onPress={() => setAdding(true)}
+            testID="list-empty-add"
           />
         ) : null}
         {allDone ? (
@@ -223,6 +268,16 @@ export function ListScreen({ household }: { household: ListHousehold }) {
             ) : null}
           </View>
         ) : null}
+        <AddItemSheet
+          visible={adding}
+          ingredients={ingredients}
+          sectionOf={(id) => facts.section(id)}
+          locale={locale}
+          region={household.region}
+          unitSystem={unitSystem}
+          onAdd={(choice, amount, source) => void add(choice, amount, source)}
+          onClose={() => setAdding(false)}
+        />
       </Screen>
       <Toast
         visible={message !== null}

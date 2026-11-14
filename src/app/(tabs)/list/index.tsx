@@ -10,6 +10,7 @@ export default function ListRoute() {
       household={{
         id: membership.householdId,
         locale: membership.locale,
+        region: membership.region,
         unitSystem: membership.unitSystem,
         weekStart: membership.weekStart === 1 ? 1 : 7,
         timezone: membership.timezone ?? null,
