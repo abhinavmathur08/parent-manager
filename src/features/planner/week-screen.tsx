@@ -27,6 +27,7 @@ import { formatDate, formatList, formatNumber, type AppLocale } from '@/i18n';
 
 import { usePlanWeek } from './data';
 import { AddSheet, type AddTarget } from './add-sheet';
+import { CopyWeekSheet } from './copy-week-sheet';
 import { EntryActionsSheet, type EntryTarget } from './entry-actions-sheet';
 import { EntrySheet, type EntryChange } from './entry-sheet';
 import {
@@ -34,6 +35,7 @@ import {
   entryAllergens,
   hasBabyPlate,
   nextPosition,
+  planWeekCopy,
   portionsFor,
   slotEntries,
   weekEntries,
@@ -41,7 +43,13 @@ import {
 import { SLOTS, type PlanEntryRow, type Slot } from './tables';
 import { usePlanPeople } from './use-plan-people';
 import { useUndoable } from './use-undoable';
-import { useAddEntry, useEntryActions, useSetPortions, useSetServings } from './writes';
+import {
+  useAddEntry,
+  useCopyWeek,
+  useEntryActions,
+  useSetPortions,
+  useSetServings,
+} from './writes';
 import {
   addDays,
   startOfWeek,
@@ -137,6 +145,8 @@ export function PlanWeekScreen({
   const [adding, setAdding] = useState<AddTarget | null>(null);
   const [acting, setActing] = useState<PlanEntryRow | null>(null);
   const [opened, setOpened] = useState<PlanEntryRow | null>(null);
+  const [choosingCopy, setChoosingCopy] = useState(false);
+  const copyWeek = useCopyWeek();
   const setPortions = useSetPortions();
   const setServings = useSetServings();
   const entryActions = useEntryActions();
@@ -146,6 +156,7 @@ export function PlanWeekScreen({
     onAdd: canWrite ? (date, slot) => setAdding({ date, slot }) : undefined,
     onOpenEntry: setOpened,
     onEntryActions: canWrite ? setActing : undefined,
+    onCopyLastWeek: canWrite ? () => startCopy() : undefined,
     ...overrides,
   };
   // Entries waiting on an undo bar are hidden until it goes (FR-PLAN-7).
@@ -188,6 +199,31 @@ export function PlanWeekScreen({
         : setServings(entry, change.servings),
     );
   };
+  const lastWeekCount = weekEntries(week.all, addDays(start, -7)).length;
+  const copyLastWeek = async (mode: 'add' | 'replace') => {
+    setChoosingCopy(false);
+    const kept = mode === 'add' ? shownEntries : [];
+    const copies = planWeekCopy(week.all, addDays(start, -7), start, kept);
+    const replaced = mode === 'replace' ? shownEntries.map((e) => e.id) : [];
+    try {
+      const ids = await copyWeek(copies, week.portions, mode);
+      if (mode === 'replace') {
+        // This week's old entries go when the undo bar does; undo removes the copies.
+        undoable.hold({
+          message: t('plan.copy.replaced'),
+          hidden: replaced,
+          commit: () => entryActions.remove(replaced, { track: false }),
+          undo: () => entryActions.remove(ids, { track: false }),
+        });
+      }
+    } catch {
+      failed();
+    }
+  };
+  function startCopy() {
+    if (shownEntries.length === 0) void copyLastWeek('add');
+    else setChoosingCopy(true);
+  }
   const removeEntry = (entry: PlanEntryRow) => {
     setActing(null);
     undoable.hold({
@@ -203,11 +239,6 @@ export function PlanWeekScreen({
   );
   const swipe = useWeekSwipe(
     useCallback((direction: -1 | 1) => goTo(addDays(start, direction * 7)), [goTo, start]),
-  );
-
-  const lastWeekHasEntries = useMemo(
-    () => weekEntries(week.all, addDays(start, -7)).length > 0,
-    [week.all, start],
   );
 
   // Today is scrolled into view (FR-PLAN-1).
@@ -262,6 +293,14 @@ export function PlanWeekScreen({
           />
         ) : null}
 
+        {canWrite && shownEntries.length > 0 && lastWeekCount > 0 && actions.onCopyLastWeek ? (
+          <Button
+            variant="ghost"
+            label={t('plan.copyLastWeek')}
+            onPress={() => actions.onCopyLastWeek?.(start)}
+            testID="plan-copy-last-week"
+          />
+        ) : null}
         {!week.loading && shownEntries.length === 0 ? (
           <Card testID="plan-empty">
             <EmptyState
@@ -271,7 +310,7 @@ export function PlanWeekScreen({
               onAction={() => actions.onAdd?.(firstAddDate, 'dinner')}
               testID="plan-empty-state"
             />
-            {canWrite && lastWeekHasEntries && actions.onCopyLastWeek ? (
+            {canWrite && lastWeekCount > 0 && actions.onCopyLastWeek ? (
               <Button
                 variant="secondary"
                 label={t('plan.copyLastWeek')}
@@ -383,6 +422,12 @@ export function PlanWeekScreen({
           canWrite={canWrite}
           onSave={saveEntry}
           onClose={() => setOpened(null)}
+        />
+        <CopyWeekSheet
+          visible={choosingCopy}
+          count={lastWeekCount}
+          onChoose={(mode) => void copyLastWeek(mode)}
+          onClose={() => setChoosingCopy(false)}
         />
         <EntryActionsSheet
           entry={acting}

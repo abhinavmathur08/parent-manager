@@ -401,3 +401,63 @@ describe('S-12 portions and baby plates (FR-PLAN-5, FR-PLAN-6)', () => {
     expect(updatesTo('plan_entries')).toEqual([['plan_entries', ENTRY, { servings: 2 }]]);
   });
 });
+
+describe('copy last week (FR-PLAN-9)', () => {
+  const lastWeek = [
+    entry('a', '2026-11-09', 'dinner', { free_text: 'Chili' }),
+    entry('b', '2026-11-14', 'lunch', { free_text: 'Soup' }),
+  ];
+
+  it('copies into an empty week at once, on the same weekdays and slots', async () => {
+    mockRows = { plan_entries: lastWeek };
+    await show();
+    await fireEvent.press(screen.getByTestId('plan-copy-last-week'));
+    expect(insertsInto('plan_entries').map(([, , v]) => [v.date, v.slot, v.free_text])).toEqual([
+      ['2026-11-16', 'dinner', 'Chili'],
+      ['2026-11-21', 'lunch', 'Soup'],
+    ]);
+    expect(screen.queryByTestId('copy-week-sheet-title')).toBeNull();
+  });
+
+  it('asks add or replace when this week has entries, and adds alongside', async () => {
+    mockRows = {
+      plan_entries: [...lastWeek, entry('mine', '2026-11-16', 'dinner', { free_text: 'Pizza' })],
+    };
+    await show();
+    await fireEvent.press(screen.getByTestId('plan-copy-last-week'));
+    await fireEvent.press(screen.getByTestId('copy-week-add'));
+    expect(insertsInto('plan_entries')[0][2]).toMatchObject({ date: '2026-11-16', position: 1 });
+    expect(screen.getByTestId('plan-entry-mine')).toBeOnTheScreen();
+  });
+
+  it('replaces this week, with undo that removes the copies instead', async () => {
+    mockRows = {
+      plan_entries: [...lastWeek, entry('mine', '2026-11-16', 'dinner', { free_text: 'Pizza' })],
+    };
+    await show();
+    await fireEvent.press(screen.getByTestId('plan-copy-last-week'));
+    await fireEvent.press(screen.getByTestId('copy-week-replace'));
+    expect(insertsInto('plan_entries')).toHaveLength(2);
+    expect(screen.queryByTestId('plan-entry-mine')).toBeNull();
+    await fireEvent.press(screen.getByTestId('plan-undo-action'));
+    await act(async () => {
+      jest.advanceTimersByTime(6000);
+    });
+    const copies = insertsInto('plan_entries').map(([, id]) => id);
+    expect(mockRemove.mock.calls).toEqual(copies.map((id) => ['plan_entries', id]));
+    expect(screen.getByTestId('plan-entry-mine')).toBeOnTheScreen();
+  });
+
+  it('removes the replaced entries once the undo bar goes', async () => {
+    mockRows = {
+      plan_entries: [...lastWeek, entry('mine', '2026-11-16', 'dinner', { free_text: 'Pizza' })],
+    };
+    await show();
+    await fireEvent.press(screen.getByTestId('plan-copy-last-week'));
+    await fireEvent.press(screen.getByTestId('copy-week-replace'));
+    await act(async () => {
+      jest.advanceTimersByTime(5000);
+    });
+    expect(mockRemove.mock.calls).toEqual([['plan_entries', 'mine']]);
+  });
+});

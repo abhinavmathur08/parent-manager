@@ -18,6 +18,7 @@ import {
   type PlanEntryRow,
   type Slot,
 } from './tables';
+import type { WeekCopy } from './plan';
 import type { PlanDate } from './week';
 
 /** What goes into a slot (FR-PLAN-3). */
@@ -148,10 +149,10 @@ export function useEntryActions() {
       target: { date: PlanDate; slot: Slot; position: number },
     ) => copyEntry(writer, entry, portions, target),
     /** Removes entries for good. The server tombstones their portions. */
-    remove: async (ids: readonly string[]) => {
+    remove: async (ids: readonly string[], options: { track?: boolean } = {}) => {
       for (const id of ids) {
         await writer.remove(PLAN_ENTRIES.name, id);
-        track('plan_entry_removed');
+        if (options.track !== false) track('plan_entry_removed');
       }
     },
     writer,
@@ -210,6 +211,35 @@ export function useSetServings() {
   return useCallback(
     (entry: PlanEntryRow, servings: number) =>
       writer.update(PLAN_ENTRIES.name, entry.id, { servings }),
+    [writer],
+  );
+}
+
+/**
+ * Writes a week copy (FR-PLAN-9) and returns the new entry IDs. Copies are written in date
+ * order, so a leftover link can point at a copy made just before it.
+ */
+export function useCopyWeek() {
+  const writer = useSyncWriter();
+  return useCallback(
+    async (
+      copies: readonly WeekCopy[],
+      portions: readonly PlanEntryPortionRow[],
+      mode: 'add' | 'replace',
+    ): Promise<string[]> => {
+      const ids = new Map<string, string>();
+      for (const copy of copies) {
+        const id = await copyEntry(writer, copy.source, portions, {
+          date: copy.date,
+          slot: copy.slot,
+          position: copy.position,
+          leftoverOf: copy.leftoverOfSource ? (ids.get(copy.leftoverOfSource) ?? null) : null,
+        });
+        ids.set(copy.source.id, id);
+      }
+      track('week_copied', { entries_count: copies.length, mode });
+      return [...ids.values()];
+    },
     [writer],
   );
 }

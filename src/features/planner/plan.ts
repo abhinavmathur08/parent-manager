@@ -10,7 +10,7 @@ import {
   type PortionVariant,
   type Slot,
 } from './tables';
-import { inWeek, type PlanDate } from './week';
+import { addDays, daysBetween, inWeek, type PlanDate } from './week';
 
 /** What the planner needs to know about someone the household feeds. */
 export type PlanPerson = {
@@ -188,4 +188,48 @@ export function entryLineQuantities(
       ingredientId: l.ingredient_id,
       quantityBase: l.quantity_base === null ? null : l.quantity_base * factor,
     }));
+}
+
+/** One entry to create when copying a week. */
+export type WeekCopy = {
+  source: PlanEntryRow;
+  date: PlanDate;
+  slot: Slot;
+  position: number;
+  /** The source entry this copy is leftovers of, when that entry is copied too. */
+  leftoverOfSource: string | null;
+};
+
+/**
+ * "Copy last week" (FR-PLAN-9): every live entry of the week starting on `sourceStart`, on
+ * the same weekday and slot of the week starting on `targetStart`. Dates move by whole days,
+ * so month ends and clock changes don't matter. Copies go after whatever stays in each slot
+ * (`existing`). A leftover link survives when its entry is copied too; a link to an entry
+ * outside the source week is dropped.
+ */
+export function planWeekCopy(
+  rows: readonly PlanEntryRow[],
+  sourceStart: PlanDate,
+  targetStart: PlanDate,
+  existing: readonly PlanEntryRow[],
+): WeekCopy[] {
+  const source = weekEntries(rows, sourceStart);
+  const copied = new Set(source.map((e) => e.id));
+  const shift = daysBetween(sourceStart, targetStart);
+  const taken = [...existing];
+  return source.map((entry) => {
+    const date = addDays(entry.date, shift);
+    const position = nextPosition(taken, date, entry.slot);
+    taken.push({ ...entry, id: `copy:${entry.id}`, date, position, deleted_at: null });
+    return {
+      source: entry,
+      date,
+      slot: entry.slot,
+      position,
+      leftoverOfSource:
+        entry.leftover_of_entry_id && copied.has(entry.leftover_of_entry_id)
+          ? entry.leftover_of_entry_id
+          : null,
+    };
+  });
 }

@@ -180,6 +180,14 @@
       "peopleUnavailable": "Portions need one online load of your household's people.",
       "nobodyEats": "At least one person needs a portion.",
       "save": "Save"
+    },
+    "copy": {
+      "title": "Copy last week",
+      "message_one": "Last week has {{count}} meal. This week already has some.",
+      "message_other": "Last week has {{count}} meals. This week already has some.",
+      "add": "Add to this week",
+      "replace": "Replace this week",
+      "replaced": "Replaced this week with last week"
     }
   },
   "placeholder": {

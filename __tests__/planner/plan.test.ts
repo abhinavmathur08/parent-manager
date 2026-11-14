@@ -8,6 +8,7 @@ import {
   servingsFromPortions,
   defaultServings,
   nextPosition,
+  planWeekCopy,
   recentRecipeIds,
   entryAllergens,
   portionsFor,
@@ -202,5 +203,48 @@ describe('portions and servings (FR-PLAN-6, R-SERV-2)', () => {
     expect(entryLineQuantities({ recipe_id: null, servings: 2 }, recipe, lines)).toEqual([]);
     expect(entryLineQuantities({ recipe_id: 'r1', servings: 2 }, undefined, lines)).toEqual([]);
     expect(quantityFactor(2, 0)).toBe(0);
+  });
+});
+
+describe('copy last week (FR-PLAN-9)', () => {
+  it('keeps weekday and slot across a month end and a clock change', () => {
+    // US clocks went back on 1 November 2026; the source week crosses into November.
+    const rows = [
+      entry({ id: 'a', date: '2026-10-25', slot: 'dinner' }),
+      entry({ id: 'b', date: '2026-10-31', slot: 'lunch' }),
+      entry({ id: 'c', date: '2026-10-31', slot: 'dinner', position: 1 }),
+      entry({ id: 'd', date: '2026-11-01', slot: 'dinner' }),
+    ];
+    const copies = planWeekCopy(rows, '2026-10-25', '2026-11-01', []);
+    expect(copies.map((c) => [c.source.id, c.date, c.slot, c.position])).toEqual([
+      ['a', '2026-11-01', 'dinner', 0],
+      ['b', '2026-11-07', 'lunch', 0],
+      ['c', '2026-11-07', 'dinner', 0],
+    ]);
+  });
+
+  it('adds after what this week already has', () => {
+    const rows = [
+      entry({ id: 'a', date: '2026-11-09', slot: 'dinner' }),
+      entry({ id: 'kept', date: '2026-11-16', slot: 'dinner', position: 0 }),
+    ];
+    const copies = planWeekCopy(rows, '2026-11-08', '2026-11-15', [rows[1]]);
+    expect(copies).toHaveLength(1);
+    expect(copies[0]).toMatchObject({ date: '2026-11-16', position: 1 });
+  });
+
+  it('keeps leftover links inside the week and drops ones that point outside', () => {
+    const rows = [
+      entry({ id: 'old', date: '2026-11-07' }),
+      entry({ id: 'a', date: '2026-11-09', slot: 'dinner' }),
+      entry({ id: 'b', date: '2026-11-10', slot: 'lunch', leftover_of_entry_id: 'a' }),
+      entry({ id: 'c', date: '2026-11-08', slot: 'lunch', leftover_of_entry_id: 'old' }),
+    ];
+    const copies = planWeekCopy(rows, '2026-11-08', '2026-11-15', []);
+    expect(copies.map((c) => [c.source.id, c.leftoverOfSource])).toEqual([
+      ['c', null],
+      ['a', null],
+      ['b', 'a'],
+    ]);
   });
 });
