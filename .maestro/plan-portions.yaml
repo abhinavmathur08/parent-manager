@@ -43,6 +43,9 @@ tags:
     timeout: 10000
 - tapOn:
     id: entry-servings-increase
+- scrollUntilVisible:
+    element:
+      id: entry-save
 - tapOn:
     id: entry-save
 - extendedWaitUntil:
