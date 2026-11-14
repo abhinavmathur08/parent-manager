@@ -34,9 +34,17 @@ tags:
 - tapOn:
     id: add-starter-0
 - extendedWaitUntil:
-    visible:
-      id: plan-slot-0-dinner
+    notVisible:
+      id: add-search
     timeout: 10000
+# The empty state goes once the week has an entry, which moves the days up.
+- scrollUntilVisible:
+    element:
+      id: plan-range
+    direction: UP
+- scrollUntilVisible:
+    element:
+      id: plan-slot-0-dinner
 - assertNotVisible:
     id: plan-empty
 
