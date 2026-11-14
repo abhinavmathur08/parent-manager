@@ -14,6 +14,10 @@ export type CatalogIngredient = {
   sectionId: SectionId;
   dimension: Dimension;
   allergens: readonly AllergenCode[];
+  /** Grams per millilitre, where known, so mass and volume lines can merge (R-UNIT-2). */
+  density: number | null;
+  /** A default staple, assumed at home (FR-PAN-1). */
+  staple: boolean;
 };
 
 type SeedIngredient = (typeof seed.ingredients)[number];
@@ -26,6 +30,8 @@ const byId = new Map<string, CatalogIngredient>(
       sectionId: i.section as SectionId,
       dimension: i.dimension as Dimension,
       allergens: i.allergens as AllergenCode[],
+      density: typeof i.density === 'number' && i.density > 0 ? i.density : null,
+      staple: i.staple === true,
     },
   ]),
 );

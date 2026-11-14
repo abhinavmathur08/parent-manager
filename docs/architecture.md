@@ -198,6 +198,8 @@ The rules for keeping user edits:
 
 The engine is a set of pure TypeScript functions with no side effects, unit-tested and run on the device, so it works offline.
 
+- **What the plan needs (G-01.1).** `weekNeeds` in `src/features/grocery/engine.ts` takes every plan entry (so leftover links to other weeks resolve, R-SERV-3), the recipes and lines, ingredient facts (`buildIngredientFacts`: dimension, density and section from the bundled catalog and household ingredients) and the week's pantry. It returns one need per ingredient and dimension, keyed `<ingredient ID>|<mass, volume, count or none>`, with its summed base quantity and the entry and line behind each part, plus the staples and "have" ingredients it left off. Mass and volume merge only through the catalog's `density`. A no-quantity line ("to taste", a pinch) becomes a `none` need, and only when nothing measured of that ingredient is needed. Results are sorted by key, so every device gets the same output. `itemDisplayParts` applies the household's unit system for display only.
+
 ### 3.3 Data minimization for children
 
 - **Store age bands, not birth dates.** Children are stored as `household_people` with an age band such as `expecting`, `infant_0_6m`, `infant_6_12m`, `toddler`, `preschool` or `older_child`.
