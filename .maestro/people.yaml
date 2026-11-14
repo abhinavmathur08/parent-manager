@@ -37,7 +37,7 @@ tags:
     id: allergies-skip
 - extendedWaitUntil:
     visible:
-      id: plan-screen-title
+      id: plan-days
     timeout: 20000
 # S-25 to S-28.
 - tapOn:
