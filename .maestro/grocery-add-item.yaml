@@ -102,9 +102,11 @@ tags:
     centerElement: true
 - tapOn:
     id: list-item-baby-0-details
+# Wait for the top of the sheet; Delete is at the bottom of its scrolling body, below the fold
+# on smaller screens.
 - extendedWaitUntil:
     visible:
-      id: item-delete
+      id: item-name
     timeout: 10000
 - scrollUntilVisible:
     element:
