@@ -26,16 +26,16 @@ tags:
 - runScript: scripts/wait-for-new-code.js
 - tapOn:
     id: delete-household-reauth-send
+# The code field has focus, and on Android the keyboard can cover the sheet, so wait for the
+# sheet's text and type straight into the focused field.
 - extendedWaitUntil:
     visible:
-      id: delete-household-reauth-code
+      text: 'Enter the code we sent.*'
     timeout: 10000
 - runScript:
     file: scripts/read-code.js
     env:
       EMAIL: ${output.email}
-- tapOn:
-    id: delete-household-reauth-code
 - inputText: ${output.code}
 - hideKeyboard
 - tapOn:
