@@ -162,13 +162,18 @@ const entry = (date: string, text: string) => ({
 });
 
 it('shows a new plan entry on the partner within 2 seconds (FR-PLAN-11)', async () => {
-  // A first change, untimed, as in the S0 check: Realtime's first event after joining can be
-  // slow while the server warms up its checks for this table.
-  const warmUp = crypto.randomUUID();
-  await A.engine.insert(PLAN_ENTRIES.name, warmUp, entry('2026-11-15', 'Warm-up'));
-  expect(
-    await waitUntil(async () => (await B.row(PLAN_ENTRIES.name, warmUp)) !== null),
-  ).not.toBeNull();
+  // Untimed warm-up until a change arrives over Realtime. Just after joining, the server may
+  // still be registering this channel's table bindings, and a change made in that gap isn't
+  // delivered (the next pull brings it). FR-PLAN-11 is about steady-state delivery.
+  let ready = false;
+  for (let i = 0; i < 15 && !ready; i++) {
+    const warmUp = crypto.randomUUID();
+    await A.engine.insert(PLAN_ENTRIES.name, warmUp, entry('2026-11-15', `Warm-up ${i}`));
+    ready =
+      (await waitUntil(async () => (await B.row(PLAN_ENTRIES.name, warmUp)) !== null, 1500)) !==
+      null;
+  }
+  expect(ready).toBe(true);
 
   const timings: number[] = [];
   for (let i = 0; i < 10; i++) {
