@@ -7,7 +7,7 @@ import type { IconName } from '@/components/icon';
 import { useHousehold } from '@/features/household/membership';
 import '@/features/ingredients/sync';
 import '@/features/recipes/sync';
-import { PendingChangesBanner, SyncProvider } from '@/lib/sync';
+import { FirstLoadGate, PendingChangesBanner, SyncProvider } from '@/lib/sync';
 
 const TABS: readonly {
   name: string;
@@ -45,8 +45,10 @@ export default function TabsLayout() {
   // The root layout only shows the tabs to members; the household's data syncs while they're open.
   return state.status === 'member' ? (
     <SyncProvider householdId={state.membership.householdId}>
-      {tabs}
-      <PendingChangesBanner />
+      <FirstLoadGate>
+        {tabs}
+        <PendingChangesBanner />
+      </FirstLoadGate>
     </SyncProvider>
   ) : (
     tabs

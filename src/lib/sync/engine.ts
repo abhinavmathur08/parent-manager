@@ -20,6 +20,11 @@ export type SyncStatus = {
   rejected: number;
   /** Whether other members' changes are arriving live (H-06.4). */
   realtime: RealtimeState;
+  /**
+   * True on a device that has never pulled this household, until its first sync finishes
+   * (A-01.3, FR-AUTH-8). The app shows a loading state instead of empty screens meanwhile.
+   */
+  firstLoad: boolean;
 };
 
 export const PAGE_SIZE = 500;
@@ -73,6 +78,7 @@ export class SyncEngine {
     pending: 0,
     rejected: 0,
     realtime: 'off',
+    firstLoad: false,
   };
   private readonly listeners = new Set<(status: SyncStatus) => void>();
   private running: Promise<void> | null = null;
@@ -97,6 +103,11 @@ export class SyncEngine {
       if (change.outbox) void this.refreshCounts();
     });
     await this.refreshCounts();
+    const pulled = await Promise.all(
+      this.store.tableNames().map((table) => this.store.getMeta(`pulledAt:${table}`)),
+    );
+    // A new table in an app update isn't a first load: the rest of the household is here.
+    if (pulled.length > 0 && pulled.every((value) => !value)) this.setStatus({ firstLoad: true });
   }
 
   getStatus(): SyncStatus {
@@ -233,7 +244,7 @@ export class SyncEngine {
       // So the pending count is exact when the sync reports it is done.
       await this.refreshCounts();
       this.failures = 0;
-      this.setStatus({ state: 'idle', lastSyncedAt: this.now() });
+      this.setStatus({ state: 'idle', lastSyncedAt: this.now(), firstLoad: false });
     } catch {
       this.failures += 1;
       this.setStatus({ state: 'offline' });
@@ -345,11 +356,18 @@ export class SyncEngine {
   // Pull (H-06.2)
   // ---------------------------------------------------------------------------
 
+  /**
+   * Pulls every table at once, so a new device waits for its slowest table rather than the
+   * sum of them (A-01.3, FR-AUTH-8). The local store runs its writes one at a time. All
+   * pulls finish before the first error is thrown, so none outlives the run.
+   */
   protected async pullAll(): Promise<void> {
-    for (const table of this.store.tableNames()) {
-      if (this.stopped) return;
-      await this.pullTable(table);
-    }
+    if (this.stopped) return;
+    const results = await Promise.allSettled(
+      this.store.tableNames().map((table) => this.pullTable(table)),
+    );
+    const failed = results.find((result) => result.status === 'rejected');
+    if (failed) throw failed.reason;
   }
 
   /**
