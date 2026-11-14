@@ -85,7 +85,7 @@ tags:
     id: allergies-finish
 - extendedWaitUntil:
     visible:
-      id: plan-screen-title
+      id: plan-days
     timeout: 20000
 - tapOn:
     id: tab-household

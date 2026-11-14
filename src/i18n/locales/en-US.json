@@ -122,6 +122,33 @@
     "recipes": "Recipes",
     "household": "Household"
   },
+  "plan": {
+    "title": "Plan",
+    "range": "{{start}} – {{end}}",
+    "previousWeek": "Previous week",
+    "nextWeek": "Next week",
+    "today": "Today",
+    "slots": {
+      "breakfast": "Breakfast",
+      "lunch": "Lunch",
+      "dinner": "Dinner",
+      "snack": "Snack",
+      "drink": "Drink"
+    },
+    "addTo": "Add to {{slot}} on {{day}}",
+    "empty": "Nothing planned this week yet. Add a meal to get started.",
+    "emptyReadOnly": "Nothing planned this week yet.",
+    "addMeal": "Add a meal",
+    "copyLastWeek": "Copy last week",
+    "applyTemplate": "Apply a template",
+    "nothingPlanned": "Nothing planned",
+    "servings_one": "{{value}} serving",
+    "servings_other": "{{value}} servings",
+    "entryLabel": "{{title}}, {{servings}}",
+    "entryActionsHint": "Long-press for more actions",
+    "deletedRecipe": "Deleted recipe",
+    "allergiesUnavailable": "Allergen markers need one online load of your household's people."
+  },
   "placeholder": {
     "comingSoon": "This part of the app is on its way."
   },
