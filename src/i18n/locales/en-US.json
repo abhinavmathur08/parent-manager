@@ -452,6 +452,12 @@
       "finish": "Finish"
     }
   },
+  "forcedUpdate": {
+    "title": "Time to update",
+    "body": "This version of Parent Manager is no longer supported. Update it to keep planning and shopping together. Your household's data is safe.",
+    "action": "Update",
+    "noStore": "Update Parent Manager from the App Store or Google Play."
+  },
   "biometric": {
     "faceIdPermission": "Parent Manager uses Face ID to unlock the app when you turn on the lock.",
     "lockedTitle": "Parent Manager is locked",

@@ -12,6 +12,8 @@ import { BiometricLock } from '@/features/biometric/biometric-lock';
 import { AccessEnded } from '@/features/household/access-ended';
 import { HouseholdUnavailable } from '@/features/household/household-unavailable';
 import { HouseholdProvider, useHousehold } from '@/features/household/membership';
+import { ForcedUpdateGate } from '@/features/remote-config/forced-update';
+import { RemoteConfigProvider } from '@/features/remote-config/provider';
 import { useTheme } from '@/hooks/use-theme';
 import { initCrashReporting, wrapRoot } from '@/lib/crash-reporting';
 
@@ -86,12 +88,16 @@ function RootLayout() {
   }, [theme]);
   return (
     <ThemeProvider value={navigationTheme}>
-      <AuthProvider>
-        <HouseholdProvider>
-          <AnalyticsIdentity />
-          <RootStack />
-        </HouseholdProvider>
-      </AuthProvider>
+      <RemoteConfigProvider>
+        <ForcedUpdateGate>
+          <AuthProvider>
+            <HouseholdProvider>
+              <AnalyticsIdentity />
+              <RootStack />
+            </HouseholdProvider>
+          </AuthProvider>
+        </ForcedUpdateGate>
+      </RemoteConfigProvider>
     </ThemeProvider>
   );
 }
