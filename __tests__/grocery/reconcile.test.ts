@@ -118,6 +118,26 @@ describe('reconcileList (R-LIST-4)', () => {
     expect(summary).toEqual({ added: 1, changed: 0, removed: 0 });
   });
 
+  it('gives a source link a new row when it comes back after removal', () => {
+    const first = run(empty, [
+      need(EGGS, 6, [
+        ['e1', 'l1', 4],
+        ['e2', 'l2', 2],
+      ]),
+    ]);
+    const dropped = run(first.state, [need(EGGS, 4, [['e1', 'l1', 4]])]);
+    const eggs = liveItems(dropped.state)[0];
+    expect(liveSources(dropped.state, eggs.id)).toHaveLength(1);
+    const back = run(dropped.state, [
+      need(EGGS, 6, [
+        ['e1', 'l1', 4],
+        ['e2', 'l2', 2],
+      ]),
+    ]);
+    const ids = liveSources(back.state, eggs.id).map((s) => s.id);
+    expect(ids).toEqual([itemSourceId(eggs.id, 'e1', 'l1'), itemSourceId(eggs.id, 'e2', 'l2', 1)]);
+  });
+
   it('changes nothing when run again on its own result', () => {
     const first = run(empty, [need(EGGS, 6)]);
     expect(reconcileList({ listId: LIST, needs: [need(EGGS, 6)], ...first.state }).ops).toEqual([]);

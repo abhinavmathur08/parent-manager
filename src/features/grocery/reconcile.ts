@@ -58,9 +58,13 @@ export function generatedItemId(listId: string, key: string, index: number): str
   return stableId('grocery_item', listId, key, String(index));
 }
 
-/** The ID of the source row linking an item to one entry's recipe line. */
-export function itemSourceId(itemId: string, entryId: string, lineId: string): string {
-  return stableId('grocery_item_source', itemId, entryId, lineId);
+/**
+ * The ID of the source row linking an item to one entry's recipe line. `index` counts the
+ * rows that link has had, so a link removed (a tombstone, which never changes) and needed
+ * again gets a new row.
+ */
+export function itemSourceId(itemId: string, entryId: string, lineId: string, index = 0): string {
+  return stableId('grocery_item_source', itemId, entryId, lineId, String(index));
 }
 
 /** The group an item belongs to, as `needKey` names it. */
@@ -85,7 +89,6 @@ export function reconcileList(input: ReconcileInput): ReconcileResult {
   }
   const sourcesOf = new Map<string, GroceryItemSourceRow[]>();
   for (const source of input.sources) {
-    if (source.deleted_at) continue;
     const list = sourcesOf.get(source.item_id);
     if (list) list.push(source);
     else sourcesOf.set(source.item_id, [source]);
@@ -104,16 +107,25 @@ export function reconcileList(input: ReconcileInput): ReconcileResult {
     summary.removed += 1;
   };
   const setSources = (itemId: string, wanted: readonly NeedSource[]) => {
-    const existing = new Map((sourcesOf.get(itemId) ?? []).map((s) => [s.id, s]));
+    const link = (entryId: string, lineId: string) => `${entryId}|${lineId}`;
+    const rows = sourcesOf.get(itemId) ?? [];
+    const live = new Map(
+      rows
+        .filter((r) => !r.deleted_at)
+        .map((r) => [link(r.plan_entry_id, r.recipe_ingredient_id), r]),
+    );
     for (const source of wanted) {
-      const id = itemSourceId(itemId, source.entryId, source.lineId);
-      const row = existing.get(id);
-      existing.delete(id);
+      const key = link(source.entryId, source.lineId);
+      const row = live.get(key);
+      live.delete(key);
       if (!row) {
+        const index = rows.filter(
+          (r) => r.plan_entry_id === source.entryId && r.recipe_ingredient_id === source.lineId,
+        ).length;
         ops.push({
           kind: 'insert',
           table: GROCERY_ITEM_SOURCES.name,
-          id,
+          id: itemSourceId(itemId, source.entryId, source.lineId, index),
           values: {
             item_id: itemId,
             plan_entry_id: source.entryId,
@@ -125,13 +137,13 @@ export function reconcileList(input: ReconcileInput): ReconcileResult {
         ops.push({
           kind: 'update',
           table: GROCERY_ITEM_SOURCES.name,
-          id,
+          id: row.id,
           values: { quantity_base: source.quantityBase },
         });
       }
     }
-    for (const id of [...existing.keys()].sort()) {
-      ops.push({ kind: 'remove', table: GROCERY_ITEM_SOURCES.name, id });
+    for (const row of [...live.values()].sort(byId)) {
+      ops.push({ kind: 'remove', table: GROCERY_ITEM_SOURCES.name, id: row.id });
     }
   };
   const create = (key: string, index: number, need: Need, quantity: number | null) => {
