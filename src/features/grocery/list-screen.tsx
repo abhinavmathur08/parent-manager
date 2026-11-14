@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 
@@ -16,7 +16,10 @@ import { Toast } from '@/components/toast';
 import type { TopBarAction } from '@/components/top-bar';
 import { nameKey } from '@/features/ingredients/catalog-ids';
 import { useIngredients } from '@/features/ingredients/use-ingredients';
+import { usePlanRows } from '@/features/planner/data';
+import { useUndoable } from '@/features/planner/use-undoable';
 import { startOfWeek, todayIn, type WeekStart } from '@/features/planner/week';
+import { useRecipeRows } from '@/features/recipes/data';
 import { useHouseholdAllergies } from '@/features/recipes/use-household-allergies';
 import { useOnline } from '@/hooks/use-online';
 import { useTheme } from '@/hooks/use-theme';
@@ -24,11 +27,13 @@ import { formatList, formatQuantity, type AppLocale, type Region, type UnitSyste
 
 import type { AddAmount, AddChoice } from './add-item';
 import { AddItemSheet } from './add-item-sheet';
+import { itemSources } from './detail';
+import { ItemSheet, type ItemEdit } from './item-sheet';
 import { useGroceryRows, useListIngredientFacts } from './data';
 import { onListUpdated, requestRegenerate, useOpenListWeek, type ListUpdated } from './list-events';
 import type { GroceryItemRow } from './tables';
 import { buildListView, type ListRowView } from './view';
-import { useAddItem, useToggleItem } from './writes';
+import { useAddItem, useDeleteItem, useEditItem, useMarkHave, useToggleItem } from './writes';
 
 export type ListHousehold = {
   id: string;
@@ -58,7 +63,9 @@ export function ListScreen({ household }: { household: ListHousehold }) {
   );
   useOpenListWeek(weekStart);
 
-  const { lists, items, sources, loading } = useGroceryRows();
+  const { lists, items, sources, pantry, loading } = useGroceryRows();
+  const plan = usePlanRows();
+  const recipeRows = useRecipeRows();
   const ingredients = useIngredients(locale);
   const { people } = useHouseholdAllergies(household.id);
   const toggleItem = useToggleItem();
@@ -67,21 +74,30 @@ export function ListScreen({ household }: { household: ListHousehold }) {
   const [adding, setAdding] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [detailId, setDetailId] = useState<string | null>(null);
+  const editItem = useEditItem();
+  const markHave = useMarkHave(household.id);
+  const deleteItem = useDeleteItem();
+  const undoable = useUndoable(() => setMessage(null));
 
   const list = lists.find((l) => !l.deleted_at && l.is_default && l.week_start === weekStart);
   const listId = list?.id ?? null;
   const byId = useMemo(() => new Map(items.map((i) => [i.id, i])), [items]);
 
-  const view = useMemo(() => {
-    const nameOf = (item: GroceryItemRow) => {
+  const nameOf = useCallback(
+    (item: GroceryItemRow) => {
       if (item.custom_name) return item.custom_name;
       if (!item.ingredient_id) return t('list.unknownItem');
       const count = item.dimension === 'count' ? item.quantity_base : null;
       return ingredients.nameFor(item.ingredient_id, count) ?? t('list.unknownItem');
-    };
+    },
+    [ingredients, t],
+  );
+  const hidden = undoable.hidden;
+  const view = useMemo(() => {
     return buildListView({
       listId: listId ?? '',
-      items,
+      items: hidden.length ? items.filter((i) => !hidden.includes(i.id)) : items,
       sources,
       system: unitSystem,
       locale,
@@ -89,7 +105,7 @@ export function ListScreen({ household }: { household: ListHousehold }) {
       allergensOf: (id) => ingredients.allergens(id),
       people,
     });
-  }, [listId, items, sources, unitSystem, locale, ingredients, people, t]);
+  }, [listId, items, hidden, sources, unitSystem, locale, ingredients, people, nameOf]);
 
   // FR-LIST-3: a short summary when a recalculation changes the open list.
   useEffect(
@@ -142,6 +158,29 @@ export function ListScreen({ household }: { household: ListHousehold }) {
     );
   };
 
+  const detailItem = detailId ? byId.get(detailId) : undefined;
+  const closeDetail = () => setDetailId(null);
+
+  const saveEdit = async (item: GroceryItemRow, edit: ItemEdit) => {
+    closeDetail();
+    if (await editItem(item, edit)) setMessage(t('list.item.saved', { name: nameOf(item) }));
+  };
+  const have = async (item: GroceryItemRow) => {
+    closeDetail();
+    if (!list) return;
+    await markHave(item, list.week_start, pantry);
+    setMessage(t('list.item.haveDone', { name: nameOf(item) }));
+  };
+  // Deletes are final tombstones, so the delete is held back behind the undo bar.
+  const remove = (item: GroceryItemRow) => {
+    closeDetail();
+    undoable.hold({
+      message: t('list.item.deleted', { name: nameOf(item) }),
+      hidden: [item.id],
+      commit: () => deleteItem(item),
+    });
+  };
+
   const renderRow = (row: ListRowView, testID: string) => {
     const item = byId.get(row.id);
     return (
@@ -152,6 +191,10 @@ export function ListScreen({ household }: { household: ListHousehold }) {
           checked={row.checked}
           onToggle={(checked) => {
             if (item) void toggleItem(item, checked);
+          }}
+          details={{
+            accessibilityLabel: t('list.item.details', { name: row.name }),
+            onPress: () => setDetailId(row.id),
           }}
           testID={testID}
         />
@@ -278,12 +321,35 @@ export function ListScreen({ household }: { household: ListHousehold }) {
           onAdd={(choice, amount, source) => void add(choice, amount, source)}
           onClose={() => setAdding(false)}
         />
+        {detailItem && !detailItem.deleted_at ? (
+          <ItemSheet
+            item={detailItem}
+            name={nameOf(detailItem)}
+            sources={itemSources(detailItem.id, sources, plan.entries, recipeRows.recipes)}
+            locale={locale}
+            region={household.region}
+            unitSystem={unitSystem}
+            onSave={(edit) => void saveEdit(detailItem, edit)}
+            onHave={() => void have(detailItem)}
+            onDelete={() => remove(detailItem)}
+            onClose={closeDetail}
+          />
+        ) : null}
       </Screen>
       <Toast
         visible={message !== null}
         message={message ?? ''}
         onDismiss={() => setMessage(null)}
         testID="list-updated"
+      />
+      <Toast
+        visible={undoable.current !== null}
+        message={undoable.current?.message ?? ''}
+        variant="undo"
+        actionLabel={t('list.item.undo')}
+        onAction={undoable.undo}
+        onDismiss={undoable.settle}
+        testID="list-undo"
       />
     </View>
   );

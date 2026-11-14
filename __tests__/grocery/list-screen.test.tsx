@@ -8,10 +8,11 @@ import { weekListId } from '@/features/grocery/weekly';
 let mockRows: Record<string, unknown[]> = {};
 const mockUpdate = jest.fn(async () => ({}));
 const mockInsert = jest.fn(async () => ({}));
+const mockRemove = jest.fn(async () => ({}));
 let mockOnline = true;
 jest.mock('@/lib/sync', () => ({
   useSyncedRows: (table: string) => ({ rows: mockRows[table] ?? [], loading: false }),
-  useSyncWriter: () => ({ insert: mockInsert, update: mockUpdate, remove: jest.fn() }),
+  useSyncWriter: () => ({ insert: mockInsert, update: mockUpdate, remove: mockRemove }),
 }));
 jest.mock('expo-crypto', () => ({ randomUUID: () => 'new-item-id' }));
 jest.mock('@/hooks/use-online', () => ({ useOnline: () => mockOnline }));
@@ -99,6 +100,7 @@ beforeEach(() => {
   mockOnline = true;
   mockUpdate.mockClear();
   mockInsert.mockClear();
+  mockRemove.mockClear();
   mockNavigate.mockClear();
 });
 afterEach(() => jest.useRealTimers());
@@ -308,5 +310,121 @@ describe('S-14 add an item (FR-LIST-6)', () => {
     await show();
     expect(screen.queryByTestId('list-add')).toBeNull();
     expect(screen.queryByTestId('list-empty-add')).toBeNull();
+  });
+});
+
+describe('S-15 item detail (FR-LIST-7, FR-LIST-12)', () => {
+  const recipe = { ...base, id: 'soup', title: 'Lentil soup', servings: 4 };
+  const entry = (id: string, date: string) => ({
+    ...base,
+    id,
+    date,
+    slot: 'dinner',
+    position: 0,
+    recipe_id: 'soup',
+    free_text: null,
+    servings: 4,
+    leftover_of_entry_id: null,
+  });
+  const withMilk = () => {
+    mockRows = {
+      grocery_lists: [list],
+      grocery_items: [item('milk')],
+      grocery_item_sources: [source('milk', 'e1'), source('milk', 'e2')],
+      plan_entries: [entry('e1', '2026-11-16'), entry('e2', '2026-11-18')],
+      recipes: [recipe],
+    };
+  };
+  const openMilk = async () => {
+    await show();
+    await fireEvent.press(screen.getByTestId('list-item-dairy-0-details'));
+  };
+
+  it('lists the planned meals the item comes from', async () => {
+    withMilk();
+    await openMilk();
+    expect(screen.getByTestId('item-source-0')).toHaveTextContent(/Monday, Dinner: Lentil soup/);
+    expect(screen.getByTestId('item-source-1')).toHaveTextContent(/Wednesday, Dinner: Lentil soup/);
+  });
+
+  it('saves a new quantity as a user-modified item', async () => {
+    withMilk();
+    await openMilk();
+    expect(screen.getByTestId('item-quantity').props.value).toBe('3');
+    await fireEvent.changeText(screen.getByTestId('item-quantity'), '4');
+    await fireEvent.press(screen.getByTestId('item-save'));
+    expect(mockUpdate).toHaveBeenCalledWith('grocery_items', 'milk', {
+      quantity_base: 4 * 236.588,
+      dimension: 'volume',
+      display_unit_id: 'unit.cup_us',
+      user_modified: true,
+      plan_changed: false,
+    });
+    expect(screen.getByTestId('list-updated')).toHaveTextContent('milk updated.');
+  });
+
+  it('renames an item', async () => {
+    withMilk();
+    await openMilk();
+    await fireEvent.changeText(screen.getByTestId('item-name'), 'Oat milk');
+    await fireEvent.press(screen.getByTestId('item-save'));
+    expect(mockUpdate).toHaveBeenCalledWith('grocery_items', 'milk', {
+      custom_name: 'Oat milk',
+      user_modified: true,
+      plan_changed: false,
+    });
+  });
+
+  it('marks "I already have this" for the week and takes the item off the list (FR-PAN-4)', async () => {
+    withMilk();
+    await openMilk();
+    await fireEvent.press(screen.getByTestId('item-have'));
+    expect(mockInsert).toHaveBeenCalledWith('pantry_items', expect.any(String), {
+      ingredient_id: 'ingredient.milk',
+      status: 'have',
+      have_week_start: WEEK,
+    });
+    expect(mockRemove).toHaveBeenCalledWith('grocery_items', 'milk');
+  });
+
+  it('holds a delete behind the undo bar, and undo keeps the item', async () => {
+    withMilk();
+    await openMilk();
+    await fireEvent.press(screen.getByTestId('item-delete'));
+    expect(screen.queryByTestId('list-item-dairy-0')).toBeNull();
+    expect(screen.getByTestId('list-undo')).toHaveTextContent(/milk deleted/);
+    expect(mockRemove).not.toHaveBeenCalled();
+    await fireEvent.press(screen.getByTestId('list-undo-action'));
+    expect(screen.getByTestId('list-item-dairy-0')).toBeOnTheScreen();
+    expect(mockRemove).not.toHaveBeenCalled();
+  });
+
+  it('deletes the item once the undo bar goes', async () => {
+    withMilk();
+    await openMilk();
+    await fireEvent.press(screen.getByTestId('item-delete'));
+    await act(async () => {
+      jest.advanceTimersByTime(6000);
+    });
+    expect(mockRemove).toHaveBeenCalledWith('grocery_items', 'milk');
+  });
+
+  it('says a manual item was added by hand, and offers no "have" for free text', async () => {
+    mockRows = {
+      grocery_lists: [list],
+      grocery_items: [
+        item('card', {
+          ingredient_id: null,
+          custom_name: 'Card',
+          origin: 'manual',
+          dimension: null,
+          quantity_base: null,
+        }),
+      ],
+    };
+    await show();
+    await fireEvent.press(screen.getByTestId('list-item-dairy-0-details'));
+    expect(screen.getByTestId('item-no-sources')).toHaveTextContent('Added to the list by hand.');
+    expect(screen.queryByTestId('item-have')).toBeNull();
   });
 });
