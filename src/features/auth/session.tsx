@@ -2,6 +2,7 @@ import type { Session } from '@supabase/supabase-js';
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 
 import { DEFAULT_LOCALE, i18n, SUPPORTED_LOCALES } from '@/i18n';
+import { setCrashUser } from '@/lib/crash-reporting';
 import { getSupabase } from '@/lib/supabase';
 import { supabaseConfig } from '@/lib/supabase-config';
 
@@ -37,6 +38,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const supabase = getSupabase();
     const { data } = supabase.auth.onAuthStateChange((event, session) => {
       setState(session ? { status: 'signedIn', session } : { status: 'signedOut' });
+      setCrashUser(session?.user.id ?? null);
       if (event === 'SIGNED_IN' && session) {
         // Not awaited inside the listener: Supabase warns that awaiting there can deadlock.
         setTimeout(() => {
