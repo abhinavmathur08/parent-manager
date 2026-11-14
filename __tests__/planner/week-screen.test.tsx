@@ -461,3 +461,26 @@ describe('copy last week (FR-PLAN-9)', () => {
     expect(mockRemove.mock.calls).toEqual([['plan_entries', 'mine']]);
   });
 });
+
+describe('week progress (FR-PLAN-12)', () => {
+  it('shows dinners planned, and the text matches the bar', async () => {
+    mockRows = {
+      plan_entries: [
+        entry('a', '2026-11-15', 'dinner', { free_text: 'A' }),
+        entry('b', '2026-11-16', 'dinner', { free_text: 'B' }),
+        entry('b2', '2026-11-16', 'dinner', { free_text: 'Side', position: 1 }),
+        entry('c', '2026-11-17', 'lunch', { free_text: 'C' }),
+      ],
+    };
+    await show();
+    const bar = screen.getByTestId('plan-progress');
+    expect(bar).toHaveTextContent('2 of 7 dinners planned');
+    expect(bar.props.accessibilityLabel).toBe('2 of 7 dinners planned');
+    expect(screen.getAllByTestId(/^plan-progress-segment-/)).toHaveLength(7);
+  });
+
+  it('has no progress bar on an empty week', async () => {
+    await show();
+    expect(screen.queryByTestId('plan-progress')).toBeNull();
+  });
+});

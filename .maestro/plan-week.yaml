@@ -60,6 +60,14 @@ tags:
     env:
       DAY: '6'
 
+# Seven dinners: the week counts as planned (FR-PLAN-12).
+- scrollUntilVisible:
+    element:
+      id: plan-progress
+    direction: UP
+- assertVisible:
+    text: 7 of 7 dinners planned
+
 # A second entry in a filled slot (FR-PLAN-4): free text.
 - scrollUntilVisible:
     element:
