@@ -162,6 +162,14 @@ const entry = (date: string, text: string) => ({
 });
 
 it('shows a new plan entry on the partner within 2 seconds (FR-PLAN-11)', async () => {
+  // A first change, untimed, as in the S0 check: Realtime's first event after joining can be
+  // slow while the server warms up its checks for this table.
+  const warmUp = crypto.randomUUID();
+  await A.engine.insert(PLAN_ENTRIES.name, warmUp, entry('2026-11-15', 'Warm-up'));
+  expect(
+    await waitUntil(async () => (await B.row(PLAN_ENTRIES.name, warmUp)) !== null),
+  ).not.toBeNull();
+
   const timings: number[] = [];
   for (let i = 0; i < 10; i++) {
     const id = crypto.randomUUID();
