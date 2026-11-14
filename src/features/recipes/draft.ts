@@ -11,6 +11,7 @@ import {
   RECIPES,
   type RecipeIngredientRow,
   type RecipeRow,
+  type RecipeSourceType,
   type RecipeStepRow,
   type RecipeTag,
 } from './tables';
@@ -157,7 +158,13 @@ function changed(
 export function planSave(
   existing: SavedRecipe | null,
   draft: RecipeDraft,
-  context: { recipeId: string; locale: string; dimension: (ingredientId: string) => Dimension },
+  context: {
+    recipeId: string;
+    locale: string;
+    dimension: (ingredientId: string) => Dimension;
+    /** Where a new recipe came from. Manual unless given, such as a starter's saved copy. */
+    origin?: { sourceType: RecipeSourceType; libraryRecipeId: string | null };
+  },
 ): SaveOp[] {
   const ops: SaveOp[] = [];
   const used = new Set(draft.lines.map((l) => l.ingredientId));
@@ -198,8 +205,8 @@ export function planSave(
       id: context.recipeId,
       values: {
         ...recipe,
-        source_type: 'manual',
-        library_recipe_id: null,
+        source_type: context.origin?.sourceType ?? 'manual',
+        library_recipe_id: context.origin?.libraryRecipeId ?? null,
         content_locale: context.locale,
       },
     });
