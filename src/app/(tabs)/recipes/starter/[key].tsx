@@ -26,12 +26,7 @@ export default function StarterRecipeRoute() {
   if (state.status !== 'member') return null;
   if (!starter) {
     return (
-      <Screen
-        title={t('recipes.title')}
-        onBack={() => router.back()}
-        hasTabBar={false}
-        testID="recipe-missing"
-      >
+      <Screen title={t('recipes.title')} onBack={() => router.back()} testID="recipe-missing">
         <EmptyState
           icon="recipes"
           message={t('recipes.detail.missing')}
