@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import type { ComponentRef, ReactNode, Ref } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -11,6 +11,8 @@ export type ScreenProps = Omit<TopBarProps, 'testID'> & {
   banner?: ReactNode;
   /** Tab screens leave room for the floating tab bar so nothing sits under it. */
   hasTabBar?: boolean;
+  /** For screens that scroll to a place themselves, such as today on the Plan tab. */
+  scrollRef?: Ref<ComponentRef<typeof ScrollView>>;
   testID: string;
 };
 
@@ -18,7 +20,14 @@ export type ScreenProps = Omit<TopBarProps, 'testID'> & {
  * A screen with a TopBar and scrolling content: `screenMargin` sides, content capped at
  * `layout.maxContentWidth`, and bottom padding of `layout.tabBarClearance` on tab screens.
  */
-export function Screen({ children, banner, hasTabBar = true, testID, ...topBar }: ScreenProps) {
+export function Screen({
+  children,
+  banner,
+  hasTabBar = true,
+  scrollRef,
+  testID,
+  ...topBar
+}: ScreenProps) {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const paddingBottom = hasTabBar
@@ -31,6 +40,7 @@ export function Screen({ children, banner, hasTabBar = true, testID, ...topBar }
     >
       {banner}
       <ScrollView
+        ref={scrollRef}
         testID={`${testID}-scroll`}
         contentContainerStyle={[
           styles.content,
