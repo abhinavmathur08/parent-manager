@@ -27,7 +27,7 @@ function Rows({ rows }: { rows: readonly Row[] }) {
 
 /**
  * S-25 Household tab: the hub for the household's settings and the member's own account
- * and privacy (FR-PRIV-1). Pantry, notifications and subscription join as they're built.
+ * and privacy (FR-PRIV-1). Pantry and subscription join as they're built.
  */
 export function HouseholdHubScreen() {
   const { t } = useTranslation();
@@ -37,6 +37,7 @@ export function HouseholdHubScreen() {
     { key: 'settings', title: t('household.settings.title'), href: '/household/settings' },
   ];
   const you: Row[] = [
+    { key: 'notifications', title: t('notifications.title'), href: '/household/notifications' },
     { key: 'privacy', title: t('privacy.title'), href: '/household/privacy' },
     { key: 'account', title: t('account.title'), href: '/household/account' },
   ];

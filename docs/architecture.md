@@ -431,7 +431,8 @@ Supabase Auth, with:
 
 ### Notifications
 
-- **Push:** `expo-notifications` and the Expo push service. Tokens are stored in `push_tokens`.
+- **Push:** `expo-notifications` and the Expo push service. Tokens are stored in `push_tokens`, one row per device, written only through `register_push_token()` (which moves a token to whoever signs in on the device next, keeping at most 10 per user) and removed at sign-out with `unregister_push_token()`. `PushRegistration` (`src/features/notifications`), mounted in the tabs layout, registers the token at launch, on returning to the foreground and when it changes, but only when permission is already granted.
+- **Permission in context (FR-NOT-2, FR-ONB-8):** nothing asks at launch or in onboarding. The first time this device's own change plans a week (the `week_planned` moment), `usePushPrompt` shows a sheet that explains before the system asks, once per member per device and only while the system can still ask. Notification settings (S-29) can turn push on too, and a denied permission shows "off in system settings" with a link there. Android uses one silent channel (`default`); nothing plays a sound (FR-NOT-6).
 - **Sending:** Edge Functions send messages, triggered by database events ("list is ready") or by `pg_cron` schedules through `pg_net` (the weekly "plan your week", in the household's timezone).
 - **Quiet hours and controls:** quiet hours and per-type settings are enforced on the server before sending.
 - **Copy:** notification text is localized on the server, chosen by the recipient's locale.
