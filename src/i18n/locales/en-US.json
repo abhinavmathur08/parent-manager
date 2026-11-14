@@ -122,75 +122,6 @@
     "recipes": "Recipes",
     "household": "Household"
   },
-  "plan": {
-    "title": "Plan",
-    "range": "{{start}} – {{end}}",
-    "previousWeek": "Previous week",
-    "nextWeek": "Next week",
-    "today": "Today",
-    "slots": {
-      "breakfast": "Breakfast",
-      "lunch": "Lunch",
-      "dinner": "Dinner",
-      "snack": "Snack",
-      "drink": "Drink"
-    },
-    "addTo": "Add to {{slot}} on {{day}}",
-    "empty": "Nothing planned this week yet. Add a meal to get started.",
-    "emptyReadOnly": "Nothing planned this week yet.",
-    "addMeal": "Add a meal",
-    "copyLastWeek": "Copy last week",
-    "applyTemplate": "Apply a template",
-    "nothingPlanned": "Nothing planned",
-    "servings_one": "{{value}} serving",
-    "servings_other": "{{value}} servings",
-    "entryLabel": "{{title}}, {{servings}}",
-    "entryActionsHint": "Long-press for more actions",
-    "deletedRecipe": "Deleted recipe",
-    "allergiesUnavailable": "Allergen markers need one online load of your household's people.",
-    "add": {
-      "title": "{{slot}}, {{day}}",
-      "servings": "Servings",
-      "search": "Search recipes or type a meal",
-      "recent": "Recent",
-      "household": "Your recipes",
-      "starter": "Starter recipes",
-      "freeText": "Add “{{text}}”",
-      "freeTextHint": "As a note, with no shopping",
-      "noResults": "No recipes match. You can still add it as a note.",
-      "failed": "Couldn't add that. Try again."
-    },
-    "actions": {
-      "day": "Day",
-      "slot": "Meal",
-      "move": "Move here",
-      "duplicate": "Duplicate here",
-      "remove": "Remove",
-      "removed": "Removed {{title}}",
-      "undo": "Undo",
-      "failed": "Couldn't change the plan. Try again."
-    },
-    "entry": {
-      "servings": "Servings",
-      "portions": "Portions",
-      "person": "{{name}} ({{band}})",
-      "notEating": "Not eating",
-      "babyPlate": "Baby plate",
-      "freeTextNote": "Notes like this don't add anything to the list.",
-      "peopleUnavailable": "Portions need one online load of your household's people.",
-      "nobodyEats": "At least one person needs a portion.",
-      "save": "Save"
-    },
-    "copy": {
-      "title": "Copy last week",
-      "message_one": "Last week has {{count}} meal. This week already has some.",
-      "message_other": "Last week has {{count}} meals. This week already has some.",
-      "add": "Add to this week",
-      "replace": "Replace this week",
-      "replaced": "Replaced this week with last week"
-    },
-    "progress": "{{planned}} of {{total}} dinners planned"
-  },
   "placeholder": {
     "comingSoon": "This part of the app is on its way."
   },
@@ -717,6 +648,109 @@
       "saved": "Settings saved.",
       "offline": "You're offline. Connect to the internet to change settings."
     }
+  },
+  "householdHub": {
+    "you": "You",
+    "about": "About",
+    "version": "Version"
+  },
+  "privacy": {
+    "title": "Privacy and data",
+    "usage": {
+      "title": "Usage",
+      "share": "Share anonymous usage",
+      "description": "Counts and app events only, from this device. Never names, children's details or list contents. Crash reports stay on."
+    },
+    "policies": {
+      "title": "Policies",
+      "privacy": "Privacy policy",
+      "terms": "Terms of use",
+      "unavailable": "Available before launch"
+    }
+  },
+  "account": {
+    "title": "Account",
+    "security": "Security",
+    "profile": {
+      "displayName": "Your name",
+      "save": "Save name",
+      "saved": "Name saved.",
+      "noEmail": "No email address",
+      "method": {
+        "email": "Signed in with an email code",
+        "apple": "Signed in with Apple",
+        "google": "Signed in with Google"
+      }
+    }
+  },
+  "plan": {
+    "title": "Plan",
+    "range": "{{start}} – {{end}}",
+    "previousWeek": "Previous week",
+    "nextWeek": "Next week",
+    "today": "Today",
+    "slots": {
+      "breakfast": "Breakfast",
+      "lunch": "Lunch",
+      "dinner": "Dinner",
+      "snack": "Snack",
+      "drink": "Drink"
+    },
+    "addTo": "Add to {{slot}} on {{day}}",
+    "empty": "Nothing planned this week yet. Add a meal to get started.",
+    "emptyReadOnly": "Nothing planned this week yet.",
+    "addMeal": "Add a meal",
+    "copyLastWeek": "Copy last week",
+    "applyTemplate": "Apply a template",
+    "nothingPlanned": "Nothing planned",
+    "servings_one": "{{value}} serving",
+    "servings_other": "{{value}} servings",
+    "entryLabel": "{{title}}, {{servings}}",
+    "entryActionsHint": "Long-press for more actions",
+    "deletedRecipe": "Deleted recipe",
+    "allergiesUnavailable": "Allergen markers need one online load of your household's people.",
+    "add": {
+      "title": "{{slot}}, {{day}}",
+      "servings": "Servings",
+      "search": "Search recipes or type a meal",
+      "recent": "Recent",
+      "household": "Your recipes",
+      "starter": "Starter recipes",
+      "freeText": "Add “{{text}}”",
+      "freeTextHint": "As a note, with no shopping",
+      "noResults": "No recipes match. You can still add it as a note.",
+      "failed": "Couldn't add that. Try again."
+    },
+    "actions": {
+      "day": "Day",
+      "slot": "Meal",
+      "move": "Move here",
+      "duplicate": "Duplicate here",
+      "remove": "Remove",
+      "removed": "Removed {{title}}",
+      "undo": "Undo",
+      "failed": "Couldn't change the plan. Try again."
+    },
+    "entry": {
+      "servings": "Servings",
+      "portions": "Portions",
+      "person": "{{name}} ({{band}})",
+      "notEating": "Not eating",
+      "babyPlate": "Baby plate",
+      "freeTextNote": "Notes like this don't add anything to the list.",
+      "peopleUnavailable": "Portions need one online load of your household's people.",
+      "nobodyEats": "At least one person needs a portion.",
+      "save": "Save"
+    },
+    "copy": {
+      "title": "Copy last week",
+      "message_one": "Last week has {{count}} meal. This week already has some.",
+      "message_other": "Last week has {{count}} meals. This week already has some.",
+      "add": "Add to this week",
+      "replace": "Replace this week",
+      "replaced": "Replaced this week with last week"
+    },
+    "progress": "{{planned}} of {{total}} dinners planned"
   },
   "recipes": {
     "title": "Recipes",

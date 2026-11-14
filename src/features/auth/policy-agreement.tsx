@@ -2,15 +2,11 @@ import * as Linking from 'expo-linking';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Text } from '@/components/text';
-import { policyUrl, type PolicyKind } from '@/constants/policy-links';
-import { DEFAULT_LOCALE, SUPPORTED_LOCALES, type AppLocale } from '@/i18n';
+import { policyUrlForLanguage, type PolicyKind } from '@/constants/policy-links';
 
 function PolicyLink({ kind, children }: { kind: PolicyKind; children?: React.ReactNode }) {
   const { t, i18n } = useTranslation();
-  const locale = (SUPPORTED_LOCALES as readonly string[]).includes(i18n.language)
-    ? (i18n.language as AppLocale)
-    : DEFAULT_LOCALE;
-  const url = policyUrl(kind, locale);
+  const url = policyUrlForLanguage(kind, i18n.language);
   if (!url) return <Text variant="caption">{children}</Text>;
   return (
     <Text

@@ -62,14 +62,4 @@ tags:
     notVisible:
       id: entry-sheet
     timeout: 10000
-- tapOn:
-    id: tab-household
-- scrollUntilVisible:
-    element:
-      id: sign-out
-- tapOn:
-    id: sign-out
-- extendedWaitUntil:
-    visible:
-      id: sign-in-screen-title
-    timeout: 10000
+- runFlow: subflows/sign-out.yaml
