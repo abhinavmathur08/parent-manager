@@ -1,0 +1,46 @@
+# R-04.1: every household sees the starter library; a starter is read-only, and "save a copy"
+# makes an editable household recipe. Ends signed out.
+# Needs the local stack; see the Testing section of README.md.
+appId: ${APP_ID || 'com.myparentmanager'}
+tags:
+  - backend
+---
+- runFlow: subflows/create-household.yaml
+- tapOn:
+    id: tab-recipes
+- scrollUntilVisible:
+    element:
+      id: starter-card-0
+    centerElement: true
+- tapOn:
+    id: starter-card-0
+- extendedWaitUntil:
+    visible:
+      id: recipe-save-copy
+    timeout: 10000
+- assertNotVisible:
+    id: recipe-detail-edit
+- tapOn:
+    id: recipe-save-copy
+- extendedWaitUntil:
+    visible:
+      id: recipe-detail-edit
+    timeout: 10000
+- tapOn:
+    id: recipe-detail-title-back
+- extendedWaitUntil:
+    visible:
+      id: recipe-card-0
+    timeout: 10000
+- tapOn:
+    id: tab-household
+- scrollUntilVisible:
+    element:
+      id: sign-out
+    centerElement: true
+- tapOn:
+    id: sign-out
+- extendedWaitUntil:
+    visible:
+      id: sign-in-screen-title
+    timeout: 10000
