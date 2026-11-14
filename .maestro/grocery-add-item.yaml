@@ -1,6 +1,7 @@
-# G-02.2 (FR-LIST-2, FR-LIST-6, R-LIST-6): opening the List tab creates the week's list; a
-# member types "diap", picks the diapers suggestion and finds it under its store section, then
-# adds free text as typed. Ends signed out. Needs the local stack; see README.md.
+# G-02.2 and G-02.3 (FR-LIST-2, FR-LIST-6, FR-LIST-7, R-LIST-6): opening the List tab creates
+# the week's list; a member types "diap", picks the diapers suggestion and finds it under its
+# store section, adds free text as typed, renames it in item detail and deletes the diapers.
+# Ends signed out. Needs the local stack; see README.md.
 appId: ${APP_ID || 'com.myparentmanager'}
 tags:
   - backend
@@ -66,5 +67,48 @@ tags:
 - assertVisible:
     id: list-item-household-0
     text: .*Birthday card.*
+
+# G-02.3 (FR-LIST-7): item detail renames an item, and delete takes it off after the undo bar.
+- tapOn:
+    id: list-item-household-0-details
+- extendedWaitUntil:
+    visible:
+      id: item-name
+    timeout: 10000
+- assertVisible:
+    id: item-no-sources
+- tapOn:
+    id: item-name
+- eraseText: 30
+- inputText: Card for Grandma
+- hideKeyboard
+- tapOn:
+    id: item-save
+- extendedWaitUntil:
+    visible:
+      id: list-item-household-0
+      text: .*Card for Grandma.*
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: list-item-baby-0-details
+    direction: UP
+    centerElement: true
+- tapOn:
+    id: list-item-baby-0-details
+- extendedWaitUntil:
+    visible:
+      id: item-delete
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: item-delete
+    centerElement: true
+- tapOn:
+    id: item-delete
+- assertVisible:
+    id: list-undo
+- assertNotVisible:
+    id: list-section-baby
 
 - runFlow: subflows/sign-out.yaml

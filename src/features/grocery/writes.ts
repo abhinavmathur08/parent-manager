@@ -1,6 +1,7 @@
 import { randomUUID } from 'expo-crypto';
 import { useCallback } from 'react';
 
+import type { PantryItemRow } from '@/features/pantry/tables';
 import { useApplyOps } from '@/features/recipes/data';
 
 import { useOnline } from '@/hooks/use-online';
@@ -8,6 +9,7 @@ import { track } from '@/lib/analytics';
 import { useSyncWriter } from '@/lib/sync';
 
 import { planAddItem, type AddAmount, type AddChoice, type AddResult } from './add-item';
+import { planHave, planItemDelete, planItemEdit } from './detail';
 import { GROCERY_ITEMS, type GroceryItemRow } from './tables';
 
 /** Unchecking within this long counts as undoing a mistake (FR-LIST-8, PROPOSED). */
@@ -57,6 +59,45 @@ export function useAddItem() {
         merged_into_existing: result.kind !== 'insert',
       });
       return result;
+    },
+    [apply],
+  );
+}
+
+/** Saves an edit from item detail (FR-LIST-7): the item becomes user-modified. */
+export function useEditItem() {
+  const apply = useApplyOps();
+  return useCallback(
+    async (item: GroceryItemRow, edit: Parameters<typeof planItemEdit>[1]) => {
+      const planned = planItemEdit(item, edit);
+      if (!planned) return false;
+      await apply([planned.op]);
+      for (const field of planned.fields) track('list_item_edited', { field });
+      return true;
+    },
+    [apply],
+  );
+}
+
+/** "I already have this" from item detail (FR-PAN-4): "have" for the week, item off the list. */
+export function useMarkHave(householdId: string) {
+  const apply = useApplyOps();
+  return useCallback(
+    async (item: GroceryItemRow, weekStart: string, pantry: readonly PantryItemRow[]) => {
+      await apply(planHave({ householdId, item, weekStart, pantry }));
+      track('have_marked', { surface: 'list' });
+    },
+    [apply, householdId],
+  );
+}
+
+/** Deletes an item (FR-LIST-7). The caller holds it back behind the undo bar first. */
+export function useDeleteItem() {
+  const apply = useApplyOps();
+  return useCallback(
+    async (item: GroceryItemRow) => {
+      await apply(planItemDelete(item));
+      track('list_item_deleted', { origin: item.origin });
     },
     [apply],
   );

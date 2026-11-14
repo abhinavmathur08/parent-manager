@@ -772,6 +772,24 @@
       "added": "{{name}} added.",
       "merged": "Added to {{name}} on your list.",
       "exists": "{{name}} is already on your list."
+    },
+    "item": {
+      "details": "Details for {{name}}",
+      "name": "Name",
+      "nameRequired": "Enter a name.",
+      "quantity": "Amount",
+      "sources": "From your plan",
+      "source": "{{day}}, {{slot}}: {{recipe}}",
+      "unknownRecipe": "a recipe",
+      "manual": "Added to the list by hand.",
+      "noSources": "No planned meals need this any more.",
+      "have": "I already have this",
+      "delete": "Delete",
+      "save": "Save",
+      "saved": "{{name}} updated.",
+      "haveDone": "{{name}} is marked as at home this week.",
+      "deleted": "{{name}} deleted.",
+      "undo": "Undo"
     }
   },
   "plan": {

@@ -4,6 +4,7 @@ import { Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from 'rea
 import { Avatar } from '@/components/avatar';
 import { CheckboxMark } from '@/components/checkbox';
 import { Icon } from '@/components/icon';
+import { IconButton } from '@/components/icon-button';
 import { Text } from '@/components/text';
 import { useTheme } from '@/hooks/use-theme';
 
@@ -19,6 +20,11 @@ export type CheckboxRowProps = {
   /** The change hasn't reached the server yet: shows a small clock. */
   pendingSync?: boolean;
   disabled?: boolean;
+  /**
+   * A trailing details button beside the row, such as the grocery item's detail sheet. It
+   * sits outside the check-off target, and screen readers get it as a row action too.
+   */
+  details?: { accessibilityLabel: string; onPress: () => void };
   testID: string;
   style?: StyleProp<ViewStyle>;
 };
@@ -37,6 +43,7 @@ export function CheckboxRow({
   checkedBy,
   pendingSync = false,
   disabled = false,
+  details,
   testID,
   style,
 }: CheckboxRowProps) {
@@ -47,7 +54,7 @@ export function CheckboxRow({
     checked && checkedBy ? t('components.checkboxRow.checkedBy', { name: checkedBy.name }) : null,
     pendingSync ? t('components.checkboxRow.pendingSync') : null,
   ].filter(Boolean);
-  return (
+  const row = (
     <Pressable
       testID={testID}
       onPress={() => onToggle(!checked)}
@@ -55,6 +62,12 @@ export function CheckboxRow({
       accessibilityRole="checkbox"
       accessibilityLabel={[label, ...hints].join(', ')}
       accessibilityState={{ checked, disabled }}
+      accessibilityActions={
+        details ? [{ name: 'details', label: details.accessibilityLabel }] : undefined
+      }
+      onAccessibilityAction={(event) => {
+        if (event.nativeEvent.actionName === 'details') details?.onPress();
+      }}
       style={({ pressed }) => [
         styles.row,
         {
@@ -65,7 +78,7 @@ export function CheckboxRow({
           backgroundColor: pressed ? theme.color.surfaceAlt : theme.color.surface,
           opacity: disabled ? 0.6 : 1,
         },
-        style,
+        details ? styles.fill : style,
       ]}
     >
       <CheckboxMark checked={checked} testID={`${testID}-mark`} />
@@ -96,6 +109,19 @@ export function CheckboxRow({
       ) : null}
     </Pressable>
   );
+  if (!details) return row;
+  return (
+    <View style={[styles.row, { backgroundColor: theme.color.surface }, style]}>
+      {row}
+      <IconButton
+        icon="info"
+        color="textSecondary"
+        accessibilityLabel={details.accessibilityLabel}
+        onPress={details.onPress}
+        testID={`${testID}-details`}
+      />
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -104,6 +130,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   text: {
+    flex: 1,
+  },
+  fill: {
     flex: 1,
   },
   struck: {

@@ -112,6 +112,29 @@ describe('CheckboxRow', () => {
     expect(screen.getByTestId('item-pending', { includeHiddenElements: true })).toBeOnTheScreen();
     expect(screen.getByRole('checkbox', { name: 'Eggs, waiting to sync' })).toBeOnTheScreen();
   });
+
+  it('opens details from its own button, without toggling, and as a screen reader action', async () => {
+    const onToggle = jest.fn();
+    const onPress = jest.fn();
+    await render(
+      <CheckboxRow
+        label="Eggs"
+        checked={false}
+        onToggle={onToggle}
+        details={{ accessibilityLabel: 'Details for Eggs', onPress }}
+        testID="item"
+      />,
+    );
+    await fireEvent.press(screen.getByTestId('item-details'));
+    expect(onPress).toHaveBeenCalledTimes(1);
+    expect(onToggle).not.toHaveBeenCalled();
+    await fireEvent(screen.getByTestId('item'), 'accessibilityAction', {
+      nativeEvent: { actionName: 'details' },
+    });
+    expect(onPress).toHaveBeenCalledTimes(2);
+    await fireEvent.press(screen.getByTestId('item'));
+    expect(onToggle).toHaveBeenCalledWith(true);
+  });
 });
 
 describe('Avatar', () => {
