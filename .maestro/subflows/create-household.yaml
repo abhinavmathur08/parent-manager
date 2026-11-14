@@ -1,5 +1,5 @@
 # Shared steps: a new account names itself and creates a household with the default name
-# and region, ending on the Plan tab. Not run on its own (config.yaml runs top-level flows only).
+# and region, skips the people and allergies steps, and ends on the Plan tab. Not run on its own (config.yaml runs top-level flows only).
 appId: ${APP_ID || 'com.myparentmanager'}
 ---
 - runFlow: sign-up-with-email.yaml
@@ -22,6 +22,17 @@ appId: ${APP_ID || 'com.myparentmanager'}
       id: create-household-continue
 - tapOn:
     id: create-household-continue
+# Onboarding's people and allergies steps (H-02.2) come after the household details.
+- scrollUntilVisible:
+    element:
+      id: people-skip
+- tapOn:
+    id: people-skip
+- scrollUntilVisible:
+    element:
+      id: allergies-skip
+- tapOn:
+    id: allergies-skip
 - extendedWaitUntil:
     visible:
       id: plan-screen-title
