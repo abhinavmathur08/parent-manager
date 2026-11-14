@@ -390,7 +390,7 @@ A small evaluation set of real recipes in US, UK and Australian formats runs bef
 
 ## 7. Getting the grocery list out of the app
 
-All export formats come from one function that turns a list into localized sections and items, so print, Reminders and text always match.
+All export formats come from one function that turns a list into localized sections and items, so print, Reminders and text always match. That function is `buildExportDocument` in `src/features/grocery/export/document.ts`. It takes the same `ListView` the List tab draws, so the sections, order and quantities match the screen, and each target only renders its output. The PDF is written on the device by `expo-print` and handed to the share sheet with `expo-sharing`.
 
 | Target                 | How                                                                                                                                                                                                       | Notes                                                                                                                                                                                                                                        |
 | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
