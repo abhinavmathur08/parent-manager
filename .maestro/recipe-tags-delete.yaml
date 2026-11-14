@@ -1,0 +1,147 @@
+# R-02.3 (FR-REC-7, FR-REC-11): a parent tags a recipe needs-defrosting and finds it by that
+# tag, plans it, then deletes it: the confirmation says how many plan entries use it, and the
+# planned dinner stays on the plan as text. Ends signed out.
+# Needs the local stack; see the Testing section of README.md.
+appId: ${APP_ID || 'com.myparentmanager'}
+tags:
+  - backend
+---
+- runFlow: subflows/create-household.yaml
+- tapOn:
+    id: tab-recipes
+- tapOn:
+    id: recipes-add
+- extendedWaitUntil:
+    visible:
+      id: recipe-title
+    timeout: 10000
+- tapOn:
+    id: recipe-title
+- inputText: Freezer chili
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: recipe-tag-needs_defrosting
+    centerElement: true
+- tapOn:
+    id: recipe-tag-needs_defrosting
+- assertVisible:
+    id: recipe-tag-needs_defrosting
+    checked: true
+- scrollUntilVisible:
+    element:
+      id: recipe-quick-add
+    centerElement: true
+- tapOn:
+    id: recipe-quick-add
+- inputText: 2 onions
+- tapOn:
+    id: recipe-quick-add-submit
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: recipe-save
+    centerElement: true
+- tapOn:
+    id: recipe-save
+- extendedWaitUntil:
+    visible:
+      id: recipe-detail-edit
+    timeout: 10000
+# The tag shows on the recipe.
+- assertVisible:
+    id: recipe-detail-tag-needs_defrosting
+- scrollUntilVisible:
+    element:
+      id: recipe-detail-title-back
+    direction: UP
+- tapOn:
+    id: recipe-detail-title-back
+- extendedWaitUntil:
+    visible:
+      id: recipes-screen
+    timeout: 10000
+# The tag filter finds it.
+- scrollUntilVisible:
+    element:
+      id: recipes-filter-needs_defrosting
+    centerElement: true
+- tapOn:
+    id: recipes-filter-needs_defrosting
+- scrollUntilVisible:
+    element:
+      id: recipe-card-0
+    centerElement: true
+- assertVisible:
+    id: recipe-card-0
+    text: .*Freezer chili.*
+
+# Plan it for the first dinner of this week.
+- tapOn:
+    id: tab-plan
+- scrollUntilVisible:
+    element:
+      id: plan-range
+    direction: UP
+- runFlow:
+    file: subflows/plan-recent-dinner.yaml
+    env:
+      DAY: '0'
+- assertVisible:
+    id: plan-entry-.*
+    text: .*Freezer chili.*
+
+# Delete it from recipe detail.
+- tapOn:
+    id: tab-recipes
+- extendedWaitUntil:
+    visible:
+      id: recipes-screen
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: recipe-card-0
+    centerElement: true
+- tapOn:
+    id: recipe-card-0
+- extendedWaitUntil:
+    visible:
+      id: recipe-detail-edit
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: recipe-detail-delete
+    centerElement: true
+- tapOn:
+    id: recipe-detail-delete
+- extendedWaitUntil:
+    visible:
+      id: recipe-delete-body
+    timeout: 10000
+- assertVisible:
+    id: recipe-delete-body
+    text: '.*on your plan 1 time from this week on.*'
+- tapOn:
+    id: recipe-delete-confirm
+- extendedWaitUntil:
+    visible:
+      id: recipes-screen
+    timeout: 10000
+- assertNotVisible:
+    id: recipe-card-0
+
+# The planned dinner keeps the title as text.
+- tapOn:
+    id: tab-plan
+- scrollUntilVisible:
+    element:
+      id: plan-range
+    direction: UP
+- scrollUntilVisible:
+    element:
+      id: plan-slot-0-dinner
+    centerElement: true
+- assertVisible:
+    id: plan-entry-.*
+    text: .*Freezer chili.*
+- runFlow: subflows/sign-out.yaml

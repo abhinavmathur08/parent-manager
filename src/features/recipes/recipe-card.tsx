@@ -9,6 +9,7 @@ import { useTheme } from '@/hooks/use-theme';
 import { formatNumber } from '@/i18n';
 
 import type { RecipeEntry } from './search';
+import { tagNameKey } from './tables';
 
 /**
  * A recipe on the Recipes tab (FR-REC-1): title, total time and tags. The "used in plan"
@@ -31,7 +32,7 @@ export function RecipeCard({
     recipe.totalMinutes === null
       ? null
       : t('recipes.card.minutes', { minutes: formatNumber(recipe.totalMinutes, locale) });
-  const tags = recipe.tags.map((tag) => t(`recipes.tags.${tag.slice(4)}`));
+  const tags = recipe.tags.map((tag) => t(tagNameKey(tag)));
   return (
     <Card
       onPress={onPress}

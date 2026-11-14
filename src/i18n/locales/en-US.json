@@ -998,6 +998,15 @@
     "starter": {
       "saveCopy": "Save a copy to edit",
       "copyFailed": "Couldn't save a copy. Try again."
+    },
+    "delete": {
+      "action": "Delete recipe",
+      "title": "Delete {{title}}?",
+      "planned_one": "It's on your plan {{value}} time from this week on. That meal stays on the plan as text and won't add anything to the list.",
+      "planned_other": "It's on your plan {{value}} times from this week on. Those meals stay on the plan as text and won't add anything to the list.",
+      "unplanned": "It isn't on your plan from this week on. Earlier meals keep its name.",
+      "confirm": "Delete",
+      "failed": "Couldn't delete the recipe. Try again."
     }
   }
 }
