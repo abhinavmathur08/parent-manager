@@ -730,6 +730,33 @@
       "expired": "That took too long. Sign in again to confirm."
     }
   },
+  "list": {
+    "title": "List",
+    "regenerate": "Regenerate",
+    "offline": "You're offline. Checking off and changes still work, and sync when you're back.",
+    "empty": "Plan some meals and your list builds itself.",
+    "planMeals": "Plan meals",
+    "allDone": "All done. Everything is in the cart.",
+    "inCart": "In the cart",
+    "showCart": "Show what's in the cart",
+    "hideCart": "Hide what's in the cart",
+    "count_one": "{{count}} item",
+    "count_other": "{{count}} items",
+    "forMeals_one": "for {{count}} meal",
+    "forMeals_other": "for {{count}} meals",
+    "manual": "Added",
+    "planChanged": "Plan changed",
+    "detailSeparator": " · ",
+    "unknownItem": "Item",
+    "updated": "List updated: {{changes}}.",
+    "added_one": "{{count}} added",
+    "added_other": "{{count}} added",
+    "changed_one": "{{count}} changed",
+    "changed_other": "{{count}} changed",
+    "removed_one": "{{count}} removed",
+    "removed_other": "{{count}} removed",
+    "upToDate": "Your list is already up to date."
+  },
   "plan": {
     "title": "Plan",
     "range": "{{start}} – {{end}}",
