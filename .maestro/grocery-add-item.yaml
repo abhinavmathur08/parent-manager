@@ -75,13 +75,19 @@ tags:
     visible:
       id: item-name
     timeout: 10000
-- assertVisible:
-    id: item-no-sources
 - tapOn:
     id: item-name
 - eraseText: 30
 - inputText: Card for Grandma
 - hideKeyboard
+# The sources sit under the amount and unit chips, below the fold on smaller screens.
+- scrollUntilVisible:
+    element:
+      id: item-no-sources
+    centerElement: true
+- assertVisible:
+    id: item-no-sources
+    text: .*by hand.*
 - tapOn:
     id: item-save
 - extendedWaitUntil:
