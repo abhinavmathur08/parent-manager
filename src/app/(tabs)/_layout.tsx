@@ -4,6 +4,8 @@ import { StyleSheet } from 'react-native';
 
 import { FloatingTabBar, TabButton } from '@/components/floating-tab-bar';
 import type { IconName } from '@/components/icon';
+import '@/features/grocery/sync';
+import { GroceryListKeeper } from '@/features/grocery/keeper';
 import { useHousehold } from '@/features/household/membership';
 import '@/features/ingredients/sync';
 import '@/features/planner/sync';
@@ -48,6 +50,7 @@ export default function TabsLayout() {
     <SyncProvider householdId={state.membership.householdId}>
       <FirstLoadGate>
         {tabs}
+        <GroceryListKeeper />
         <PendingChangesBanner />
       </FirstLoadGate>
     </SyncProvider>
