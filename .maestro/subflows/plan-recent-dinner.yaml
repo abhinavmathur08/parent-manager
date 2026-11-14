@@ -1,0 +1,23 @@
+# Shared steps: adds the most recent recipe to dinner on day ${DAY} (0 to 6) of the shown
+# week, then checks the entry is there. Not run on its own (config.yaml runs top-level flows only).
+appId: ${APP_ID || 'com.myparentmanager'}
+---
+- scrollUntilVisible:
+    element:
+      id: plan-add-${DAY}-dinner
+    centerElement: true
+- tapOn:
+    id: plan-add-${DAY}-dinner
+- extendedWaitUntil:
+    visible:
+      id: add-recipe-0
+    timeout: 10000
+- tapOn:
+    id: add-recipe-0
+- extendedWaitUntil:
+    notVisible:
+      id: add-recipe-0
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: plan-slot-${DAY}-dinner

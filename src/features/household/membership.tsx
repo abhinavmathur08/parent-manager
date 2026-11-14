@@ -43,6 +43,12 @@ export type Membership = {
   unitSystem: UnitSystem;
   /** ISO weekday the week starts on: 1 is Monday, 7 is Sunday. */
   weekStart: 1 | 7;
+  /**
+   * The household's IANA timezone, which decides what "today" is in the planner. Missing
+   * from a membership cached before it was saved; the device's timezone is used until the
+   * next load.
+   */
+  timezone?: string;
 };
 
 export type HouseholdState =
@@ -103,6 +109,7 @@ type Row = {
     locale: string;
     unit_system: string;
     week_start: number;
+    timezone: string;
   } | null;
 };
 
@@ -110,7 +117,7 @@ type Row = {
 export async function fetchMembership(userId: string): Promise<Membership | null> {
   const { data, error } = await getSupabase()
     .from('household_members')
-    .select('household_id, role, households(region, locale, unit_system, week_start)')
+    .select('household_id, role, households(region, locale, unit_system, week_start, timezone)')
     .eq('user_id', userId)
     .eq('status', 'active')
     .is('deleted_at', null)
@@ -135,6 +142,7 @@ export async function fetchMembership(userId: string): Promise<Membership | null
     locale,
     unitSystem: household.unit_system === 'metric' ? 'metric' : 'us_customary',
     weekStart: household.week_start === 1 ? 1 : 7,
+    timezone: household.timezone,
   };
 }
 
