@@ -107,6 +107,11 @@ tags:
     id: quiet-note
 
 # Leave and come back: the server kept every change.
+# The top bar scrolls with the settings.
+- scrollUntilVisible:
+    element:
+      id: notifications-screen-title-back
+    direction: UP
 - tapOn:
     id: notifications-screen-title-back
 - scrollUntilVisible:
@@ -129,6 +134,11 @@ tags:
 - scrollUntilVisible:
     element:
       text: 10:00.PM
+# The top bar scrolls with the settings.
+- scrollUntilVisible:
+    element:
+      id: notifications-screen-title-back
+    direction: UP
 - tapOn:
     id: notifications-screen-title-back
 

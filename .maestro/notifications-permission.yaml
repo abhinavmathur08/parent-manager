@@ -20,6 +20,25 @@ tags:
       id: plan-days
     timeout: 20000
 
+# Notification settings read push as not asked yet, with a way to turn it on.
+- tapOn:
+    id: tab-household
+- scrollUntilVisible:
+    element:
+      id: open-notifications
+- tapOn:
+    id: open-notifications
+- extendedWaitUntil:
+    visible:
+      id: push-turn-on
+    timeout: 10000
+- tapOn:
+    id: tab-plan
+- extendedWaitUntil:
+    visible:
+      id: plan-days
+    timeout: 10000
+
 # Day 1 from the starter library, then the recent recipe up to 5 dinners.
 - scrollUntilVisible:
     element:
@@ -66,10 +85,20 @@ tags:
       DAY: '3'
 - assertNotVisible:
     id: push-prompt-body
-- runFlow:
-    file: subflows/plan-recent-dinner.yaml
-    env:
-      DAY: '4'
+# The fifth dinner, without the subflow's last scroll: a swipe on the sheet's scrim would
+# close the prompt that opens now.
+- scrollUntilVisible:
+    element:
+      id: plan-add-4-dinner
+    centerElement: true
+- tapOn:
+    id: plan-add-4-dinner
+- extendedWaitUntil:
+    visible:
+      id: add-recipe-0
+    timeout: 10000
+- tapOn:
+    id: add-recipe-0
 
 # The fifth dinner plans the week: the sheet explains before anything asks the system.
 - extendedWaitUntil:
@@ -83,19 +112,23 @@ tags:
       id: push-prompt-body
     timeout: 10000
 
-# Notification settings show the push status, with a way to turn push on.
+# "Not now" leaves push off, still with a way to turn it on.
 - tapOn:
     id: tab-household
-- scrollUntilVisible:
-    element:
-      id: open-notifications
-- tapOn:
-    id: open-notifications
+# The Household tab may still show its notification settings from before.
+- runFlow:
+    when:
+      notVisible:
+        id: push-turn-on
+    commands:
+      - scrollUntilVisible:
+          element:
+            id: open-notifications
+      - tapOn:
+          id: open-notifications
 - extendedWaitUntil:
     visible:
-      id: push-status
+      id: push-turn-on
     timeout: 10000
-- tapOn:
-    id: notifications-screen-title-back
 
 - runFlow: subflows/sign-out.yaml
