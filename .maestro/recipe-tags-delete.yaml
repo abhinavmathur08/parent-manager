@@ -83,10 +83,31 @@ tags:
     element:
       id: plan-range
     direction: UP
-- runFlow:
-    file: subflows/plan-recent-dinner.yaml
-    env:
-      DAY: '0'
+- scrollUntilVisible:
+    element:
+      id: plan-add-0-dinner
+    centerElement: true
+- tapOn:
+    id: plan-add-0-dinner
+- extendedWaitUntil:
+    visible:
+      id: add-recipe-0
+    timeout: 10000
+- tapOn:
+    id: add-recipe-0
+- extendedWaitUntil:
+    notVisible:
+      id: add-recipe-0
+    timeout: 10000
+# The empty state goes once the week has an entry, which moves the days up.
+- scrollUntilVisible:
+    element:
+      id: plan-range
+    direction: UP
+- scrollUntilVisible:
+    element:
+      id: plan-slot-0-dinner-entry-0
+    centerElement: true
 - assertVisible:
     id: plan-entry-.*
     text: .*Freezer chili.*
@@ -139,7 +160,7 @@ tags:
     direction: UP
 - scrollUntilVisible:
     element:
-      id: plan-slot-0-dinner
+      id: plan-slot-0-dinner-entry-0
     centerElement: true
 - assertVisible:
     id: plan-entry-.*
