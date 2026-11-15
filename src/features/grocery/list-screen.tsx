@@ -16,6 +16,11 @@ import { Toast } from '@/components/toast';
 import type { TopBarAction } from '@/components/top-bar';
 import { nameKey } from '@/features/ingredients/catalog-ids';
 import { useIngredients } from '@/features/ingredients/use-ingredients';
+import { AssumedAtHome } from '@/features/pantry/assumed-at-home';
+import { assumedAtHome } from '@/features/pantry/pantry';
+import { weekPantry } from '@/features/pantry/tables';
+import { useSyncedRows } from '@/lib/sync';
+import { track } from '@/lib/analytics';
 import { usePlanRows } from '@/features/planner/data';
 import { useUndoable } from '@/features/planner/use-undoable';
 import { startOfWeek, todayIn, type WeekStart } from '@/features/planner/week';
@@ -30,12 +35,28 @@ import type { AddAmount, AddChoice } from './add-item';
 import { AddItemSheet } from './add-item-sheet';
 import { ExportSheet } from './export/export-sheet';
 import { itemSources } from './detail';
+import { FinishShoppingSheet } from './finish-shopping-sheet';
+import {
+  FREQUENT_SUGGESTION_HIDES,
+  frequentlyBought,
+  type FrequentSuggestionHideRow,
+} from './frequent';
 import { ItemSheet, type ItemEdit } from './item-sheet';
 import { useGroceryRows, useListIngredientFacts } from './data';
+import { weekNeeds } from './engine';
 import { onListUpdated, requestRegenerate, useOpenListWeek, type ListUpdated } from './list-events';
 import type { GroceryItemRow } from './tables';
+import { usePartnerActivity, useListMembers } from './use-shopping';
 import { buildListView, type ListRowView } from './view';
-import { useAddItem, useDeleteItem, useEditItem, useMarkHave, useToggleItem } from './writes';
+import {
+  useAddItem,
+  useDeleteItem,
+  useEditItem,
+  useFinishShopping,
+  useHideSuggestion,
+  useMarkHave,
+  useToggleItem,
+} from './writes';
 
 export type ListHousehold = {
   id: string;
@@ -46,6 +67,8 @@ export type ListHousehold = {
   timezone: string | null;
   /** Caregivers shop and edit but don't regenerate (spec section 2.2, row 29). */
   canRegenerate: boolean;
+  /** The signed-in member, so their own changes don't show the partner banner. */
+  userId?: string | null;
 };
 
 /**
@@ -65,7 +88,7 @@ export function ListScreen({ household }: { household: ListHousehold }) {
   );
   useOpenListWeek(weekStart);
 
-  const { lists, items, sources, pantry, loading } = useGroceryRows();
+  const { lists, items, sources, pantry, purchases, loading } = useGroceryRows();
   const plan = usePlanRows();
   const recipeRows = useRecipeRows();
   const ingredients = useIngredients(locale);
@@ -74,6 +97,12 @@ export function ListScreen({ household }: { household: ListHousehold }) {
   const addItem = useAddItem();
   const { facts } = useListIngredientFacts();
   const [adding, setAdding] = useState(false);
+  // When the add sheet opened: the frequently bought window ends then (R-MEM-2).
+  const [addOpenedAt, setAddOpenedAt] = useState(0);
+  const openAdd = () => {
+    setAddOpenedAt(Date.now());
+    setAdding(true);
+  };
   const [exporting, setExporting] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -83,10 +112,17 @@ export function ListScreen({ household }: { household: ListHousehold }) {
   const deleteItem = useDeleteItem();
   const undoable = useUndoable(() => setMessage(null));
   const listReady = useListReady(household.id, weekStart, household.timezone);
+  const members = useListMembers(household.id);
+  const finishShopping = useFinishShopping();
+  const hideSuggestion = useHideSuggestion(household.id);
+  const hides = useSyncedRows<FrequentSuggestionHideRow>(FREQUENT_SUGGESTION_HIDES.name).rows;
+  const [finishing, setFinishing] = useState<'confirm' | 'saving' | null>(null);
+  const me = household.userId ?? null;
 
   const list = lists.find((l) => !l.deleted_at && l.is_default && l.week_start === weekStart);
   const listId = list?.id ?? null;
   const byId = useMemo(() => new Map(items.map((i) => [i.id, i])), [items]);
+  const partnerActive = usePartnerActivity(listId, items, me);
 
   const nameOf = useCallback(
     (item: GroceryItemRow) => {
@@ -110,6 +146,45 @@ export function ListScreen({ household }: { household: ListHousehold }) {
       people,
     });
   }, [listId, items, hidden, sources, unitSystem, locale, ingredients, people, nameOf]);
+
+  // FR-PAN-3: the staples this week's plan uses, which the list leaves off.
+  const staples = useMemo(() => {
+    if (!listId) return [];
+    const needs = weekNeeds({
+      entries: plan.entries,
+      recipes: recipeRows.recipes,
+      lines: recipeRows.lines,
+      weekStart,
+      ingredients: facts,
+      pantry: weekPantry(pantry, weekStart),
+    });
+    return assumedAtHome({
+      staples: needs.staples,
+      listId,
+      items,
+      nameOf: (id) => ingredients.name(id) ?? t('list.unknownItem'),
+      locale,
+    });
+  }, [listId, plan.entries, recipeRows, weekStart, facts, pantry, items, ingredients, locale, t]);
+
+  // FR-MEM-3: frequently bought, for the add item sheet. Worked out when the sheet opens.
+  const frequent = useMemo(() => {
+    if (!adding || !listId) return [];
+    const staplesNow = new Set(
+      pantry.filter((r) => !r.deleted_at && r.status === 'staple').map((r) => r.ingredient_id),
+    );
+    return frequentlyBought({
+      events: purchases,
+      items,
+      listId,
+      staples: staplesNow,
+      hides,
+      now: addOpenedAt,
+    }).map((ingredientId) => ({
+      ingredientId,
+      name: ingredients.name(ingredientId) ?? t('list.unknownItem'),
+    }));
+  }, [adding, addOpenedAt, listId, pantry, purchases, items, hides, ingredients, t]);
 
   // FR-LIST-3: a short summary when a recalculation changes the open list.
   useEffect(
@@ -144,7 +219,7 @@ export function ListScreen({ household }: { household: ListHousehold }) {
   const add = async (
     choice: AddChoice,
     amount: AddAmount | null,
-    source: 'typed' | 'suggestion_catalog',
+    source: 'typed' | 'suggestion_catalog' | 'suggestion_frequent' | 'assumed_at_home',
   ) => {
     if (!listId) return;
     setAdding(false);
@@ -160,6 +235,30 @@ export function ListScreen({ household }: { household: ListHousehold }) {
           ? t('list.add.merged', { name })
           : t('list.add.exists', { name }),
     );
+  };
+
+  // FR-PAN-3, R-PAN-3: one tap puts a staple on this week's list, overriding the staple.
+  const addStaple = (ingredientId: string) => {
+    void add(
+      { kind: 'ingredient', ingredientId, sectionId: facts.section(ingredientId) },
+      null,
+      'assumed_at_home',
+    );
+  };
+
+  // FR-LIST-10: purchases for anything checked without one, and the cart moves to history.
+  const finish = async () => {
+    if (!listId) return;
+    setFinishing('saving');
+    try {
+      const done = await finishShopping({ listId, items, events: purchases });
+      setCartOpen(false);
+      setMessage(t('list.finish.done', { count: done.checkedCount }));
+    } catch {
+      setMessage(t('list.finish.failed'));
+    } finally {
+      setFinishing(null);
+    }
   };
 
   const detailItem = detailId ? byId.get(detailId) : undefined;
@@ -185,6 +284,18 @@ export function ListScreen({ household }: { household: ListHousehold }) {
     });
   };
 
+  // FR-LIST-9: "checked by <member>" once the household has more than one member.
+  const checkedByOf = (row: ListRowView) => {
+    if (!row.checkedBy) return undefined;
+    const index = members ? members.findIndex((m) => m.userId === row.checkedBy) : -1;
+    const several = members ? members.length > 1 : row.checkedBy !== me;
+    if (!several) return undefined;
+    return {
+      name: (index >= 0 ? members?.[index].displayName : null) ?? t('household.members.unnamed'),
+      memberIndex: Math.max(index, 0),
+    };
+  };
+
   const renderRow = (row: ListRowView, testID: string) => {
     const item = byId.get(row.id);
     return (
@@ -193,8 +304,9 @@ export function ListScreen({ household }: { household: ListHousehold }) {
           label={row.name}
           detail={detailOf(row) || undefined}
           checked={row.checked}
+          checkedBy={checkedByOf(row)}
           onToggle={(checked) => {
-            if (item) void toggleItem(item, checked);
+            if (item) void toggleItem(item, checked, purchases);
           }}
           details={{
             accessibilityLabel: t('list.item.details', { name: row.name }),
@@ -226,7 +338,7 @@ export function ListScreen({ household }: { household: ListHousehold }) {
     });
   }
   if (listId) {
-    actions.push({ label: t('list.addShort'), onPress: () => setAdding(true), testID: 'list-add' });
+    actions.push({ label: t('list.addShort'), onPress: () => openAdd(), testID: 'list-add' });
   }
   const topActions =
     actions.length === 2
@@ -242,9 +354,15 @@ export function ListScreen({ household }: { household: ListHousehold }) {
         title={t('list.title')}
         actions={topActions}
         banner={
-          online ? null : (
+          !online ? (
             <Banner variant="offline" message={t('list.offline')} testID="list-offline" />
-          )
+          ) : partnerActive ? (
+            <Banner
+              variant="partnerActivity"
+              message={t('list.partnerActivity')}
+              testID="list-partner-activity"
+            />
+          ) : null
         }
         testID="list-screen"
       >
@@ -262,7 +380,7 @@ export function ListScreen({ household }: { household: ListHousehold }) {
             variant="secondary"
             icon="add"
             label={t('list.addItem')}
-            onPress={() => setAdding(true)}
+            onPress={() => openAdd()}
             testID="list-empty-add"
           />
         ) : null}
@@ -313,6 +431,7 @@ export function ListScreen({ household }: { household: ListHousehold }) {
             </View>
           </View>
         ))}
+        <AssumedAtHome staples={staples} onAdd={addStaple} />
         {view.cart.length ? (
           <View testID="list-cart">
             <ListRow
@@ -333,6 +452,12 @@ export function ListScreen({ household }: { household: ListHousehold }) {
                 {view.cart.map((row, i) => renderRow(row, `list-cart-item-${i}`))}
               </View>
             ) : null}
+            <Button
+              variant={allDone ? 'primary' : 'secondary'}
+              label={t('list.finish.action')}
+              onPress={() => setFinishing('confirm')}
+              testID="list-finish"
+            />
           </View>
         ) : null}
         {list ? (
@@ -354,6 +479,14 @@ export function ListScreen({ household }: { household: ListHousehold }) {
             householdId={household.id}
           />
         ) : null}
+        <FinishShoppingSheet
+          visible={finishing !== null}
+          checkedCount={view.cart.length}
+          uncheckedCount={view.total - view.cart.length}
+          busy={finishing === 'saving'}
+          onConfirm={() => void finish()}
+          onClose={() => setFinishing(null)}
+        />
         <AddItemSheet
           visible={adding}
           ingredients={ingredients}
@@ -362,6 +495,21 @@ export function ListScreen({ household }: { household: ListHousehold }) {
           region={household.region}
           unitSystem={unitSystem}
           onAdd={(choice, amount, source) => void add(choice, amount, source)}
+          frequent={frequent}
+          onAddFrequent={(ingredientId, rank) => {
+            track('frequent_suggestion_used', { rank });
+            void add(
+              { kind: 'ingredient', ingredientId, sectionId: facts.section(ingredientId) },
+              null,
+              'suggestion_frequent',
+            );
+          }}
+          onHideFrequent={(ingredientId) => {
+            hideSuggestion(ingredientId, hides).then(
+              () => undefined,
+              () => setMessage(t('list.add.hideFailed')),
+            );
+          }}
           onClose={() => setAdding(false)}
         />
         {detailItem && !detailItem.deleted_at ? (

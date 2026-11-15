@@ -315,6 +315,9 @@ revoke all on function private.dispatch_pushes() from public;
 
 select cron.schedule('notify-pushes', '* * * * *', 'select private.dispatch_pushes()');
 
--- Account and household deletion remove notifications (FR-PRIV-3, FR-PRIV-7).
+-- Account and household deletion remove notifications (FR-PRIV-3, FR-PRIV-7). A member's
+-- inbox is theirs: it goes in their account export (FR-PRIV-2), not the household's, so a
+-- parent's export doesn't hold the other members' notifications.
 select private.register_for_deletion('public.notifications', 'household_id', 'household');
 select private.register_for_deletion('public.notifications', 'user_id', 'user');
+select private.register_for_export('public.notifications', 'user', 'user_id');

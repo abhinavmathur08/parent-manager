@@ -4,7 +4,7 @@
 begin;
 create extension if not exists pgtap with schema extensions;
 
-select plan(17);
+select plan(19);
 
 create schema tests;
 grant usage on schema tests to anon, authenticated;
@@ -93,8 +93,16 @@ select throws_ok(
   'anonymous callers cannot register tokens');
 
 -- ---------------------------------------------------------------------------
--- Account deletion
+-- Account export (FR-PRIV-2) and deletion
 -- ---------------------------------------------------------------------------
+reset role;
+select tests.as_user('bbbbbbbb-0000-0000-0000-000000000001');
+select is(
+  jsonb_array_length(public.export_account_data() -> 'tables' -> 'push_tokens'), 10,
+  'the account export lists the user''s devices');
+select ok(
+  not (public.export_account_data() -> 'tables' -> 'push_tokens' -> 0 ? 'token'),
+  'without the push token itself');
 reset role;
 select private.erase_user('bbbbbbbb-0000-0000-0000-000000000001');
 select is(

@@ -72,6 +72,7 @@ const row = (id: string, over: Partial<ListRowView> = {}): ListRowView => ({
   origin: 'plan',
   planChanged: false,
   checked: false,
+  checkedBy: null,
   sectionId: 'section.produce',
   allergens: [],
   ...over,

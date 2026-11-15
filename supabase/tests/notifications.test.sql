@@ -5,7 +5,7 @@
 begin;
 create extension if not exists pgtap with schema extensions;
 
-select plan(40);
+select plan(42);
 
 create schema tests;
 grant usage on schema tests to anon, authenticated;
@@ -249,6 +249,16 @@ select is(
   (select count(*)::int from cron.job where jobname = 'notify-pushes'), 1,
   'the dispatcher runs on a schedule');
 
+-- Export (FR-PRIV-2): the inbox is in the member's account export, not the household's.
+select tests.as_user('aaaaaaaa-0000-0000-0000-000000000002');
+select ok(
+  jsonb_array_length(public.export_account_data() -> 'tables' -> 'notifications') > 0,
+  'a member''s account export includes their inbox');
+select tests.as_user('aaaaaaaa-0000-0000-0000-000000000001');
+select ok(
+  not (public.export_household_data('00000000-0000-0000-0000-00000000000a') -> 'tables' ? 'notifications'),
+  'a parent''s household export does not include other members'' notifications');
+reset role;
 select private.erase_user('aaaaaaaa-0000-0000-0000-000000000002');
 select is(
   (select count(*)::int from public.notifications where user_id = 'aaaaaaaa-0000-0000-0000-000000000002'),

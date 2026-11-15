@@ -154,6 +154,17 @@ There are only three levels. Prefer a hairline `color.border` outline to a shado
 - **Color:** an icon takes the color of its text, `color.primary` when it leads an action, or `color.textSecondary` when decorative.
 - **Meaning:** an icon is never the only carrier of meaning. Icon-only buttons need a translated `accessibilityLabel` and a 48 pt target, and a warning icon always comes with text.
 
+### App icon and splash screen
+
+- **Interim mark (#207):** a bowl with a sprout, in one color and with no text, until the real logo is chosen (D-2). The source is `assets/brand/mark.svg`.
+- **Colors:** `color.primary` on `color.background`. In dark mode, the dark `color.primary` on the dark `color.background`.
+- **Generated files:** `swift scripts/brand/render-brand.swift` (macOS) writes every PNG from the SVG:
+  - The iOS light, dark and tinted icons.
+  - The Android adaptive foreground and monochrome images. The mark is scaled into the launcher's safe zone, and the background is `color.background`, set in `app.config.ts`.
+  - The light and dark splash images.
+- **Replacing it:** edit or replace the SVG and run the script again. Never edit the PNGs by hand.
+- **Testing the splash screen:** use a release build, because development builds don't show it accurately.
+
 ## 8. Components
 
 Every component reads only tokens, has a `testID` prop for Maestro, and takes translated strings from its caller. A component never contains hard-coded copy.

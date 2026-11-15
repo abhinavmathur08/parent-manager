@@ -4,7 +4,7 @@
 begin;
 create extension if not exists pgtap with schema extensions;
 
-select plan(24);
+select plan(25);
 
 create schema tests;
 grant usage on schema tests to anon, authenticated;
@@ -115,8 +115,13 @@ select is(
   '2026-11-01 07:00-05'::timestamptz, 'the release time is local, across a DST change');
 
 -- ---------------------------------------------------------------------------
--- Account deletion
+-- Account export (FR-PRIV-2) and deletion
 -- ---------------------------------------------------------------------------
+select tests.as_user('aaaaaaaa-0000-0000-0000-000000000001');
+select is(
+  (public.export_account_data() -> 'tables' -> 'notification_prefs' -> 0 ->> 'quiet_start_minute')::int,
+  1320, 'the account export includes the member''s notification settings');
+reset role;
 select private.erase_user('aaaaaaaa-0000-0000-0000-000000000001');
 select is_empty(
   $$select user_id from public.notification_prefs
