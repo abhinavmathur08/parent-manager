@@ -135,6 +135,8 @@ function buildConfig(
         monochromeImage: './assets/images/android-icon-monochrome.png',
       },
       predictiveBackGestureEnabled: false,
+      // expo-calendar's plugin adds these; Reminders export is iOS only (G-06.2).
+      blockedPermissions: ['android.permission.READ_CALENDAR', 'android.permission.WRITE_CALENDAR'],
       package: id,
     },
     plugins: [
@@ -173,6 +175,14 @@ function buildConfig(
           icon: './assets/images/android-icon-monochrome.png',
           color: '#3F6B4F',
           defaultChannel: 'default',
+        },
+      ],
+      // Apple Reminders export (G-06.2): reminders only, never the calendar.
+      [
+        'expo-calendar',
+        {
+          remindersPermission: enUS.list.export.remindersPermission,
+          calendarPermission: false,
         },
       ],
     ],
