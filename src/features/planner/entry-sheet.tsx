@@ -44,6 +44,7 @@ export function EntrySheet({
   portionRows,
   locale,
   canWrite,
+  leftoversOf = null,
   onSave,
   onClose,
 }: {
@@ -54,6 +55,8 @@ export function EntrySheet({
   portionRows: readonly PlanEntryPortionRow[];
   locale: AppLocale;
   canWrite: boolean;
+  /** The entry this one is leftovers of (FR-PLAN-8), described. */
+  leftoversOf?: { title: string; when: string } | null;
   onSave: (entry: PlanEntryRow, change: EntryChange) => void;
   onClose: () => void;
 }) {
@@ -68,6 +71,7 @@ export function EntrySheet({
           portionRows={portionRows}
           locale={locale}
           canWrite={canWrite}
+          leftoversOf={leftoversOf}
           onSave={onSave}
         />
       ) : null}
@@ -82,6 +86,7 @@ function Body({
   portionRows,
   locale,
   canWrite,
+  leftoversOf,
   onSave,
 }: {
   entry: PlanEntryRow;
@@ -90,6 +95,7 @@ function Body({
   portionRows: readonly PlanEntryPortionRow[];
   locale: AppLocale;
   canWrite: boolean;
+  leftoversOf: { title: string; when: string } | null;
   onSave: (entry: PlanEntryRow, change: EntryChange) => void;
 }) {
   const { t } = useTranslation();
@@ -130,7 +136,11 @@ function Body({
           formatValue={number}
           testID="entry-servings"
         />
-        {free ? (
+        {leftoversOf ? (
+          <Text variant="caption" color="textSecondary" testID="entry-leftovers-of">
+            {t('plan.leftovers.note', leftoversOf)}
+          </Text>
+        ) : free ? (
           <Text variant="caption" color="textSecondary">
             {t('plan.entry.freeTextNote')}
           </Text>
