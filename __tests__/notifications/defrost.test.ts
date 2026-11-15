@@ -2,13 +2,12 @@ import * as Notifications from 'expo-notifications';
 
 import {
   defrostSchedule,
-  NEEDS_DEFROSTING_TAG,
   outsideQuietHours,
   type DefrostReminder,
 } from '@/features/notifications/defrost';
 import { reconcileDefrost } from '@/features/notifications/defrost-scheduler';
 import type { PlanEntryRow } from '@/features/planner/tables';
-import type { RecipeRow } from '@/features/recipes/tables';
+import { NEEDS_DEFROSTING_TAG, type RecipeRow } from '@/features/recipes/tables';
 
 jest.mock('@/features/planner/data', () => ({ usePlanRows: jest.fn() }));
 jest.mock('@/features/recipes/data', () => ({ useRecipeRows: jest.fn() }));

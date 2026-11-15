@@ -1,13 +1,6 @@
 import { addDays, type PlanDate } from '@/features/planner/week';
 import type { PlanEntryRow } from '@/features/planner/tables';
-import type { RecipeRow } from '@/features/recipes/tables';
-
-/**
- * The needs-defrosting recipe tag (FR-REC-7, spec C-4), stored as this ID in `recipes.tags`.
- * R-02.3 (Track 18, #194) exports the same ID as `NEEDS_DEFROSTING_TAG` from
- * `@/features/recipes/tables`; this can import it once that's merged.
- */
-export const NEEDS_DEFROSTING_TAG = 'tag.needs_defrosting';
+import { hasTag, NEEDS_DEFROSTING_TAG, type RecipeRow } from '@/features/recipes/tables';
 
 /** FR-NOT-5 (PROPOSED): the reminder goes at 08:00 on the day of the dinner. */
 export const DEFROST_MINUTE = 8 * 60;
@@ -52,7 +45,7 @@ export function outsideQuietHours(minute: number, quietStart: number, quietEnd: 
 
 /**
  * The "defrost tonight" reminders this device should have (FR-NOT-5): one for each live
- * dinner from today on, up to two weeks ahead, whose recipe has the needs-defrosting tag,
+ * dinner from today on, up to two weeks ahead, whose recipe has the needs-defrosting tag (R-02.3's `tag.needs_defrosting`, matched by ID),
  * at 08:00 or after quiet hours, and still in the future. Moving or removing the entry, or
  * untagging the recipe, drops or moves its reminder.
  */
@@ -74,7 +67,7 @@ export function defrostSchedule({
   const last = addDays(today, DEFROST_DAYS_AHEAD - 1);
   const tagged = new Map(
     recipes
-      .filter((r) => !r.deleted_at && (r.tags as readonly string[]).includes(NEEDS_DEFROSTING_TAG))
+      .filter((r) => !r.deleted_at && hasTag(r, NEEDS_DEFROSTING_TAG))
       .map((r) => [r.id, r.title]),
   );
   const minute = outsideQuietHours(DEFROST_MINUTE, quietStartMinute, quietEndMinute);
