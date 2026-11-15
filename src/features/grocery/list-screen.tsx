@@ -19,6 +19,7 @@ import { useIngredients } from '@/features/ingredients/use-ingredients';
 import { usePlanRows } from '@/features/planner/data';
 import { useUndoable } from '@/features/planner/use-undoable';
 import { startOfWeek, todayIn, type WeekStart } from '@/features/planner/week';
+import { useListReady } from '@/features/notifications/list-ready';
 import { useRecipeRows } from '@/features/recipes/data';
 import { useHouseholdAllergies } from '@/features/recipes/use-household-allergies';
 import { useOnline } from '@/hooks/use-online';
@@ -79,6 +80,7 @@ export function ListScreen({ household }: { household: ListHousehold }) {
   const markHave = useMarkHave(household.id);
   const deleteItem = useDeleteItem();
   const undoable = useUndoable(() => setMessage(null));
+  const listReady = useListReady(household.id, weekStart, household.timezone);
 
   const list = lists.find((l) => !l.deleted_at && l.is_default && l.week_start === weekStart);
   const listId = list?.id ?? null;
@@ -261,6 +263,26 @@ export function ListScreen({ household }: { household: ListHousehold }) {
             onPress={() => setAdding(true)}
             testID="list-empty-add"
           />
+        ) : null}
+        {view.total > 0 && listReady.state !== 'unknown' ? (
+          listReady.state === 'sent' ? (
+            <Text color="textSecondary" testID="list-ready-sent">
+              {t('list.ready.sentToday')}
+            </Text>
+          ) : (
+            <Button
+              variant="secondary"
+              label={t('list.ready.button')}
+              accessibilityHint={t('list.ready.hint')}
+              loading={listReady.state === 'sending'}
+              onPress={() =>
+                void listReady
+                  .announce()
+                  .then((ok) => setMessage(ok ? t('list.ready.sent') : t('list.ready.failed')))
+              }
+              testID="list-ready"
+            />
+          )
         ) : null}
         {allDone ? (
           <Text color="textSecondary" testID="list-all-done">

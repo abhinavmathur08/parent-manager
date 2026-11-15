@@ -32,6 +32,8 @@ export function messageKey(item: Pick<InboxItem, 'type' | 'payload'>): string {
 export function routeFor(type: string): Href | null {
   switch (type) {
     case 'plan_week':
+    case 'defrost':
+      // "Defrost tonight" is today's dinner, which the Plan tab scrolls into view.
       return '/plan';
     case 'list_ready':
       return '/list';

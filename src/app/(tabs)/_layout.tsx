@@ -9,6 +9,7 @@ import { GroceryListKeeper } from '@/features/grocery/keeper';
 import { useHousehold } from '@/features/household/membership';
 import '@/features/ingredients/sync';
 import { useAuth } from '@/features/auth/session';
+import { DefrostScheduler } from '@/features/notifications/defrost-scheduler';
 import { NotificationResponses } from '@/features/notifications/notification-responses';
 import { PushRegistration } from '@/features/notifications/push-registration';
 import '@/features/planner/sync';
@@ -57,7 +58,10 @@ export default function TabsLayout() {
         <GroceryListKeeper />
         <PushRegistration />
         {auth.status === 'signedIn' ? (
-          <NotificationResponses userId={auth.session.user.id} />
+          <>
+            <NotificationResponses userId={auth.session.user.id} />
+            <DefrostScheduler userId={auth.session.user.id} />
+          </>
         ) : null}
         <PendingChangesBanner />
       </FirstLoadGate>
