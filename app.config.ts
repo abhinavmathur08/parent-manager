@@ -178,6 +178,16 @@ function buildConfig(
       sentryPlugin(process.env.SENTRY_ORG, process.env.SENTRY_PROJECT),
       // The Face ID permission text comes from the locale file, like all copy (A-03).
       ['expo-local-authentication', { faceIDPermission: enUS.biometric.faceIdPermission }],
+      // Push and local notifications (N-01). The Android channel is created in the app
+      // (src/lib/notifications/push.ts) without sound, as FR-NOT-6 asks.
+      [
+        'expo-notifications',
+        {
+          icon: './assets/images/android-icon-monochrome.png',
+          color: '#3F6B4F',
+          defaultChannel: 'default',
+        },
+      ],
       // Apple Reminders export (G-06.2): reminders only, never the calendar.
       [
         'expo-calendar',

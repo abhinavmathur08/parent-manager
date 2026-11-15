@@ -88,4 +88,19 @@ describe('week_planned (FR-PLAN-12)', () => {
     await hook.rerender({ d: 6, s: '2026-11-15' });
     expect(mockTrack).not.toHaveBeenCalled();
   });
+
+  it('tells the screen when the week becomes planned, for the push prompt (FR-NOT-2)', async () => {
+    const onPlanned = jest.fn();
+    const hook = await renderHook(
+      ({ d }: { d: number }) => useWeekPlannedEvent('hh', '2026-11-15', '2026-11-13', d, onPlanned),
+      { initialProps: { d: 4 } },
+    );
+    await hook.rerender({ d: 5 });
+    expect(onPlanned).not.toHaveBeenCalled();
+    hook.result.current();
+    await hook.rerender({ d: 4 });
+    hook.result.current();
+    await hook.rerender({ d: 5 });
+    expect(onPlanned).toHaveBeenCalledTimes(1);
+  });
 });

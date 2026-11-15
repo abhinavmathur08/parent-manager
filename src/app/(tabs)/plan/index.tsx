@@ -1,19 +1,28 @@
+import { useAuth } from '@/features/auth/session';
 import { useHousehold } from '@/features/household/membership';
+import { usePushPrompt } from '@/features/notifications/push-prompt';
 import { PlanWeekScreen } from '@/features/planner/week-screen';
 
 export default function PlanRoute() {
   const { state } = useHousehold();
+  const auth = useAuth();
+  // The first planned week offers push notifications, in context (FR-NOT-2).
+  const pushPrompt = usePushPrompt(auth.status === 'signedIn' ? auth.session.user.id : null);
   if (state.status !== 'member') return null;
   const { membership } = state;
   return (
-    <PlanWeekScreen
-      household={{
-        id: membership.householdId,
-        locale: membership.locale,
-        weekStart: membership.weekStart === 1 ? 1 : 7,
-        timezone: membership.timezone ?? null,
-      }}
-      canWrite={membership.role !== 'caregiver'}
-    />
+    <>
+      <PlanWeekScreen
+        household={{
+          id: membership.householdId,
+          locale: membership.locale,
+          weekStart: membership.weekStart === 1 ? 1 : 7,
+          timezone: membership.timezone ?? null,
+        }}
+        canWrite={membership.role !== 'caregiver'}
+        actions={{ onWeekPlanned: pushPrompt.offer }}
+      />
+      {pushPrompt.sheet}
+    </>
   );
 }

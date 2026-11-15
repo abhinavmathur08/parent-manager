@@ -1,0 +1,20 @@
+# Shared steps: launch the app with nothing on the device and wait for the sign-in screen.
+# Not run on its own (config.yaml runs top-level flows only).
+#
+# On the Android emulator, clearing the app's data kills its process, and Android's delayed
+# clean-up of the old task can then kill the newly started process as well ("Destroy timeout
+# of remove-task ... Killing <new pid> ... remove task" in logcat), leaving the splash screen
+# up. The app never ran, so nothing on screen can be waited for. A second launch, after the
+# old task has gone, is the fix; the two tries together wait no longer than one 60-second
+# wait did, and the sign-in screen must still appear.
+appId: ${APP_ID || 'com.myparentmanager'}
+---
+- retry:
+    maxRetries: 1
+    commands:
+      - launchApp:
+          clearState: true
+      - extendedWaitUntil:
+          visible:
+            id: sign-in-screen-title
+          timeout: 30000

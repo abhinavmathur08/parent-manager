@@ -1077,6 +1077,25 @@
       "failed": "Couldn't delete the recipe. Try again."
     }
   },
+  "notifications": {
+    "title": "Notifications",
+    "channelName": "Reminders",
+    "prompt": {
+      "title": "Want a nudge when it helps?",
+      "body": "We can remind you to plan the week and tell you when the list is ready. Quiet hours keep nights and naps silent.",
+      "turnOn": "Turn on notifications",
+      "notNow": "Not now"
+    },
+    "push": {
+      "section": "Push notifications",
+      "title": "Push notifications",
+      "on": "On",
+      "offExplainer": "Push notifications are off. Turn them on to get reminders on this phone.",
+      "turnOn": "Turn on",
+      "offInSystem": "Off in system settings. Turn notifications on there to get reminders.",
+      "openSettings": "Open system settings"
+    }
+  },
   "pantry": {
     "title": "Pantry and staples",
     "intro": "Staples are things you always have at home, like salt and oil. They're left off your list. Anything you mark as already at home is listed here for this week.",

@@ -81,6 +81,11 @@ export type PlanWeekActions = {
   onCopyLastWeek?: (start: PlanDate) => void;
   /** "Apply a template" (FR-PLAN-10, Premium). */
   onApplyTemplate?: (start: PlanDate) => void;
+  /**
+   * This device's own change has just planned the week (FR-PLAN-12), once per week: the push
+   * prompt (FR-NOT-2) follows it.
+   */
+  onWeekPlanned?: (start: PlanDate) => void;
 };
 
 /** Today in the household's timezone, checked again when the app comes back. */
@@ -175,7 +180,9 @@ export function PlanWeekScreen({
   }, [week.entries, undoable.hidden]);
   // "6 of 7 dinners planned" and the week-planned event (FR-PLAN-12).
   const dinners = dinnersPlanned(shownEntries, start);
-  const noteChange = useWeekPlannedEvent(household.id, start, today, dinners);
+  const noteChange = useWeekPlannedEvent(household.id, start, today, dinners, () =>
+    actions.onWeekPlanned?.(start),
+  );
   const titleOf = (entry: PlanEntryRow) =>
     (entry.recipe_id ? week.titles.get(entry.recipe_id) : undefined) ??
     entry.free_text ??

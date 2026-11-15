@@ -8,6 +8,7 @@ import '@/features/grocery/sync';
 import { GroceryListKeeper } from '@/features/grocery/keeper';
 import { useHousehold } from '@/features/household/membership';
 import '@/features/ingredients/sync';
+import { PushRegistration } from '@/features/notifications/push-registration';
 import '@/features/planner/sync';
 import '@/features/recipes/sync';
 import { FirstLoadGate, PendingChangesBanner, SyncProvider } from '@/lib/sync';
@@ -51,6 +52,7 @@ export default function TabsLayout() {
       <FirstLoadGate>
         {tabs}
         <GroceryListKeeper />
+        <PushRegistration />
         <PendingChangesBanner />
       </FirstLoadGate>
     </SyncProvider>
