@@ -19,6 +19,8 @@ import { useIngredients } from '@/features/ingredients/use-ingredients';
 import { AssumedAtHome } from '@/features/pantry/assumed-at-home';
 import { assumedAtHome } from '@/features/pantry/pantry';
 import { weekPantry } from '@/features/pantry/tables';
+import { useSyncedRows } from '@/lib/sync';
+import { track } from '@/lib/analytics';
 import { usePlanRows } from '@/features/planner/data';
 import { useUndoable } from '@/features/planner/use-undoable';
 import { startOfWeek, todayIn, type WeekStart } from '@/features/planner/week';
@@ -33,6 +35,11 @@ import { AddItemSheet } from './add-item-sheet';
 import { ExportSheet } from './export/export-sheet';
 import { itemSources } from './detail';
 import { FinishShoppingSheet } from './finish-shopping-sheet';
+import {
+  FREQUENT_SUGGESTION_HIDES,
+  frequentlyBought,
+  type FrequentSuggestionHideRow,
+} from './frequent';
 import { ItemSheet, type ItemEdit } from './item-sheet';
 import { useGroceryRows, useListIngredientFacts } from './data';
 import { weekNeeds } from './engine';
@@ -45,6 +52,7 @@ import {
   useDeleteItem,
   useEditItem,
   useFinishShopping,
+  useHideSuggestion,
   useMarkHave,
   useToggleItem,
 } from './writes';
@@ -88,6 +96,12 @@ export function ListScreen({ household }: { household: ListHousehold }) {
   const addItem = useAddItem();
   const { facts } = useListIngredientFacts();
   const [adding, setAdding] = useState(false);
+  // When the add sheet opened: the frequently bought window ends then (R-MEM-2).
+  const [addOpenedAt, setAddOpenedAt] = useState(0);
+  const openAdd = () => {
+    setAddOpenedAt(Date.now());
+    setAdding(true);
+  };
   const [exporting, setExporting] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -98,6 +112,8 @@ export function ListScreen({ household }: { household: ListHousehold }) {
   const undoable = useUndoable(() => setMessage(null));
   const members = useListMembers(household.id);
   const finishShopping = useFinishShopping();
+  const hideSuggestion = useHideSuggestion(household.id);
+  const hides = useSyncedRows<FrequentSuggestionHideRow>(FREQUENT_SUGGESTION_HIDES.name).rows;
   const [finishing, setFinishing] = useState<'confirm' | 'saving' | null>(null);
   const me = household.userId ?? null;
 
@@ -149,6 +165,25 @@ export function ListScreen({ household }: { household: ListHousehold }) {
     });
   }, [listId, plan.entries, recipeRows, weekStart, facts, pantry, items, ingredients, locale, t]);
 
+  // FR-MEM-3: frequently bought, for the add item sheet. Worked out when the sheet opens.
+  const frequent = useMemo(() => {
+    if (!adding || !listId) return [];
+    const staplesNow = new Set(
+      pantry.filter((r) => !r.deleted_at && r.status === 'staple').map((r) => r.ingredient_id),
+    );
+    return frequentlyBought({
+      events: purchases,
+      items,
+      listId,
+      staples: staplesNow,
+      hides,
+      now: addOpenedAt,
+    }).map((ingredientId) => ({
+      ingredientId,
+      name: ingredients.name(ingredientId) ?? t('list.unknownItem'),
+    }));
+  }, [adding, addOpenedAt, listId, pantry, purchases, items, hides, ingredients, t]);
+
   // FR-LIST-3: a short summary when a recalculation changes the open list.
   useEffect(
     () =>
@@ -182,7 +217,7 @@ export function ListScreen({ household }: { household: ListHousehold }) {
   const add = async (
     choice: AddChoice,
     amount: AddAmount | null,
-    source: 'typed' | 'suggestion_catalog' | 'assumed_at_home',
+    source: 'typed' | 'suggestion_catalog' | 'suggestion_frequent' | 'assumed_at_home',
   ) => {
     if (!listId) return;
     setAdding(false);
@@ -301,7 +336,7 @@ export function ListScreen({ household }: { household: ListHousehold }) {
     });
   }
   if (listId) {
-    actions.push({ label: t('list.addShort'), onPress: () => setAdding(true), testID: 'list-add' });
+    actions.push({ label: t('list.addShort'), onPress: () => openAdd(), testID: 'list-add' });
   }
   const topActions =
     actions.length === 2
@@ -343,7 +378,7 @@ export function ListScreen({ household }: { household: ListHousehold }) {
             variant="secondary"
             icon="add"
             label={t('list.addItem')}
-            onPress={() => setAdding(true)}
+            onPress={() => openAdd()}
             testID="list-empty-add"
           />
         ) : null}
@@ -438,6 +473,21 @@ export function ListScreen({ household }: { household: ListHousehold }) {
           region={household.region}
           unitSystem={unitSystem}
           onAdd={(choice, amount, source) => void add(choice, amount, source)}
+          frequent={frequent}
+          onAddFrequent={(ingredientId, rank) => {
+            track('frequent_suggestion_used', { rank });
+            void add(
+              { kind: 'ingredient', ingredientId, sectionId: facts.section(ingredientId) },
+              null,
+              'suggestion_frequent',
+            );
+          }}
+          onHideFrequent={(ingredientId) => {
+            hideSuggestion(ingredientId, hides).then(
+              () => undefined,
+              () => setMessage(t('list.add.hideFailed')),
+            );
+          }}
           onClose={() => setAdding(false)}
         />
         {detailItem && !detailItem.deleted_at ? (

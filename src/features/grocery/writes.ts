@@ -12,6 +12,12 @@ import { useSyncWriter } from '@/lib/sync';
 import { planAddItem, type AddAmount, type AddChoice, type AddResult } from './add-item';
 import { haveId, planHave, planItemDelete, planItemEdit } from './detail';
 import {
+  FREQUENT_SUGGESTION_HIDES,
+  HIDE_MS,
+  hideId,
+  type FrequentSuggestionHideRow,
+} from './frequent';
+import {
   planCheckEvent,
   planFinishShopping,
   planUncheckEvent,
@@ -123,7 +129,7 @@ export function useAddItem() {
       items: readonly GroceryItemRow[];
       choice: AddChoice;
       amount: AddAmount | null;
-      source: 'typed' | 'suggestion_catalog' | 'assumed_at_home';
+      source: 'typed' | 'suggestion_catalog' | 'suggestion_frequent' | 'assumed_at_home';
     }): Promise<AddResult> => {
       const result = planAddItem({ ...input, newId: randomUUID() });
       if (result.kind !== 'exists') await apply([result.op]);
@@ -189,5 +195,33 @@ export function useDeleteItem() {
       track('list_item_deleted', { origin: item.origin });
     },
     [apply],
+  );
+}
+
+/**
+ * "Don't suggest" (FR-MEM-5): hides a frequently bought ingredient for 90 days. Hiding it
+ * again after that updates the same row; the server sets the time either way.
+ */
+export function useHideSuggestion(householdId: string) {
+  const writer = useSyncWriter();
+  return useCallback(
+    async (ingredientId: string, hides: readonly FrequentSuggestionHideRow[]) => {
+      const hiddenUntil = new Date(Date.now() + HIDE_MS).toISOString();
+      const current = hides.find((h) => h.ingredient_id === ingredientId && !h.deleted_at);
+      if (current) {
+        await writer.update(FREQUENT_SUGGESTION_HIDES.name, current.id, {
+          hidden_until: hiddenUntil,
+        });
+      } else {
+        await insertStable(
+          writer,
+          FREQUENT_SUGGESTION_HIDES.name,
+          (index) => hideId(householdId, ingredientId, index),
+          { ingredient_id: ingredientId, hidden_until: hiddenUntil },
+        );
+      }
+      track('frequent_suggestion_hidden');
+    },
+    [writer, householdId],
   );
 }
