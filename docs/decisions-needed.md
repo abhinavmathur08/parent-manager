@@ -4,7 +4,7 @@ This is the decision log. Each entry names the backlog items and GitHub issues i
 
 ## Status at a glance
 
-Updated 2026-11-12.
+Updated 2026-11-15.
 
 | ID   | Decision                                   | Status                                                 | Needed by                                                                      |
 | ---- | ------------------------------------------ | ------------------------------------------------------ | ------------------------------------------------------------------------------ |
@@ -17,7 +17,7 @@ Updated 2026-11-12.
 | D-7  | AI provider and data terms                 | Deferred 2026-11-08                                    | Before AI parsing (R-05.3, #54)                                                |
 | D-8  | Starter recipe content                     | Deferred                                               | Before the internal beta (L-03.1). Development uses placeholder recipes        |
 | D-9  | Free-tier limits                           | Decided 2026-11-08                                     |                                                                                |
-| D-10 | RevenueCat, products, prices and trial     | Deferred                                               | Before subscriptions are built (M-01.1, #94) and the beta. Needs D-5           |
+| D-10 | RevenueCat, products, prices and trial     | Interim, decided 2026-11-15: mock store                | Real products, prices and RevenueCat before the beta                           |
 | D-11 | Legal review and no ads                    | Deferred                                               | Before the external beta (L-01.2, #102)                                        |
 | D-12 | Updates channel                            | Deferred                                               | Any time; blocks nothing                                                       |
 | D-13 | Offline sync approach                      | Decided 2026-11-08: build our own                      |                                                                                |
@@ -109,11 +109,16 @@ These don't block development or staging. Each is listed with the point by which
 - **Recommendation:** commission or write 40 to 60 original recipes, tagged for new parents. Ingredient lists are fine to use freely, but instructions and photos are copyrighted and can't be scraped.
 - **In the meantime:** development uses a handful of placeholder recipes. R-04.1 (the read-only library and save-a-copy) doesn't need the final content; R-04.2 (#51) does.
 
-### D-10 RevenueCat, products, prices and trial: needed before subscriptions are built
+### D-10 RevenueCat, products, prices and trial: interim, decided 2026-11-15, mock store
+
+- **Interim decision, in the product owner's words:** "build D-10 entirely with a subscription flow that imitates all aspects without charging a credit card. We can add RevenueCat later".
+- **What that means:** subscriptions are built against a provider-neutral billing interface shaped like RevenueCat's SDK (`src/lib/billing/`, architecture section 8). The only implementation is a mock store that keeps real subscription state on the server and never charges anyone. Its monthly and annual prices are PROPOSED placeholders, and the trial is the spec's PROPOSED 14 days.
+- **Safety:** the mock is never selected by a production build, and the server refuses mock purchases unless `BILLING_MOCK_ENABLED` is set on that project. No migration sets it.
+- **Still with the product owner, before the beta:** the real store products, prices and trial, and RevenueCat. RevenueCat then plugs in as a second implementation of the same interface.
 
 This is a human gate: Claude never changes billing configuration. It needs D-5 first.
 
-**You do:**
+**You do, before the beta:**
 
 - Create the RevenueCat account.
 - Set up monthly and annual products and the trial length (PROPOSED: 14 days) in App Store Connect and Play Console.

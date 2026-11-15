@@ -82,6 +82,15 @@ export function googleSignInPlugins(
 }
 
 /**
+ * Whether this build may use the mock billing store (M-01.1). Production builds never may;
+ * the only exception is the release build made for end-to-end tests against the local stack
+ * (E2E_LOCAL_BACKEND=1), which is never shipped.
+ */
+export function billingMockAllowed(variant: AppVariant, e2eLocalBackend: string | undefined) {
+  return variant !== 'production' || e2eLocalBackend === '1';
+}
+
+/**
  * Sentry (F-07.1). The plugin is always on, so its native SDK is in every build. Source maps
  * upload from builds only when `SENTRY_ORG` and `SENTRY_PROJECT` are set, which also needs
  * the `SENTRY_AUTH_TOKEN` secret in EAS; without them builds skip the upload rather than
@@ -205,6 +214,9 @@ function buildConfig(
     },
     extra: {
       appVariant: variant,
+      // The mock billing store (M-01.1) never runs in a build that ships: only development,
+      // preview, and the end-to-end builds against the local stack. See src/lib/billing/config.ts.
+      billingMockAllowed: billingMockAllowed(variant, process.env.E2E_LOCAL_BACKEND),
       eas: {
         projectId: EAS_PROJECT_ID,
       },
