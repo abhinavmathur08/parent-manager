@@ -32,6 +32,7 @@ import { formatList, formatQuantity, type AppLocale, type Region, type UnitSyste
 
 import type { AddAmount, AddChoice } from './add-item';
 import { AddItemSheet } from './add-item-sheet';
+import { ExportSheet } from './export/export-sheet';
 import { itemSources } from './detail';
 import { FinishShoppingSheet } from './finish-shopping-sheet';
 import {
@@ -101,6 +102,7 @@ export function ListScreen({ household }: { household: ListHousehold }) {
     setAddOpenedAt(Date.now());
     setAdding(true);
   };
+  const [exporting, setExporting] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [detailId, setDetailId] = useState<string | null>(null);
@@ -435,6 +437,25 @@ export function ListScreen({ household }: { household: ListHousehold }) {
               testID="list-finish"
             />
           </View>
+        ) : null}
+        {list ? (
+          <Button
+            variant="secondary"
+            icon="share"
+            label={t('list.export.open')}
+            onPress={() => setExporting(true)}
+            testID="list-export"
+          />
+        ) : null}
+        {list && exporting ? (
+          <ExportSheet
+            visible
+            onClose={() => setExporting(false)}
+            view={view}
+            weekStart={list.week_start}
+            locale={locale}
+            householdId={household.id}
+          />
         ) : null}
         <FinishShoppingSheet
           visible={finishing !== null}

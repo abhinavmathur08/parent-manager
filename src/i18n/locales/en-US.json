@@ -808,6 +808,34 @@
       "undo": "Undo"
     },
     "partnerActivity": "Someone else is updating the list.",
+    "export": {
+      "open": "Print or share the list",
+      "title": "Get the list out",
+      "includeChecked": "Include checked items",
+      "includeCheckedHint": "Items already in the cart are left out unless you include them.",
+      "emptyList": "There's nothing on the list to export yet.",
+      "allChecked": "Everything is checked off. Include checked items to export them.",
+      "print": "Print",
+      "pdf": "Save or send a PDF",
+      "failed": "That didn't work. Try again, or use another option.",
+      "listName": "Groceries",
+      "line": "{{quantity}} {{name}}",
+      "checked": "Checked",
+      "unchecked": "Not checked",
+      "share": "Share as text",
+      "copy": "Copy as text",
+      "copied": "Copied. Paste it into any app.",
+      "textTitle": "{{title}}, {{week}}",
+      "textItem": "{{box}} {{line}}",
+      "box": "☐",
+      "boxChecked": "☑",
+      "reminders": "Add to Reminders",
+      "remindersDone_one": "Reminders is up to date with {{count}} item.",
+      "remindersDone_other": "Reminders is up to date with {{count}} items.",
+      "remindersDenied": "Parent Manager can't reach Reminders. To turn it on, open Settings, then Apps, Parent Manager, Reminders. Or share or copy the list as text instead.",
+      "openSettings": "Open Settings",
+      "remindersPermission": "Parent Manager adds your grocery list to Reminders when you ask, so you can shop with Siri and your watch."
+    },
     "finish": {
       "action": "Finish shopping",
       "title": "Finish shopping?",
@@ -889,7 +917,17 @@
       "replace": "Replace this week",
       "replaced": "Replaced this week with last week"
     },
-    "progress": "{{planned}} of {{total}} dinners planned"
+    "progress": "{{planned}} of {{total}} dinners planned",
+    "leftovers": {
+      "mark": "Mark as leftovers",
+      "choose": "Leftovers of",
+      "none": "There's nothing earlier this week or last week to link to.",
+      "when": "{{day}} · {{slot}}",
+      "of": "Leftovers of {{title}} ({{when}})",
+      "unlink": "Unlink leftovers",
+      "tag": "Leftovers",
+      "note": "Leftovers of {{title}} ({{when}}). They add nothing to the list: that meal's ingredients cover these servings."
+    }
   },
   "recipes": {
     "title": "Recipes",
@@ -1028,6 +1066,15 @@
     "starter": {
       "saveCopy": "Save a copy to edit",
       "copyFailed": "Couldn't save a copy. Try again."
+    },
+    "delete": {
+      "action": "Delete recipe",
+      "title": "Delete {{title}}?",
+      "planned_one": "It's on your plan {{value}} time from this week on. That meal stays on the plan as text and won't add anything to the list.",
+      "planned_other": "It's on your plan {{value}} times from this week on. Those meals stay on the plan as text and won't add anything to the list.",
+      "unplanned": "It isn't on your plan from this week on. Earlier meals keep its name.",
+      "confirm": "Delete",
+      "failed": "Couldn't delete the recipe. Try again."
     }
   },
   "pantry": {
