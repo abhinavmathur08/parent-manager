@@ -137,6 +137,9 @@ describe('S-10 week view (FR-PLAN-1, FR-PLAN-2)', () => {
     expect(screen.queryByTestId('plan-empty')).toBeNull();
     const dinner = screen.getByTestId('plan-slot-1-dinner');
     expect(dinner).toHaveTextContent(/Mac and cheese.*2.5 servings.*Salad/);
+    // E2E flows find entries by day, slot and order.
+    expect(screen.getByTestId('plan-slot-1-dinner-entry-0')).toHaveTextContent(/Mac and cheese/);
+    expect(screen.getByTestId('plan-slot-1-dinner-entry-1')).toHaveTextContent(/Salad/);
     expect(await screen.findByTestId('plan-entry-e1-allergen-milk')).toHaveTextContent(/Mia/);
     expect(screen.queryByTestId('plan-entry-e2-allergen-milk')).toBeNull();
     expect(screen.getByTestId('plan-entry-e3')).toHaveTextContent(/Deleted recipe/);
@@ -482,5 +485,74 @@ describe('week progress (FR-PLAN-12)', () => {
   it('has no progress bar on an empty week', async () => {
     await show();
     expect(screen.queryByTestId('plan-progress')).toBeNull();
+  });
+});
+
+describe('leftover links (P-04, FR-PLAN-8)', () => {
+  // Week of Nov 15 (Sunday start). Last week starts Nov 8.
+  const chili = { ...base, id: 'r1', title: 'Chili', servings: 4, tags: [] };
+  const rows = (lunch: Record<string, unknown> = {}) => ({
+    recipes: [chili],
+    plan_entries: [
+      entry('old', '2026-11-01', 'dinner', { free_text: 'Too old' }),
+      entry('last', '2026-11-12', 'dinner', { free_text: 'Roast' }),
+      entry('mon', '2026-11-16', 'dinner', { recipe_id: 'r1', servings: 4 }),
+      entry('tue', '2026-11-17', 'lunch', { free_text: 'Sandwich', ...lunch }),
+      entry('wed', '2026-11-18', 'dinner', { free_text: 'Later' }),
+    ],
+  });
+
+  it('offers only earlier entries from this week and last, nearest first, and links one', async () => {
+    mockRows = rows();
+    await show();
+    await fireEvent(screen.getByTestId('plan-entry-tue'), 'longPress');
+    await fireEvent.press(screen.getByTestId('entry-actions-leftovers'));
+    expect(screen.getByTestId('entry-leftover-option-0')).toHaveTextContent(
+      /Chili.*Mon, Nov 16.*Dinner/,
+    );
+    expect(screen.getByTestId('entry-leftover-option-1')).toHaveTextContent(/Roast/);
+    expect(screen.queryByTestId('entry-leftover-option-2')).toBeNull();
+    await fireEvent.press(screen.getByTestId('entry-leftover-option-0'));
+    expect(mockUpdate).toHaveBeenCalledWith('plan_entries', 'tue', {
+      leftover_of_entry_id: 'mon',
+      recipe_id: 'r1',
+      free_text: null,
+    });
+  });
+
+  it('says when there is nothing earlier to link to', async () => {
+    mockRows = { plan_entries: [entry('mon', '2026-11-16', 'breakfast', { free_text: 'Eggs' })] };
+    await show();
+    await fireEvent(screen.getByTestId('plan-entry-mon'), 'longPress');
+    await fireEvent.press(screen.getByTestId('entry-actions-leftovers'));
+    expect(screen.getByTestId('entry-leftover-none')).toBeOnTheScreen();
+  });
+
+  it('labels linked leftovers, explains them in S-12, and unlinks', async () => {
+    mockRows = rows({ recipe_id: 'r1', free_text: null, leftover_of_entry_id: 'mon' });
+    await show();
+    expect(screen.getByTestId('plan-entry-tue-leftovers')).toBeOnTheScreen();
+    expect(screen.queryByTestId('plan-entry-mon-leftovers')).toBeNull();
+    await fireEvent.press(screen.getByTestId('plan-entry-tue'));
+    expect(screen.getByTestId('entry-leftovers-of')).toHaveTextContent(/Leftovers of Chili/);
+    await fireEvent(screen.getByTestId('plan-entry-tue'), 'longPress');
+    expect(screen.getByTestId('entry-actions-leftovers-of')).toHaveTextContent(/Chili/);
+    await fireEvent.press(screen.getByTestId('entry-actions-unlink'));
+    expect(mockUpdate).toHaveBeenCalledWith('plan_entries', 'tue', { leftover_of_entry_id: null });
+  });
+
+  it('drops the links a move breaks', async () => {
+    mockRows = rows({ recipe_id: 'r1', free_text: null, leftover_of_entry_id: 'mon' });
+    await show();
+    await fireEvent(screen.getByTestId('plan-entry-mon'), 'longPress');
+    // Wednesday dinner: after Tuesday lunch, so Tuesday can't be its leftovers any more.
+    await fireEvent.press(screen.getByTestId('entry-actions-day-3'));
+    await fireEvent.press(screen.getByTestId('entry-actions-move'));
+    expect(mockUpdate).toHaveBeenCalledWith('plan_entries', 'mon', {
+      date: '2026-11-18',
+      slot: 'dinner',
+      position: 1,
+    });
+    expect(mockUpdate).toHaveBeenCalledWith('plan_entries', 'tue', { leftover_of_entry_id: null });
   });
 });
