@@ -553,7 +553,7 @@
         "premium_required": "Family members and caregivers are part of Premium."
       },
       "upgradeTitle": "Invite more helpers with Premium",
-      "upgradeBody": "Premium adds up to 6 family members and caregivers. Upgrading from the app is coming soon.",
+      "upgradeBody": "Premium adds up to 6 family members and caregivers.",
       "create": "Create invite",
       "codeLabel": "Invite code",
       "codeA11y": "Invite code {{code}}",
@@ -1046,5 +1046,91 @@
       "confirm": "Delete",
       "failed": "Couldn't delete the recipe. Try again."
     }
+  },
+  "premium": {
+    "name": "Premium",
+    "badge": "Premium",
+    "benefits": {
+      "seats": {
+        "title": "Family and caregiver seats",
+        "body": "Invite up to 6 grandparents, nannies and other helpers, each with the access their role allows."
+      },
+      "ai": {
+        "title": "More recipe imports",
+        "body": "{{premium}} imports a month instead of {{free}}."
+      },
+      "templates": {
+        "title": "Saved week templates",
+        "body": "Save a week you liked and plan it again in one tap."
+      },
+      "history": {
+        "title": "All your past weeks",
+        "body": "See every past plan and list, not just the last 4 weeks."
+      }
+    },
+    "sheet": {
+      "title": "Premium for your household",
+      "lead": "Unlocks this",
+      "alsoIncludes": "Also included",
+      "allMembers": "One subscription covers everyone in the household.",
+      "testNotice": "Test purchase: this build uses a test store, and no card is charged.",
+      "planLabel": "Choose a plan",
+      "monthly": "Monthly",
+      "annual": "Yearly",
+      "perMonth": "{{price}} a month",
+      "perYear": "{{price}} a year",
+      "startTrial": "Start {{days}}-day free trial",
+      "subscribe": "Subscribe",
+      "restore": "Restore purchases",
+      "notNow": "Not now",
+      "close": "Close",
+      "done": "Done",
+      "termsTrial": "Free for {{days}} days, then {{price}}. It renews automatically until you turn off auto-renew at least 24 hours before the renewal date.",
+      "termsNoTrial": "{{price}}, renewing automatically until you turn off auto-renew at least 24 hours before the renewal date.",
+      "manageStore": "Manage or cancel it any time in your store account's subscription settings.",
+      "manageMock": "Manage or cancel the test subscription in Household, then Subscription.",
+      "unavailable": "Purchases aren't available in this build.",
+      "loading": "Loading plans",
+      "askParent": {
+        "title": "Ask a parent",
+        "body": "Only a parent can start Premium for the household. Ask a parent to open Premium in the Household tab."
+      },
+      "alreadyPremium": {
+        "title": "Your household has Premium",
+        "body": "Everything in Premium is already on for everyone in the household."
+      },
+      "activating": {
+        "title": "Activating Premium",
+        "body": "This can take a minute. You can keep using the app."
+      },
+      "active": {
+        "title": "Premium is on",
+        "body": "Everyone in the household has Premium now."
+      },
+      "stalled": {
+        "title": "Still activating",
+        "body": "Your purchase went through, but Premium isn't on yet. Try restoring your purchases. If that doesn't help, contact support from the store's receipt."
+      },
+      "errors": {
+        "network": "You're offline. Connect to the internet and try again.",
+        "alreadyPremium": "Your household already has Premium, so there's nothing to buy.",
+        "alreadySubscribed": "Your store account already has a subscription. Restore purchases instead.",
+        "notAllowed": "Only a parent can buy Premium for the household.",
+        "unavailable": "Purchases aren't available in this build.",
+        "generic": "That didn't work. Nothing was charged. Try again."
+      },
+      "restoreNone": "We didn't find a subscription for this store account.",
+      "restoreFound": "Your subscription was restored."
+    },
+    "hub": {
+      "title": "Premium",
+      "free": "Free",
+      "premium": "Premium"
+    },
+    "allowance": {
+      "used": "{{used}} of {{total}} imports used this month",
+      "reached": "You've used this month's imports. They reset on {{date}}. You can still add recipes by hand."
+    },
+    "seePremium": "See Premium"
   }
 }

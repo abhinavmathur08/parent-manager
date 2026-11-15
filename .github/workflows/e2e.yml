@@ -43,7 +43,10 @@ jobs:
       # The app reaches it on 127.0.0.1 through `adb reverse`, and Maestro reads Mailpit.
       - name: Start local Supabase
         run: |
-          pnpm supabase start -x realtime,storage-api,imgproxy,postgres-meta,studio,edge-runtime,logflare,vector,supavisor
+          # The mock billing store (M-01.2) runs only where BILLING_MOCK_ENABLED is set. This is
+          # the throwaway local stack; the file is git-ignored and never deployed.
+          echo "BILLING_MOCK_ENABLED=true" > supabase/functions/.env
+          pnpm supabase start -x realtime,storage-api,imgproxy,postgres-meta,studio,logflare,vector,supavisor
           # Only the publishable key, which is public, goes into the build.
           key="$(pnpm --silent supabase status -o json | jq -r '.PUBLISHABLE_KEY // .ANON_KEY // empty')"
           if [ -z "${key}" ]; then
@@ -52,6 +55,14 @@ jobs:
           fi
           echo "EXPO_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321" >> "$GITHUB_ENV"
           echo "EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY=${key}" >> "$GITHUB_ENV"
+          # The mock store, allowed only because this build sets E2E_LOCAL_BACKEND=1 (app.config.ts).
+          echo "EXPO_PUBLIC_BILLING_PROVIDER=mock" >> "$GITHUB_ENV"
+      - name: Warm up the Edge Functions
+        # A cold worker takes a while to boot; the Premium flow shouldn't spend its wait on it.
+        run: |
+          curl -s -m 120 -o /dev/null -w '%{http_code}\n' -X POST \
+            http://127.0.0.1:54321/functions/v1/mock-store \
+            -H "apikey: ${EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY}" -d '{"action":"status"}' || true
       - name: Generate the native Android project
         env:
           E2E_LOCAL_BACKEND: '1' # allows plain HTTP to the local stack; see app.config.ts

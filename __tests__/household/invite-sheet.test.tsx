@@ -18,6 +18,10 @@ function mockQuery(result: unknown) {
   return chain;
 }
 
+const mockOpenPremiumSheet = jest.fn();
+jest.mock('@/features/subscription/premium-sheet', () => ({
+  usePremiumSheet: () => ({ openPremiumSheet: mockOpenPremiumSheet }),
+}));
 jest.mock('@/lib/supabase', () => ({
   getSupabase: () => ({
     rpc: mockRpc,
@@ -107,7 +111,10 @@ describe('S-27 invite sheet (FR-HH-1, FR-HH-3)', () => {
     await renderSheet();
     await fireEvent.press(await screen.findByTestId('invite-role-caregiver'));
     expect(screen.getByTestId('invite-upgrade')).toBeOnTheScreen();
-    expect(screen.getByTestId('invite-create')).toBeDisabled();
+    expect(screen.queryByTestId('invite-create')).toBeNull();
+    // Inviting a caregiver on Free is a moment of need (FR-PAY-5).
+    await fireEvent.press(screen.getByTestId('invite-see-premium'));
+    expect(mockOpenPremiumSheet).toHaveBeenCalledWith('caregiver_invite', { afterSheet: true });
   });
 
   it('shows the server refusal when seats changed since the sheet opened', async () => {

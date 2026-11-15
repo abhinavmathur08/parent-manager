@@ -1,0 +1,78 @@
+# Premium at a moment of need (M-02.1, S-32, FR-PAY-4, FR-PAY-5): a parent on Free tries to
+# invite a caregiver, the Premium sheet opens with caregiver seats first and the test-store
+# notice, the parent starts the monthly trial, and once the server entitlement arrives the
+# caregiver invite works. Uses the mock store: the local stack needs BILLING_MOCK_ENABLED=true
+# in supabase/functions/.env and the build EXPO_PUBLIC_BILLING_PROVIDER=mock (see README.md).
+appId: ${APP_ID || 'com.myparentmanager'}
+tags:
+  - backend
+---
+- runFlow: subflows/create-household.yaml
+- tapOn:
+    id: tab-household
+- tapOn:
+    id: open-members
+- extendedWaitUntil:
+    visible:
+      id: members-screen-title
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: open-invite
+- tapOn:
+    id: open-invite
+- extendedWaitUntil:
+    visible:
+      id: invite-sheet-header
+    timeout: 10000
+- tapOn:
+    id: invite-role-caregiver
+- assertVisible:
+    id: invite-upgrade
+- tapOn:
+    id: invite-see-premium
+- extendedWaitUntil:
+    visible:
+      id: premium-sheet-header
+    timeout: 10000
+- assertVisible:
+    id: premium-test-notice
+- assertVisible:
+    id: premium-benefit-seats
+- scrollUntilVisible:
+    element:
+      id: premium-plan-monthly
+    centerElement: true
+- tapOn:
+    id: premium-plan-monthly
+- scrollUntilVisible:
+    element:
+      id: premium-terms
+- tapOn:
+    id: premium-start-trial
+# The tier comes from the server (FR-PAY-1); FR-PAY-8 allows up to 60 seconds.
+- extendedWaitUntil:
+    visible:
+      id: premium-status-active
+    timeout: 90000
+- tapOn:
+    id: premium-done
+- scrollUntilVisible:
+    element:
+      id: open-invite
+- tapOn:
+    id: open-invite
+- extendedWaitUntil:
+    visible:
+      id: invite-sheet-header
+    timeout: 10000
+- tapOn:
+    id: invite-role-caregiver
+- assertNotVisible:
+    id: invite-upgrade
+- tapOn:
+    id: invite-create
+- extendedWaitUntil:
+    visible:
+      id: invite-code
+    timeout: 10000

@@ -39,6 +39,15 @@ const importInput = oneOf('url', 'text', 'photo', 'screenshot');
 const exportTarget = oneOf('print', 'pdf', 'apple_reminders', 'share_text', 'copy_text');
 const weekMode = oneOf('add', 'replace');
 const exportScope = oneOf('household', 'account');
+export const PAYWALL_TRIGGERS = [
+  'caregiver_invite',
+  'family_invite',
+  'ai_allowance',
+  'template',
+  'history',
+  'premium_section',
+] as const;
+const productPeriod = oneOf('monthly', 'annual');
 
 /** Spec section 3, the "Analytics events" table of each area. */
 export const ANALYTICS_EVENTS = {
@@ -168,6 +177,13 @@ export const ANALYTICS_EVENTS = {
   account_deletion_requested: { was_only_member: bool },
   account_deleted: { was_only_member: bool },
   analytics_opt_out_changed: { opted_out: bool },
+  // 3.13 Free versus Premium (M-02.1). `premium_section` is the Household tab's Premium row,
+  // the one place Premium shows without a trigger (FR-PAY-5).
+  paywall_viewed: { trigger: oneOf(...PAYWALL_TRIGGERS), role },
+  trial_started: { product_period: productPeriod },
+  purchase_completed: { product_period: productPeriod, is_trial: bool },
+  purchase_failed: { error_code: code },
+  purchases_restored: { found: bool },
 } as const satisfies Record<string, Record<string, PropertySpec>>;
 
 export type AnalyticsEvent = keyof typeof ANALYTICS_EVENTS;

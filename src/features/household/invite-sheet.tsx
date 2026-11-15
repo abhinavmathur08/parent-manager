@@ -20,6 +20,7 @@ import {
 } from '@/features/household/invitations';
 import { useHousehold } from '@/features/household/membership';
 import { roleAvailability, useSeats } from '@/features/household/seats';
+import { usePremiumSheet } from '@/features/subscription/premium-sheet';
 import { useOnline } from '@/hooks/use-online';
 import { useTheme } from '@/hooks/use-theme';
 import { formatDate } from '@/i18n';
@@ -52,6 +53,7 @@ export function InviteSheet({
   const [error, setError] = useState<string>();
   const [copied, setCopied] = useState(false);
 
+  const { openPremiumSheet } = usePremiumSheet();
   const availability = seats ? roleAvailability(seats, role) : null;
 
   function close() {
@@ -118,6 +120,19 @@ export function InviteSheet({
         testID="invite-copy"
       />
     </View>
+  ) : availability === 'premium_required' ? (
+    // FR-PAY-5: inviting a family member or caregiver is a moment of need.
+    <Button
+      label={t('premium.seePremium')}
+      onPress={() => {
+        close();
+        openPremiumSheet(role === 'caregiver' ? 'caregiver_invite' : 'family_invite', {
+          afterSheet: true,
+        });
+      }}
+      fullWidth
+      testID="invite-see-premium"
+    />
   ) : (
     <Button
       label={t('household.invite.create')}
