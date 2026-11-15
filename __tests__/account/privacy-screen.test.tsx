@@ -13,6 +13,12 @@ jest.mock('@/lib/analytics', () => ({
   isAnalyticsOptedOut: () => mockOptedOut,
   setAnalyticsOptOut: (value: boolean) => mockSetOptOut(value),
 }));
+const mockShareExport = jest.fn(async (..._args: unknown[]) => undefined);
+jest.mock('@/features/account/export', () => ({
+  shareExport: (...args: unknown[]) => mockShareExport(...args),
+}));
+let mockOnline = true;
+jest.mock('@/hooks/use-online', () => ({ useOnline: () => mockOnline }));
 jest.mock('expo-router', () => ({
   router: { back: jest.fn(), replace: jest.fn(), canGoBack: () => true },
 }));
@@ -31,7 +37,15 @@ const renderScreen = () =>
 beforeEach(() => {
   jest.clearAllMocks();
   mockOptedOut = false;
+  mockOnline = true;
 });
+
+const renderFor = (isParent: boolean) =>
+  render(
+    <SafeAreaProvider initialMetrics={metrics}>
+      <PrivacyScreen household={{ id: 'hh', isParent }} />
+    </SafeAreaProvider>,
+  );
 
 describe('privacy and data (S-30)', () => {
   it('turns analytics off and back on for this device (FR-PRIV-5)', async () => {
@@ -68,5 +82,38 @@ describe('privacy and data (S-30)', () => {
       'https://example.com/legal/en-us/terms',
     );
     expect(policyUrlForLanguage('terms', 'en-AU', null)).toBeNull();
+  });
+});
+
+describe('data export (FR-PRIV-2, spec 2.2 rows 35 and 36)', () => {
+  it('lets a parent export the household and their own data', async () => {
+    await renderFor(true);
+    await fireEvent.press(screen.getByTestId('privacy-export-household'));
+    expect(mockShareExport).toHaveBeenCalledWith(
+      expect.objectContaining({ scope: 'household', householdId: 'hh' }),
+    );
+    expect(screen.getByTestId('privacy-export-account')).toBeOnTheScreen();
+  });
+
+  it('lets other members export only their own data', async () => {
+    await renderFor(false);
+    expect(screen.queryByTestId('privacy-export-household')).toBeNull();
+    await fireEvent.press(screen.getByTestId('privacy-export-account'));
+    expect(mockShareExport).toHaveBeenCalledWith(expect.objectContaining({ scope: 'account' }));
+  });
+
+  it('is off offline, with the reason (NFR-OFF-2)', async () => {
+    mockOnline = false;
+    await renderFor(true);
+    expect(screen.getByTestId('privacy-export-household')).toHaveTextContent(/offline/);
+    await fireEvent.press(screen.getByTestId('privacy-export-household'));
+    expect(mockShareExport).not.toHaveBeenCalled();
+  });
+
+  it('says when the export fails', async () => {
+    mockShareExport.mockRejectedValueOnce(new Error('network'));
+    await renderFor(false);
+    await fireEvent.press(screen.getByTestId('privacy-export-account'));
+    expect(await screen.findByTestId('privacy-export-error')).toBeOnTheScreen();
   });
 });
