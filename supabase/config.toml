@@ -446,6 +446,11 @@ port = 54327
 backend = "postgres"
 
 # Experimental features may be deprecated any time
+# N-01.3: pg_cron calls `notify` with its own shared secret (NOTIFY_CRON_SECRET), not a user's
+# JWT, so the gateway's JWT check is off and the function checks the secret itself.
+[functions.notify]
+verify_jwt = false
+
 [experimental]
 # Configures S3 bucket URL, eg. <bucket_name>.s3-<region>.amazonaws.com
 s3_host = "env(S3_HOST)"

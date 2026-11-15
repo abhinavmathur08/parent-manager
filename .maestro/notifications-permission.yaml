@@ -1,0 +1,134 @@
+# N-01.1 (FR-NOT-2, FR-ONB-8): push permission is asked in context. Onboarding never asks;
+# the first planned week (5 dinners, FR-PLAN-12) offers notifications in a sheet, and
+# "Not now" leaves them off without the system prompt. Notification settings then show the
+# push status. Ends signed out. Needs the local stack; see the Testing section of README.md.
+appId: ${APP_ID || 'com.myparentmanager'}
+tags:
+  - backend
+---
+- runFlow: subflows/create-household.yaml
+# Onboarding is over and nothing asked for permission.
+- assertNotVisible:
+    id: push-prompt-body
+# Maestro grants every permission at launch; take notifications back so the app can ask.
+# Android needs the permission's own name (this flow is tagged backend, so it runs there).
+- launchApp:
+    permissions:
+      android.permission.POST_NOTIFICATIONS: deny
+- extendedWaitUntil:
+    visible:
+      id: plan-days
+    timeout: 20000
+
+# Notification settings read push as not asked yet, with a way to turn it on.
+- tapOn:
+    id: tab-household
+- scrollUntilVisible:
+    element:
+      id: open-notifications
+- tapOn:
+    id: open-notifications
+- extendedWaitUntil:
+    visible:
+      id: push-turn-on
+    timeout: 10000
+- tapOn:
+    id: tab-plan
+- extendedWaitUntil:
+    visible:
+      id: plan-days
+    timeout: 10000
+
+# Day 1 from the starter library, then the recent recipe up to 5 dinners.
+- scrollUntilVisible:
+    element:
+      id: plan-empty
+    direction: UP
+- scrollUntilVisible:
+    element:
+      id: plan-add-0-dinner
+    centerElement: true
+- tapOn:
+    id: plan-add-0-dinner
+- extendedWaitUntil:
+    visible:
+      id: add-search
+    timeout: 10000
+- tapOn:
+    id: add-search
+- inputText: lentil
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: add-starter-0
+- tapOn:
+    id: add-starter-0
+- extendedWaitUntil:
+    notVisible:
+      id: add-search
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: plan-range
+    direction: UP
+- runFlow:
+    file: subflows/plan-recent-dinner.yaml
+    env:
+      DAY: '1'
+- runFlow:
+    file: subflows/plan-recent-dinner.yaml
+    env:
+      DAY: '2'
+- runFlow:
+    file: subflows/plan-recent-dinner.yaml
+    env:
+      DAY: '3'
+- assertNotVisible:
+    id: push-prompt-body
+# The fifth dinner, without the subflow's last scroll: a swipe on the sheet's scrim would
+# close the prompt that opens now.
+- scrollUntilVisible:
+    element:
+      id: plan-add-4-dinner
+    centerElement: true
+- tapOn:
+    id: plan-add-4-dinner
+- extendedWaitUntil:
+    visible:
+      id: add-recipe-0
+    timeout: 10000
+- tapOn:
+    id: add-recipe-0
+
+# The fifth dinner plans the week: the sheet explains before anything asks the system.
+- extendedWaitUntil:
+    visible:
+      id: push-prompt-body
+    timeout: 10000
+- tapOn:
+    id: push-prompt-not-now
+- extendedWaitUntil:
+    notVisible:
+      id: push-prompt-body
+    timeout: 10000
+
+# "Not now" leaves push off, still with a way to turn it on.
+- tapOn:
+    id: tab-household
+# The Household tab may still show its notification settings from before.
+- runFlow:
+    when:
+      notVisible:
+        id: push-turn-on
+    commands:
+      - scrollUntilVisible:
+          element:
+            id: open-notifications
+      - tapOn:
+          id: open-notifications
+- extendedWaitUntil:
+    visible:
+      id: push-turn-on
+    timeout: 10000
+
+- runFlow: subflows/sign-out.yaml

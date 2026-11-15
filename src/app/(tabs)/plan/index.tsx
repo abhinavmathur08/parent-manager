@@ -1,19 +1,39 @@
+import { useAuth } from '@/features/auth/session';
 import { useHousehold } from '@/features/household/membership';
+import { useInboxBell } from '@/features/notifications/inbox-bell';
+import { announceListReady } from '@/features/notifications/list-ready';
+import { usePushPrompt } from '@/features/notifications/push-prompt';
 import { PlanWeekScreen } from '@/features/planner/week-screen';
 
 export default function PlanRoute() {
   const { state } = useHousehold();
+  const auth = useAuth();
+  // The first planned week offers push notifications, in context (FR-NOT-2).
+  const pushPrompt = usePushPrompt(auth.status === 'signedIn' ? auth.session.user.id : null);
+  // The header bell opens the inbox (S-24).
+  const bell = useInboxBell();
   if (state.status !== 'member') return null;
   const { membership } = state;
   return (
-    <PlanWeekScreen
-      household={{
-        id: membership.householdId,
-        locale: membership.locale,
-        weekStart: membership.weekStart === 1 ? 1 : 7,
-        timezone: membership.timezone ?? null,
-      }}
-      canWrite={membership.role !== 'caregiver'}
-    />
+    <>
+      <PlanWeekScreen
+        household={{
+          id: membership.householdId,
+          locale: membership.locale,
+          weekStart: membership.weekStart === 1 ? 1 : 7,
+          timezone: membership.timezone ?? null,
+        }}
+        canWrite={membership.role !== 'caregiver'}
+        actions={{
+          onWeekPlanned: (start) => {
+            pushPrompt.offer();
+            // FR-NOT-4: a planned week tells the others its list is ready, unless someone did today.
+            void announceListReady(start, 'week_planned').catch(() => undefined);
+          },
+        }}
+        headerActions={[bell]}
+      />
+      {pushPrompt.sheet}
+    </>
   );
 }

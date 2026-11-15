@@ -807,6 +807,13 @@
       "deleted": "{{name}} deleted.",
       "undo": "Undo"
     },
+    "ready": {
+      "button": "List is ready",
+      "hint": "Lets the rest of the household know they can shop from it",
+      "sent": "Your household knows the list is ready.",
+      "sentToday": "The household has been told this list is ready today.",
+      "failed": "Couldn't let the household know. Check your connection and try again."
+    },
     "partnerActivity": "Someone else is updating the list.",
     "export": {
       "open": "Print or share the list",
@@ -1262,6 +1269,102 @@
       "delayWebhookHint": "Holds the purchase event for 90 seconds or until restore, to show the activating state.",
       "notApplicable": "That doesn't apply to the subscription right now.",
       "error": "The test store didn't respond. Try again."
+    }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "channelName": "Reminders",
+    "prompt": {
+      "title": "Want a nudge when it helps?",
+      "body": "We can remind you to plan the week and tell you when the list is ready. Quiet hours keep nights and naps silent.",
+      "turnOn": "Turn on notifications",
+      "notNow": "Not now"
+    },
+    "push": {
+      "section": "Push notifications",
+      "title": "Push notifications",
+      "on": "On",
+      "offExplainer": "Push notifications are off. Turn them on to get reminders on this phone.",
+      "turnOn": "Turn on",
+      "offInSystem": "Off in system settings. Turn notifications on there to get reminders.",
+      "openSettings": "Open system settings"
+    },
+    "saveFailed": "Couldn't save that change. Check your connection and try again.",
+    "types": {
+      "section": "What to send",
+      "offInSystem": "Off in system settings",
+      "plan_week": {
+        "title": "Plan your week",
+        "description": "A reminder before the week starts, unless it's already planned."
+      },
+      "list_ready": {
+        "title": "List is ready",
+        "description": "When someone marks the grocery list ready to shop."
+      },
+      "defrost": {
+        "title": "Defrost tonight",
+        "description": "A morning reminder when tonight's dinner needs defrosting."
+      },
+      "household_changes": {
+        "title": "Household changes",
+        "description": "Members joining or leaving. In the app only."
+      }
+    },
+    "planWeek": {
+      "section": "Plan your week",
+      "day": "Day",
+      "time": "Time"
+    },
+    "quiet": {
+      "section": "Quiet hours",
+      "start": "Starts",
+      "end": "Ends",
+      "note": "Notifications wait until quiet hours end, and never make a sound. Times are in the household's time zone ({{timezone}})."
+    },
+    "messages": {
+      "plan_week": {
+        "title": "Time to plan next week",
+        "body": "Next week isn't planned yet. A few minutes now makes the week easier."
+      },
+      "list_ready": {
+        "title": "The grocery list is ready",
+        "body": "It's ready to shop. Open the list to get started."
+      },
+      "test": {
+        "title": "Notifications are working",
+        "body": "This is a test notification for this phone."
+      },
+      "member_joined": {
+        "title": "Someone joined your household",
+        "body": "Open members to see who's in your household."
+      },
+      "member_left": {
+        "title": "Someone left your household",
+        "body": "Open members to see who's in your household."
+      }
+    },
+    "turnOffType": "Turn off this type",
+    "inbox": {
+      "title": "Inbox",
+      "open": "Notifications",
+      "openUnread_one": "Notifications, {{count}} unread",
+      "openUnread_other": "Notifications, {{count}} unread",
+      "markAllRead": "Mark all read",
+      "empty": {
+        "title": "Nothing yet",
+        "body": "Reminders and household updates will show up here."
+      },
+      "unread": "Unread",
+      "failed": "Couldn't load notifications. Pull down to try again."
+    },
+    "test": {
+      "send": "Send a test notification",
+      "sent": "Test sent. It arrives in a minute or so, after quiet hours if they're on.",
+      "failed": "Couldn't send a test. Check your connection and try again."
+    },
+    "defrost": {
+      "title": "Defrost for tonight",
+      "body": "Tonight's dinner, {{meal}}, needs defrosting."
     }
   },
   "pantry": {
