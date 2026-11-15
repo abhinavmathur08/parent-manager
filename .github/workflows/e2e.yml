@@ -58,11 +58,20 @@ jobs:
           # The mock store, allowed only because this build sets E2E_LOCAL_BACKEND=1 (app.config.ts).
           echo "EXPO_PUBLIC_BILLING_PROVIDER=mock" >> "$GITHUB_ENV"
       - name: Warm up the Edge Functions
-        # A cold worker takes a while to boot; the Premium flow shouldn't spend its wait on it.
+        # A cold worker takes a while to boot; the Premium flows shouldn't spend their waits on
+        # it. The anon JWT gets past the gateway, so the function itself answers (with its own
+        # 401) once it has booted.
         run: |
-          curl -s -m 120 -o /dev/null -w '%{http_code}\n' -X POST \
-            http://127.0.0.1:54321/functions/v1/mock-store \
-            -H "apikey: ${EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY}" -d '{"action":"status"}' || true
+          anon="$(pnpm --silent supabase status -o json | jq -r '.ANON_KEY // empty')"
+          for attempt in 1 2 3 4 5 6; do
+            body="$(curl -s -m 60 -X POST http://127.0.0.1:54321/functions/v1/mock-store \
+              -H "apikey: ${EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY}" -H "Authorization: Bearer ${anon}" \
+              -d '{"action":"status"}' || true)"
+            echo "attempt ${attempt}: ${body}"
+            case "${body}" in *billing.*) exit 0 ;; esac
+            sleep 10
+          done
+          echo "::warning::The mock-store function didn't answer during warm-up."
       - name: Generate the native Android project
         env:
           E2E_LOCAL_BACKEND: '1' # allows plain HTTP to the local stack; see app.config.ts
@@ -102,7 +111,9 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: maestro-report
-          path: maestro-report.xml
+          path: |
+            maestro-report.xml
+            ~/.maestro/tests
           if-no-files-found: ignore
 
   ios:
