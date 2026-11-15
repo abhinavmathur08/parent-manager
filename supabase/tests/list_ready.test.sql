@@ -3,7 +3,7 @@
 begin;
 create extension if not exists pgtap with schema extensions;
 
-select plan(16);
+select plan(17);
 
 create schema tests;
 grant usage on schema tests to anon, authenticated;
@@ -79,6 +79,13 @@ reset role;
 select is(
   (select count(*)::int from public.notifications where user_id = 'aaaaaaaa-0000-0000-0000-000000000002' and type = 'list_ready'),
   2, 'but not to a member with the type off');
+
+-- Export (FR-PRIV-2)
+select tests.as_user('aaaaaaaa-0000-0000-0000-000000000001');
+select is(
+  jsonb_array_length(public.export_household_data('00000000-0000-0000-0000-00000000000a') -> 'tables' -> 'list_ready_events'),
+  2, 'the household export includes its list announcements');
+reset role;
 
 -- Isolation
 select tests.as_user('bbbbbbbb-0000-0000-0000-000000000001');

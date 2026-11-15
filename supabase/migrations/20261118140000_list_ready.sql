@@ -78,3 +78,5 @@ grant execute on function public.announce_list_ready(date, text) to authenticate
 
 select private.register_for_deletion('public.list_ready_events', 'household_id', 'household');
 select private.register_for_deletion('public.list_ready_events', 'sent_by', 'user', 'set_null');
+-- The household export includes when its lists were announced (FR-PRIV-2).
+select private.register_for_export('public.list_ready_events', 'household', 'household_id');
