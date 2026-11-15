@@ -1,12 +1,7 @@
 appId: ${APP_ID || 'com.myparentmanager'}
 ---
-- launchApp:
-    clearState: true
 # Signed out, the app opens on sign-in (S-02). Needs no backend.
-- extendedWaitUntil:
-    visible:
-      id: sign-in-screen-title
-    timeout: 60000
+- runFlow: subflows/launch-signed-out.yaml
 - assertVisible:
     id: sign-in-email
 - assertVisible:
