@@ -17,16 +17,17 @@ tags:
     visible:
       id: pantry-screen
     timeout: 10000
+# Rows are matched on their name text (Android reads text from the Text, not the row).
 # The spices section is below the fold on smaller screens; the staples arrive with the
 # first sync.
 - scrollUntilVisible:
     element:
-      id: pantry-staple-spices-1
+      id: pantry-staple-spices-1-name
       text: .*salt.*
     centerElement: true
     timeout: 20000
 - assertVisible:
-    id: pantry-staple-spices-0
+    id: pantry-staple-spices-0-name
     text: .*pepper.*
 
 # Add a staple, then remove it again (FR-PAN-2).
@@ -48,7 +49,7 @@ tags:
     id: pantry-add-suggestion-0
 - scrollUntilVisible:
     element:
-      id: pantry-staple-spices-1
+      id: pantry-staple-spices-1-name
       text: .*cinnamon.*
     direction: UP
     centerElement: true
@@ -56,7 +57,7 @@ tags:
     id: pantry-staple-spices-1-action
 - scrollUntilVisible:
     element:
-      id: pantry-staple-spices-1
+      id: pantry-staple-spices-1-name
       text: .*salt.*
     centerElement: true
     timeout: 10000
@@ -109,7 +110,7 @@ tags:
 # The pantry keeps its scroll position; "at home this week" is at the top.
 - scrollUntilVisible:
     element:
-      id: pantry-have-0
+      id: pantry-have-0-name
       text: .*banana.*
     direction: UP
     timeout: 10000
