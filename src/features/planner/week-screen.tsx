@@ -22,6 +22,7 @@ import { Tag } from '@/components/tag';
 import { EmptyState } from '@/components/empty-state';
 import { Text } from '@/components/text';
 import { Toast } from '@/components/toast';
+import type { TopBarProps } from '@/components/top-bar';
 import { useIngredients } from '@/features/ingredients/use-ingredients';
 import { useTheme } from '@/hooks/use-theme';
 import { formatDate, formatList, formatNumber, type AppLocale } from '@/i18n';
@@ -137,11 +138,14 @@ export function PlanWeekScreen({
   household,
   canWrite,
   actions: overrides = {},
+  headerActions,
 }: {
   household: PlanHousehold;
   canWrite: boolean;
   /** Replaces the screen's own handlers, for tests and later items. */
   actions?: PlanWeekActions;
+  /** Trailing header actions, such as the inbox bell (S-24). */
+  headerActions?: TopBarProps['actions'];
 }) {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -298,7 +302,12 @@ export function PlanWeekScreen({
 
   return (
     <View style={styles.grow}>
-      <Screen title={t('plan.title')} scrollRef={scrollRef} testID="plan-screen">
+      <Screen
+        title={t('plan.title')}
+        actions={headerActions}
+        scrollRef={scrollRef}
+        testID="plan-screen"
+      >
         <View style={[styles.row, { gap: theme.space[2] }]}>
           <IconButton
             icon="back"

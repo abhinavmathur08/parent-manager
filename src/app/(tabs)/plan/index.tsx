@@ -1,5 +1,6 @@
 import { useAuth } from '@/features/auth/session';
 import { useHousehold } from '@/features/household/membership';
+import { useInboxBell } from '@/features/notifications/inbox-bell';
 import { usePushPrompt } from '@/features/notifications/push-prompt';
 import { PlanWeekScreen } from '@/features/planner/week-screen';
 
@@ -8,6 +9,8 @@ export default function PlanRoute() {
   const auth = useAuth();
   // The first planned week offers push notifications, in context (FR-NOT-2).
   const pushPrompt = usePushPrompt(auth.status === 'signedIn' ? auth.session.user.id : null);
+  // The header bell opens the inbox (S-24).
+  const bell = useInboxBell();
   if (state.status !== 'member') return null;
   const { membership } = state;
   return (
@@ -21,6 +24,7 @@ export default function PlanRoute() {
         }}
         canWrite={membership.role !== 'caregiver'}
         actions={{ onWeekPlanned: pushPrompt.offer }}
+        headerActions={[bell]}
       />
       {pushPrompt.sheet}
     </>

@@ -1,8 +1,10 @@
+import Constants from 'expo-constants';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, View } from 'react-native';
 
+import { Button } from '@/components/button';
 import { ListRow } from '@/components/list-row';
 import { Screen } from '@/components/screen';
 import { SectionHeader } from '@/components/section-header';
@@ -13,6 +15,7 @@ import { track } from '@/lib/analytics';
 import { openSystemNotificationSettings, requestPushPermission } from '@/lib/notifications/push';
 
 import { ChoiceSheet } from './choice-sheet';
+import { sendTestNotification } from './inbox';
 import {
   dayBefore,
   DEVICE_TYPES,
@@ -26,6 +29,10 @@ import { useNotificationPrefs } from './use-notification-prefs';
 import { usePushPermission } from './use-push-permission';
 
 type Picking = 'planWeekDay' | 'planWeekMinute' | 'quietStartMinute' | 'quietEndMinute';
+
+/** Development and preview builds can send themselves a test push (N-01.3). */
+const canSendTest =
+  (Constants.expoConfig?.extra as { appVariant?: string } | undefined)?.appVariant !== 'production';
 
 export type NotificationsScreenProps = {
   userId: string;
@@ -130,6 +137,19 @@ export function NotificationsScreen({ userId, household }: NotificationsScreenPr
           onTurnOn={() => void turnOnPush()}
           onOpenSystemSettings={() => void openSystemNotificationSettings()}
         />
+        {canSendTest && permission === 'granted' ? (
+          <Button
+            label={t('notifications.test.send')}
+            variant="secondary"
+            onPress={() =>
+              void sendTestNotification().then(
+                () => Alert.alert(t('notifications.test.sent')),
+                () => Alert.alert(t('notifications.test.failed')),
+              )
+            }
+            testID="send-test-notification"
+          />
+        ) : null}
       </View>
 
       <View>
