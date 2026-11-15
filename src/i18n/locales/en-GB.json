@@ -91,5 +91,18 @@
       "dontSuggestHint": "Stops suggesting {{name}} for 90 days",
       "hideFailed": "That didn't save. Try again."
     }
+  },
+  "privacy": {
+    "export": {
+      "title": "Your data",
+      "household": "Export household data",
+      "householdDetail": "Everything your household keeps in the app: recipes, plans, lists, pantry, purchases and people.",
+      "account": "Export my data",
+      "accountDetail": "Your profile, your membership and your recipe imports.",
+      "preparing": "Preparing your export…",
+      "offline": "You're offline. Export needs a connection.",
+      "share": "Share your data export",
+      "failed": "The export didn't work. Check your connection and try again."
+    }
   }
 }
