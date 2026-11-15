@@ -33,8 +33,13 @@ tags:
 - scrollUntilVisible:
     element:
       id: plan-week-day
+    centerElement: true
 - tapOn:
     id: plan-week-day
+- extendedWaitUntil:
+    visible:
+      id: choose-planWeekDay-header
+    timeout: 10000
 - scrollUntilVisible:
     element:
       id: choose-planWeekDay-5
@@ -46,6 +51,10 @@ tags:
     timeout: 10000
 - tapOn:
     id: plan-week-time
+- extendedWaitUntil:
+    visible:
+      id: choose-planWeekMinute-header
+    timeout: 10000
 - scrollUntilVisible:
     element:
       id: choose-planWeekMinute-1020
@@ -60,8 +69,13 @@ tags:
 - scrollUntilVisible:
     element:
       id: quiet-start
+    centerElement: true
 - tapOn:
     id: quiet-start
+- extendedWaitUntil:
+    visible:
+      id: choose-quietStartMinute-header
+    timeout: 10000
 - scrollUntilVisible:
     element:
       id: choose-quietStartMinute-1320
