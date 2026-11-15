@@ -30,6 +30,7 @@ import { formatList, formatQuantity, type AppLocale, type Region, type UnitSyste
 
 import type { AddAmount, AddChoice } from './add-item';
 import { AddItemSheet } from './add-item-sheet';
+import { ExportSheet } from './export/export-sheet';
 import { itemSources } from './detail';
 import { ItemSheet, type ItemEdit } from './item-sheet';
 import { useGroceryRows, useListIngredientFacts } from './data';
@@ -79,6 +80,7 @@ export function ListScreen({ household }: { household: ListHousehold }) {
   const addItem = useAddItem();
   const { facts } = useListIngredientFacts();
   const [adding, setAdding] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [detailId, setDetailId] = useState<string | null>(null);
@@ -369,6 +371,25 @@ export function ListScreen({ household }: { household: ListHousehold }) {
               </View>
             ) : null}
           </View>
+        ) : null}
+        {list ? (
+          <Button
+            variant="secondary"
+            icon="share"
+            label={t('list.export.open')}
+            onPress={() => setExporting(true)}
+            testID="list-export"
+          />
+        ) : null}
+        {list && exporting ? (
+          <ExportSheet
+            visible
+            onClose={() => setExporting(false)}
+            view={view}
+            weekStart={list.week_start}
+            locale={locale}
+            householdId={household.id}
+          />
         ) : null}
         <AddItemSheet
           visible={adding}

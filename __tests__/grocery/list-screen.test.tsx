@@ -576,3 +576,21 @@ describe('shopping together (FR-LIST-8, FR-LIST-9)', () => {
     expect(screen.queryByTestId('list-partner-activity')).toBeNull();
   });
 });
+
+describe('S-23 export entry (FR-EXP-1)', () => {
+  it('opens the export sheet from the list, for caregivers too', async () => {
+    mockRows = { grocery_lists: [list], grocery_items: [item('milk')] };
+    await show({ canRegenerate: false });
+    await fireEvent.press(screen.getByTestId('list-export'));
+    expect(screen.getByTestId('export-sheet')).toBeTruthy();
+    expect(screen.getByTestId('export-count')).toHaveTextContent('1 item');
+  });
+
+  it('offers export on an empty list, with the actions disabled and the reason shown', async () => {
+    mockRows = { grocery_lists: [list], grocery_items: [] };
+    await show();
+    await fireEvent.press(screen.getByTestId('list-export'));
+    expect(screen.getByTestId('export-empty')).toHaveTextContent(/nothing on the list/);
+    expect(screen.getByTestId('export-print')).toBeDisabled();
+  });
+});
