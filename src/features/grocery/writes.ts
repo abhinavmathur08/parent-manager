@@ -1,7 +1,8 @@
 import { randomUUID } from 'expo-crypto';
 import { useCallback } from 'react';
 
-import type { PantryItemRow } from '@/features/pantry/tables';
+import { insertStable } from '@/features/pantry/pantry';
+import { PANTRY_ITEMS, type PantryItemRow } from '@/features/pantry/tables';
 import { useApplyOps } from '@/features/recipes/data';
 
 import { useOnline } from '@/hooks/use-online';
@@ -9,7 +10,7 @@ import { track } from '@/lib/analytics';
 import { useSyncWriter } from '@/lib/sync';
 
 import { planAddItem, type AddAmount, type AddChoice, type AddResult } from './add-item';
-import { planHave, planItemDelete, planItemEdit } from './detail';
+import { haveId, planHave, planItemDelete, planItemEdit } from './detail';
 import { GROCERY_ITEMS, type GroceryItemRow } from './tables';
 
 /** Unchecking within this long counts as undoing a mistake (FR-LIST-8, PROPOSED). */
@@ -50,7 +51,7 @@ export function useAddItem() {
       items: readonly GroceryItemRow[];
       choice: AddChoice;
       amount: AddAmount | null;
-      source: 'typed' | 'suggestion_catalog';
+      source: 'typed' | 'suggestion_catalog' | 'assumed_at_home';
     }): Promise<AddResult> => {
       const result = planAddItem({ ...input, newId: randomUUID() });
       if (result.kind !== 'exists') await apply([result.op]);
@@ -58,6 +59,7 @@ export function useAddItem() {
         source: input.source,
         merged_into_existing: result.kind !== 'insert',
       });
+      if (input.source === 'assumed_at_home') track('staple_added_to_list');
       return result;
     },
     [apply],
@@ -82,12 +84,27 @@ export function useEditItem() {
 /** "I already have this" from item detail (FR-PAN-4): "have" for the week, item off the list. */
 export function useMarkHave(householdId: string) {
   const apply = useApplyOps();
+  const writer = useSyncWriter();
   return useCallback(
     async (item: GroceryItemRow, weekStart: string, pantry: readonly PantryItemRow[]) => {
-      await apply(planHave({ householdId, item, weekStart, pantry }));
+      for (const op of planHave({ householdId, item, weekStart, pantry })) {
+        // An undone "have" left a tombstone under the first ID, so a second "have" for the
+        // same ingredient and week takes the next one (G-03.2).
+        if (op.kind === 'insert' && op.table === PANTRY_ITEMS.name && item.ingredient_id) {
+          const ingredientId = item.ingredient_id;
+          await insertStable(
+            writer,
+            op.table,
+            (index) => haveId(householdId, ingredientId, weekStart, index),
+            op.values as Record<string, string>,
+          );
+        } else {
+          await apply([op]);
+        }
+      }
       track('have_marked', { surface: 'list' });
     },
-    [apply, householdId],
+    [apply, writer, householdId],
   );
 }
 
