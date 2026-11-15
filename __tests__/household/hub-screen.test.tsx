@@ -18,6 +18,7 @@ describe('Household tab (S-25, FR-PRIV-1)', () => {
   it.each([
     ['members', '/household/members'],
     ['people', '/household/people'],
+    ['pantry', '/household/pantry'],
     ['settings', '/household/settings'],
     ['privacy', '/household/privacy'],
     ['account', '/household/account'],

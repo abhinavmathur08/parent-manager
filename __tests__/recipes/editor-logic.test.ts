@@ -276,6 +276,7 @@ describe('planSave', () => {
         content_locale: 'en-US',
         created_by: null,
         updated_by: null,
+        shopped_at: null,
       } as RecipeRow,
       lines: [
         {
