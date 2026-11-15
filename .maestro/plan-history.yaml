@@ -1,0 +1,49 @@
+# History (G-08, S-34, FR-PLAN-2, FR-LIST-13): a free household opens past weeks from the Plan
+# tab and sees the "older weeks" Premium prompt with history first; on the Plan tab, the week
+# 5 weeks back shows the history prompt instead of the plan. Needs the local stack.
+appId: ${APP_ID || 'com.myparentmanager'}
+tags:
+  - backend
+---
+- runFlow: subflows/create-household.yaml
+- scrollUntilVisible:
+    element:
+      id: plan-history
+    direction: UP
+- tapOn:
+    id: plan-history
+- extendedWaitUntil:
+    visible:
+      id: history-screen-title
+    timeout: 10000
+- assertVisible:
+    id: history-empty
+- scrollUntilVisible:
+    element:
+      id: history-see-premium
+- tapOn:
+    id: history-see-premium
+- extendedWaitUntil:
+    visible:
+      id: premium-sheet-header
+    timeout: 10000
+- assertVisible:
+    id: premium-benefit-history
+- scrollUntilVisible:
+    element:
+      id: premium-not-now
+- tapOn:
+    id: premium-not-now
+- tapOn:
+    id: history-screen-title-back
+- scrollUntilVisible:
+    element:
+      id: plan-previous
+    direction: UP
+- repeat:
+    times: 5
+    commands:
+      - tapOn:
+          id: plan-previous
+- assertVisible:
+    id: plan-history-locked

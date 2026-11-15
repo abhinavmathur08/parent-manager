@@ -25,6 +25,10 @@ insert into public.households (id, name, region, locale, unit_system, timezone, 
 insert into public.household_members (household_id, user_id, role) values
   ('00000000-0000-0000-0000-00000000000a', 'aaaaaaaa-0000-0000-0000-000000000001', 'parent'),
   ('00000000-0000-0000-0000-00000000000a', 'aaaaaaaa-0000-0000-0000-000000000002', 'parent');
+
+-- Fixed dates: on Premium every week stays readable, so they never leave the free history
+-- window (G-08).
+update public.household_entitlements set tier = 'premium';
 insert into public.grocery_lists (id, household_id, week_start) values
   ('aaaaaaaa-1111-0000-0000-000000000001', '00000000-0000-0000-0000-00000000000a', '2026-11-15');
 insert into public.grocery_items (id, household_id, list_id, ingredient_id, dimension,

@@ -48,6 +48,12 @@ export function isoWeekday(date: PlanDate): number {
   return ((toDate(date).getUTCDay() + 6) % 7) + 1;
 }
 
+/**
+ * The free history window (FR-PAY-6, decided D-9): the current week and the 4 before it. The
+ * server enforces it (`private.free_history_start`); the app only mirrors it.
+ */
+export const FREE_HISTORY_DAYS = 28;
+
 /** The first day of the week that contains `date`, for a household's week start. */
 export function startOfWeek(date: PlanDate, weekStart: WeekStart): PlanDate {
   return addDays(date, -((isoWeekday(date) - weekStart + 7) % 7));

@@ -10,6 +10,7 @@ import { useHousehold } from '@/features/household/membership';
 import '@/features/ingredients/sync';
 import '@/features/planner/sync';
 import '@/features/recipes/sync';
+import { HistorySync } from '@/features/subscription/history-sync';
 import { FirstLoadGate, PendingChangesBanner, SyncProvider } from '@/lib/sync';
 
 const TABS: readonly {
@@ -51,6 +52,7 @@ export default function TabsLayout() {
       <FirstLoadGate>
         {tabs}
         <GroceryListKeeper />
+        <HistorySync />
         <PendingChangesBanner />
       </FirstLoadGate>
     </SyncProvider>
