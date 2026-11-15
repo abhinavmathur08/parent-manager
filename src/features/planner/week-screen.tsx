@@ -25,10 +25,20 @@ import { Toast } from '@/components/toast';
 import { useIngredients } from '@/features/ingredients/use-ingredients';
 import { useTheme } from '@/hooks/use-theme';
 import { formatDate, formatList, formatNumber, type AppLocale } from '@/i18n';
+import { useEntitlement } from '@/features/subscription/entitlement';
+import { usePremiumSheet } from '@/features/subscription/premium-sheet';
 
 import { usePlanWeek } from './data';
 import { AddSheet, type AddTarget } from './add-sheet';
 import { CopyWeekSheet } from './copy-week-sheet';
+import { ApplyTemplateSheet, SaveTemplateSheet } from './template-sheets';
+import {
+  saveTemplate,
+  templateCopies,
+  templateFromWeek,
+  useApplyTemplate,
+  type WeekTemplate,
+} from './templates';
 import { EntryActionsSheet, type EntryTarget } from './entry-actions-sheet';
 import { EntrySheet, type EntryChange } from './entry-sheet';
 import { leftoverCandidates, leftoverSource, linksBrokenByMove } from './leftovers';
@@ -156,6 +166,10 @@ export function PlanWeekScreen({
   const [opened, setOpened] = useState<PlanEntryRow | null>(null);
   const [choosingCopy, setChoosingCopy] = useState(false);
   const copyWeek = useCopyWeek();
+  const [templateSheet, setTemplateSheet] = useState<'save' | 'apply' | null>(null);
+  const applyTemplateEntries = useApplyTemplate();
+  const { isPremium } = useEntitlement();
+  const { openPremiumSheet } = usePremiumSheet();
   const setPortions = useSetPortions();
   const setServings = useSetServings();
   const entryActions = useEntryActions();
@@ -166,6 +180,7 @@ export function PlanWeekScreen({
     onOpenEntry: setOpened,
     onEntryActions: canWrite ? setActing : undefined,
     onCopyLastWeek: canWrite ? () => startCopy() : undefined,
+    onApplyTemplate: canWrite ? () => openTemplates('apply') : undefined,
     ...overrides,
   };
   // Entries waiting on an undo bar are hidden until it goes (FR-PLAN-7).
@@ -253,6 +268,36 @@ export function PlanWeekScreen({
     if (shownEntries.length === 0) void copyLastWeek('add');
     else setChoosingCopy(true);
   }
+  // Saved templates are Premium (FR-PLAN-10); a free household gets the Premium sheet.
+  function openTemplates(sheet: 'save' | 'apply') {
+    if (isPremium) setTemplateSheet(sheet);
+    else openPremiumSheet('template');
+  }
+  const applyTemplate = async (template: WeekTemplate, mode: 'add' | 'replace') => {
+    noteChange();
+    const kept = mode === 'add' ? shownEntries : [];
+    const copies = templateCopies(
+      template,
+      start,
+      kept,
+      new Set(week.titles.keys()),
+      people.people,
+    );
+    const replaced = mode === 'replace' ? shownEntries.map((e) => e.id) : [];
+    try {
+      const ids = await applyTemplateEntries(copies, mode);
+      if (mode === 'replace') {
+        undoable.hold({
+          message: t('plan.templates.replaced', { name: template.name }),
+          hidden: replaced,
+          commit: () => entryActions.remove(replaced, { track: false }),
+          undo: () => entryActions.remove(ids, { track: false }),
+        });
+      }
+    } catch {
+      failed();
+    }
+  };
   const removeEntry = (entry: PlanEntryRow) => {
     setActing(null);
     noteChange();
@@ -342,6 +387,24 @@ export function PlanWeekScreen({
             onPress={() => actions.onCopyLastWeek?.(start)}
             testID="plan-copy-last-week"
           />
+        ) : null}
+        {canWrite && shownEntries.length > 0 ? (
+          <View style={[styles.row, { gap: theme.space[2], flexWrap: 'wrap' }]}>
+            <Button
+              variant="ghost"
+              label={t('plan.saveTemplate')}
+              onPress={() => openTemplates('save')}
+              testID="plan-save-template"
+            />
+            {actions.onApplyTemplate ? (
+              <Button
+                variant="ghost"
+                label={t('plan.applyTemplate')}
+                onPress={() => actions.onApplyTemplate?.(start)}
+                testID="plan-apply-template"
+              />
+            ) : null}
+          </View>
         ) : null}
         {!week.loading && shownEntries.length === 0 ? (
           <Card testID="plan-empty">
@@ -437,6 +500,26 @@ export function PlanWeekScreen({
             {t('plan.allergiesUnavailable')}
           </Text>
         ) : null}
+        <SaveTemplateSheet
+          visible={templateSheet === 'save'}
+          onSave={(name) =>
+            saveTemplate(
+              household.id,
+              name,
+              templateFromWeek(week.all, week.portions, start, week.titles),
+            )
+          }
+          onClose={() => setTemplateSheet(null)}
+          onPremiumRequired={() => openPremiumSheet('template', { afterSheet: true })}
+        />
+        <ApplyTemplateSheet
+          visible={templateSheet === 'apply'}
+          householdId={household.id}
+          weekHasEntries={shownEntries.length > 0}
+          onApply={(template, mode) => void applyTemplate(template, mode)}
+          onClose={() => setTemplateSheet(null)}
+          onPremiumRequired={() => openPremiumSheet('template', { afterSheet: true })}
+        />
         <AddSheet
           target={adding}
           locale={locale}

@@ -254,6 +254,7 @@ select private.register_for_deletion('public.recipes', 'created_by', 'user', 'se
 | `recipe_steps`                | With their recipe                          | With the household                                                            |
 | `plan_entries`                | All rows                                   | With the household                                                            |
 | `plan_entry_portions`         | With their entry                           | With the household; with the person when they are removed                     |
+| `week_templates`              | All rows, with their entries               | With the household; `created_by` set null with the account                    |
 | `pantry_items`                | All rows                                   | With the household                                                            |
 | `grocery_lists`               | All rows                                   | With the household                                                            |
 | `grocery_items`               | With their list                            | With the household; `checked_by` set null with the account                    |
