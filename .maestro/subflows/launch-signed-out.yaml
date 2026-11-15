@@ -1,0 +1,25 @@
+# Shared steps: launch the app with nothing on the device and wait for the sign-in screen.
+# Not run on its own (config.yaml runs top-level flows only).
+#
+# On the Android emulator, clearing the app's data kills it, and Android's delayed clean-up of
+# the old task can kill the new process too, leaving the splash screen up. So when the
+# sign-in screen hasn't come in 30 seconds, launch once more; the data is already cleared.
+appId: ${APP_ID || 'com.myparentmanager'}
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible:
+      id: sign-in-screen-title
+    timeout: 30000
+  optional: true
+- runFlow:
+    when:
+      notVisible:
+        id: sign-in-screen-title
+    commands:
+      - launchApp
+- extendedWaitUntil:
+    visible:
+      id: sign-in-screen-title
+    timeout: 60000

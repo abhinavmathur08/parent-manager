@@ -8,12 +8,7 @@ tags:
 - runFlow: subflows/create-household.yaml
 - runScript: scripts/wait-for-new-code.js
 # A new device: nothing on it, so the household has to come from the server.
-- launchApp:
-    clearState: true
-- extendedWaitUntil:
-    visible:
-      id: sign-in-screen-title
-    timeout: 60000
+- runFlow: subflows/launch-signed-out.yaml
 - tapOn:
     id: sign-in-email
 - inputText: ${output.email}
