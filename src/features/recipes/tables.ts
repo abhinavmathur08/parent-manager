@@ -63,6 +63,26 @@ export const RECIPE_TAGS = [
 ] as const;
 export type RecipeTag = (typeof RECIPE_TAGS)[number];
 
+/**
+ * The needs-defrosting tag (FR-REC-7, spec C-4). The "defrost tonight" notification (N-02.2,
+ * FR-NOT-5) reminds the household on the day of a dinner whose recipe has it.
+ */
+export const NEEDS_DEFROSTING_TAG = 'tag.needs_defrosting' satisfies RecipeTag;
+
+export function isRecipeTag(value: unknown): value is RecipeTag {
+  return (RECIPE_TAGS as readonly unknown[]).includes(value);
+}
+
+/** Whether a recipe has a tag. Tags are compared by ID, never by their translated names. */
+export function hasTag(recipe: { tags: readonly string[] | null }, tag: RecipeTag): boolean {
+  return recipe.tags?.includes(tag) ?? false;
+}
+
+/** The locale key of a tag's name: `tag.no_cook` is `recipes.tags.no_cook`. */
+export function tagNameKey(tag: RecipeTag): string {
+  return `recipes.tags.${tag.slice('tag.'.length)}`;
+}
+
 export type RecipeSourceType =
   'manual' | 'url' | 'photo' | 'screenshot' | 'text' | 'voice' | 'library';
 

@@ -1,0 +1,125 @@
+# P-04 (FR-PLAN-8): a parent plans a dinner, then marks the next day's dinner as its leftovers
+# from the long-press actions. The entry is labelled as leftovers and S-12 explains it; then
+# the link is undone. Ends signed out.
+# Needs the local stack; see the Testing section of README.md.
+appId: ${APP_ID || 'com.myparentmanager'}
+tags:
+  - backend
+---
+- runFlow: subflows/create-household.yaml
+# The week opens scrolled to today; start from the top.
+- scrollUntilVisible:
+    element:
+      id: plan-range
+    direction: UP
+- scrollUntilVisible:
+    element:
+      id: plan-add-0-dinner
+    centerElement: true
+- tapOn:
+    id: plan-add-0-dinner
+- extendedWaitUntil:
+    visible:
+      id: add-search
+    timeout: 10000
+- tapOn:
+    id: add-search
+- inputText: lentil
+# The keyboard can cover the sheet's results.
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: add-starter-0
+- tapOn:
+    id: add-starter-0
+- extendedWaitUntil:
+    notVisible:
+      id: add-search
+    timeout: 10000
+# The empty state goes once the week has an entry, which moves the days up.
+- scrollUntilVisible:
+    element:
+      id: plan-range
+    direction: UP
+- runFlow:
+    file: subflows/plan-recent-dinner.yaml
+    env:
+      DAY: '1'
+
+# Day 2's dinner becomes leftovers of day 1's.
+- scrollUntilVisible:
+    element:
+      id: plan-slot-1-dinner-entry-0
+    centerElement: true
+- longPressOn:
+    id: plan-slot-1-dinner-entry-0
+- extendedWaitUntil:
+    visible:
+      id: entry-actions
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: entry-actions-leftovers
+    centerElement: true
+- tapOn:
+    id: entry-actions-leftovers
+- scrollUntilVisible:
+    element:
+      id: entry-leftover-option-0
+    centerElement: true
+- tapOn:
+    id: entry-leftover-option-0
+- extendedWaitUntil:
+    notVisible:
+      id: entry-actions
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: plan-slot-1-dinner-entry-0
+    centerElement: true
+# Day 2's dinner is labelled as leftovers (Jest checks the original isn't).
+- assertVisible:
+    id: plan-entry-[0-9a-f-]{36}-leftovers
+
+# S-12 says what it's leftovers of.
+- tapOn:
+    id: plan-slot-1-dinner-entry-0
+- extendedWaitUntil:
+    visible:
+      id: entry-leftovers-of
+    timeout: 10000
+- tapOn:
+    id: entry-sheet-close
+- extendedWaitUntil:
+    notVisible:
+      id: entry-sheet
+    timeout: 10000
+
+# Unlinking makes it an ordinary dinner again.
+- scrollUntilVisible:
+    element:
+      id: plan-slot-1-dinner-entry-0
+    centerElement: true
+- longPressOn:
+    id: plan-slot-1-dinner-entry-0
+- extendedWaitUntil:
+    visible:
+      id: entry-actions-leftovers-of
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: entry-actions-unlink
+    centerElement: true
+- tapOn:
+    id: entry-actions-unlink
+- extendedWaitUntil:
+    notVisible:
+      id: entry-actions
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: plan-slot-1-dinner-entry-0
+    centerElement: true
+- assertNotVisible:
+    id: plan-entry-[0-9a-f-]{36}-leftovers
+- runFlow: subflows/sign-out.yaml

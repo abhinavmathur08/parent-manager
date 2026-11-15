@@ -17,7 +17,7 @@ import { formatList, formatNumber, type AppLocale, type UnitSystem } from '@/i18
 
 import type { LineLike } from './format-line';
 import { allergenMatches, scaledLineText } from './scale';
-import { RECIPE_LIMITS, type RecipeSourceType, type RecipeTag } from './tables';
+import { RECIPE_LIMITS, tagNameKey, type RecipeSourceType, type RecipeTag } from './tables';
 import { useHouseholdAllergies } from './use-household-allergies';
 
 /** A recipe as S-17 shows it: a household recipe, or a starter recipe (R-04.1). */
@@ -45,11 +45,14 @@ export function RecipeDetail({
   recipe,
   household,
   actions,
+  onDelete,
 }: {
   recipe: RecipeView;
   household: { id: string; locale: AppLocale; unitSystem: UnitSystem };
   /** At most two actions under the title, such as edit or "save a copy". */
   actions?: readonly { label: string; onPress: () => void; testID: string }[];
+  /** Offers deleting the recipe at the end of the screen (FR-REC-11). */
+  onDelete?: () => void;
 }) {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -92,7 +95,11 @@ export function RecipeDetail({
         {recipe.tags.length ? (
           <View style={[styles.wrap, { gap: theme.space[1] }]}>
             {recipe.tags.map((tag) => (
-              <Tag key={tag} label={t(`recipes.tags.${tag.slice(4)}`)} />
+              <Tag
+                key={tag}
+                label={t(tagNameKey(tag))}
+                testID={`recipe-detail-tag-${tag.slice('tag.'.length)}`}
+              />
             ))}
           </View>
         ) : null}
@@ -199,6 +206,16 @@ export function RecipeDetail({
             />
           ) : null}
         </View>
+      ) : null}
+
+      {onDelete ? (
+        <Button
+          variant="destructive"
+          label={t('recipes.delete.action')}
+          onPress={onDelete}
+          fullWidth
+          testID="recipe-detail-delete"
+        />
       ) : null}
     </Screen>
   );

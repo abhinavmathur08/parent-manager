@@ -32,7 +32,7 @@ import {
 import { formatLine } from './format-line';
 import { LineSheet, type LineSheetResult } from './line-sheet';
 import { quickAddLine } from './quick-add';
-import { RECIPE_LIMITS, RECIPE_TAGS } from './tables';
+import { RECIPE_LIMITS, RECIPE_TAGS, tagNameKey } from './tables';
 
 type Household = { locale: AppLocale; region: Region; unitSystem: UnitSystem };
 
@@ -206,7 +206,7 @@ export function RecipeEditor({
             {RECIPE_TAGS.map((tag) => (
               <Chip
                 key={tag}
-                label={t(`recipes.tags.${tag.slice(4)}`)}
+                label={t(tagNameKey(tag))}
                 selected={draft.tags.includes(tag)}
                 onPress={() =>
                   update({
