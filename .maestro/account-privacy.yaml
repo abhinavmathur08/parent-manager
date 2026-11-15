@@ -30,6 +30,11 @@ tags:
 - scrollUntilVisible:
     element:
       id: privacy-policy-privacy
+# The title bar scrolls with the screen; scroll back up to its back button.
+- scrollUntilVisible:
+    element:
+      id: privacy-screen-title-back
+    direction: UP
 - tapOn:
     id: privacy-screen-title-back
 - scrollUntilVisible:
