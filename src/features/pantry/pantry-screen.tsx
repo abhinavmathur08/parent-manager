@@ -90,7 +90,9 @@ export function PantryScreen({ household }: { household: PantryHousehold }) {
       ]}
       testID={testID}
     >
-      <Text style={styles.name}>{item.name}</Text>
+      <Text style={styles.name} testID={`${testID}-name`}>
+        {item.name}
+      </Text>
       {action ? (
         <Button
           variant="ghost"
