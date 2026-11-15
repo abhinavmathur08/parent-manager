@@ -6,6 +6,7 @@ import { BottomSheet } from '@/components/bottom-sheet';
 import { Button } from '@/components/button';
 import { Chip } from '@/components/chip';
 import { ListRow } from '@/components/list-row';
+import { SectionHeader } from '@/components/section-header';
 import { Text } from '@/components/text';
 import { TextField } from '@/components/text-field';
 import { nameKey, SECTION_IDS, type SectionId } from '@/features/ingredients/catalog-ids';
@@ -24,7 +25,9 @@ const MAX_SUGGESTIONS = 6;
  * S-14, the add item sheet (FR-LIST-6): type an item and pick a catalog suggestion, or add
  * the text as typed in a chosen section (R-LIST-6), with an optional amount and unit, then
  * "Add to list". Suggestions come from the locale's ingredient names and synonyms, matched
- * to IDs, never compared as display text (R-ING-6).
+ * to IDs, never compared as display text (R-ING-6). Before anything is typed, it shows the
+ * household's frequently bought items (FR-MEM-3): one tap adds one, and "don't suggest" hides
+ * it for 90 days (FR-MEM-5).
  */
 export function AddItemSheet({
   visible,
@@ -35,6 +38,9 @@ export function AddItemSheet({
   unitSystem,
   onAdd,
   onClose,
+  frequent = [],
+  onAddFrequent,
+  onHideFrequent,
 }: {
   visible: boolean;
   ingredients: Ingredients;
@@ -49,6 +55,11 @@ export function AddItemSheet({
     source: 'typed' | 'suggestion_catalog',
   ) => void;
   onClose: () => void;
+  /** Frequently bought ingredients, most bought first; hidden when empty. */
+  frequent?: readonly { ingredientId: string; name: string }[];
+  /** Adds a frequently bought ingredient; `rank` counts from 1. */
+  onAddFrequent?: (ingredientId: string, rank: number) => void;
+  onHideFrequent?: (ingredientId: string) => void;
 }) {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -143,6 +154,32 @@ export function AddItemSheet({
             autoFocus
             testID="add-item-search"
           />
+          {!text.trim() && !typing && !chosen && frequent.length ? (
+            <View testID="add-item-frequent">
+              <SectionHeader title={t('list.add.frequent')} variant="group" />
+              {frequent.map((item, i) => (
+                <View key={item.ingredientId} style={[styles.row, { gap: theme.space[2] }]}>
+                  <ListRow
+                    title={item.name}
+                    accessibilityHint={t('list.add.frequentHint', { name: item.name })}
+                    onPress={() => {
+                      reset();
+                      onAddFrequent?.(item.ingredientId, i + 1);
+                    }}
+                    testID={`add-item-frequent-${i}`}
+                    style={styles.grow}
+                  />
+                  <Button
+                    variant="ghost"
+                    label={t('list.add.dontSuggest')}
+                    accessibilityHint={t('list.add.dontSuggestHint', { name: item.name })}
+                    onPress={() => onHideFrequent?.(item.ingredientId)}
+                    testID={`add-item-frequent-${i}-hide`}
+                  />
+                </View>
+              ))}
+            </View>
+          ) : null}
           {suggestions.map((result, i) => (
             <ListRow
               key={result.ingredientId}
@@ -229,4 +266,6 @@ export function AddItemSheet({
 
 const styles = StyleSheet.create({
   wrap: { flexDirection: 'row', flexWrap: 'wrap' },
+  row: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap' },
+  grow: { flex: 1, minWidth: 160 },
 });
