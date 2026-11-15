@@ -14,6 +14,11 @@ tags:
       id: open-privacy
 - tapOn:
     id: open-privacy
+# Data export (A-04.2) sits above usage sharing.
+- scrollUntilVisible:
+    element:
+      id: analytics-switch
+    centerElement: true
 - assertVisible:
     id: analytics-switch
     checked: true
@@ -22,8 +27,14 @@ tags:
 - assertVisible:
     id: analytics-switch
     checked: false
-- assertVisible:
-    id: privacy-policy-privacy
+- scrollUntilVisible:
+    element:
+      id: privacy-policy-privacy
+# The title bar scrolls with the screen; scroll back up to its back button.
+- scrollUntilVisible:
+    element:
+      id: privacy-screen-title-back
+    direction: UP
 - tapOn:
     id: privacy-screen-title-back
 - scrollUntilVisible:

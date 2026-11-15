@@ -681,6 +681,17 @@
       "privacy": "Privacy policy",
       "terms": "Terms of use",
       "unavailable": "Available before launch"
+    },
+    "export": {
+      "title": "Your data",
+      "household": "Export household data",
+      "householdDetail": "Everything your household keeps in the app: recipes, plans, lists, pantry, purchases and people.",
+      "account": "Export my data",
+      "accountDetail": "Your profile, your membership and your recipe imports.",
+      "preparing": "Preparing your export…",
+      "offline": "You're offline. Export needs a connection.",
+      "share": "Share your data export",
+      "failed": "The export didn't work. Check your connection and try again."
     }
   },
   "account": {
