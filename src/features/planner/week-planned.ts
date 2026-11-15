@@ -51,16 +51,22 @@ function markRecorded(householdId: string, start: PlanDate): void {
  * doesn't count here, so the event comes from the device that planned it. The weeks already
  * recorded are kept on the device (IDs and dates only).
  *
- * Returns `noteChange`, which the screen calls whenever it writes to the plan.
+ * `onPlanned` runs at the same moment, for what follows a planned week (the push prompt,
+ * FR-NOT-2). Returns `noteChange`, which the screen calls whenever it writes to the plan.
  */
 export function useWeekPlannedEvent(
   householdId: string,
   start: PlanDate,
   today: PlanDate,
   dinners: number,
+  onPlanned?: () => void,
 ): () => void {
   const changedAt = useRef(0);
   const last = useRef<{ start: PlanDate; dinners: number } | null>(null);
+  const planned = useRef(onPlanned);
+  useEffect(() => {
+    planned.current = onPlanned;
+  });
 
   useEffect(() => {
     const before = last.current;
@@ -74,6 +80,7 @@ export function useWeekPlannedEvent(
       dinners_count: dinners,
       days_until_week_start: Math.max(0, daysBetween(today, start)),
     });
+    planned.current?.();
   }, [householdId, start, today, dinners]);
 
   return useCallback(() => {
