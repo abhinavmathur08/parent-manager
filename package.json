@@ -20,6 +20,7 @@
     "expo-local-authentication": "~58.0.3",
     "expo-localization": "~58.0.5",
     "expo-network": "~58.0.5",
+    "expo-notifications": "~58.1.9",
     "expo-print": "~58.0.9",
     "expo-router": "~58.0.31",
     "expo-secure-store": "~58.0.3",
@@ -69,7 +70,7 @@
     "test:watch": "jest --watch",
     "test:ci": "jest --ci",
     "test:e2e": "maestro test .maestro",
-    "check": "pnpm run lint && pnpm run lint:rules && pnpm run catalog:check && pnpm run email:check && pnpm run format:check && pnpm run typecheck && pnpm run test:ci",
+    "check": "pnpm run lint && pnpm run lint:rules && pnpm run catalog:check && pnpm run email:check && pnpm run notify:copy:check && pnpm run format:check && pnpm run typecheck && pnpm run test:ci",
     "lint:rules": "node scripts/check-lint-rules.js",
     "catalog:check": "node scripts/catalog-seed.js --check",
     "catalog:seed": "node scripts/catalog-seed.js --new",
@@ -78,7 +79,9 @@
     "test:functions": "deno test --permit-no-files --lock=supabase/functions/deno.lock supabase/functions",
     "update:preview": "APP_VARIANT=preview pnpm dlx eas-cli@latest update --channel preview --environment preview",
     "email:check": "node scripts/email-templates.js --check",
-    "email:templates": "node scripts/email-templates.js --write"
+    "email:templates": "node scripts/email-templates.js --write",
+    "notify:copy": "node scripts/notification-copy.js --write",
+    "notify:copy:check": "node scripts/notification-copy.js --check"
   },
   "private": true,
   "jest": {
