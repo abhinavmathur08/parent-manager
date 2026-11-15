@@ -23,7 +23,8 @@ jobs:
   android:
     name: Maestro on Android
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    # The build takes about 12 minutes and the flows about 50 with the Premium ones (M-02.x).
+    timeout-minutes: 80
     steps:
       # The native build and the emulator don't both fit on a stock runner's disk.
       - name: Free disk space
