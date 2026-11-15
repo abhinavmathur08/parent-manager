@@ -31,7 +31,9 @@ function permissionOf(response: Notifications.NotificationPermissionsStatus): Pu
   ) {
     return 'granted';
   }
-  return response.status === 'undetermined' && response.canAskAgain ? 'undetermined' : 'denied';
+  // Android 13+ reports a permission it has never asked for as `denied` (notifications are
+  // off until granted) with `canAskAgain` true, so whether the system can still ask decides.
+  return response.canAskAgain ? 'undetermined' : 'denied';
 }
 
 export async function readPushPermission(): Promise<PushPermission> {
