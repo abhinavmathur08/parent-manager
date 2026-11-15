@@ -13,7 +13,7 @@ import { useRecipeRows } from '@/features/recipes/data';
 import { indexRecipe, searchRecipes } from '@/features/recipes/search';
 import { STARTER_RECIPES } from '@/features/recipes/starter/library';
 import { starterEntry } from '@/features/recipes/starter/view';
-import type { RecipeTag } from '@/features/recipes/tables';
+import { tagNameKey, type RecipeTag } from '@/features/recipes/tables';
 import { useTheme } from '@/hooks/use-theme';
 import { formatDate, formatNumber, type AppLocale } from '@/i18n';
 
@@ -94,7 +94,7 @@ function AddSheetBody({
   const [busy, setBusy] = useState(false);
 
   const household = useMemo(() => {
-    const tagName = (tag: RecipeTag) => t(`recipes.tags.${tag.slice(4)}`);
+    const tagName = (tag: RecipeTag) => t(tagNameKey(tag));
     const names = new Map<string, string[]>();
     for (const line of lines) {
       if (line.deleted_at) continue;
@@ -118,7 +118,7 @@ function AddSheetBody({
       );
   }, [recipes, lines, ingredients, t]);
   const starters = useMemo(() => {
-    const tagName = (tag: RecipeTag) => t(`recipes.tags.${tag.slice(4)}`);
+    const tagName = (tag: RecipeTag) => t(tagNameKey(tag));
     return STARTER_RECIPES.map((s) =>
       indexRecipe(
         starterEntry(s, locale, (id) => ingredients.name(id)),
