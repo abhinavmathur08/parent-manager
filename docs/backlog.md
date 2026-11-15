@@ -1116,16 +1116,16 @@ Delete account with re-authentication: sole members delete the household, others
   - The partner keeps the household
   - Backups purge within 30 days (documented)
 
-### 87. M-01.1 RevenueCat in the app
+### 87. M-01.1 Billing provider interface and mock store
 
-Add `react-native-purchases` with the Supabase user ID and the household attribute: offerings, purchase and restore, using sandbox accounts. Products and prices are set by the product owner.
+A provider-neutral billing interface shaped like RevenueCat's `react-native-purchases` (offerings, purchase, restore and customer info), with a mock store as its only implementation (D-10 interim, 2026-11-15). RevenueCat plugs in later as a second implementation. Products and prices are set by the product owner.
 
 - **Area:** Subscriptions
 - **Size:** S
 - **Spec:** FR-PAY-7
-- **Depends on:** H-04.1, F-03.1; decisions D-10
+- **Depends on:** H-04.1, F-03.1; decisions D-10 (interim: mock store)
 - **Acceptance:**
-  - Sandbox purchase and restore work on both platforms
+  - The interface mirrors `react-native-purchases`, and a production build never selects the mock
   - No billing configuration is changed by code or Claude
 
 ### 88. M-01.2 Entitlement webhook and reconciliation
