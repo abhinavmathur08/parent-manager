@@ -30,6 +30,7 @@ const SYMBOLS = {
   share: { ios: 'square.and.arrow.up', android: 'share' },
   print: { ios: 'printer', android: 'print' },
   pdf: { ios: 'doc.richtext', android: 'picture_as_pdf' },
+  copy: { ios: 'doc.on.doc', android: 'content_copy' },
 } as const;
 
 export type IconName = keyof typeof SYMBOLS;

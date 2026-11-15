@@ -1,5 +1,5 @@
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
-import { Platform } from 'react-native';
+import { Platform, Share } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { ExportSheet } from '@/features/grocery/export/export-sheet';
@@ -17,6 +17,9 @@ const mockShareFile = jest.fn(async (_uri: string, _options: unknown) => undefin
 jest.mock('expo-sharing', () => ({
   shareAsync: (uri: string, options: unknown) => mockShareFile(uri, options),
 }));
+
+const mockCopy = jest.fn(async (_text: string) => true);
+jest.mock('expo-clipboard', () => ({ setStringAsync: (text: string) => mockCopy(text) }));
 
 const metrics = {
   frame: { x: 0, y: 0, width: 390, height: 844 },
@@ -63,6 +66,7 @@ beforeEach(() => {
   mockToFile.mockClear();
   mockShareFile.mockClear();
   onMessage.mockClear();
+  mockCopy.mockClear();
 });
 
 describe('S-23 export sheet (FR-EXP-1, FR-EXP-2)', () => {
@@ -137,5 +141,52 @@ describe('S-23 export sheet (FR-EXP-1, FR-EXP-2)', () => {
     expect(screen.getByTestId('export-pdf')).toBeDisabled();
     await fireEvent(screen.getByTestId('export-include-checked'), 'press');
     expect(screen.getByTestId('export-pdf')).not.toBeDisabled();
+  });
+});
+
+describe('S-23 share and copy as text (FR-EXP-4)', () => {
+  it('opens the share sheet with the checklist text', async () => {
+    const share = jest
+      .spyOn(Share, 'share')
+      .mockResolvedValue({ action: Share.sharedAction, activityType: undefined });
+    await show();
+    await fireEvent.press(screen.getByTestId('export-share'));
+    await act(async () => undefined);
+    expect(share.mock.calls[0]?.[0]).toEqual({
+      title: 'Groceries',
+      message: 'Groceries, Nov 15 – Nov 21\n\nProduce\n☐ 2 onions\n☐ 2 carrots',
+    });
+    expect(mockTrack).toHaveBeenCalledWith('list_exported', {
+      target: 'share_text',
+      item_count: 2,
+      included_checked: false,
+    });
+  });
+
+  it('counts nothing when the share sheet is closed without sharing', async () => {
+    jest
+      .spyOn(Share, 'share')
+      .mockResolvedValue({ action: Share.dismissedAction, activityType: undefined });
+    await show();
+    await fireEvent.press(screen.getByTestId('export-share'));
+    await act(async () => undefined);
+    expect(mockTrack).not.toHaveBeenCalled();
+    expect(onMessage).not.toHaveBeenCalled();
+  });
+
+  it('copies the same text and confirms it', async () => {
+    await show();
+    expect(screen.queryByTestId('export-copied')).toBeNull();
+    await fireEvent.press(screen.getByTestId('export-copy'));
+    await act(async () => undefined);
+    expect(mockCopy).toHaveBeenCalledWith(
+      'Groceries, Nov 15 – Nov 21\n\nProduce\n☐ 2 onions\n☐ 2 carrots',
+    );
+    expect(screen.getByTestId('export-copied')).toHaveTextContent(/Copied/);
+    expect(mockTrack).toHaveBeenCalledWith('list_exported', {
+      target: 'copy_text',
+      item_count: 2,
+      included_checked: false,
+    });
   });
 });

@@ -13,7 +13,8 @@ import { i18n } from '@/i18n';
 import type { ListView } from '../view';
 import { buildExportDocument } from './document';
 import { exportHtml } from './html';
-import { printHtml, runExport, sharePdf, type ExportTarget } from './targets';
+import { copyText, printHtml, runExport, shareText, sharePdf, type ExportTarget } from './targets';
+import { exportText } from './text';
 
 export type ExportSheetProps = {
   visible: boolean;
@@ -42,6 +43,7 @@ export function ExportSheet({
   const theme = useTheme();
   const [includeChecked, setIncludeChecked] = useState(false);
   const [busy, setBusy] = useState<ExportTarget | null>(null);
+  const [copied, setCopied] = useState(false);
 
   const doc = useMemo(
     () => buildExportDocument({ view, weekStart, includeChecked, locale, t }),
@@ -54,10 +56,13 @@ export function ExportSheet({
     setBusy(target);
     const result = await runExport(target, doc, action);
     setBusy(null);
-    // iOS rejects when the print dialog is closed without printing, which isn't an error.
-    if (!result.ok && !(target === 'print' && Platform.OS === 'ios')) {
-      onMessage(t('list.export.failed'));
+    if (result.ok) {
+      if (target === 'copy_text') setCopied(true);
+      return;
     }
+    // Closing the share sheet, or on iOS the print dialog, without finishing isn't an error.
+    if (result.code === 'dismissed' || (target === 'print' && Platform.OS === 'ios')) return;
+    onMessage(t('list.export.failed'));
   };
   const html = () => exportHtml(doc, t, i18n.dir(locale));
 
@@ -73,7 +78,10 @@ export function ExportSheet({
           label={t('list.export.includeChecked')}
           description={t('list.export.includeCheckedHint')}
           value={includeChecked}
-          onValueChange={setIncludeChecked}
+          onValueChange={(value) => {
+            setIncludeChecked(value);
+            setCopied(false);
+          }}
           disabled={view.cart.length === 0}
           testID="export-include-checked"
         />
@@ -106,6 +114,31 @@ export function ExportSheet({
           fullWidth
           testID="export-pdf"
         />
+        <Button
+          variant="secondary"
+          icon="share"
+          label={t('list.export.share')}
+          onPress={() => void run('share_text', () => shareText(exportText(doc, t), doc.title))}
+          disabled={empty}
+          loading={busy === 'share_text'}
+          fullWidth
+          testID="export-share"
+        />
+        <Button
+          variant="secondary"
+          icon="copy"
+          label={t('list.export.copy')}
+          onPress={() => void run('copy_text', () => copyText(exportText(doc, t)))}
+          disabled={empty}
+          loading={busy === 'copy_text'}
+          fullWidth
+          testID="export-copy"
+        />
+        {copied ? (
+          <Text color="success" accessibilityLiveRegion="polite" testID="export-copied">
+            {t('list.export.copied')}
+          </Text>
+        ) : null}
       </View>
     </BottomSheet>
   );

@@ -1,6 +1,7 @@
-# G-05 (FR-EXP-1, FR-EXP-2): any member opens the export sheet from the List tab. An empty
-# list explains why there's nothing to export; with an item on the list, print and PDF are
-# offered with unchecked items only, and "include checked items" adds the ones in the cart.
+# G-05 and G-07 (FR-EXP-1, FR-EXP-2, FR-EXP-4): any member opens the export sheet from the
+# List tab. An empty list explains why there's nothing to export; with items on the list,
+# print and PDF are offered with unchecked items only, and "include checked items" adds the
+# ones in the cart. Copy as text confirms, and Share as text opens the system share sheet.
 # Ends signed out. Needs the local stack; see the Testing section of README.md.
 appId: ${APP_ID || 'com.myparentmanager'}
 tags:
@@ -95,6 +96,46 @@ tags:
 - assertVisible:
     id: export-count
     text: 2 items
+
+# Copy as text confirms in the sheet.
+- scrollUntilVisible:
+    element:
+      id: export-copy
+    centerElement: true
+- tapOn:
+    id: export-copy
+- extendedWaitUntil:
+    visible:
+      id: export-copied
+    timeout: 10000
+
+# Share as text opens the system share sheet; closing it comes back to the export sheet.
+- scrollUntilVisible:
+    element:
+      id: export-share
+    centerElement: true
+- tapOn:
+    id: export-share
+- waitForAnimationToEnd:
+    timeout: 5000
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn: Close
+- extendedWaitUntil:
+    visible:
+      id: export-share
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: export-sheet-close
+    direction: UP
 - tapOn:
     id: export-sheet-close
 - extendedWaitUntil:
