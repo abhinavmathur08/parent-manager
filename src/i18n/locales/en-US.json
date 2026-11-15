@@ -811,7 +811,13 @@
       "textTitle": "{{title}}, {{week}}",
       "textItem": "{{box}} {{line}}",
       "box": "☐",
-      "boxChecked": "☑"
+      "boxChecked": "☑",
+      "reminders": "Add to Reminders",
+      "remindersDone_one": "Reminders is up to date with {{count}} item.",
+      "remindersDone_other": "Reminders is up to date with {{count}} items.",
+      "remindersDenied": "Parent Manager can't reach Reminders. To turn it on, open Settings, then Apps, Parent Manager, Reminders. Or share or copy the list as text instead.",
+      "openSettings": "Open Settings",
+      "remindersPermission": "Parent Manager adds your grocery list to Reminders when you ask, so you can shop with Siri and your watch."
     }
   },
   "plan": {

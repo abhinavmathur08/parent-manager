@@ -1,5 +1,5 @@
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
-import { Platform, Share } from 'react-native';
+import { Linking, Platform, Share } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { ExportSheet } from '@/features/grocery/export/export-sheet';
@@ -20,6 +20,12 @@ jest.mock('expo-sharing', () => ({
 
 const mockCopy = jest.fn(async (_text: string) => true);
 jest.mock('expo-clipboard', () => ({ setStringAsync: (text: string) => mockCopy(text) }));
+
+const mockExportToReminders = jest.fn();
+jest.mock('@/features/grocery/export/reminders', () => ({
+  exportToReminders: (...args: unknown[]) => mockExportToReminders(...args),
+}));
+const mockOpenSettings = jest.fn(async () => undefined);
 
 const metrics = {
   frame: { x: 0, y: 0, width: 390, height: 844 },
@@ -42,7 +48,6 @@ const view: ListView = {
   cart: [row('apples', { checked: true })],
   total: 3,
 };
-const onMessage = jest.fn();
 
 const show = async (listView: ListView = view) => {
   await render(
@@ -53,7 +58,7 @@ const show = async (listView: ListView = view) => {
         view={listView}
         weekStart="2026-11-15"
         locale="en-US"
-        onMessage={onMessage}
+        householdId="hh"
       />
     </SafeAreaProvider>,
   );
@@ -65,7 +70,7 @@ beforeEach(() => {
   mockPrint.mockClear();
   mockToFile.mockClear();
   mockShareFile.mockClear();
-  onMessage.mockClear();
+  mockExportToReminders.mockReset();
   mockCopy.mockClear();
 });
 
@@ -121,7 +126,9 @@ describe('S-23 export sheet (FR-EXP-1, FR-EXP-2)', () => {
       target: 'pdf',
       error_code: 'err_print',
     });
-    expect(onMessage).toHaveBeenCalledWith("That didn't work. Try again, or use another option.");
+    expect(screen.getByTestId('export-failed')).toHaveTextContent(
+      "That didn't work. Try again, or use another option.",
+    );
   });
 
   it('stays quiet when the iOS print dialog is closed without printing', async () => {
@@ -131,7 +138,7 @@ describe('S-23 export sheet (FR-EXP-1, FR-EXP-2)', () => {
     await show();
     await fireEvent.press(screen.getByTestId('export-print'));
     await act(async () => undefined);
-    expect(onMessage).not.toHaveBeenCalled();
+    expect(screen.queryByTestId('export-failed')).toBeNull();
     Platform.OS = os;
   });
 
@@ -171,7 +178,7 @@ describe('S-23 share and copy as text (FR-EXP-4)', () => {
     await fireEvent.press(screen.getByTestId('export-share'));
     await act(async () => undefined);
     expect(mockTrack).not.toHaveBeenCalled();
-    expect(onMessage).not.toHaveBeenCalled();
+    expect(screen.queryByTestId('export-failed')).toBeNull();
   });
 
   it('copies the same text and confirms it', async () => {
@@ -188,5 +195,54 @@ describe('S-23 share and copy as text (FR-EXP-4)', () => {
       item_count: 2,
       included_checked: false,
     });
+  });
+});
+
+describe('S-23 Apple Reminders (FR-EXP-3, FR-EXP-5)', () => {
+  const os = Platform.OS;
+  beforeEach(() => {
+    Platform.OS = 'ios';
+    jest.spyOn(Linking, 'openSettings').mockImplementation(mockOpenSettings);
+  });
+  afterEach(() => {
+    Platform.OS = os;
+  });
+
+  it('is offered on iOS only', async () => {
+    Platform.OS = 'android';
+    await show();
+    expect(screen.queryByTestId('export-reminders')).toBeNull();
+  });
+
+  it('exports the same document to the week list and confirms', async () => {
+    mockExportToReminders.mockResolvedValue(undefined);
+    await show();
+    await fireEvent.press(screen.getByTestId('export-reminders'));
+    await act(async () => undefined);
+    const [householdId, doc, title] = mockExportToReminders.mock.calls[0] ?? [];
+    expect(householdId).toBe('hh');
+    expect(doc).toMatchObject({ weekStart: '2026-11-15', itemCount: 2 });
+    expect(title).toBe('Groceries, Nov 15 – Nov 21');
+    expect(screen.getByTestId('export-reminders-done')).toHaveTextContent(/2 items/);
+    expect(mockTrack).toHaveBeenCalledWith('list_exported', {
+      target: 'apple_reminders',
+      item_count: 2,
+      included_checked: false,
+    });
+  });
+
+  it('explains how to turn Reminders on and keeps Share and Copy there when refused', async () => {
+    mockExportToReminders.mockRejectedValue(
+      Object.assign(new Error(), { code: 'reminders_denied' }),
+    );
+    await show();
+    await fireEvent.press(screen.getByTestId('export-reminders'));
+    await act(async () => undefined);
+    expect(screen.getByTestId('export-reminders-denied')).toHaveTextContent(/open Settings/);
+    expect(screen.getByTestId('export-share')).not.toBeDisabled();
+    expect(screen.getByTestId('export-copy')).not.toBeDisabled();
+    expect(screen.queryByTestId('export-failed')).toBeNull();
+    await fireEvent.press(screen.getByTestId('export-open-settings'));
+    expect(mockOpenSettings).toHaveBeenCalled();
   });
 });
