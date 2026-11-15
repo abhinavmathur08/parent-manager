@@ -117,7 +117,13 @@ function buildConfig(
     scheme,
     userInterfaceStyle: 'automatic',
     ios: {
-      icon: './assets/expo.icon',
+      // Interim mark until the real logo (D-2): light, dark and tinted (#207).
+      // Regenerate with `swift scripts/brand/render-brand.swift`.
+      icon: {
+        light: './assets/images/icon.png',
+        dark: './assets/images/icon-ios-dark.png',
+        tinted: './assets/images/icon-ios-tinted.png',
+      },
       bundleIdentifier: id,
       supportsTablet: false,
       appleTeamId: '5JNGSJXS6A',
@@ -129,9 +135,9 @@ function buildConfig(
     },
     android: {
       adaptiveIcon: {
-        backgroundColor: '#E6F4FE',
+        // color.background from docs/design-system.md (#207).
+        backgroundColor: '#FAF7F2',
         foregroundImage: './assets/images/android-icon-foreground.png',
-        backgroundImage: './assets/images/android-icon-background.png',
         monochromeImage: './assets/images/android-icon-monochrome.png',
       },
       predictiveBackGestureEnabled: false,
@@ -144,9 +150,14 @@ function buildConfig(
       [
         'expo-splash-screen',
         {
-          backgroundColor: '#208AEF',
+          // The interim mark on color.background, with the dark-mode values (#207).
+          backgroundColor: '#FAF7F2',
           image: './assets/images/splash-icon.png',
-          imageWidth: 76,
+          imageWidth: 180,
+          dark: {
+            backgroundColor: '#1C1B19',
+            image: './assets/images/splash-icon-dark.png',
+          },
         },
       ],
       [
