@@ -1,0 +1,105 @@
+# G-05 (FR-EXP-1, FR-EXP-2): any member opens the export sheet from the List tab. An empty
+# list explains why there's nothing to export; with an item on the list, print and PDF are
+# offered with unchecked items only, and "include checked items" adds the ones in the cart.
+# Ends signed out. Needs the local stack; see the Testing section of README.md.
+appId: ${APP_ID || 'com.myparentmanager'}
+tags:
+  - backend
+---
+- runFlow: subflows/create-household.yaml
+
+# The empty list: export is there, but its actions are disabled with the reason.
+- tapOn:
+    id: tab-list
+- extendedWaitUntil:
+    visible:
+      id: list-empty-add
+    timeout: 15000
+- scrollUntilVisible:
+    element:
+      id: list-export
+    centerElement: true
+- tapOn:
+    id: list-export
+- extendedWaitUntil:
+    visible:
+      id: export-empty
+    timeout: 10000
+- tapOn:
+    id: export-sheet-close
+- extendedWaitUntil:
+    notVisible:
+      id: export-empty
+    timeout: 10000
+
+# Add diapers, then check them off and add milk, so one item is in the cart.
+- tapOn:
+    id: list-empty-add
+- extendedWaitUntil:
+    visible:
+      id: add-item-search
+    timeout: 10000
+- tapOn:
+    id: add-item-search
+- inputText: diap
+- hideKeyboard
+- tapOn:
+    id: add-item-suggestion-0
+- tapOn:
+    id: add-item-done
+- extendedWaitUntil:
+    visible:
+      id: list-item-baby-0
+    timeout: 10000
+- tapOn:
+    id: list-add
+- extendedWaitUntil:
+    visible:
+      id: add-item-search
+    timeout: 10000
+- tapOn:
+    id: add-item-search
+- inputText: milk
+- hideKeyboard
+- tapOn:
+    id: add-item-suggestion-0
+- tapOn:
+    id: add-item-done
+- extendedWaitUntil:
+    visible:
+      id: list-item-dairy-0
+    timeout: 10000
+- tapOn:
+    id: list-item-baby-0
+
+# Unchecked items only by default; including checked ones adds the diapers.
+- scrollUntilVisible:
+    element:
+      id: list-export
+    centerElement: true
+- tapOn:
+    id: list-export
+- extendedWaitUntil:
+    visible:
+      id: export-count
+    timeout: 10000
+- assertVisible:
+    id: export-count
+    text: 1 item
+- assertVisible:
+    id: export-print
+- assertVisible:
+    id: export-pdf
+- tapOn:
+    id: export-include-checked
+- assertVisible:
+    id: export-count
+    text: 2 items
+- tapOn:
+    id: export-sheet-close
+- extendedWaitUntil:
+    notVisible:
+      id: export-count
+    timeout: 10000
+
+- runFlow: subflows/sign-out.yaml

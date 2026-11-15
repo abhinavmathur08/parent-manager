@@ -790,6 +790,21 @@
       "haveDone": "{{name}} is marked as at home this week.",
       "deleted": "{{name}} deleted.",
       "undo": "Undo"
+    },
+    "export": {
+      "open": "Print or share the list",
+      "title": "Get the list out",
+      "includeChecked": "Include checked items",
+      "includeCheckedHint": "Items already in the cart are left out unless you include them.",
+      "emptyList": "There's nothing on the list to export yet.",
+      "allChecked": "Everything is checked off. Include checked items to export them.",
+      "print": "Print",
+      "pdf": "Save or send a PDF",
+      "failed": "That didn't work. Try again, or use another option.",
+      "listName": "Groceries",
+      "line": "{{quantity}} {{name}}",
+      "checked": "Checked",
+      "unchecked": "Not checked"
     }
   },
   "plan": {
