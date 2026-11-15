@@ -5,6 +5,7 @@ import { StyleSheet, View } from 'react-native';
 import { BottomSheet } from '@/components/bottom-sheet';
 import { Button } from '@/components/button';
 import { Chip } from '@/components/chip';
+import { ListRow } from '@/components/list-row';
 import { Text } from '@/components/text';
 import { useTheme } from '@/hooks/use-theme';
 import { formatDate, type AppLocale } from '@/i18n';
@@ -14,9 +15,22 @@ import { toDate, type PlanDate } from './week';
 
 export type EntryTarget = { date: PlanDate; slot: Slot };
 
+/** Leftover links for the entry (P-04, FR-PLAN-8). */
+export type EntryLeftovers = {
+  /** The entry it's leftovers of, or null. */
+  source: PlanEntryRow | null;
+  /** Earlier entries it can be leftovers of, nearest first. */
+  candidates: readonly PlanEntryRow[];
+  /** Where and what an entry is, such as "Mon, Nov 16 · Dinner · Chili". */
+  describe: (entry: PlanEntryRow) => { title: string; when: string };
+  onLink: (entry: PlanEntryRow, source: PlanEntryRow) => void;
+  onUnlink: (entry: PlanEntryRow) => void;
+};
+
 /**
  * Long-press actions on an entry (FR-PLAN-7): pick a day of the shown week and a slot, then
- * move or duplicate the entry there; or remove it, with an undo bar afterwards.
+ * move or duplicate the entry there; mark it as leftovers of an earlier entry, or unlink it
+ * (FR-PLAN-8); or remove it, with an undo bar afterwards.
  */
 export function EntryActionsSheet({
   entry,
@@ -26,6 +40,7 @@ export function EntryActionsSheet({
   onMove,
   onDuplicate,
   onRemove,
+  leftovers,
   onClose,
 }: {
   entry: PlanEntryRow | null;
@@ -36,6 +51,7 @@ export function EntryActionsSheet({
   onMove: (entry: PlanEntryRow, target: EntryTarget) => void;
   onDuplicate: (entry: PlanEntryRow, target: EntryTarget) => void;
   onRemove: (entry: PlanEntryRow) => void;
+  leftovers?: EntryLeftovers;
   onClose: () => void;
 }) {
   return (
@@ -49,6 +65,7 @@ export function EntryActionsSheet({
           onMove={onMove}
           onDuplicate={onDuplicate}
           onRemove={onRemove}
+          leftovers={leftovers}
         />
       ) : null}
     </BottomSheet>
@@ -62,6 +79,7 @@ function Body({
   onMove,
   onDuplicate,
   onRemove,
+  leftovers,
 }: {
   entry: PlanEntryRow;
   days: readonly PlanDate[];
@@ -69,6 +87,7 @@ function Body({
   onMove: (entry: PlanEntryRow, target: EntryTarget) => void;
   onDuplicate: (entry: PlanEntryRow, target: EntryTarget) => void;
   onRemove: (entry: PlanEntryRow) => void;
+  leftovers?: EntryLeftovers;
 }) {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -76,6 +95,7 @@ function Body({
   const [date, setDate] = useState(days.includes(entry.date) ? entry.date : days[0]);
   const [slot, setSlot] = useState<Slot>(entry.slot);
   const unchanged = date === entry.date && slot === entry.slot;
+  const [choosing, setChoosing] = useState(false);
 
   return (
     <View style={{ gap: theme.space[4] }}>
@@ -125,6 +145,14 @@ function Body({
         fullWidth
         testID="entry-actions-duplicate"
       />
+      {leftovers ? (
+        <LeftoversSection
+          entry={entry}
+          leftovers={leftovers}
+          choosing={choosing}
+          onChoose={() => setChoosing(true)}
+        />
+      ) : null}
       <Button
         variant="destructive"
         label={t('plan.actions.remove')}
@@ -132,6 +160,77 @@ function Body({
         fullWidth
         testID="entry-actions-remove"
       />
+    </View>
+  );
+}
+
+function LeftoversSection({
+  entry,
+  leftovers,
+  choosing,
+  onChoose,
+}: {
+  entry: PlanEntryRow;
+  leftovers: EntryLeftovers;
+  choosing: boolean;
+  onChoose: () => void;
+}) {
+  const { t } = useTranslation();
+  const theme = useTheme();
+  const { source, candidates, describe } = leftovers;
+
+  if (source) {
+    const { title, when } = describe(source);
+    return (
+      <View style={{ gap: theme.space[2] }}>
+        <Text color="textSecondary" testID="entry-actions-leftovers-of">
+          {t('plan.leftovers.of', { title, when })}
+        </Text>
+        <Button
+          variant="secondary"
+          label={t('plan.leftovers.unlink')}
+          onPress={() => leftovers.onUnlink(entry)}
+          fullWidth
+          testID="entry-actions-unlink"
+        />
+      </View>
+    );
+  }
+  if (!choosing) {
+    return (
+      <Button
+        variant="secondary"
+        label={t('plan.leftovers.mark')}
+        onPress={onChoose}
+        fullWidth
+        testID="entry-actions-leftovers"
+      />
+    );
+  }
+  return (
+    <View style={{ gap: theme.space[2] }} testID="entry-leftover-options">
+      <Text variant="label" color="textSecondary">
+        {t('plan.leftovers.choose')}
+      </Text>
+      {candidates.length === 0 ? (
+        <Text color="textSecondary" testID="entry-leftover-none">
+          {t('plan.leftovers.none')}
+        </Text>
+      ) : null}
+      {candidates.map((candidate, i) => {
+        const { title, when } = describe(candidate);
+        return (
+          <ListRow
+            key={candidate.id}
+            title={title}
+            subtitle={when}
+            variant="navigation"
+            onPress={() => leftovers.onLink(entry, candidate)}
+            divider={i < candidates.length - 1}
+            testID={`entry-leftover-option-${i}`}
+          />
+        );
+      })}
     </View>
   );
 }

@@ -859,7 +859,17 @@
       "replace": "Replace this week",
       "replaced": "Replaced this week with last week"
     },
-    "progress": "{{planned}} of {{total}} dinners planned"
+    "progress": "{{planned}} of {{total}} dinners planned",
+    "leftovers": {
+      "mark": "Mark as leftovers",
+      "choose": "Leftovers of",
+      "none": "There's nothing earlier this week or last week to link to.",
+      "when": "{{day}} · {{slot}}",
+      "of": "Leftovers of {{title}} ({{when}})",
+      "unlink": "Unlink leftovers",
+      "tag": "Leftovers",
+      "note": "Leftovers of {{title}} ({{when}}). They add nothing to the list: that meal's ingredients cover these servings."
+    }
   },
   "recipes": {
     "title": "Recipes",
