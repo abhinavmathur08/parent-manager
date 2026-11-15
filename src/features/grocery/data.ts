@@ -12,23 +12,28 @@ import {
   GROCERY_ITEM_SOURCES,
   GROCERY_ITEMS,
   GROCERY_LISTS,
+  PURCHASE_EVENTS,
   type GroceryItemRow,
   type GroceryItemSourceRow,
   type GroceryListRow,
+  type PurchaseEventRow,
 } from './tables';
 
-/** The household's lists, items, item sources and pantry from the local copy (FR-LIST-11). */
+/** The household's lists, items, sources, pantry and purchases from the local copy (FR-LIST-11). */
 export function useGroceryRows() {
   const lists = useSyncedRows<GroceryListRow>(GROCERY_LISTS.name);
   const items = useSyncedRows<GroceryItemRow>(GROCERY_ITEMS.name);
   const sources = useSyncedRows<GroceryItemSourceRow>(GROCERY_ITEM_SOURCES.name);
   const pantry = useSyncedRows<PantryItemRow>(PANTRY_ITEMS.name);
+  const purchases = useSyncedRows<PurchaseEventRow>(PURCHASE_EVENTS.name);
   return {
     lists: lists.rows,
     items: items.rows,
     sources: sources.rows,
     pantry: pantry.rows,
-    loading: lists.loading || items.loading || sources.loading || pantry.loading,
+    purchases: purchases.rows,
+    loading:
+      lists.loading || items.loading || sources.loading || pantry.loading || purchases.loading,
   };
 }
 
