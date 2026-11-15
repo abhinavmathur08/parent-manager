@@ -8,6 +8,10 @@ import '@/features/grocery/sync';
 import { GroceryListKeeper } from '@/features/grocery/keeper';
 import { useHousehold } from '@/features/household/membership';
 import '@/features/ingredients/sync';
+import { useAuth } from '@/features/auth/session';
+import { DefrostScheduler } from '@/features/notifications/defrost-scheduler';
+import { NotificationResponses } from '@/features/notifications/notification-responses';
+import { PushRegistration } from '@/features/notifications/push-registration';
 import '@/features/planner/sync';
 import '@/features/recipes/sync';
 import { FirstLoadGate, PendingChangesBanner, SyncProvider } from '@/lib/sync';
@@ -27,6 +31,7 @@ const TABS: readonly {
 export default function TabsLayout() {
   const { t } = useTranslation();
   const { state } = useHousehold();
+  const auth = useAuth();
   const tabs = (
     <Tabs style={styles.fill}>
       <TabSlot style={styles.fill} />
@@ -51,6 +56,13 @@ export default function TabsLayout() {
       <FirstLoadGate>
         {tabs}
         <GroceryListKeeper />
+        <PushRegistration />
+        {auth.status === 'signedIn' ? (
+          <>
+            <NotificationResponses userId={auth.session.user.id} />
+            <DefrostScheduler userId={auth.session.user.id} />
+          </>
+        ) : null}
         <PendingChangesBanner />
       </FirstLoadGate>
     </SyncProvider>

@@ -28,6 +28,8 @@ const SYMBOLS = {
   people: { ios: 'person.2', android: 'group' },
   lock: { ios: 'lock', android: 'lock' },
   share: { ios: 'square.and.arrow.up', android: 'share' },
+  bell: { ios: 'bell', android: 'notifications' },
+  bellUnread: { ios: 'bell.badge', android: 'notifications_active' },
   print: { ios: 'printer', android: 'print' },
   pdf: { ios: 'doc.richtext', android: 'picture_as_pdf' },
   copy: { ios: 'doc.on.doc', android: 'content_copy' },
