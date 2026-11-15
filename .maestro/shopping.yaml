@@ -1,0 +1,90 @@
+# G-04.1 (FR-LIST-4, FR-LIST-8, FR-LIST-11): a member checks items off with one tap, they move
+# to "in the cart", and an unticked item goes back on the list. Two partners shopping together
+# (who checked, the partner banner, offline convergence) is covered by the two-device harness,
+# test-utils/sync/harness/grocery.harness.ts. Ends signed out. Needs the local stack; see
+# README.md.
+appId: ${APP_ID || 'com.myparentmanager'}
+tags:
+  - backend
+---
+- runFlow: subflows/create-household.yaml
+
+- tapOn:
+    id: tab-list
+- extendedWaitUntil:
+    visible:
+      id: list-empty-add
+    timeout: 15000
+- tapOn:
+    id: list-empty-add
+- extendedWaitUntil:
+    visible:
+      id: add-item-search
+    timeout: 10000
+- tapOn:
+    id: add-item-search
+- inputText: bananas
+- hideKeyboard
+- tapOn:
+    id: add-item-suggestion-0
+- tapOn:
+    id: add-item-done
+- extendedWaitUntil:
+    visible:
+      id: list-item-produce-0
+    timeout: 10000
+- tapOn:
+    id: list-add
+- extendedWaitUntil:
+    visible:
+      id: add-item-search
+    timeout: 10000
+- tapOn:
+    id: add-item-search
+- inputText: eggs
+- hideKeyboard
+- tapOn:
+    id: add-item-suggestion-0
+- tapOn:
+    id: add-item-done
+- extendedWaitUntil:
+    visible:
+      id: list-item-dairy-0
+    timeout: 10000
+
+# One tap checks an item off, and it moves to the cart (FR-LIST-8).
+- tapOn:
+    id: list-item-produce-0
+- extendedWaitUntil:
+    notVisible:
+      id: list-item-produce-0
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: list-cart-toggle
+- assertVisible:
+    id: list-cart-toggle
+    text: .*1 item.*
+- tapOn:
+    id: list-cart-toggle
+- scrollUntilVisible:
+    element:
+      id: list-cart-item-0
+- assertVisible:
+    id: list-cart-item-0
+    text: .*banana.*
+
+# Unticking puts it back on the list.
+- tapOn:
+    id: list-cart-item-0
+- scrollUntilVisible:
+    element:
+      id: list-item-produce-0
+    direction: UP
+- assertVisible:
+    id: list-item-produce-0
+    text: .*banana.*
+- assertNotVisible:
+    id: list-cart-toggle
+
+- runFlow: subflows/sign-out.yaml

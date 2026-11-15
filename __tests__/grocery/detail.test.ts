@@ -35,6 +35,7 @@ const item = (over: Partial<GroceryItemRow> = {}): GroceryItemRow => ({
   checked: false,
   checked_at: null,
   checked_by: null,
+  updated_by: null,
   ...over,
 });
 

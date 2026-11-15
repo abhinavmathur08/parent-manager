@@ -791,6 +791,7 @@
       "deleted": "{{name}} deleted.",
       "undo": "Undo"
     },
+    "partnerActivity": "Someone else is updating the list.",
     "export": {
       "open": "Print or share the list",
       "title": "Get the list out",

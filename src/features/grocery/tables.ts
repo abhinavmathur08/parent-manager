@@ -31,6 +31,7 @@ export const GROCERY_ITEMS = {
     checked: 'boolean',
     checked_at: 'text',
     checked_by: 'text',
+    updated_by: 'text',
   },
 } as const satisfies SyncTableDefinition;
 
@@ -80,6 +81,8 @@ export type GroceryItemRow = SyncRow & {
   checked: boolean;
   checked_at: string | null;
   checked_by: string | null;
+  /** The member whose write the server last took (G-04.1), for the partner-activity banner. */
+  updated_by: string | null;
 };
 
 export type GroceryItemSourceRow = SyncRow & {

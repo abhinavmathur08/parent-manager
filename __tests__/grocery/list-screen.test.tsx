@@ -28,6 +28,11 @@ jest.mock('@/features/people/data', () => ({
     },
   ],
 }));
+let mockMembers: { userId: string; role: string; joinedAt: string; displayName: string | null }[] =
+  [];
+jest.mock('@/features/household/members', () => ({
+  fetchMembers: async () => mockMembers,
+}));
 const mockNavigate = jest.fn();
 jest.mock('expo-router', () => ({
   router: { navigate: (...args: unknown[]) => mockNavigate(...args) },
@@ -64,6 +69,7 @@ const item = (id: string, over: Record<string, unknown> = {}) => ({
   checked: false,
   checked_at: null,
   checked_by: null,
+  updated_by: null,
   ...over,
 });
 const source = (itemId: string, entryId: string) => ({
@@ -98,6 +104,7 @@ beforeEach(() => {
   jest.useFakeTimers({ now: new Date('2026-11-18T12:00:00Z'), advanceTimers: true });
   mockRows = {};
   mockOnline = true;
+  mockMembers = [];
   mockUpdate.mockClear();
   mockInsert.mockClear();
   mockRemove.mockClear();
@@ -512,6 +519,61 @@ describe('"assumed at home" (FR-PAN-3, R-PAN-3)', () => {
     mockRows = { grocery_lists: [list], grocery_items: [item('milk')] };
     await show();
     expect(screen.queryByTestId('list-assumed')).toBeNull();
+  });
+});
+
+describe('shopping together (FR-LIST-8, FR-LIST-9)', () => {
+  const partners = [
+    { userId: 'me', role: 'parent', joinedAt: '2026-11-01', displayName: 'Sam' },
+    { userId: 'alex', role: 'parent', joinedAt: '2026-11-02', displayName: 'Alex' },
+  ];
+  const checkedByAlex = item('milk', {
+    checked: true,
+    checked_by: 'alex',
+    checked_at: '2026-11-18T11:00:00Z',
+  });
+
+  it('shows who checked an item off when the household has more than one member', async () => {
+    mockMembers = partners;
+    mockRows = { grocery_lists: [list], grocery_items: [checkedByAlex] };
+    await show({ userId: 'me' });
+    await fireEvent.press(screen.getByTestId('list-cart-toggle'));
+    expect(screen.getByTestId('list-cart-item-0')).toHaveAccessibleName(/checked by Alex/);
+  });
+
+  it('leaves "checked by" off for a household of one', async () => {
+    mockMembers = [partners[0]];
+    mockRows = {
+      grocery_lists: [list],
+      grocery_items: [{ ...checkedByAlex, checked_by: 'me' }],
+    };
+    await show({ userId: 'me' });
+    await fireEvent.press(screen.getByTestId('list-cart-toggle'));
+    expect(screen.getByTestId('list-cart-item-0')).not.toHaveAccessibleName(/checked by/);
+  });
+
+  it('shows the banner for a minute after another member changes the list', async () => {
+    mockRows = {
+      grocery_lists: [list],
+      grocery_items: [item('milk', { updated_by: 'alex', updated_at: '2026-11-18T11:59:50Z' })],
+    };
+    await show({ userId: 'me' });
+    expect(screen.getByTestId('list-partner-activity')).toHaveTextContent(
+      'Someone else is updating the list.',
+    );
+    await act(async () => {
+      jest.advanceTimersByTime(60_000);
+    });
+    expect(screen.queryByTestId('list-partner-activity')).toBeNull();
+  });
+
+  it("doesn't show the banner for the member's own changes", async () => {
+    mockRows = {
+      grocery_lists: [list],
+      grocery_items: [item('milk', { updated_by: 'me', updated_at: '2026-11-18T11:59:50Z' })],
+    };
+    await show({ userId: 'me' });
+    expect(screen.queryByTestId('list-partner-activity')).toBeNull();
   });
 });
 

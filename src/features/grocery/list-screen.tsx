@@ -37,6 +37,7 @@ import { useGroceryRows, useListIngredientFacts } from './data';
 import { weekNeeds } from './engine';
 import { onListUpdated, requestRegenerate, useOpenListWeek, type ListUpdated } from './list-events';
 import type { GroceryItemRow } from './tables';
+import { usePartnerActivity, useListMembers } from './use-shopping';
 import { buildListView, type ListRowView } from './view';
 import { useAddItem, useDeleteItem, useEditItem, useMarkHave, useToggleItem } from './writes';
 
@@ -49,6 +50,8 @@ export type ListHousehold = {
   timezone: string | null;
   /** Caregivers shop and edit but don't regenerate (spec section 2.2, row 29). */
   canRegenerate: boolean;
+  /** The signed-in member, so their own changes don't show the partner banner. */
+  userId?: string | null;
 };
 
 /**
@@ -85,10 +88,13 @@ export function ListScreen({ household }: { household: ListHousehold }) {
   const markHave = useMarkHave(household.id);
   const deleteItem = useDeleteItem();
   const undoable = useUndoable(() => setMessage(null));
+  const members = useListMembers(household.id);
+  const me = household.userId ?? null;
 
   const list = lists.find((l) => !l.deleted_at && l.is_default && l.week_start === weekStart);
   const listId = list?.id ?? null;
   const byId = useMemo(() => new Map(items.map((i) => [i.id, i])), [items]);
+  const partnerActive = usePartnerActivity(listId, items, me);
 
   const nameOf = useCallback(
     (item: GroceryItemRow) => {
@@ -216,6 +222,18 @@ export function ListScreen({ household }: { household: ListHousehold }) {
     });
   };
 
+  // FR-LIST-9: "checked by <member>" once the household has more than one member.
+  const checkedByOf = (row: ListRowView) => {
+    if (!row.checkedBy) return undefined;
+    const index = members ? members.findIndex((m) => m.userId === row.checkedBy) : -1;
+    const several = members ? members.length > 1 : row.checkedBy !== me;
+    if (!several) return undefined;
+    return {
+      name: (index >= 0 ? members?.[index].displayName : null) ?? t('household.members.unnamed'),
+      memberIndex: Math.max(index, 0),
+    };
+  };
+
   const renderRow = (row: ListRowView, testID: string) => {
     const item = byId.get(row.id);
     return (
@@ -224,6 +242,7 @@ export function ListScreen({ household }: { household: ListHousehold }) {
           label={row.name}
           detail={detailOf(row) || undefined}
           checked={row.checked}
+          checkedBy={checkedByOf(row)}
           onToggle={(checked) => {
             if (item) void toggleItem(item, checked);
           }}
@@ -273,9 +292,15 @@ export function ListScreen({ household }: { household: ListHousehold }) {
         title={t('list.title')}
         actions={topActions}
         banner={
-          online ? null : (
+          !online ? (
             <Banner variant="offline" message={t('list.offline')} testID="list-offline" />
-          )
+          ) : partnerActive ? (
+            <Banner
+              variant="partnerActivity"
+              message={t('list.partnerActivity')}
+              testID="list-partner-activity"
+            />
+          ) : null
         }
         testID="list-screen"
       >

@@ -274,7 +274,8 @@ select set_eq(
     where table_name::text in ('grocery_lists', 'grocery_items', 'grocery_item_sources', 'purchase_events')$$,
   array['grocery_lists.household_id:household', 'grocery_items.household_id:household',
         'grocery_item_sources.household_id:household', 'purchase_events.household_id:household',
-        'grocery_items.checked_by:user', 'purchase_events.recorded_by:user'],
+        'grocery_items.checked_by:user', 'grocery_items.updated_by:user',
+        'purchase_events.recorded_by:user'],
   'every grocery table and user column is registered for deletion');
 
 -- Deleting the caregiver's and the family member's accounts clears them from A's list.
