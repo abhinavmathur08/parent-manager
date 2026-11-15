@@ -1,0 +1,127 @@
+# N-01.2 (FR-NOT-3, FR-NOT-6, FR-NOT-7): a member turns "list is ready" off, moves the
+# "plan your week" reminder and the start of quiet hours, and finds the settings kept on the
+# server when they come back. Maestro grants notification permission at launch, so turning a
+# type back on doesn't ask. Ends signed out. Needs the local stack; see README.md.
+appId: ${APP_ID || 'com.myparentmanager'}
+tags:
+  - backend
+---
+- runFlow: subflows/create-household.yaml
+- tapOn:
+    id: tab-household
+- scrollUntilVisible:
+    element:
+      id: open-notifications
+- tapOn:
+    id: open-notifications
+- extendedWaitUntil:
+    visible:
+      id: notification-type-list_ready
+    timeout: 10000
+
+# Every type starts on; turn "list is ready" off.
+- assertVisible:
+    id: notification-type-list_ready
+    checked: true
+- tapOn:
+    id: notification-type-list_ready
+- assertVisible:
+    id: notification-type-list_ready
+    checked: false
+
+# "Plan your week": Friday at 5 PM instead of the day before the week at 6 PM.
+- scrollUntilVisible:
+    element:
+      id: plan-week-day
+    centerElement: true
+- tapOn:
+    id: plan-week-day
+- extendedWaitUntil:
+    visible:
+      id: choose-planWeekDay-header
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: choose-planWeekDay-5
+- tapOn:
+    id: choose-planWeekDay-5
+- extendedWaitUntil:
+    notVisible:
+      id: choose-planWeekDay-5
+    timeout: 10000
+- tapOn:
+    id: plan-week-time
+- extendedWaitUntil:
+    visible:
+      id: choose-planWeekMinute-header
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: choose-planWeekMinute-1020
+- tapOn:
+    id: choose-planWeekMinute-1020
+- extendedWaitUntil:
+    notVisible:
+      id: choose-planWeekMinute-1020
+    timeout: 10000
+
+# Quiet hours start at 10 PM instead of 9 PM.
+- scrollUntilVisible:
+    element:
+      id: quiet-start
+    centerElement: true
+- tapOn:
+    id: quiet-start
+- extendedWaitUntil:
+    visible:
+      id: choose-quietStartMinute-header
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: choose-quietStartMinute-1320
+- tapOn:
+    id: choose-quietStartMinute-1320
+- extendedWaitUntil:
+    notVisible:
+      id: choose-quietStartMinute-1320
+    timeout: 10000
+- assertVisible:
+    id: quiet-note
+
+# Leave and come back: the server kept every change.
+# The top bar scrolls with the settings.
+- scrollUntilVisible:
+    element:
+      id: notifications-screen-title-back
+    direction: UP
+- tapOn:
+    id: notifications-screen-title-back
+- scrollUntilVisible:
+    element:
+      id: open-notifications
+- tapOn:
+    id: open-notifications
+- extendedWaitUntil:
+    visible:
+      id: notification-type-list_ready
+    timeout: 10000
+- assertVisible:
+    id: notification-type-list_ready
+    checked: false
+- scrollUntilVisible:
+    element:
+      text: Friday
+- assertVisible:
+    text: 5:00.PM
+- scrollUntilVisible:
+    element:
+      text: 10:00.PM
+# The top bar scrolls with the settings.
+- scrollUntilVisible:
+    element:
+      id: notifications-screen-title-back
+    direction: UP
+- tapOn:
+    id: notifications-screen-title-back
+
+- runFlow: subflows/sign-out.yaml

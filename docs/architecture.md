@@ -175,13 +175,13 @@ How the plan is stored (P-01.1):
 
 #### AI, notifications and devices
 
-| Table                | Key columns                                                                                                                                                   |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ai_import_jobs`     | `id`, `household_id`, `user_id`, `input_type`, `locale`, `region`, `status`, `source`, `reserved_period`, `draft` (JSON), `model`, `cost_units`, `error_code` |
-| `ai_usage`           | `household_id`, `period` (month), `imports_used`                                                                                                              |
-| `push_tokens`        | `user_id`, `token`, `platform`, `last_seen_at`                                                                                                                |
-| `notification_prefs` | `user_id`, `type`, `enabled`, `quiet_start`, `quiet_end`                                                                                                      |
-| `notifications`      | `user_id`, `household_id`, `type`, `payload`, `read_at` (the in-app inbox)                                                                                    |
+| Table                | Key columns                                                                                                                                                               |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ai_import_jobs`     | `id`, `household_id`, `user_id`, `input_type`, `locale`, `region`, `status`, `source`, `reserved_period`, `draft` (JSON), `model`, `cost_units`, `error_code`             |
+| `ai_usage`           | `household_id`, `period` (month), `imports_used`                                                                                                                          |
+| `push_tokens`        | `user_id`, `token`, `platform`, `last_seen_at`                                                                                                                            |
+| `notification_prefs` | `user_id`, one switch per type (`plan_week`, `list_ready`, `defrost`, `household_changes`), `plan_week_day`, `plan_week_minute`, `quiet_start_minute`, `quiet_end_minute` |
+| `notifications`      | `user_id`, `household_id`, `type`, `payload`, `read_at` (the in-app inbox)                                                                                                |
 
 ### How the grocery list is built
 
@@ -461,7 +461,7 @@ Supabase Auth, with:
 - **Push:** `expo-notifications` and the Expo push service. Tokens are stored in `push_tokens`, one row per device, written only through `register_push_token()` (which moves a token to whoever signs in on the device next, keeping at most 10 per user) and removed at sign-out with `unregister_push_token()`. `PushRegistration` (`src/features/notifications`), mounted in the tabs layout, registers the token at launch, on returning to the foreground and when it changes, but only when permission is already granted.
 - **Permission in context (FR-NOT-2, FR-ONB-8):** nothing asks at launch or in onboarding. The first time this device's own change plans a week (the `week_planned` moment), `usePushPrompt` shows a sheet that explains before the system asks, once per member per device and only while the system can still ask. Notification settings (S-29) can turn push on too, and a denied permission shows "off in system settings" with a link there. Android uses one silent channel (`default`); nothing plays a sound (FR-NOT-6).
 - **Sending:** Edge Functions send messages, triggered by database events ("list is ready") or by `pg_cron` schedules through `pg_net` (the weekly "plan your week", in the household's timezone).
-- **Quiet hours and controls:** quiet hours and per-type settings are enforced on the server before sending.
+- **Quiet hours and controls:** quiet hours and per-type settings are enforced on the server before sending. `notification_prefs` holds one row per member, written by the member on S-29; no row means the defaults (every type on, "plan your week" at 18:00 the day before the week starts, quiet hours 21:00 to 07:00). Times are minutes after midnight in the household's timezone. `private.notification_prefs_of()` reads a member's settings with the defaults filled in, and `private.quiet_hours_release()` gives the time a push due inside quiet hours may go: the end of quiet hours, local to the household. The app keeps the last settings it saw on the device for local notifications.
 - **Copy:** notification text is localized on the server, chosen by the recipient's locale.
 - **In-app inbox:** the `notifications` table.
 - **Email:** sent through Resend, for invitations and, later, digests.
