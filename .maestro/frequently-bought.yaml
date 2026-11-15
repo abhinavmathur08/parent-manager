@@ -74,8 +74,7 @@ tags:
       id: add-item-frequent-0
       text: .*banana.*
     timeout: 10000
-# The search field takes focus when the sheet opens; the keyboard can cover the rows.
-- hideKeyboard
+# No hideKeyboard here: with no keyboard up, Android's back press would close the sheet.
 - tapOn:
     id: add-item-frequent-0-hide
 - extendedWaitUntil:
