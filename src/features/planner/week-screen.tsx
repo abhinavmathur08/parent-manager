@@ -565,18 +565,25 @@ function DaySlots({
                 />
               ) : null}
             </View>
-            {list.map((entry) => (
-              <EntryRow
+            {list.map((entry, n) => (
+              // A stable test ID by position (day, slot, order), for E2E flows that can't know
+              // entry IDs. Not collapsable, so Android keeps it in the view hierarchy.
+              <View
                 key={entry.id}
-                entry={entry}
-                title={titleOf(entry)}
-                leftovers={isLeftovers(entry)}
-                babyPlate={babyPlateOf(entry)}
-                matches={allergensOf(entry)}
-                locale={locale}
-                onPress={actions.onOpenEntry}
-                onLongPress={canWrite ? actions.onEntryActions : undefined}
-              />
+                collapsable={false}
+                testID={`plan-slot-${index}-${slot}-entry-${n}`}
+              >
+                <EntryRow
+                  entry={entry}
+                  title={titleOf(entry)}
+                  leftovers={isLeftovers(entry)}
+                  babyPlate={babyPlateOf(entry)}
+                  matches={allergensOf(entry)}
+                  locale={locale}
+                  onPress={actions.onOpenEntry}
+                  onLongPress={canWrite ? actions.onEntryActions : undefined}
+                />
+              </View>
             ))}
           </View>
         ))}

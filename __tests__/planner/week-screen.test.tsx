@@ -137,6 +137,9 @@ describe('S-10 week view (FR-PLAN-1, FR-PLAN-2)', () => {
     expect(screen.queryByTestId('plan-empty')).toBeNull();
     const dinner = screen.getByTestId('plan-slot-1-dinner');
     expect(dinner).toHaveTextContent(/Mac and cheese.*2.5 servings.*Salad/);
+    // E2E flows find entries by day, slot and order.
+    expect(screen.getByTestId('plan-slot-1-dinner-entry-0')).toHaveTextContent(/Mac and cheese/);
+    expect(screen.getByTestId('plan-slot-1-dinner-entry-1')).toHaveTextContent(/Salad/);
     expect(await screen.findByTestId('plan-entry-e1-allergen-milk')).toHaveTextContent(/Mia/);
     expect(screen.queryByTestId('plan-entry-e2-allergen-milk')).toBeNull();
     expect(screen.getByTestId('plan-entry-e3')).toHaveTextContent(/Deleted recipe/);

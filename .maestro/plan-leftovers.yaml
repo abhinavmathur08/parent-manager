@@ -49,12 +49,10 @@ tags:
 # Day 2's dinner becomes leftovers of day 1's.
 - scrollUntilVisible:
     element:
-      id: plan-slot-1-dinner
+      id: plan-slot-1-dinner-entry-0
     centerElement: true
 - longPressOn:
-    id: plan-entry-[0-9a-f-]{36}
-    childOf:
-      id: plan-slot-1-dinner
+    id: plan-slot-1-dinner-entry-0
 - extendedWaitUntil:
     visible:
       id: entry-actions
@@ -77,23 +75,15 @@ tags:
     timeout: 10000
 - scrollUntilVisible:
     element:
-      id: plan-slot-1-dinner
+      id: plan-slot-1-dinner-entry-0
     centerElement: true
+# Day 2's dinner is labelled as leftovers (Jest checks the original isn't).
 - assertVisible:
     id: plan-entry-[0-9a-f-]{36}-leftovers
-    childOf:
-      id: plan-slot-1-dinner
-- assertNotVisible:
-    id: plan-entry-[0-9a-f-]{36}-leftovers
-    childOf:
-      id: plan-slot-0-dinner
 
 # S-12 says what it's leftovers of.
 - tapOn:
-    id: plan-entry-[0-9a-f-]{36}
-    childOf:
-      id: plan-slot-1-dinner
-    index: 0
+    id: plan-slot-1-dinner-entry-0
 - extendedWaitUntil:
     visible:
       id: entry-leftovers-of
@@ -108,13 +98,10 @@ tags:
 # Unlinking makes it an ordinary dinner again.
 - scrollUntilVisible:
     element:
-      id: plan-slot-1-dinner
+      id: plan-slot-1-dinner-entry-0
     centerElement: true
 - longPressOn:
-    id: plan-entry-[0-9a-f-]{36}
-    childOf:
-      id: plan-slot-1-dinner
-    index: 0
+    id: plan-slot-1-dinner-entry-0
 - extendedWaitUntil:
     visible:
       id: entry-actions-leftovers-of
@@ -131,7 +118,7 @@ tags:
     timeout: 10000
 - scrollUntilVisible:
     element:
-      id: plan-slot-1-dinner
+      id: plan-slot-1-dinner-entry-0
     centerElement: true
 - assertNotVisible:
     id: plan-entry-[0-9a-f-]{36}-leftovers
