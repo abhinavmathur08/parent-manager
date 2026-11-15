@@ -132,12 +132,25 @@ export async function copyEntry(
 export function useEntryActions() {
   const writer = useSyncWriter();
   return {
-    move: async (entry: PlanEntryRow, target: { date: PlanDate; slot: Slot; position: number }) => {
+    /**
+     * Moves an entry. `unlink` lists the entries whose leftover link the move breaks
+     * (`linksBrokenByMove`); they become ordinary entries again, as the server would make them.
+     */
+    move: async (
+      entry: PlanEntryRow,
+      target: { date: PlanDate; slot: Slot; position: number },
+      unlink: readonly string[] = [],
+    ) => {
       await writer.update(PLAN_ENTRIES.name, entry.id, {
         date: target.date,
         slot: target.slot,
         position: target.position,
+        ...(unlink.includes(entry.id) ? { leftover_of_entry_id: null } : {}),
       });
+      for (const id of unlink) {
+        if (id !== entry.id)
+          await writer.update(PLAN_ENTRIES.name, id, { leftover_of_entry_id: null });
+      }
       track('plan_entry_moved', {
         slot_changed: target.slot !== entry.slot,
         day_changed: target.date !== entry.date,
@@ -148,6 +161,22 @@ export function useEntryActions() {
       portions: readonly PlanEntryPortionRow[],
       target: { date: PlanDate; slot: Slot; position: number },
     ) => copyEntry(writer, entry, portions, target),
+    /**
+     * Marks `entry` as leftovers of an earlier entry (FR-PLAN-8). It takes on the earlier
+     * entry's recipe or text, because it's the same food; it keeps its own servings, which the
+     * list adds to the earlier entry's (R-SERV-3).
+     */
+    linkLeftovers: async (entry: PlanEntryRow, source: PlanEntryRow) => {
+      await writer.update(PLAN_ENTRIES.name, entry.id, {
+        leftover_of_entry_id: source.id,
+        recipe_id: source.recipe_id,
+        free_text: source.free_text,
+      });
+      track('leftover_linked');
+    },
+    /** Makes a leftovers entry an ordinary one again: it needs its own ingredients. */
+    unlinkLeftovers: (entry: PlanEntryRow) =>
+      writer.update(PLAN_ENTRIES.name, entry.id, { leftover_of_entry_id: null }),
     /** Removes entries for good. The server tombstones their portions. */
     remove: async (ids: readonly string[], options: { track?: boolean } = {}) => {
       for (const id of ids) {

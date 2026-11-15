@@ -887,7 +887,17 @@
       "replace": "Replace this week",
       "replaced": "Replaced this week with last week"
     },
-    "progress": "{{planned}} of {{total}} dinners planned"
+    "progress": "{{planned}} of {{total}} dinners planned",
+    "leftovers": {
+      "mark": "Mark as leftovers",
+      "choose": "Leftovers of",
+      "none": "There's nothing earlier this week or last week to link to.",
+      "when": "{{day}} · {{slot}}",
+      "of": "Leftovers of {{title}} ({{when}})",
+      "unlink": "Unlink leftovers",
+      "tag": "Leftovers",
+      "note": "Leftovers of {{title}} ({{when}}). They add nothing to the list: that meal's ingredients cover these servings."
+    }
   },
   "recipes": {
     "title": "Recipes",
@@ -1026,6 +1036,15 @@
     "starter": {
       "saveCopy": "Save a copy to edit",
       "copyFailed": "Couldn't save a copy. Try again."
+    },
+    "delete": {
+      "action": "Delete recipe",
+      "title": "Delete {{title}}?",
+      "planned_one": "It's on your plan {{value}} time from this week on. That meal stays on the plan as text and won't add anything to the list.",
+      "planned_other": "It's on your plan {{value}} times from this week on. Those meals stay on the plan as text and won't add anything to the list.",
+      "unplanned": "It isn't on your plan from this week on. Earlier meals keep its name.",
+      "confirm": "Delete",
+      "failed": "Couldn't delete the recipe. Try again."
     }
   }
 }

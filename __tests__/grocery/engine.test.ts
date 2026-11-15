@@ -337,6 +337,36 @@ describe('effectiveServings (R-SERV-3)', () => {
   });
 });
 
+describe('leftover links in the list (P-04, FR-PLAN-8 acceptance)', () => {
+  const chili = [line('r1', 'ingredient.egg', 4, null, 4)];
+  const mon = entry({ id: 'mon', date: '2026-11-16', servings: 4 });
+  const tue = entry({ id: 'tue', date: '2026-11-17', servings: 2 });
+  const need = (entries: EngineEntry[]) =>
+    weekNeeds(input({ entries, recipes: [recipe('r1')], lines: chili })).needs;
+
+  it('scales the original to 6 servings, and the leftovers add no items of their own', () => {
+    const needs = need([mon, { ...tue, leftover_of_entry_id: 'mon' }]);
+    expect(needs).toHaveLength(1);
+    expect(needs[0].quantityBase).toBe(6);
+    expect(needs[0].sources.map((s) => s.entryId)).toEqual(['mon']);
+  });
+
+  it('gives the leftovers their own ingredients again once unlinked', () => {
+    const needs = need([mon, tue]);
+    expect(needs[0].quantityBase).toBe(6);
+    expect(needs[0].sources.map((s) => s.entryId)).toEqual(['mon', 'tue']);
+  });
+
+  it('gives the leftovers their own ingredients when the original is removed', () => {
+    const needs = need([
+      { ...mon, deleted_at: 'x' },
+      { ...tue, leftover_of_entry_id: 'mon' },
+    ]);
+    expect(needs[0].quantityBase).toBe(2);
+    expect(needs[0].sources.map((s) => s.entryId)).toEqual(['tue']);
+  });
+});
+
 describe('needKey', () => {
   it('names a no-quantity group "none"', () => {
     expect(needKey('ingredient.salt', null)).toBe('ingredient.salt|none');
