@@ -70,6 +70,7 @@ const item = (id: string, over: Record<string, unknown> = {}) => ({
   checked_at: null,
   checked_by: null,
   updated_by: null,
+  shopped_at: null,
   ...over,
 });
 const source = (itemId: string, entryId: string) => ({
@@ -574,6 +575,107 @@ describe('shopping together (FR-LIST-8, FR-LIST-9)', () => {
     };
     await show({ userId: 'me' });
     expect(screen.queryByTestId('list-partner-activity')).toBeNull();
+  });
+});
+
+describe('purchase events and finish shopping (FR-LIST-10, FR-MEM-1)', () => {
+  const purchase = (itemId: string, minutesAgo: number) => ({
+    ...base,
+    id: `event-${itemId}`,
+    list_id: LIST,
+    item_id: itemId,
+    ingredient_id: 'ingredient.milk',
+    dimension: 'volume',
+    quantity_base: 709.764,
+    occurred_at: new Date(Date.parse('2026-11-18T12:00:00Z') - minutesAgo * 60_000).toISOString(),
+    source: 'checked_off',
+    recorded_by: 'me',
+  });
+
+  it('records a purchase when an item is checked off', async () => {
+    mockRows = { grocery_lists: [list], grocery_items: [item('milk')] };
+    await show();
+    await fireEvent.press(screen.getByTestId('list-item-dairy-0'));
+    await act(async () => undefined);
+    expect(mockInsert).toHaveBeenCalledWith(
+      'purchase_events',
+      expect.any(String),
+      expect.objectContaining({ item_id: 'milk', source: 'checked_off', quantity_base: 709.764 }),
+    );
+  });
+
+  it('deletes the purchase when the item is unchecked within 10 minutes', async () => {
+    mockRows = {
+      grocery_lists: [list],
+      grocery_items: [item('milk', { checked: true })],
+      purchase_events: [purchase('milk', 2)],
+    };
+    await show();
+    await fireEvent.press(screen.getByTestId('list-cart-toggle'));
+    await fireEvent.press(screen.getByTestId('list-cart-item-0'));
+    await act(async () => undefined);
+    expect(mockRemove).toHaveBeenCalledWith('purchase_events', 'event-milk');
+  });
+
+  it('keeps the purchase when the item is unchecked later', async () => {
+    mockRows = {
+      grocery_lists: [list],
+      grocery_items: [item('milk', { checked: true })],
+      purchase_events: [purchase('milk', 11)],
+    };
+    await show();
+    await fireEvent.press(screen.getByTestId('list-cart-toggle'));
+    await fireEvent.press(screen.getByTestId('list-cart-item-0'));
+    await act(async () => undefined);
+    expect(mockRemove).not.toHaveBeenCalled();
+  });
+
+  it('asks before finishing, then records missing purchases and moves the cart to history', async () => {
+    mockRows = {
+      grocery_lists: [list],
+      grocery_items: [
+        item('milk', { checked: true }),
+        item('eggs', { ingredient_id: 'ingredient.egg', checked: true }),
+        item('bread', { ingredient_id: 'ingredient.bread', section_id: 'section.bakery' }),
+      ],
+      purchase_events: [purchase('milk', 30)],
+    };
+    await show();
+    await fireEvent.press(screen.getByTestId('list-finish'));
+    expect(screen.getByTestId('list-finish-body')).toHaveTextContent(
+      "2 checked items move to this week's history.",
+    );
+    expect(screen.getByTestId('list-finish-staying')).toHaveTextContent(/1 unchecked item stays/);
+    expect(mockUpdate).not.toHaveBeenCalled();
+    await fireEvent.press(screen.getByTestId('list-finish-confirm'));
+    await act(async () => undefined);
+    expect(mockInsert).toHaveBeenCalledTimes(1);
+    expect(mockInsert).toHaveBeenCalledWith(
+      'purchase_events',
+      expect.any(String),
+      expect.objectContaining({ item_id: 'eggs', source: 'confirmed' }),
+    );
+    expect(mockUpdate).toHaveBeenCalledWith('grocery_items', 'milk', {
+      shopped_at: expect.any(String),
+    });
+    expect(mockUpdate).toHaveBeenCalledWith('grocery_items', 'eggs', {
+      shopped_at: expect.any(String),
+    });
+    expect(mockUpdate).not.toHaveBeenCalledWith('grocery_items', 'bread', expect.anything());
+  });
+
+  it('leaves items already moved to history off the list', async () => {
+    mockRows = {
+      grocery_lists: [list],
+      grocery_items: [
+        item('milk', { checked: true, shopped_at: '2026-11-17T10:00:00Z' }),
+        item('bread', { ingredient_id: 'ingredient.bread', section_id: 'section.bakery' }),
+      ],
+    };
+    await show();
+    expect(screen.queryByTestId('list-cart')).toBeNull();
+    expect(screen.queryByTestId('list-finish')).toBeNull();
+    expect(screen.getByTestId('list-item-bakery-0')).toBeOnTheScreen();
   });
 });
 

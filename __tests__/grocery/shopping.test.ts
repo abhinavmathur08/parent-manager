@@ -24,6 +24,7 @@ const item = (id: string, over: Partial<GroceryItemRow> = {}): GroceryItemRow =>
   checked_at: null,
   checked_by: null,
   updated_by: 'me',
+  shopped_at: null,
   ...over,
 });
 const at = (items: GroceryItemRow[], previous: ReturnType<typeof listSnapshot> | null) =>

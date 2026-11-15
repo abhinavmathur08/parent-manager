@@ -179,12 +179,15 @@ select is(
   (select recorded_by from public.purchase_events where id = 'aaaaaaaa-7777-0000-0000-000000000002'),
   'aaaaaaaa-0000-0000-0000-000000000002'::uuid,
   'a purchase is recorded as the member who wrote it, whatever the client says');
-select throws_ok($$
-  insert into public.purchase_events (id, household_id, list_id, item_id, occurred_at, source)
-  values (gen_random_uuid(), '00000000-0000-0000-0000-00000000000a',
-          'aaaaaaaa-1111-0000-0000-000000000001', 'aaaaaaaa-2222-0000-0000-000000000002', now(),
-          'confirmed')
-$$, '23505', null, 'an item has at most one purchase event (R-MEM-1)');
+-- G-04.2: a second event is kept as a tombstone rather than refused (finish_shopping.test.sql).
+insert into public.purchase_events (id, household_id, list_id, item_id, occurred_at, source)
+values (gen_random_uuid(), '00000000-0000-0000-0000-00000000000a',
+        'aaaaaaaa-1111-0000-0000-000000000001', 'aaaaaaaa-2222-0000-0000-000000000002', now(),
+        'confirmed');
+select is(
+  (select count(*)::int from public.purchase_events
+   where item_id = 'aaaaaaaa-2222-0000-0000-000000000002' and deleted_at is null),
+  1, 'an item has at most one purchase event (R-MEM-1)');
 
 select throws_ok($$
   delete from public.grocery_items where id = 'aaaaaaaa-2222-0000-0000-000000000002'

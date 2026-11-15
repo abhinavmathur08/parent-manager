@@ -1,5 +1,6 @@
 import { SECTION_IDS, type SectionId } from '@/features/ingredients/catalog-ids';
 import type { SaveOp } from '@/features/recipes/draft';
+import type { SyncValue } from '@/lib/sync/types';
 import { stableId } from '@/features/grocery/stable-id';
 
 import { PANTRY_ITEMS, type PantryItemRow } from './tables';
@@ -163,10 +164,12 @@ export function isDuplicateRow(error: unknown): boolean {
  * so marking the same ingredient again needs the next one.
  */
 export async function insertStable(
-  writer: { insert(table: string, id: string, values: Record<string, string>): Promise<unknown> },
+  writer: {
+    insert(table: string, id: string, values: Record<string, SyncValue>): Promise<unknown>;
+  },
   table: string,
   idFor: (index: number) => string,
-  values: Record<string, string>,
+  values: Record<string, SyncValue>,
   maxTries = 50,
 ): Promise<string> {
   for (let index = 0; index < maxTries; index++) {

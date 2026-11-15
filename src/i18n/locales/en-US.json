@@ -819,6 +819,19 @@
       "remindersDenied": "Parent Manager can't reach Reminders. To turn it on, open Settings, then Apps, Parent Manager, Reminders. Or share or copy the list as text instead.",
       "openSettings": "Open Settings",
       "remindersPermission": "Parent Manager adds your grocery list to Reminders when you ask, so you can shop with Siri and your watch."
+    },
+    "finish": {
+      "action": "Finish shopping",
+      "title": "Finish shopping?",
+      "moved_one": "{{count}} checked item moves to this week's history.",
+      "moved_other": "{{count}} checked items move to this week's history.",
+      "staying_one": "{{count}} unchecked item stays on your list for next time.",
+      "staying_other": "{{count}} unchecked items stay on your list for next time.",
+      "nothingLeft": "Nothing is left on your list.",
+      "confirm": "Finish shopping",
+      "done_one": "Shopping finished. {{count}} item moved to history.",
+      "done_other": "Shopping finished. {{count}} items moved to history.",
+      "failed": "That didn't save. Try again."
     }
   },
   "plan": {
