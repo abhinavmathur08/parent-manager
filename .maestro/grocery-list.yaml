@@ -86,4 +86,17 @@ tags:
     id: list-cart-item-0
     text: .*carrot.*
 
+# N-02.2 (FR-NOT-4): "list is ready" tells the rest of the household, once a day.
+- scrollUntilVisible:
+    element:
+      id: list-ready
+    direction: UP
+    centerElement: true
+- tapOn:
+    id: list-ready
+- extendedWaitUntil:
+    visible:
+      id: list-ready-sent
+    timeout: 10000
+
 - runFlow: subflows/sign-out.yaml

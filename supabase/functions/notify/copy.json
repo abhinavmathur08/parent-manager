@@ -1,0 +1,44 @@
+{
+  "en-US": {
+    "plan_week": {
+      "title": "Time to plan next week",
+      "body": "Next week isn't planned yet. A few minutes now makes the week easier."
+    },
+    "list_ready": {
+      "title": "The grocery list is ready",
+      "body": "It's ready to shop. Open the list to get started."
+    },
+    "test": {
+      "title": "Notifications are working",
+      "body": "This is a test notification for this phone."
+    }
+  },
+  "en-GB": {
+    "plan_week": {
+      "title": "Time to plan next week",
+      "body": "Next week isn't planned yet. A few minutes now makes the week easier."
+    },
+    "list_ready": {
+      "title": "The grocery list is ready",
+      "body": "It's ready to shop. Open the list to get started."
+    },
+    "test": {
+      "title": "Notifications are working",
+      "body": "This is a test notification for this phone."
+    }
+  },
+  "en-AU": {
+    "plan_week": {
+      "title": "Time to plan next week",
+      "body": "Next week isn't planned yet. A few minutes now makes the week easier."
+    },
+    "list_ready": {
+      "title": "The grocery list is ready",
+      "body": "It's ready to shop. Open the list to get started."
+    },
+    "test": {
+      "title": "Notifications are working",
+      "body": "This is a test notification for this phone."
+    }
+  }
+}
