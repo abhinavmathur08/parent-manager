@@ -78,5 +78,7 @@ revoke all on function public.unregister_push_token(text) from public, anon;
 grant execute on function public.register_push_token(text, text) to authenticated;
 grant execute on function public.unregister_push_token(text) to authenticated;
 
--- Account deletion removes the user's tokens (FR-PRIV-3).
+-- Account deletion removes the user's tokens (FR-PRIV-3). The account export (FR-PRIV-2)
+-- lists the user's devices, without the token itself: it can address the device.
 select private.register_for_deletion('public.push_tokens', 'user_id', 'user');
+select private.register_for_export('public.push_tokens', 'user', 'user_id', array['token']);
