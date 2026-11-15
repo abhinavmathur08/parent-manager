@@ -57,8 +57,16 @@ describe('push permission (FR-NOT-2)', () => {
     expect(await readPushPermission()).toBe('granted');
     notifications.getPermissionsAsync.mockResolvedValueOnce(status({}));
     expect(await readPushPermission()).toBe('undetermined');
-    notifications.getPermissionsAsync.mockResolvedValueOnce(status({ status: 'denied' }));
+    // iOS after a refusal.
+    notifications.getPermissionsAsync.mockResolvedValueOnce(
+      status({ status: 'denied', canAskAgain: false }),
+    );
     expect(await readPushPermission()).toBe('denied');
+    // Android 13+ before it has asked: "denied" because notifications are off, but it can ask.
+    notifications.getPermissionsAsync.mockResolvedValueOnce(
+      status({ status: 'denied', canAskAgain: true }),
+    );
+    expect(await readPushPermission()).toBe('undetermined');
     // The system won't ask again: only settings can turn it on.
     notifications.getPermissionsAsync.mockResolvedValueOnce(status({ canAskAgain: false }));
     expect(await readPushPermission()).toBe('denied');
@@ -91,7 +99,9 @@ describe('push permission (FR-NOT-2)', () => {
   });
 
   it('records a refusal and registers nothing', async () => {
-    notifications.requestPermissionsAsync.mockResolvedValueOnce(status({ status: 'denied' }));
+    notifications.requestPermissionsAsync.mockResolvedValueOnce(
+      status({ status: 'denied', canAskAgain: false }),
+    );
     expect(await requestPushPermission('settings', 'Reminders')).toBe('denied');
     expect(mockTrack).toHaveBeenLastCalledWith('push_permission_result', { granted: false });
     expect(mockRpc).not.toHaveBeenCalled();
