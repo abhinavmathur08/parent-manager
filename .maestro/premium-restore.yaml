@@ -1,0 +1,67 @@
+# Restore and the "activating" state (M-02.2, FR-PAY-8 edge cases): the test store holds the
+# purchase's webhook back, so after buying the sheet shows "activating"; restoring purchases on
+# S-33 sends the subscription again and the household turns Premium. Needs the local stack with
+# the mock store on (see premium.yaml and README.md).
+appId: ${APP_ID || 'com.myparentmanager'}
+tags:
+  - backend
+---
+- runFlow: subflows/create-household.yaml
+- tapOn:
+    id: tab-household
+- scrollUntilVisible:
+    element:
+      id: open-premium
+    centerElement: true
+- tapOn:
+    id: open-premium
+- extendedWaitUntil:
+    visible:
+      id: subscription-summary-free
+    timeout: 15000
+- scrollUntilVisible:
+    element:
+      id: subscription-test-store
+- tapOn:
+    id: subscription-test-store
+- extendedWaitUntil:
+    visible:
+      id: mock-store-delay-webhook
+    timeout: 15000
+- tapOn:
+    id: mock-store-delay-webhook
+- tapOn:
+    id: mock-store-screen-title-back
+- extendedWaitUntil:
+    visible:
+      id: subscription-see-premium
+    timeout: 10000
+- tapOn:
+    id: subscription-see-premium
+- extendedWaitUntil:
+    visible:
+      id: premium-sheet-header
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: premium-terms
+- tapOn:
+    id: premium-start-trial
+- extendedWaitUntil:
+    visible:
+      id: premium-status-activating
+    timeout: 30000
+- tapOn:
+    id: premium-close
+- extendedWaitUntil:
+    visible:
+      id: subscription-restore
+    timeout: 10000
+- tapOn:
+    id: subscription-restore
+- extendedWaitUntil:
+    visible:
+      id: subscription-summary-trial
+    timeout: 60000
+- assertVisible:
+    id: subscription-restore-found

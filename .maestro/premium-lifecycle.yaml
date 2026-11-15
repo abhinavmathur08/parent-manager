@@ -1,0 +1,106 @@
+# A subscription's whole life on the mock store (M-02.2, S-33, FR-PAY-8, FR-PAY-9): a parent
+# opens Premium from the Household tab, starts the trial, sees Premium on S-33, uses the test
+# clock to end the trial and then expire the subscription, and the household lapses to Free
+# with caregiver invites waiting for Premium again. Needs the local stack with the mock store
+# on (see premium.yaml and README.md).
+appId: ${APP_ID || 'com.myparentmanager'}
+tags:
+  - backend
+---
+- runFlow: subflows/create-household.yaml
+- tapOn:
+    id: tab-household
+- scrollUntilVisible:
+    element:
+      id: open-premium
+    centerElement: true
+- tapOn:
+    id: open-premium
+- extendedWaitUntil:
+    visible:
+      id: subscription-summary-free
+    timeout: 15000
+- tapOn:
+    id: subscription-see-premium
+- extendedWaitUntil:
+    visible:
+      id: premium-sheet-header
+    timeout: 10000
+- assertVisible:
+    id: premium-test-notice
+- scrollUntilVisible:
+    element:
+      id: premium-terms
+- tapOn:
+    id: premium-start-trial
+- extendedWaitUntil:
+    visible:
+      id: premium-status-active
+    timeout: 90000
+- tapOn:
+    id: premium-done
+# S-33 shows the trial, its end date and the buyer.
+- extendedWaitUntil:
+    visible:
+      id: subscription-summary-trial
+    timeout: 15000
+- assertVisible:
+    id: subscription-buyer
+- tapOn:
+    id: subscription-manage
+- extendedWaitUntil:
+    visible:
+      id: mock-store-intro
+    timeout: 15000
+- scrollUntilVisible:
+    element:
+      id: mock-clock-trial-end
+    centerElement: true
+- tapOn:
+    id: mock-clock-trial-end
+- scrollUntilVisible:
+    element:
+      id: mock-clock-expiry
+    centerElement: true
+- tapOn:
+    id: mock-clock-expiry
+- extendedWaitUntil:
+    visible:
+      id: mock-store-ended
+    timeout: 20000
+- tapOn:
+    id: mock-store-screen-title-back
+- extendedWaitUntil:
+    visible:
+      id: subscription-summary-expired
+    timeout: 20000
+- assertVisible:
+    id: subscription-see-premium
+- tapOn:
+    id: subscription-screen-title-back
+# The lapse (FR-PAY-9): caregiver seats need Premium again.
+- scrollUntilVisible:
+    element:
+      id: open-members
+    direction: UP
+- tapOn:
+    id: open-members
+- extendedWaitUntil:
+    visible:
+      id: members-screen-title
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: open-invite
+- tapOn:
+    id: open-invite
+- extendedWaitUntil:
+    visible:
+      id: invite-sheet-header
+    timeout: 10000
+- tapOn:
+    id: invite-role-caregiver
+- assertVisible:
+    id: invite-upgrade
+- assertVisible:
+    id: invite-see-premium
