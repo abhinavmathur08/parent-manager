@@ -1,6 +1,7 @@
 import { useAuth } from '@/features/auth/session';
 import { useHousehold } from '@/features/household/membership';
 import { useInboxBell } from '@/features/notifications/inbox-bell';
+import { announceListReady } from '@/features/notifications/list-ready';
 import { usePushPrompt } from '@/features/notifications/push-prompt';
 import { PlanWeekScreen } from '@/features/planner/week-screen';
 
@@ -23,7 +24,13 @@ export default function PlanRoute() {
           timezone: membership.timezone ?? null,
         }}
         canWrite={membership.role !== 'caregiver'}
-        actions={{ onWeekPlanned: pushPrompt.offer }}
+        actions={{
+          onWeekPlanned: (start) => {
+            pushPrompt.offer();
+            // FR-NOT-4: a planned week tells the others its list is ready, unless someone did today.
+            void announceListReady(start, 'week_planned').catch(() => undefined);
+          },
+        }}
         headerActions={[bell]}
       />
       {pushPrompt.sheet}

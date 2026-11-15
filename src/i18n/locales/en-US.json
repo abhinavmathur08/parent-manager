@@ -807,6 +807,13 @@
       "deleted": "{{name}} deleted.",
       "undo": "Undo"
     },
+    "ready": {
+      "button": "List is ready",
+      "hint": "Lets the rest of the household know they can shop from it",
+      "sent": "Your household knows the list is ready.",
+      "sentToday": "The household has been told this list is ready today.",
+      "failed": "Couldn't let the household know. Check your connection and try again."
+    },
     "partnerActivity": "Someone else is updating the list.",
     "export": {
       "open": "Print or share the list",
@@ -1167,6 +1174,10 @@
       "send": "Send a test notification",
       "sent": "Test sent. It arrives in a minute or so, after quiet hours if they're on.",
       "failed": "Couldn't send a test. Check your connection and try again."
+    },
+    "defrost": {
+      "title": "Defrost for tonight",
+      "body": "Tonight's dinner, {{meal}}, needs defrosting."
     }
   },
   "pantry": {

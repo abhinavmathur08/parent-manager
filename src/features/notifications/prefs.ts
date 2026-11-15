@@ -79,6 +79,16 @@ const toRow = (prefs: NotificationPrefs): Row => ({
 
 const cacheKey = (userId: string) => `notifications.prefs.${userId}`;
 
+const listeners = new Set<() => void>();
+
+/** Runs `listener` whenever settings are saved or fetched, such as "defrost tonight" turned off. */
+export function onPrefsChanged(listener: () => void): () => void {
+  listeners.add(listener);
+  return () => {
+    listeners.delete(listener);
+  };
+}
+
 /**
  * The last settings seen on this device, for what runs offline (local "defrost tonight"
  * notifications, N-02.2). Defaults when nothing was saved.
@@ -100,6 +110,7 @@ function cache(userId: string, prefs: NotificationPrefs): void {
   } catch {
     // The cache only helps offline; the server has the settings.
   }
+  listeners.forEach((listener) => listener());
 }
 
 export async function fetchPrefs(userId: string): Promise<NotificationPrefs> {
