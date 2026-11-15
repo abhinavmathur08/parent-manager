@@ -52,6 +52,10 @@ export function HouseholdHubScreen() {
         <Rows rows={household} />
       </View>
       <View>
+        <SectionHeader title={t('householdHub.you')} variant="group" />
+        <Rows rows={you} />
+      </View>
+      <View>
         <SectionHeader title={t('premium.hub.title')} variant="group" />
         {/* S-33; the one place Premium shows without a moment of need (FR-PAY-5). */}
         <ListRow
@@ -61,10 +65,6 @@ export function HouseholdHubScreen() {
           onPress={() => router.push('/household/subscription')}
           testID="open-premium"
         />
-      </View>
-      <View>
-        <SectionHeader title={t('householdHub.you')} variant="group" />
-        <Rows rows={you} />
       </View>
       <View>
         <SectionHeader title={t('householdHub.about')} variant="group" />
