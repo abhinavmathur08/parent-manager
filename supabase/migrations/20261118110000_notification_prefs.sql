@@ -99,5 +99,7 @@ $$;
 revoke all on function private.notification_prefs_of(uuid) from public;
 revoke all on function private.quiet_hours_release(timestamptz, text, integer, integer) from public;
 
--- Account deletion removes the settings (FR-PRIV-3).
+-- Account deletion removes the settings (FR-PRIV-3), and the account export includes them
+-- (FR-PRIV-2).
 select private.register_for_deletion('public.notification_prefs', 'user_id', 'user');
+select private.register_for_export('public.notification_prefs', 'user', 'user_id');
