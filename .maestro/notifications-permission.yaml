@@ -11,9 +11,10 @@ tags:
 - assertNotVisible:
     id: push-prompt-body
 # Maestro grants every permission at launch; take notifications back so the app can ask.
+# Android needs the permission's own name (this flow is tagged backend, so it runs there).
 - launchApp:
     permissions:
-      notifications: unset
+      android.permission.POST_NOTIFICATIONS: deny
 - extendedWaitUntil:
     visible:
       id: plan-days
