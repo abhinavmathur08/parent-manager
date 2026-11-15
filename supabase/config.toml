@@ -429,6 +429,16 @@ deno_version = 2
 # [edge_runtime.secrets]
 # secret_key = "env(SECRET_VALUE)"
 
+# The RevenueCat webhook (M-01.2) authenticates with its own shared header (BILLING_WEBHOOK_AUTH),
+# not a Supabase session. It refuses everything until that secret is set (D-10).
+[functions.subscription-events]
+verify_jwt = false
+
+# The mock store (M-01.2, D-10 interim) is off unless the Edge Function secret
+# BILLING_MOCK_ENABLED=true is set. For the local stack, put that line in
+# supabase/functions/.env (git-ignored) before `pnpm supabase start`. Never set it on a
+# production project.
+
 [analytics]
 enabled = true
 port = 54327

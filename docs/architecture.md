@@ -72,17 +72,17 @@ All tables live in Postgres. Every table holding household data has `household_i
 
 ### 3.1 Shared household layer
 
-| Table                    | Key columns                                                                                                                                               | Notes                                                                                                                   |
-| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `profiles`               | `id` (= `auth.users.id`), `display_name`, `locale`, `active_household_id`                                                                                 | One per account.                                                                                                        |
-| `households`             | `id`, `name`, `region` (`US`, `GB` or `AU`), `locale` (`en-US`, `en-GB` or `en-AU`), `unit_system` (`us_customary` or `metric`), `timezone`, `week_start` | Region sets the default units, store sections and later holidays.                                                       |
-| `household_members`      | `household_id`, `user_id`, `role` (`parent`, `family` or `caregiver`), `status`, `joined_at`                                                              | Unique on `(household_id, user_id)`. The free tier allows at most 2 members with the `parent` role.                     |
-| `invitations`            | `id`, `household_id`, `role`, `invited_by`, `token_hash`, `email` (optional), `expires_at`, `accepted_by`, `revoked_at`                                   | Accepted by link or short code. Only the token's hash is stored, and a token works once.                                |
-| `invite_attempts`        | `user_id`, `attempted_at`                                                                                                                                 | Wrong invite codes and tokens, for the limit of 10 an hour per user (NFR-SEC-8). No client access.                      |
-| `household_people`       | `id`, `household_id`, `display_name`, `kind` (`adult` or `child`), `age_band`, `due_month` (expecting only), `linked_user_id` (optional)                  | The people being fed, including children without accounts. Age bands, not birth dates (see section 3.3).                |
-| `person_dietary`         | `person_id`, `type` (`allergy`, `diet` or `avoid`), `code`                                                                                                | Codes are fixed identifiers: allergens such as `allergen.peanut`, diets such as `diet.vegetarian`, or an ingredient ID. |
-| `household_entitlements` | `household_id`, `tier` (`free` or `premium`), `status`, `period_ends_at`, `purchaser_user_id`, `rc_app_user_id`, `updated_at`                             | Written only by the RevenueCat webhook (section 8).                                                                     |
-| `app_config`             | `key`, `value`                                                                                                                                            | Minimum supported app version, kill switches. Anyone can read it.                                                       |
+| Table                    | Key columns                                                                                                                                                                                                           | Notes                                                                                                                   |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `profiles`               | `id` (= `auth.users.id`), `display_name`, `locale`, `active_household_id`                                                                                                                                             | One per account.                                                                                                        |
+| `households`             | `id`, `name`, `region` (`US`, `GB` or `AU`), `locale` (`en-US`, `en-GB` or `en-AU`), `unit_system` (`us_customary` or `metric`), `timezone`, `week_start`                                                             | Region sets the default units, store sections and later holidays.                                                       |
+| `household_members`      | `household_id`, `user_id`, `role` (`parent`, `family` or `caregiver`), `status`, `joined_at`                                                                                                                          | Unique on `(household_id, user_id)`. The free tier allows at most 2 members with the `parent` role.                     |
+| `invitations`            | `id`, `household_id`, `role`, `invited_by`, `token_hash`, `email` (optional), `expires_at`, `accepted_by`, `revoked_at`                                                                                               | Accepted by link or short code. Only the token's hash is stored, and a token works once.                                |
+| `invite_attempts`        | `user_id`, `attempted_at`                                                                                                                                                                                             | Wrong invite codes and tokens, for the limit of 10 an hour per user (NFR-SEC-8). No client access.                      |
+| `household_people`       | `id`, `household_id`, `display_name`, `kind` (`adult` or `child`), `age_band`, `due_month` (expecting only), `linked_user_id` (optional)                                                                              | The people being fed, including children without accounts. Age bands, not birth dates (see section 3.3).                |
+| `person_dietary`         | `person_id`, `type` (`allergy`, `diet` or `avoid`), `code`                                                                                                                                                            | Codes are fixed identifiers: allergens such as `allergen.peanut`, diets such as `diet.vegetarian`, or an ingredient ID. |
+| `household_entitlements` | `household_id`, `tier` (`free` or `premium`), `status`, `source` (`mock` or `revenuecat`), `store`, `product_id`, `period_ends_at`, `trial_ends_at`, `will_renew`, `grace_ends_at`, `purchaser_user_id`, `updated_at` | Written only by `apply_subscription_event` (section 8).                                                                 |
+| `app_config`             | `key`, `value`                                                                                                                                                                                                        | Minimum supported app version, kill switches. Anyone can read it.                                                       |
 
 ### Roles
 
@@ -234,32 +234,34 @@ select private.register_for_deletion('public.recipes', 'created_by', 'user', 'se
 - **`supabase/tests/data_deletion.test.sql` fails** if a public table has a `household_id`, a foreign key to `auth.users` or `households`, or a uuid column named `*_by` or `*user_id` that isn't registered.
 - **Backups (FR-PRIV-4).** Deleted rows leave the live database at once. They stay in Supabase's daily backups until those expire (7 days on Pro, 14 on Team, up to 30 on Enterprise), so the promise is 30 days at most, and the plan chosen in D-1 must keep it. Point-in-time recovery, if it's turned on, must keep a window of 30 days or less. The privacy policy states this period (L-01.2).
 
-| Table                         | Export                               | Deletion                                                                      |
-| ----------------------------- | ------------------------------------ | ----------------------------------------------------------------------------- |
-| `profiles`                    | The user's own row                   | With the account; `active_household_id` is cleared with the household         |
-| `households`                  | The household                        | Last row of `erase_household`                                                 |
-| `household_members`           | All members' roles and join dates    | With the household; the user's own row with the account                       |
-| `invitations`                 | Open invitations, without token hash | With the household; `invited_by` and `accepted_by` set null with the account  |
-| `invite_attempts`             | Not exported (security record)       | With the account                                                              |
-| `household_people`            | All people, with the due month       | With the household; `linked_user_id` set null with the account                |
-| `person_dietary`              | All diets and allergies              | With the household                                                            |
-| `household_entitlements`      | Tier and status                      | With the household; `purchaser_user_id` set null with the account             |
-| `ingredients`                 | Rows with the household's ID only    | Household rows with the household; catalog rows are never touched             |
-| `ingredient_names`            | Rows with the household's ID only    | Household rows with the household; catalog rows are never touched             |
-| `household_ingredients`       | All rows                             | With the household                                                            |
-| `recipes`                     | All rows, with lines and steps       | With the household; `created_by` and `updated_by` set null with the account   |
-| `recipe_ingredients`          | With their recipe                    | With the household                                                            |
-| `recipe_steps`                | With their recipe                    | With the household                                                            |
-| `plan_entries`                | All rows                             | With the household                                                            |
-| `plan_entry_portions`         | With their entry                     | With the household; with the person when they are removed                     |
-| `pantry_items`                | All rows                             | With the household                                                            |
-| `grocery_lists`               | All rows                             | With the household                                                            |
-| `grocery_items`               | With their list                      | With the household; `checked_by` set null with the account                    |
-| `grocery_item_sources`        | With their item                      | With the household                                                            |
-| `purchase_events`             | All rows                             | With the household; `recorded_by` set null with the account                   |
-| `ai_import_jobs`              | The user's own jobs, with drafts     | With the household; `user_id` set null with the account; purged after 30 days |
-| `ai_usage`                    | Monthly counts                       | With the household                                                            |
-| `household_deletion_requests` | Not exported (a pending action)      | With the household; with the account of the parent who asked                  |
+| Table                         | Export                                     | Deletion                                                                      |
+| ----------------------------- | ------------------------------------------ | ----------------------------------------------------------------------------- |
+| `profiles`                    | The user's own row                         | With the account; `active_household_id` is cleared with the household         |
+| `households`                  | The household                              | Last row of `erase_household`                                                 |
+| `household_members`           | All members' roles and join dates          | With the household; the user's own row with the account                       |
+| `invitations`                 | Open invitations, without token hash       | With the household; `invited_by` and `accepted_by` set null with the account  |
+| `invite_attempts`             | Not exported (security record)             | With the account                                                              |
+| `household_people`            | All people, with the due month             | With the household; `linked_user_id` set null with the account                |
+| `person_dietary`              | All diets and allergies                    | With the household                                                            |
+| `household_entitlements`      | Tier and status                            | With the household; `purchaser_user_id` set null with the account             |
+| `subscription_events`         | All rows (IDs, product codes, dates)       | With the household; `purchaser_user_id` set null with the account             |
+| `mock_store_subscriptions`    | Not exported (the mock store's own record) | With the household, and with the account                                      |
+| `ingredients`                 | Rows with the household's ID only          | Household rows with the household; catalog rows are never touched             |
+| `ingredient_names`            | Rows with the household's ID only          | Household rows with the household; catalog rows are never touched             |
+| `household_ingredients`       | All rows                                   | With the household                                                            |
+| `recipes`                     | All rows, with lines and steps             | With the household; `created_by` and `updated_by` set null with the account   |
+| `recipe_ingredients`          | With their recipe                          | With the household                                                            |
+| `recipe_steps`                | With their recipe                          | With the household                                                            |
+| `plan_entries`                | All rows                                   | With the household                                                            |
+| `plan_entry_portions`         | With their entry                           | With the household; with the person when they are removed                     |
+| `pantry_items`                | All rows                                   | With the household                                                            |
+| `grocery_lists`               | All rows                                   | With the household                                                            |
+| `grocery_items`               | With their list                            | With the household; `checked_by` set null with the account                    |
+| `grocery_item_sources`        | With their item                            | With the household                                                            |
+| `purchase_events`             | All rows                                   | With the household; `recorded_by` set null with the account                   |
+| `ai_import_jobs`              | The user's own jobs, with drafts           | With the household; `user_id` set null with the account; purged after 30 days |
+| `ai_usage`                    | Monthly counts                             | With the household                                                            |
+| `household_deletion_requests` | Not exported (a pending action)            | With the household; with the account of the parent who asked                  |
 
 ## 4. Row-level security and household isolation
 
@@ -429,9 +431,15 @@ The G-06.1 spike checked EventKit and `expo-calendar` 58 (`ExpoCalendar.createRe
   - **Unset:** no provider. Offerings are empty and buying fails with `CONFIGURATION_ERROR`.
 - **RevenueCat setup:**
   - **App user ID:** the RevenueCat app user ID is the purchaser's Supabase user ID.
-  - **Household attribute:** at purchase, the app sets a RevenueCat attribute `household_id`.
-  - **Webhook:** the Edge Function `revenuecat-webhook` checks the shared authorization header, reads the event, and upserts `household_entitlements` for that household. It's idempotent on event ID.
-  - **Reconciliation:** a nightly job compares households with RevenueCat's REST API.
+  - **Household attribute:** at purchase, the app sets a RevenueCat attribute `household_id`, which the webhook reads.
+  - **Webhook:** the Edge Function `subscription-events` checks the shared authorization header (`BILLING_WEBHOOK_AUTH`, set with RevenueCat in D-10), converts RevenueCat's event to the normalized shape below and applies it. Until that secret exists it refuses every request, and it never accepts mock events.
+  - **Reconciliation:** a nightly job compares households with RevenueCat's REST API, behind the `Reconciler` interface in `supabase/functions/_shared/billing/reconcile.ts`. The mock store's reconciler is a no-op.
+- **One idempotent path (M-01.2):** every subscription event, from RevenueCat or the mock store, reaches `household_entitlements` through `public.apply_subscription_event(event jsonb)`, which only the service role can call. Events are modelled on RevenueCat's types: `INITIAL_PURCHASE` (a trial start when `period_type` is `TRIAL`), `RENEWAL` (a trial conversion when `is_trial_conversion`), `CANCELLATION` (auto-renew off, Premium kept until the period ends; with `cancel_reason` `CUSTOMER_SUPPORT` it's a refund, which ends Premium at once), `UNCANCELLATION`, `BILLING_ISSUE` (with a grace period, still Premium), `EXPIRATION` and `PRODUCT_CHANGE` (takes effect at the next renewal). Each event is stored once in `subscription_events`, keyed on its ID, so a replay changes nothing; an event older than the last one applied is recorded but not applied. The entitlement records its `source` (`mock` or `revenuecat`) and `store`. `tier` is the only column gates read: `trialing`, `active` and `grace_period` are Premium.
+- **The mock store (D-10 interim):** the Edge Function `mock-store` plays the app store for the mock provider. It keeps each store account's subscription in `mock_store_subscriptions` (period start and end, trial, auto-renew, billing issue and grace end, a pending plan switch), creates the events a store would, and applies them through the same path. The store account gets one 14-day trial. A second parent can't buy while the household is Premium. A "delayed webhook" option holds the events for 90 seconds, or until restore, to show the app's "activating" state; restore sends held and latest events again.
+  - **Test clock:** `advance` moves a household's subscription to its next renewal, trial end, billing issue (16-day grace), grace end or expiry, so testers see every lifecycle state. `manage` cancels, uncancels, switches plans, refunds or fixes the payment, as the store's settings would.
+  - **Safety:** the function refuses every request (`billing.mock_disabled`) unless the Edge Function secret `BILLING_MOCK_ENABLED=true` is set on that project. No migration sets it. The product owner sets it on the hosted test project only; never on a production project. Locally, put it in `supabase/functions/.env` (git-ignored). Production builds never select the mock provider either (above).
+- **Every member sees the change (FR-PAY-8):** `household_entitlements` is published to Realtime. The app's `EntitlementProvider` reads the row, listens for changes, and checks again on foreground and every minute while open.
+- **Edge Function client:** billing functions call PostgREST and Auth over `fetch` (`_shared/admin.ts`) rather than supabase-js, so a cold worker boots fast.
 - **What the app uses:** the RevenueCat SDK on the device is used only to show offerings, purchase and restore. Feature gates read our database, not the SDK.
 - **Lapse or refund:** `tier` returns to `free` and Premium features pause. Caregivers lose access through RLS on their role and the tier, but their membership rows and all data stay. Nothing is deleted, and export keeps working.
 - **The purchaser leaves the household:** the subscription stays with the purchaser's Apple or Google account, and the household keeps Premium until the period ends. The app then prompts a remaining parent to subscribe. Moving a subscription between households is out of scope for the MVP.
