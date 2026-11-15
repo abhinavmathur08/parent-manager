@@ -19,7 +19,7 @@ import { RecipeCard } from './recipe-card';
 import { indexRecipe, searchRecipes, sortRecipes, type RecipeEntry } from './search';
 import { STARTER_RECIPES } from './starter/library';
 import { starterEntry } from './starter/view';
-import { RECIPE_TAGS, type RecipeIngredientRow, type RecipeTag } from './tables';
+import { RECIPE_TAGS, tagNameKey, type RecipeIngredientRow, type RecipeTag } from './tables';
 
 const totalMinutes = (prep: number | null, cook: number | null) =>
   prep === null && cook === null ? null : (prep ?? 0) + (cook ?? 0);
@@ -44,7 +44,7 @@ export function RecipesScreen({ locale, canWrite }: { locale: AppLocale; canWrit
       list.push(line);
       byRecipe.set(line.recipe_id, list);
     }
-    const tagName = (tag: RecipeTag) => t(`recipes.tags.${tag.slice(4)}`);
+    const tagName = (tag: RecipeTag) => t(tagNameKey(tag));
     const entries: RecipeEntry[] = recipes.map((recipe) => ({
       id: recipe.id,
       title: recipe.title,
@@ -60,7 +60,7 @@ export function RecipesScreen({ locale, canWrite }: { locale: AppLocale; canWrit
 
   // The starter library (R-04.1), the same for every household, read from the app bundle.
   const starters = useMemo(() => {
-    const tagName = (tag: RecipeTag) => t(`recipes.tags.${tag.slice(4)}`);
+    const tagName = (tag: RecipeTag) => t(tagNameKey(tag));
     return STARTER_RECIPES.map((recipe) =>
       indexRecipe(
         starterEntry(recipe, locale, (id) => ingredients.name(id)),
@@ -108,7 +108,7 @@ export function RecipesScreen({ locale, canWrite }: { locale: AppLocale; canWrit
           {RECIPE_TAGS.map((tag) => (
             <Chip
               key={tag}
-              label={t(`recipes.tags.${tag.slice(4)}`)}
+              label={t(tagNameKey(tag))}
               selected={tags.includes(tag)}
               onPress={() =>
                 setTags((current) =>

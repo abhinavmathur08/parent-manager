@@ -25,59 +25,5 @@
     "unitNames": {
       "l": "litre"
     }
-  },
-  "pantry": {
-    "title": "Pantry and staples",
-    "intro": "Staples are things you always have at home, like salt and oil. They're left off your list. Anything you mark as already at home is listed here for this week.",
-    "unknown": "Ingredient",
-    "failed": "That didn't save. Try again.",
-    "count_one": "{{count}} item",
-    "count_other": "{{count}} items",
-    "have": {
-      "title": "At home this week",
-      "empty": "Nothing marked as at home this week. Use “I already have this” on a list item.",
-      "undo": "Put back",
-      "undoHint": "Puts {{name}} back on this week's list",
-      "undone": "{{name}} is back on your list."
-    },
-    "staples": {
-      "title": "Staples",
-      "empty": "No staples yet.",
-      "add": "Add a staple",
-      "added": "{{name}} added to staples.",
-      "remove": "Remove",
-      "removeHint": "Removes {{name}} from staples, so the list includes it again",
-      "removed": "{{name}} removed from staples.",
-      "readOnly": "Only parents and family members can change staples."
-    },
-    "add": {
-      "title": "Add a staple",
-      "search": "Search ingredients",
-      "already": "Already a staple",
-      "none": "No matching ingredients."
-    },
-    "assumed": {
-      "title": "Assumed at home",
-      "show": "Shows the staples your plan uses",
-      "hide": "Hides the staples your plan uses",
-      "add": "Tap to add to this week's list",
-      "addHint": "Adds {{name}} to this week's list"
-    }
-  },
-  "list": {
-    "partnerActivity": "Someone else is updating the list.",
-    "finish": {
-      "action": "Finish shopping",
-      "title": "Finish shopping?",
-      "moved_one": "{{count}} checked item moves to this week's history.",
-      "moved_other": "{{count}} checked items move to this week's history.",
-      "staying_one": "{{count}} unchecked item stays on your list for next time.",
-      "staying_other": "{{count}} unchecked items stay on your list for next time.",
-      "nothingLeft": "Nothing is left on your list.",
-      "confirm": "Finish shopping",
-      "done_one": "Shopping finished. {{count}} item moved to history.",
-      "done_other": "Shopping finished. {{count}} items moved to history.",
-      "failed": "That didn't save. Try again."
-    }
   }
 }

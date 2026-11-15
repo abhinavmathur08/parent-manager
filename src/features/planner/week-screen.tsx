@@ -31,6 +31,7 @@ import { AddSheet, type AddTarget } from './add-sheet';
 import { CopyWeekSheet } from './copy-week-sheet';
 import { EntryActionsSheet, type EntryTarget } from './entry-actions-sheet';
 import { EntrySheet, type EntryChange } from './entry-sheet';
+import { leftoverCandidates, leftoverSource, linksBrokenByMove } from './leftovers';
 import {
   defaultServings,
   entryAllergens,
@@ -114,6 +115,12 @@ const DEFAULT_SERVINGS = 2;
 
 const dayFormat = { weekday: 'long', month: 'short', day: 'numeric', timeZone: 'UTC' } as const;
 const rangeFormat = { month: 'short', day: 'numeric', timeZone: 'UTC' } as const;
+const shortDayFormat = {
+  weekday: 'short',
+  month: 'short',
+  day: 'numeric',
+  timeZone: 'UTC',
+} as const;
 
 /**
  * S-10, the Plan tab (FR-PLAN-1, FR-PLAN-2, FR-PLAN-11, FR-ONB-5): one week from the
@@ -173,6 +180,20 @@ export function PlanWeekScreen({
     (entry.recipe_id ? week.titles.get(entry.recipe_id) : undefined) ??
     entry.free_text ??
     t('plan.deletedRecipe');
+  // Every entry the device has, less those waiting on an undo bar, so leftover links can
+  // reach the week before (FR-PLAN-8).
+  const allEntries = useMemo(() => {
+    const hidden = new Set(undoable.hidden);
+    return week.all.filter((e) => !hidden.has(e.id));
+  }, [week.all, undoable.hidden]);
+  const sourceOf = (entry: PlanEntryRow) => leftoverSource(entry, allEntries, household.weekStart);
+  const describeEntry = (entry: PlanEntryRow) => ({
+    title: titleOf(entry),
+    when: t('plan.leftovers.when', {
+      day: formatDate(toDate(entry.date), locale, shortDayFormat),
+      slot: t(`plan.slots.${entry.slot}`),
+    }),
+  });
 
   const runAction = async (task: () => Promise<unknown>) => {
     setActing(null);
@@ -185,10 +206,11 @@ export function PlanWeekScreen({
   };
   const moveEntry = (entry: PlanEntryRow, target: EntryTarget) =>
     runAction(() =>
-      entryActions.move(entry, {
-        ...target,
-        position: nextPosition(week.all, target.date, target.slot),
-      }),
+      entryActions.move(
+        entry,
+        { ...target, position: nextPosition(week.all, target.date, target.slot) },
+        linksBrokenByMove(entry, target, allEntries, household.weekStart),
+      ),
     );
   const duplicateEntry = (entry: PlanEntryRow, target: EntryTarget) =>
     runAction(() =>
@@ -390,6 +412,7 @@ export function PlanWeekScreen({
                     canWrite={canWrite}
                     actions={actions}
                     titleOf={titleOf}
+                    isLeftovers={(entry) => sourceOf(entry) !== null}
                     babyPlateOf={(entry) =>
                       hasBabyPlate(portionsFor(entry.id, people.people, week.portions).values())
                     }
@@ -441,6 +464,10 @@ export function PlanWeekScreen({
           portionRows={week.portions}
           locale={locale}
           canWrite={canWrite}
+          leftoversOf={(() => {
+            const source = opened ? sourceOf(opened) : null;
+            return source ? describeEntry(source) : null;
+          })()}
           onSave={saveEntry}
           onClose={() => setOpened(null)}
         />
@@ -458,6 +485,18 @@ export function PlanWeekScreen({
           onMove={(entry, target) => void moveEntry(entry, target)}
           onDuplicate={(entry, target) => void duplicateEntry(entry, target)}
           onRemove={removeEntry}
+          leftovers={
+            acting
+              ? {
+                  source: sourceOf(acting),
+                  candidates: leftoverCandidates(acting, allEntries, household.weekStart),
+                  describe: describeEntry,
+                  onLink: (entry, source) =>
+                    void runAction(() => entryActions.linkLeftovers(entry, source)),
+                  onUnlink: (entry) => void runAction(() => entryActions.unlinkLeftovers(entry)),
+                }
+              : undefined
+          }
           onClose={() => setActing(null)}
         />
       </Screen>
@@ -481,6 +520,7 @@ function DaySlots({
   canWrite,
   actions,
   titleOf,
+  isLeftovers,
   babyPlateOf,
   allergensOf,
   locale,
@@ -492,6 +532,7 @@ function DaySlots({
   canWrite: boolean;
   actions: PlanWeekActions;
   titleOf: (entry: PlanEntryRow) => string;
+  isLeftovers: (entry: PlanEntryRow) => boolean;
   babyPlateOf: (entry: PlanEntryRow) => boolean;
   allergensOf: (entry: PlanEntryRow) => ReturnType<typeof entryAllergens>;
   locale: AppLocale;
@@ -524,17 +565,25 @@ function DaySlots({
                 />
               ) : null}
             </View>
-            {list.map((entry) => (
-              <EntryRow
+            {list.map((entry, n) => (
+              // A stable test ID by position (day, slot, order), for E2E flows that can't know
+              // entry IDs. Not collapsable, so Android keeps it in the view hierarchy.
+              <View
                 key={entry.id}
-                entry={entry}
-                title={titleOf(entry)}
-                babyPlate={babyPlateOf(entry)}
-                matches={allergensOf(entry)}
-                locale={locale}
-                onPress={actions.onOpenEntry}
-                onLongPress={canWrite ? actions.onEntryActions : undefined}
-              />
+                collapsable={false}
+                testID={`plan-slot-${index}-${slot}-entry-${n}`}
+              >
+                <EntryRow
+                  entry={entry}
+                  title={titleOf(entry)}
+                  leftovers={isLeftovers(entry)}
+                  babyPlate={babyPlateOf(entry)}
+                  matches={allergensOf(entry)}
+                  locale={locale}
+                  onPress={actions.onOpenEntry}
+                  onLongPress={canWrite ? actions.onEntryActions : undefined}
+                />
+              </View>
             ))}
           </View>
         ))}
@@ -561,6 +610,7 @@ function DaySlots({
 function EntryRow({
   entry,
   title,
+  leftovers,
   babyPlate,
   matches,
   locale,
@@ -569,6 +619,8 @@ function EntryRow({
 }: {
   entry: PlanEntryRow;
   title: string;
+  /** It's leftovers of an earlier entry, so it adds nothing to the list (FR-PLAN-8). */
+  leftovers: boolean;
   /** Someone eats it from a baby plate, which the entry says (FR-PLAN-6). */
   babyPlate: boolean;
   matches: ReturnType<typeof entryAllergens>;
@@ -608,6 +660,9 @@ function EntryRow({
           {servings}
         </Text>
       </View>
+      {leftovers ? (
+        <Tag label={t('plan.leftovers.tag')} testID={`plan-entry-${entry.id}-leftovers`} />
+      ) : null}
       {babyPlate ? (
         <Tag label={t('plan.entry.babyPlate')} testID={`plan-entry-${entry.id}-baby-plate`} />
       ) : null}
