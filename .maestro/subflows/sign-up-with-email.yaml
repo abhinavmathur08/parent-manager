@@ -2,12 +2,7 @@
 # inbox. Ends signed in. Not run on its own (config.yaml runs top-level flows only).
 appId: ${APP_ID || 'com.myparentmanager'}
 ---
-- launchApp:
-    clearState: true
-- extendedWaitUntil:
-    visible:
-      id: sign-in-screen-title
-    timeout: 60000
+- runFlow: launch-signed-out.yaml
 - runScript: ../scripts/new-email.js
 - tapOn:
     id: sign-in-email
