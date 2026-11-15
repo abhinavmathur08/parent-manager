@@ -15,9 +15,16 @@ tags:
     id: open-pantry
 - extendedWaitUntil:
     visible:
+      id: pantry-screen
+    timeout: 10000
+# The spices section is below the fold on smaller screens; the staples arrive with the
+# first sync.
+- scrollUntilVisible:
+    element:
       id: pantry-staple-spices-1
       text: .*salt.*
-    timeout: 15000
+    centerElement: true
+    timeout: 20000
 - assertVisible:
     id: pantry-staple-spices-0
     text: .*pepper.*
@@ -47,10 +54,11 @@ tags:
     centerElement: true
 - tapOn:
     id: pantry-staple-spices-1-action
-- extendedWaitUntil:
-    visible:
+- scrollUntilVisible:
+    element:
       id: pantry-staple-spices-1
       text: .*salt.*
+    centerElement: true
     timeout: 10000
 
 # "I already have this" on a list item puts it under "at home this week" (FR-PAN-4).
@@ -98,16 +106,19 @@ tags:
 # Undo "have" in the pantry (FR-PAN-5).
 - tapOn:
     id: tab-household
-- extendedWaitUntil:
-    visible:
+# The pantry keeps its scroll position; "at home this week" is at the top.
+- scrollUntilVisible:
+    element:
       id: pantry-have-0
       text: .*banana.*
+    direction: UP
     timeout: 10000
 - tapOn:
     id: pantry-have-0-action
-- extendedWaitUntil:
-    visible:
+- scrollUntilVisible:
+    element:
       id: pantry-have-empty
+    direction: UP
     timeout: 10000
 
 - runFlow: subflows/sign-out.yaml
