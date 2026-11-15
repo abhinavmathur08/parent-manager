@@ -1,0 +1,20 @@
+<!--
+  Interim Parent Manager mark (#207), used until the real logo is chosen (D-2).
+  A bowl with a sprout: nourishment and a growing child. No text, so it needs no translation.
+  Drawn on a 1024 x 1024 canvas, centered, single color. MARK_COLOR is replaced by
+  scripts/brand/render-brand.swift, which writes every icon and splash PNG from this file.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <g fill="MARK_COLOR">
+    <g transform="translate(0 -28)">
+    <!-- Bowl: a shallow half-round with a rim and a foot. -->
+    <rect x="212" y="520" width="600" height="44" rx="22"/>
+    <path d="M252 588 H772 C760 724 652 812 512 812 C372 812 264 724 252 588 Z"/>
+    <rect x="432" y="806" width="160" height="34" rx="17"/>
+    <!-- Sprout: a stem and two leaves rising from the bowl. -->
+    <rect x="497" y="404" width="30" height="128" rx="15"/>
+    <path d="M512 470 C430 474 360 424 344 330 C432 322 500 372 512 470 Z"/>
+    <path d="M512 410 C590 404 652 342 660 248 C574 248 512 312 512 410 Z"/>
+    </g>
+  </g>
+</svg>
