@@ -1161,7 +1161,6 @@
       "used": "{{used}} of {{total}} imports used this month",
       "reached": "You've used this month's imports. They reset on {{date}}. You can still add recipes by hand."
     },
-<<<<<<< HEAD
     "seePremium": "See Premium",
     "status": {
       "title": "Subscription",
@@ -1226,8 +1225,7 @@
       "delayWebhookHint": "Holds the purchase event for 90 seconds or until restore, to show the activating state.",
       "notApplicable": "That doesn't apply to the subscription right now.",
       "error": "The test store didn't respond. Try again."
-=======
-    "seePremium": "See Premium"
+    }
   },
   "pantry": {
     "title": "Pantry and staples",
@@ -1265,7 +1263,6 @@
       "hide": "Hides the staples your plan uses",
       "add": "Tap to add to this week's list",
       "addHint": "Adds {{name}} to this week's list"
->>>>>>> feat/99-premium-sheet
     }
   }
 }
