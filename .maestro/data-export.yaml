@@ -1,0 +1,34 @@
+# A-04.2 (FR-PRIV-2, spec 2.2 rows 35 and 36): a parent finds "export household data" and
+# "export my data" on Privacy and data, both enabled online. The export itself (server
+# registry, ZIP contents and the share call) is covered by supabase/tests/data_export.test.sql
+# and the Jest tests; the share sheet is system UI outside the app, so the flow doesn't open
+# it. Ends signed out. Needs the local stack; see README.md.
+appId: ${APP_ID || 'com.myparentmanager'}
+tags:
+  - backend
+---
+- runFlow: subflows/create-household.yaml
+- tapOn:
+    id: tab-household
+- scrollUntilVisible:
+    element:
+      id: open-privacy
+- tapOn:
+    id: open-privacy
+- extendedWaitUntil:
+    visible:
+      id: privacy-export-household
+      enabled: true
+    timeout: 10000
+- assertVisible:
+    id: privacy-export-household
+    text: .*Export household data.*
+- assertVisible:
+    id: privacy-export-account
+    text: .*Export my data.*
+    enabled: true
+- assertNotVisible:
+    id: privacy-export-error
+- tapOn:
+    id: privacy-screen-title-back
+- runFlow: subflows/sign-out.yaml

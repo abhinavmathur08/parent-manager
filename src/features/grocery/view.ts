@@ -21,6 +21,8 @@ export type ListRowView = {
   origin: GroceryItemRow['origin'];
   planChanged: boolean;
   checked: boolean;
+  /** The member who checked it off (FR-LIST-8), or null. */
+  checkedBy: string | null;
   sectionId: SectionId;
   allergens: AllergenMatch[];
 };
@@ -77,7 +79,8 @@ export function buildListView(input: ListViewInput): ListView {
   }
 
   const rows = input.items
-    .filter((item) => item.list_id === input.listId && !item.deleted_at)
+    // Items moved to the week's history by "finish shopping" leave the list (FR-LIST-10).
+    .filter((item) => item.list_id === input.listId && !item.deleted_at && !item.shopped_at)
     .map((item): ListRowView => ({
       id: item.id,
       name: input.nameOf(item),
@@ -86,6 +89,7 @@ export function buildListView(input: ListViewInput): ListView {
       origin: item.origin,
       planChanged: item.user_modified && item.plan_changed,
       checked: item.checked,
+      checkedBy: item.checked ? item.checked_by : null,
       sectionId: SECTION_ORDER.has(item.section_id) ? item.section_id : 'section.other',
       allergens: item.ingredient_id
         ? allergenMatches([item.ingredient_id], input.allergensOf, input.people)
