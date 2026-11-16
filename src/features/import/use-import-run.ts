@@ -11,6 +11,7 @@ import {
   type ImportInput,
   type ImportResult,
 } from './api';
+import { discardImage } from './image';
 
 /** The import in progress, kept on the device so leaving and returning shows the result (S-20). */
 export type PendingImport = { jobId: string; input: ImportInput; startedAt: number };
@@ -146,9 +147,10 @@ export function useImportRun(now: () => number = Date.now) {
 
   /** Forgets the import on this device. The server may still finish it. */
   const reset = useCallback(() => {
+    discardImage(pending?.input);
     clearPending();
     setRun({ phase: 'idle' });
-  }, [clearPending]);
+  }, [clearPending, pending]);
 
   return { run, start, reset };
 }

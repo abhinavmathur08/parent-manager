@@ -2,13 +2,18 @@ import { FunctionsFetchError, FunctionsHttpError } from '@supabase/supabase-js';
 
 import { getSupabase } from '@/lib/supabase';
 
+import { readImage } from './image';
 import type { ImportedDraft, ImportSource } from './types';
 
 /** The Edge Function that turns links, text and images into drafts (architecture section 6). */
 export const IMPORT_FUNCTION = 'import-recipe';
 
 /** What the member gave us. Kept on the device so a retry needs no retyping (FR-AI-11). */
-export type ImportInput = { type: 'link'; url: string } | { type: 'text'; text: string };
+export type ImportInput =
+  | { type: 'link'; url: string }
+  | { type: 'text'; text: string }
+  /** A compressed photo or screenshot in the app's cache (R-07, FR-AI-12). */
+  | { type: 'image'; kind: 'photo' | 'screenshot'; uri: string; mediaType: 'image/jpeg' };
 
 export type ImportResult = { draft: ImportedDraft; source: ImportSource };
 
@@ -31,6 +36,7 @@ export const IMPORT_ERROR_CODES = [
   'import.link_unsupported',
   'import.link_too_large',
   'import.no_recipe_found',
+  'import.image_too_large',
   'import.network',
 ] as const;
 export type ImportErrorCode = (typeof IMPORT_ERROR_CODES)[number];
@@ -78,10 +84,20 @@ async function toImportError(error: unknown): Promise<ImportError> {
 
 /** Starts an import under the app's own job ID and waits for the draft. */
 export async function startImport(jobId: string, input: ImportInput): Promise<ImportResult> {
+  let body: Record<string, unknown> = input;
+  if (input.type === 'image') {
+    let base64: string;
+    try {
+      base64 = await readImage(input);
+    } catch {
+      throw new ImportError('import.failed');
+    }
+    body = { type: 'image', kind: input.kind, mediaType: input.mediaType, base64 };
+  }
   const { data, error } = await getSupabase().functions.invoke<{
     draft: ImportedDraft;
     source: ImportSource;
-  }>(IMPORT_FUNCTION, { body: { jobId, input } });
+  }>(IMPORT_FUNCTION, { body: { jobId, input: body } });
   if (error) throw await toImportError(error);
   if (!data?.draft) throw new ImportError('import.failed');
   return { draft: data.draft, source: data.source };

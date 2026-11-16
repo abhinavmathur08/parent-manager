@@ -32,6 +32,11 @@ jest.mock('@/features/subscription/allowance-notice', () => {
       allowance ? <Text testID="import-allowance">{`used ${allowance.used}`}</Text> : null,
   };
 });
+const mockPick = jest.fn();
+jest.mock('@/features/import/image', () => ({
+  pickImage: (...args: unknown[]) => mockPick(...args),
+  discardImage: jest.fn(),
+}));
 jest.mock('@/hooks/use-online', () => ({ useOnline: () => mockOnline }));
 jest.mock('@/lib/analytics', () => ({ track: (...args: unknown[]) => mockTrack(...args) }));
 jest.mock('expo-crypto', () => ({ randomUUID: () => `job-${++mockId}` }));
@@ -184,5 +189,29 @@ describe('S-19 and S-20 import (FR-AI-1 to FR-AI-3, FR-AI-11)', () => {
     await fireEvent.press(screen.getByTestId('import-text-submit'));
     expect(mockFetchJob).toHaveBeenCalledWith('job-1');
     expect(screen.getByTestId('import-error-message')).toHaveTextContent(/couldn't read/);
+  });
+
+  it('imports a photo, asking for the camera only on that tap (R-07)', async () => {
+    const input = { type: 'image', kind: 'photo', uri: 'file:///c/x.jpg', mediaType: 'image/jpeg' };
+    mockPick.mockResolvedValue({ status: 'picked', input });
+    mockStart.mockReturnValue(new Promise(() => undefined));
+    await show();
+    expect(mockPick).not.toHaveBeenCalled();
+    await fireEvent.press(screen.getByTestId('import-take-photo'));
+    expect(mockPick).toHaveBeenCalledWith('camera');
+    expect(mockStart).toHaveBeenCalledWith('job-1', input);
+    expect(mockTrack).toHaveBeenCalledWith('ai_import_started', {
+      input_type: 'photo',
+      allowance_remaining: 4,
+    });
+  });
+
+  it('a refused camera explains itself and offers Settings', async () => {
+    mockPick.mockResolvedValue({ status: 'denied', canAskAgain: false });
+    await show();
+    await fireEvent.press(screen.getByTestId('import-take-photo'));
+    expect(screen.getByTestId('import-image-problem')).toHaveTextContent(/can't use the camera/);
+    expect(screen.getByTestId('import-open-settings')).toBeOnTheScreen();
+    expect(mockStart).not.toHaveBeenCalled();
   });
 });

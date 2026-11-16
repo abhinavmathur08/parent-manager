@@ -1458,7 +1458,20 @@
       "link_unsupported": "That link isn't a web page we can read. Paste the recipe's text instead.",
       "link_too_large": "That page is too large to import. Paste the recipe's text instead.",
       "no_recipe_found": "We couldn't find a recipe there. Paste the recipe's text instead, or enter it manually.",
-      "network": "We lost the connection. Check you're online and try again."
+      "network": "We lost the connection. Check you're online and try again.",
+      "image_too_large": "That image is too large to import. Try another one."
+    },
+    "photo": {
+      "fromImage": "From a photo or screenshot",
+      "hint": "A cookbook page, a handwritten card or a screenshot of a recipe. One image per import.",
+      "takePhoto": "Take a photo",
+      "chooseImage": "Choose an image",
+      "cameraPermission": "Parent Manager uses the camera when you take a photo of a recipe to import it.",
+      "photosPermission": "Parent Manager opens your photos when you choose a recipe photo or screenshot to import.",
+      "cameraDenied": "Parent Manager can't use the camera. Turn on camera access in Settings, or choose an image instead.",
+      "openSettings": "Open Settings",
+      "preparing": "Preparing the image…",
+      "imageFailed": "We couldn't use that image. Try another one."
     }
   }
 }
