@@ -37,14 +37,14 @@ function fakeJobs(options: { allowance?: number; refuse?: string } = {}) {
     used: 0,
     reserved: new Set<string>(),
     finished: new Map<string, FinishOutcome>(),
-    started: [] as { userId: string; inputType: string }[],
+    started: [] as { userId: string; inputType: string; jobId?: string }[],
   };
   const jobs: JobStore = {
-    start(userId, inputType) {
+    start(userId, inputType, jobId) {
       if (options.refuse) return Promise.reject(new JobRefused(options.refuse));
-      state.started.push({ userId, inputType });
+      state.started.push(jobId ? { userId, inputType, jobId } : { userId, inputType });
       return Promise.resolve({
-        jobId: `job-${state.started.length}`,
+        jobId: jobId ?? `job-${state.started.length}`,
         householdId: 'household-1',
         locale: 'en-AU',
         region: 'AU',
@@ -439,4 +439,41 @@ Deno.test('the job store reads the started job and passes outcomes through', asy
     p_status: 'failed',
     p_error_code: 'import.timeout',
   });
+});
+
+const JOB_ID = '5f0c1d2e-3a4b-4c5d-8e6f-7a8b9c0d1e2f';
+
+Deno.test('the app can name its job, so it can read the result later (R-06.1)', async () => {
+  const { jobs, state } = fakeJobs();
+  const { handle } = handler({ jobs });
+  const response = await handle(post({ ...TEXT, jobId: JOB_ID.toUpperCase() }));
+  assertEquals(response.status, 200);
+  assertEquals((await response.json()).jobId, JOB_ID);
+  assertEquals(state.started, [{ userId: 'user-1', inputType: 'text', jobId: JOB_ID }]);
+});
+
+Deno.test('a malformed or reused job ID is refused', async () => {
+  const { jobs, state } = fakeJobs();
+  const { handle } = handler({ jobs });
+  for (const jobId of ['not-a-uuid', 42, '']) {
+    const response = await handle(post({ ...TEXT, jobId }));
+    assertEquals(response.status, 400);
+  }
+  assertEquals(state.started, []);
+
+  const reused = handler({ jobs: fakeJobs({ refuse: 'import.invalid_request' }).jobs });
+  const response = await reused.handle(post({ ...TEXT, jobId: JOB_ID }));
+  assertEquals(response.status, 400);
+  assertEquals(await response.json(), { error: { code: 'import.invalid_request' } });
+});
+
+Deno.test('the job store passes the app job ID to the database', async () => {
+  const { client, calls } = fakeRpc({
+    ai_import_start: {
+      data: [{ job_id: JOB_ID, household_id: 'h', locale: 'en-US', region: 'US' }],
+      error: null,
+    },
+  });
+  await createJobStore(client).start('user-1', 'link', JOB_ID);
+  assertEquals(calls[0].args, { p_user_id: 'user-1', p_input_type: 'link', p_job_id: JOB_ID });
 });

@@ -21,8 +21,11 @@ export type FinishOutcome =
   | { status: 'failed'; errorCode: string };
 
 export interface JobStore {
-  /** Checks role and the hourly limit, then records a job. Throws JobRefused. */
-  start(userId: string, inputType: InputType): Promise<StartedJob>;
+  /**
+   * Checks role and the hourly limit, then records a job, with the app's job ID when it gave
+   * one (so it can read the result after leaving the screen). Throws JobRefused.
+   */
+  start(userId: string, inputType: InputType, jobId?: string): Promise<StartedJob>;
   /** Reserves one import of the monthly allowance. False when it's used up. */
   reserve(jobId: string): Promise<boolean>;
   /** Records the outcome. A failure gives back any reservation. */
@@ -45,14 +48,19 @@ export interface RpcClient {
   ): PromiseLike<{ data: unknown; error: { message: string; hint?: string | null } | null }>;
 }
 
-const REFUSAL_CODES = new Set(['import.forbidden', 'import.rate_limited']);
+const REFUSAL_CODES = new Set([
+  'import.forbidden',
+  'import.rate_limited',
+  'import.invalid_request',
+]);
 
 export function createJobStore(client: RpcClient): JobStore {
   return {
-    async start(userId, inputType) {
+    async start(userId, inputType, jobId) {
       const { data, error } = await client.rpc('ai_import_start', {
         p_user_id: userId,
         p_input_type: inputType,
+        ...(jobId ? { p_job_id: jobId } : {}),
       });
       if (error) {
         if (error.hint && REFUSAL_CODES.has(error.hint)) throw new JobRefused(error.hint);
