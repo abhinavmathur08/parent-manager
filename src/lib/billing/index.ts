@@ -61,3 +61,9 @@ export function getBilling(): BillingProvider {
 export function setBillingForTesting(next: BillingProvider | null) {
   provider = next;
 }
+
+/** Test builds: hold the next mock purchase's webhook back, to see the "activating" state. */
+export function setMockWebhookDelay(on: boolean) {
+  const current = getBilling();
+  if (current instanceof MockBillingProvider) current.delayNextWebhook = on;
+}

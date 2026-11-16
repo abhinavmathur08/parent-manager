@@ -9,7 +9,6 @@ import { SectionHeader } from '@/components/section-header';
 import { Text } from '@/components/text';
 import { DeletionNotice } from '@/features/household/deletion-notice';
 import { useEntitlement } from '@/features/subscription/entitlement';
-import { usePremiumSheet } from '@/features/subscription/premium-sheet';
 import { supabaseConfig } from '@/lib/supabase-config';
 
 type Row = { key: string; title: string; href: Href };
@@ -34,7 +33,6 @@ function Rows({ rows }: { rows: readonly Row[] }) {
 export function HouseholdHubScreen() {
   const { t } = useTranslation();
   const { isPremium } = useEntitlement();
-  const { openPremiumSheet } = usePremiumSheet();
   const household: Row[] = [
     { key: 'members', title: t('household.members.title'), href: '/household/members' },
     { key: 'people', title: t('people.title'), href: '/household/people' },
@@ -60,12 +58,12 @@ export function HouseholdHubScreen() {
       </View>
       <View>
         <SectionHeader title={t('premium.hub.title')} variant="group" />
-        {/* The one place Premium shows without a moment of need (FR-PAY-5). */}
+        {/* S-33; the one place Premium shows without a moment of need (FR-PAY-5). */}
         <ListRow
           title={t('premium.name')}
-          variant="value"
-          value={isPremium ? t('premium.hub.premium') : t('premium.hub.free')}
-          onPress={() => openPremiumSheet('premium_section')}
+          subtitle={isPremium ? t('premium.hub.premium') : t('premium.hub.free')}
+          variant="navigation"
+          onPress={() => router.push('/household/subscription')}
           testID="open-premium"
         />
       </View>

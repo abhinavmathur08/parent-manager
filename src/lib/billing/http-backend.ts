@@ -62,3 +62,35 @@ export const httpMockStoreBackend: MockStoreBackend = {
     return result.subscription;
   },
 };
+
+/** The mock store's settings and test clock (M-02.2). Development and test builds only. */
+export type MockOperation = 'cancel' | 'uncancel' | 'change_product' | 'refund' | 'fix_payment';
+export type MockClockTarget = 'renewal' | 'trial_end' | 'billing_issue' | 'grace_end' | 'expiry';
+
+export const mockStoreAdmin = {
+  /** Whether the server has the mock store turned on (BILLING_MOCK_ENABLED). */
+  async enabled(): Promise<boolean> {
+    try {
+      const result = await callMockStore<{ enabled: boolean }>({ action: 'status' });
+      return result.enabled === true;
+    } catch {
+      return false;
+    }
+  },
+  async manage(operation: MockOperation, productId?: string) {
+    const result = await callMockStore<{ subscription: MockStoreSubscription | null }>({
+      action: 'manage',
+      operation,
+      productId,
+    });
+    return result.subscription;
+  },
+  async advance(householdId: string, to: MockClockTarget) {
+    const result = await callMockStore<{ subscription: MockStoreSubscription | null }>({
+      action: 'advance',
+      householdId,
+      to,
+    });
+    return result.subscription;
+  },
+};
