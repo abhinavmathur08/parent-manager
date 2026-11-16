@@ -11,6 +11,7 @@ import { SectionHeader } from '@/components/section-header';
 import { Text } from '@/components/text';
 import { TextField } from '@/components/text-field';
 import { useIngredients } from '@/features/ingredients/use-ingredients';
+import { useFeatureEnabled } from '@/features/remote-config/provider';
 import { useTheme } from '@/hooks/use-theme';
 import type { AppLocale } from '@/i18n';
 
@@ -36,6 +37,8 @@ export function RecipesScreen({ locale, canWrite }: { locale: AppLocale; canWrit
   const ingredients = useIngredients(locale);
   const [query, setQuery] = useState('');
   const [tags, setTags] = useState<RecipeTag[]>([]);
+  // The kill switch hides import and leaves manual entry (AI-20).
+  const importEnabled = useFeatureEnabled('ai_import');
 
   const searchable = useMemo(() => {
     const byRecipe = new Map<string, RecipeIngredientRow[]>();
@@ -81,14 +84,17 @@ export function RecipesScreen({ locale, canWrite }: { locale: AppLocale; canWrit
   const openStarter = (key: string) =>
     router.push({ pathname: '/recipes/starter/[key]', params: { key } });
 
+  const addAction = { label: t('recipes.addShort'), onPress: add, testID: 'recipes-add' };
+  const importAction = {
+    label: t('recipes.importShort'),
+    onPress: () => router.push('/recipes/import'),
+    testID: 'recipes-import-action',
+  };
+
   return (
     <Screen
       title={t('recipes.title')}
-      actions={
-        canWrite
-          ? [{ label: t('recipes.addShort'), onPress: add, testID: 'recipes-add' }]
-          : undefined
-      }
+      actions={!canWrite ? undefined : importEnabled ? [importAction, addAction] : [addAction]}
       testID="recipes-screen"
     >
       <View style={{ gap: theme.space[3] }}>
@@ -130,7 +136,7 @@ export function RecipesScreen({ locale, canWrite }: { locale: AppLocale; canWrit
             onAction={canWrite ? add : undefined}
             testID="recipes-empty"
           />
-          {canWrite ? (
+          {canWrite && importEnabled ? (
             <Button
               variant="secondary"
               icon="share"

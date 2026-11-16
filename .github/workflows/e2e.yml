@@ -44,9 +44,10 @@ jobs:
       # The app reaches it on 127.0.0.1 through `adb reverse`, and Maestro reads Mailpit.
       - name: Start local Supabase
         run: |
-          # The mock billing store (M-01.2) runs only where BILLING_MOCK_ENABLED is set. This is
+          # The mock billing store (M-01.2) runs only where BILLING_MOCK_ENABLED is set, and the
+          # fake AI parser (R-05.3) only where AI_PROVIDER=fake is set on a local stack. This is
           # the throwaway local stack; the file is git-ignored and never deployed.
-          echo "BILLING_MOCK_ENABLED=true" > supabase/functions/.env
+          printf 'BILLING_MOCK_ENABLED=true\nAI_PROVIDER=fake\n' > supabase/functions/.env
           pnpm supabase start -x realtime,storage-api,imgproxy,postgres-meta,studio,logflare,vector,supavisor
           # Only the publishable key, which is public, goes into the build.
           key="$(pnpm --silent supabase status -o json | jq -r '.PUBLISHABLE_KEY // .ANON_KEY // empty')"
