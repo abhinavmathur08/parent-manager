@@ -200,3 +200,27 @@ Deno.test('the fake provider parses through the real pipeline', async () => {
   );
   assertEquals(draft.steps, ['Mash the bananas.', 'Bake.']);
 });
+
+Deno.test('an image source reaches the provider as an image, with the locale (R-07)', async () => {
+  const { provider, seen } = scripted([answer(VALID)]);
+  await createAiParser(provider, { sleep: noSleep }).parse({
+    ...request(),
+    source: { kind: 'image', mediaType: 'image/jpeg', base64: '/9j/AAAA' },
+  });
+  const [context, image] = seen[0].content;
+  if (context.type !== 'text') throw new Error('expected the context first');
+  assertStringIncludes(context.text, 'Locale: en-AU. Region: AU.');
+  assertEquals(image, { type: 'image', mediaType: 'image/jpeg', base64: '/9j/AAAA' });
+});
+
+Deno.test(
+  'the fake reads every image as its fixed recipe, so photo imports work in E2E',
+  async () => {
+    const result = await createAiParser(createFakeProvider(), { sleep: noSleep }).parse({
+      ...request(),
+      source: { kind: 'image', mediaType: 'image/jpeg', base64: '/9j/AAAA' },
+    });
+    assertEquals(result.draft.title, 'Tomato pasta');
+    assertEquals(result.draft.ingredients.length, 4);
+  },
+);

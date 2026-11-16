@@ -8,13 +8,28 @@ import { checkLinkShape, type FetchedPage, FetchPageError } from './fetch_page.t
 import { readableText, recipeFromStructuredData } from './html.ts';
 import { JobRefused, type JobStore } from './jobs.ts';
 import { ParserError, type RecipeParser } from './parser.ts';
-import type { ImportRequest, InputType, Locale, RecipeDraft, Region } from './types.ts';
+import type {
+  ImportRequest,
+  InputType,
+  Locale,
+  ParseSource,
+  RecipeDraft,
+  Region,
+} from './types.ts';
 
 /** FR-AI-11 (PROPOSED): an import not finished in 45 seconds fails and can be retried. */
 export const IMPORT_TIME_LIMIT_MS = 45_000;
 /** Pasted text longer than this is refused. A long recipe is well under it. */
 export const MAX_TEXT_CHARS = 20_000;
-const MAX_BODY_BYTES = 64 * 1024;
+/**
+ * Images are compressed on the device to 1600 px on the long edge (FR-AI-12), well under 1 MB
+ * as JPEG. Anything larger than this is refused.
+ */
+export const MAX_IMAGE_BASE64_CHARS = 2_800_000;
+const MAX_BODY_BYTES = MAX_IMAGE_BASE64_CHARS + 64 * 1024;
+const BASE64 = /^[A-Za-z0-9+/]+={0,2}$/;
+/** The start of a JPEG or PNG file, in base64. */
+const MAGIC: Record<string, string> = { 'image/jpeg': '/9j/', 'image/png': 'iVBORw0KGgo' };
 
 export interface HandlerDeps {
   /** Returns the user ID for a valid access token, or null. */
@@ -137,16 +152,21 @@ async function run(
   region: Region,
   signal: AbortSignal,
 ): Promise<RunResult> {
-  let text: string;
-  if (request.type === 'link') {
+  let source: ParseSource;
+  if (request.type === 'image') {
+    // The image goes to the parser from memory and is never written anywhere, so it's gone
+    // when this request ends (FR-AI-12).
+    source = { kind: 'image', mediaType: request.mediaType, base64: request.base64 };
+  } else if (request.type === 'link') {
     const page = await deps.fetchPage(request.url, signal);
     // Embedded schema.org data needs no parser call, so it's free (AI-17, FR-AI-8).
     const structured = recipeFromStructuredData(page.html);
     if (structured) return { source: 'structured_data', draft: structured };
-    text = readableText(page.html, MAX_TEXT_CHARS);
+    const text = readableText(page.html, MAX_TEXT_CHARS);
     if (!text) throw new ImportFailure('import.no_recipe_found', 422);
+    source = { kind: 'text', text };
   } else {
-    text = request.text;
+    source = { kind: 'text', text: request.text };
   }
 
   // Only a parser call uses the allowance, so reserve right before it (FR-AI-8).
@@ -154,7 +174,7 @@ async function run(
     throw new ImportFailure('import.quota_exceeded', 429);
   }
   const parsed = await deps.parser.parse({
-    source: { kind: 'text', text },
+    source,
     locale,
     region,
     signal,
@@ -177,6 +197,16 @@ function inputTypeOf(request: ImportRequest): InputType {
   return request.type;
 }
 
+function readImage(input: Record<string, unknown>): ReadResult | ImportRequest {
+  const { kind, mediaType, base64 } = input;
+  if (kind !== 'photo' && kind !== 'screenshot') return INVALID;
+  if (mediaType !== 'image/jpeg' && mediaType !== 'image/png') return INVALID;
+  if (typeof base64 !== 'string' || base64.length === 0) return INVALID;
+  if (base64.length > MAX_IMAGE_BASE64_CHARS) return { error: 'import.image_too_large' };
+  if (!BASE64.test(base64) || !base64.startsWith(MAGIC[mediaType])) return INVALID;
+  return { type: 'image', kind, mediaType, base64 };
+}
+
 function bearerToken(req: Request): string | null {
   const match = /^Bearer\s+(\S+)$/i.exec(req.headers.get('Authorization') ?? '');
   return match ? match[1] : null;
@@ -189,14 +219,16 @@ const INVALID: ReadResult = { error: 'import.invalid_request' };
 /** Reads and validates the body. Links are checked for shape before any job starts. */
 async function readRequest(req: Request): Promise<ReadResult> {
   const declared = Number(req.headers.get('Content-Length') ?? '0');
-  if (declared > MAX_BODY_BYTES) return INVALID;
+  if (declared > MAX_BODY_BYTES) return { error: 'import.image_too_large' };
   let raw: string;
   try {
     raw = await req.text();
   } catch {
     return INVALID;
   }
-  if (new TextEncoder().encode(raw).length > MAX_BODY_BYTES) return INVALID;
+  if (new TextEncoder().encode(raw).length > MAX_BODY_BYTES) {
+    return { error: 'import.image_too_large' };
+  }
 
   let body: unknown;
   try {
@@ -211,6 +243,10 @@ async function readRequest(req: Request): Promise<ReadResult> {
   if (jobId !== undefined && (typeof jobId !== 'string' || !UUID.test(jobId))) return INVALID;
   const withId = jobId ? { jobId: jobId.toLowerCase() } : {};
   const { type, text, url } = input as { type?: unknown; text?: unknown; url?: unknown };
+  if (type === 'image') {
+    const image = readImage(input as Record<string, unknown>);
+    return 'type' in image ? { request: image, ...withId } : image;
+  }
 
   if (type === 'text' && typeof text === 'string') {
     const trimmed = text.trim();

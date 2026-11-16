@@ -1,6 +1,6 @@
 import { assertEquals } from 'jsr:@std/assert@1';
 
-import { createHandler, type HandlerDeps } from './handler.ts';
+import { createHandler, type HandlerDeps, MAX_IMAGE_BASE64_CHARS } from './handler.ts';
 import { createJobStore, type FinishOutcome, JobRefused, type JobStore } from './jobs.ts';
 import {
   type ParseRequest,
@@ -476,4 +476,43 @@ Deno.test('the job store passes the app job ID to the database', async () => {
   });
   await createJobStore(client).start('user-1', 'link', JOB_ID);
   assertEquals(calls[0].args, { p_user_id: 'user-1', p_input_type: 'link', p_job_id: JOB_ID });
+});
+
+const JPEG = '/9j/4AAQSkZJRgABAQ' + 'A'.repeat(64);
+const IMAGE = { input: { type: 'image', kind: 'photo', mediaType: 'image/jpeg', base64: JPEG } };
+
+Deno.test('an image goes to the parser from memory, reserves and counts (R-07)', async () => {
+  const { jobs, state } = fakeJobs();
+  const seen: ParseRequest[] = [];
+  const { handle, logs } = handler({ jobs, parser: parserReturning(DRAFT, seen) });
+  const response = await handle(post(IMAGE));
+  assertEquals(response.status, 200);
+  assertEquals((await response.json()).counted, true);
+  assertEquals(state.started, [{ userId: 'user-1', inputType: 'image' }]);
+  assertEquals(seen[0].source, { kind: 'image', mediaType: 'image/jpeg', base64: JPEG });
+  assertEquals(seen[0].region, 'AU');
+  assertEquals(
+    logs.some((line) => line.includes(JPEG.slice(0, 12))),
+    false,
+  );
+});
+
+Deno.test('images that are not JPEG or PNG, malformed or too large are refused', async () => {
+  const { jobs, state } = fakeJobs();
+  const { handle } = handler({ jobs });
+  const bad = (input: Record<string, unknown>) => post({ input: { ...IMAGE.input, ...input } });
+  for (const input of [
+    { mediaType: 'image/gif' },
+    { kind: 'video' },
+    { base64: 'not base64!' },
+    { base64: 'iVBORw0KGgo' + 'A'.repeat(20) },
+  ]) {
+    const response = await handle(bad(input));
+    assertEquals(response.status, 400);
+    assertEquals((await response.json()).error.code, 'import.invalid_request');
+  }
+  const huge = await handle(bad({ base64: '/9j/' + 'A'.repeat(MAX_IMAGE_BASE64_CHARS) }));
+  assertEquals(huge.status, 400);
+  assertEquals((await huge.json()).error.code, 'import.image_too_large');
+  assertEquals(state.started, []);
 });
