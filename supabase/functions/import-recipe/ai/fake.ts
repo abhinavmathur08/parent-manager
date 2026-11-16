@@ -72,7 +72,7 @@ const FRACTIONS: Record<string, number> = {
 const HEADING = /^(ingredients|method|instructions|directions|steps|preparation)\b:?\s*$/i;
 const STEP_HEADING = /^(method|instructions|directions|steps|preparation)\b/i;
 const AMOUNT =
-  /^(\d+(?:[.,]\d+)?(?:\s+\d+\/\d+)?|\d+\/\d+|[½⅓⅔¼¾]|\d+[½⅓⅔¼¾])(?:\s*(?:-|to)\s*(\d+(?:[.,]\d+)?))?/;
+  /^(\d+\s+\d+\/\d+|\d+\/\d+|\d+[½⅓⅔¼¾]|\d+(?:[.,]\d+)?|[½⅓⅔¼¾])(?:\s*(?:-|to)\s*(\d+(?:[.,]\d+)?))?/;
 
 function amount(text: string): number | null {
   let total = 0;

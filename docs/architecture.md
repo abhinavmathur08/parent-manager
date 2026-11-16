@@ -401,7 +401,7 @@ Voice import is out of the MVP. The vision lists it, but it adds speech-recognit
 
 ### Quality
 
-An evaluation set of recipes in US, UK and Australian formats runs before each model or prompt change (R-05.4). It measures whether ingredients, units and allergens are parsed correctly.
+The evaluation set in `ai-eval/` (R-05.4) has 60 original recipes, 20 each in US, UK and Australian formats, as text, links, screenshots and photos, with a hand-made gold parse. `ai-eval/run.ts` runs them through the real pipeline and scores ingredient, unit and allergen accuracy and hallucinated lines against spec AI-22. CI runs it with the fake provider on every build and compares the report with `ai-eval/results/fake.json`; `pnpm run eval:ai` runs it against a real provider once there's a key (see `ai-eval/README.md`).
 
 ## 7. Getting the grocery list out of the app
 
