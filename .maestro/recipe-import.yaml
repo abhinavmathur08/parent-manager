@@ -1,7 +1,9 @@
-# R-06.1, S-19 and S-20: a parent opens import from the Recipes tab, sees the month's
-# allowance, pastes a recipe's text, waits on the progress screen and reaches review (S-21).
-# The local stack parses with the fake AI provider: supabase/functions/.env needs
-# AI_PROVIDER=fake (see the Testing section of README.md). Ends signed out.
+# R-06.1 and R-06.2, S-19 to S-21: a parent imports a recipe from a link with the mocked AI
+# model, sees the month's allowance and the progress screen, checks the draft on review
+# (lines show the source's text), saves it, and finds it on the recipe detail screen.
+# The local stack parses with the fake AI provider and serves `.test` links itself:
+# supabase/functions/.env needs AI_PROVIDER=fake (see the Testing section of README.md).
+# Ends signed out.
 appId: ${APP_ID || 'com.myparentmanager'}
 tags:
   - backend
@@ -19,23 +21,34 @@ tags:
     visible:
       id: import-allowance
     timeout: 20000
-- scrollUntilVisible:
-    element:
-      id: import-text-input
-    centerElement: true
 - tapOn:
-    id: import-text-input
-- inputText: "Lemon chicken\nServes 4\nIngredients\n4 chicken thighs\n2 tbsp olive oil\n1 lemon, juiced\nMethod\nRoast for 40 minutes."
+    id: import-link-input
+- inputText: https://recipes.example.test/lemon-chicken
 - hideKeyboard
-- scrollUntilVisible:
-    element:
-      id: import-text-submit
-    centerElement: true
 - tapOn:
-    id: import-text-submit
+    id: import-link-submit
 # The first request to a cold Edge Function worker can take a while.
 - extendedWaitUntil:
     visible:
-      id: import-review
+      id: import-review-intro
     timeout: 90000
+- assertVisible:
+    id: import-line-original-0
+- scrollUntilVisible:
+    element:
+      id: recipe-save
+    centerElement: true
+- tapOn:
+    id: recipe-save
+- extendedWaitUntil:
+    visible:
+      id: recipe-detail
+    timeout: 10000
+- assertVisible:
+    text: Lemon chicken traybake
+# FR-AI-15: an imported recipe shows where it came from.
+- scrollUntilVisible:
+    element:
+      id: recipe-detail-source
+    centerElement: true
 - runFlow: subflows/sign-out.yaml
