@@ -14,6 +14,7 @@ import { HouseholdUnavailable } from '@/features/household/household-unavailable
 import { HouseholdProvider, useHousehold } from '@/features/household/membership';
 import { ForcedUpdateGate } from '@/features/remote-config/forced-update';
 import { RemoteConfigProvider } from '@/features/remote-config/provider';
+import { EntitlementProvider } from '@/features/subscription/entitlement';
 import { useTheme } from '@/hooks/use-theme';
 import { initCrashReporting, wrapRoot } from '@/lib/crash-reporting';
 
@@ -92,8 +93,10 @@ function RootLayout() {
         <ForcedUpdateGate>
           <AuthProvider>
             <HouseholdProvider>
-              <AnalyticsIdentity />
-              <RootStack />
+              <EntitlementProvider>
+                <AnalyticsIdentity />
+                <RootStack />
+              </EntitlementProvider>
             </HouseholdProvider>
           </AuthProvider>
         </ForcedUpdateGate>
