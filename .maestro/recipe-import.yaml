@@ -32,8 +32,11 @@ tags:
     visible:
       id: import-review-intro
     timeout: 90000
-- assertVisible:
-    id: import-line-original-0
+# Each line shows the source's original text (FR-AI-5), below the title and times.
+- scrollUntilVisible:
+    element:
+      id: import-line-original-0
+    centerElement: true
 - scrollUntilVisible:
     element:
       id: recipe-save
