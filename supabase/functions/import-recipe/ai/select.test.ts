@@ -6,7 +6,11 @@ import { isLocalStack, selectParser } from './select.ts';
 Deno.test('no provider secret means no parser; the fake runs only against a local stack', () => {
   const env = (vars: Record<string, string>) => (name: string) => vars[name];
   assertEquals(selectParser(env({})).parser, parserNotConfigured);
-  assertEquals(selectParser(env({ AI_PROVIDER: 'other' })).provider, 'none');
+  assertEquals(selectParser(env({ AI_PROVIDER: 'anthropic' })).provider, 'none');
+  assertEquals(
+    selectParser(env({ AI_PROVIDER: 'anthropic', ANTHROPIC_API_KEY: 'k' })).provider,
+    'anthropic',
+  );
   assertEquals(
     selectParser(env({ AI_PROVIDER: 'fake', SUPABASE_URL: 'http://kong:8000' })).provider,
     'fake',
