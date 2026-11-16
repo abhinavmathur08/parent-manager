@@ -148,6 +148,19 @@ export class SyncEngine {
    * is running are folded into one more run afterwards. Never throws: a failure leaves the
    * status `offline` and, with writes waiting, tries again with backoff.
    */
+  /**
+   * Pulls these tables in full on the next run, which also drops local rows the server no
+   * longer returns. Used when what the household may read changes, such as the history
+   * window when Premium starts or ends (G-08).
+   */
+  async refetch(tables: readonly string[]): Promise<void> {
+    const known = new Set(this.store.tableNames());
+    for (const table of tables) {
+      if (known.has(table)) await this.store.setMeta(`pulledAt:${table}`, '0');
+    }
+    await this.sync();
+  }
+
   sync(): Promise<void> {
     if (this.stopped) return Promise.resolve();
     if (this.running) {

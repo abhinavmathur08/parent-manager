@@ -128,6 +128,13 @@ beforeAll(async () => {
     .from('household_members')
     .insert(ids.map((user_id) => ({ household_id: householdId, user_id, role: 'parent' })));
   if (membersError) throw membersError;
+  // Fixed dates: on Premium every week stays readable, so they never leave the free history
+  // window (G-08).
+  const { error: tierError } = await admin
+    .from('household_entitlements')
+    .update({ tier: 'premium' })
+    .eq('household_id', householdId);
+  if (tierError) throw tierError;
   const { data: person, error: personError } = await admin
     .from('household_people')
     .insert({

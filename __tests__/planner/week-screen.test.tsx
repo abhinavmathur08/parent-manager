@@ -19,6 +19,8 @@ jest.mock('expo-crypto', () => ({
 }));
 jest.mock('@/features/people/data', () => ({ fetchPeople: () => mockPeople() }));
 jest.mock('@/hooks/use-online', () => ({ useOnline: () => true }));
+const mockPush = jest.fn();
+jest.mock('expo-router', () => ({ router: { push: (...a: unknown[]) => mockPush(...a) } }));
 let mockPremium = false;
 const mockOpenPremiumSheet = jest.fn();
 jest.mock('@/features/subscription/entitlement', () => ({
@@ -663,5 +665,45 @@ describe('saved week templates (P-05, FR-PLAN-10)', () => {
       // The recipe was deleted since, so its saved title is planned as free text.
       ['2026-11-21', 'lunch', 'Old soup', null],
     ]);
+  });
+});
+
+describe('history window (G-08, FR-PLAN-2, FR-PAY-6)', () => {
+  beforeEach(() => {
+    mockPremium = false;
+    mockOpenPremiumSheet.mockClear();
+  });
+
+  const goBack = async (weeks: number) => {
+    for (let i = 0; i < weeks; i++) await fireEvent.press(screen.getByTestId('plan-previous'));
+  };
+
+  it('shows the 4 weeks before this one on Free, then the history prompt', async () => {
+    mockRows = { plan_entries: [entry('old', '2026-10-12', 'dinner', { free_text: 'Kept' })] };
+    await show();
+    await goBack(4);
+    expect(screen.queryByTestId('plan-history-locked')).toBeNull();
+    await goBack(1);
+    expect(screen.getByTestId('plan-history-locked')).toBeOnTheScreen();
+    // A stale local copy of an older week stays hidden, and nothing can be added.
+    expect(screen.queryByTestId('plan-entry-old')).toBeNull();
+    expect(screen.queryByTestId('plan-add-0-dinner')).toBeNull();
+    await fireEvent.press(screen.getByTestId('plan-history-see-premium'));
+    expect(mockOpenPremiumSheet).toHaveBeenCalledWith('history');
+  });
+
+  it('shows every week on Premium', async () => {
+    mockPremium = true;
+    mockRows = { plan_entries: [entry('old', '2026-10-12', 'dinner', { free_text: 'Kept' })] };
+    await show();
+    await goBack(5);
+    expect(screen.queryByTestId('plan-history-locked')).toBeNull();
+    expect(screen.getByTestId('plan-entry-old')).toBeOnTheScreen();
+  });
+
+  it('opens S-34', async () => {
+    await show();
+    await fireEvent.press(screen.getByTestId('plan-history'));
+    expect(mockPush).toHaveBeenCalledWith('/plan/history');
   });
 });

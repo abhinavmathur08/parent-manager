@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ComponentRef } from 'react';
+import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import {
   Alert,
@@ -66,6 +67,7 @@ import {
 } from './writes';
 import {
   addDays,
+  FREE_HISTORY_DAYS,
   startOfWeek,
   todayIn,
   toDate,
@@ -146,7 +148,7 @@ const shortDayFormat = {
  */
 export function PlanWeekScreen({
   household,
-  canWrite,
+  canWrite: canWriteProp,
   actions: overrides = {},
   headerActions,
 }: {
@@ -178,6 +180,10 @@ export function PlanWeekScreen({
   const [templateSheet, setTemplateSheet] = useState<'save' | 'apply' | null>(null);
   const applyTemplateEntries = useApplyTemplate();
   const { isPremium } = useEntitlement();
+  // Weeks before the free history window are Premium (FR-PLAN-2, FR-PAY-6, D-9): the server
+  // returns nothing for them, so the week shows the history prompt and can't be edited.
+  const lockedWeek = !isPremium && start < addDays(currentStart, -FREE_HISTORY_DAYS);
+  const canWrite = canWriteProp && !lockedWeek;
   const { openPremiumSheet } = usePremiumSheet();
   const setPortions = useSetPortions();
   const setServings = useSetServings();
@@ -194,9 +200,10 @@ export function PlanWeekScreen({
   };
   // Entries waiting on an undo bar are hidden until it goes (FR-PLAN-7).
   const shownEntries = useMemo(() => {
+    if (lockedWeek) return [];
     const hidden = new Set(undoable.hidden);
     return week.entries.filter((e) => !hidden.has(e.id));
-  }, [week.entries, undoable.hidden]);
+  }, [week.entries, undoable.hidden, lockedWeek]);
   // "6 of 7 dinners planned" and the week-planned event (FR-PLAN-12).
   const dinners = dinnersPlanned(shownEntries, start);
   const noteChange = useWeekPlannedEvent(household.id, start, today, dinners, () =>
@@ -321,7 +328,7 @@ export function PlanWeekScreen({
 
   const goTo = useCallback(
     (next: PlanDate) => setShown(next === currentStart ? null : next),
-    [currentStart],
+    [currentStart, setShown],
   );
   const swipe = useWeekSwipe(
     useCallback((direction: -1 | 1) => goTo(addDays(start, direction * 7)), [goTo, start]),
@@ -383,6 +390,25 @@ export function PlanWeekScreen({
             testID="plan-today"
           />
         ) : null}
+        <Button
+          variant="ghost"
+          label={t('plan.history.open')}
+          onPress={() => router.push('/plan/history')}
+          testID="plan-history"
+        />
+        {lockedWeek ? (
+          <Card testID="plan-history-locked">
+            <View style={{ gap: theme.space[3] }}>
+              <Text>{t('plan.history.locked')}</Text>
+              <Button
+                variant="secondary"
+                label={t('premium.seePremium')}
+                onPress={() => openPremiumSheet('history')}
+                testID="plan-history-see-premium"
+              />
+            </View>
+          </Card>
+        ) : null}
 
         {shownEntries.length > 0 ? (
           <ProgressBar
@@ -422,7 +448,7 @@ export function PlanWeekScreen({
             ) : null}
           </View>
         ) : null}
-        {!week.loading && shownEntries.length === 0 ? (
+        {!week.loading && shownEntries.length === 0 && !lockedWeek ? (
           <Card testID="plan-empty">
             <EmptyState
               icon="plan"

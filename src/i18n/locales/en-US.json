@@ -958,6 +958,19 @@
         "offline": "Templates need an internet connection.",
         "generic": "That didn't work. Try again."
       }
+    },
+    "history": {
+      "open": "History",
+      "locked": "Weeks older than the last 4 are part of Premium. They're kept safe and come back with Premium.",
+      "title": "History",
+      "intro": "Past weeks' plans and lists, newest first.",
+      "empty": "No past weeks yet.",
+      "meals_one": "{{count}} meal",
+      "meals_other": "{{count}} meals",
+      "items": "{{bought}} of {{total}} list items bought",
+      "noList": "No list that week",
+      "olderTitle": "Older weeks",
+      "olderBody": "Free keeps the current week and the 4 before it. Premium shows every past week, and nothing older is deleted."
     }
   },
   "recipes": {

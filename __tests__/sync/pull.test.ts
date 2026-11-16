@@ -103,6 +103,27 @@ describe('SyncEngine pull', () => {
     expect(await names(engine)).toEqual(['milk']);
   });
 
+  it('refetches a table in full when what the household may read changes (G-08)', async () => {
+    const { server, device } = setup();
+    server.put('items', { id: 'a', household_id: 'h1', name: 'milk' });
+    server.put('items', { id: 'old', household_id: 'h1', name: 'last month' });
+    const hidden = server.table('items').get('old')!;
+    server.table('items').delete('old');
+    const engine = await device();
+    await engine.sync();
+    expect(await names(engine)).toEqual(['milk']);
+
+    // Premium returns an older row, which an incremental pull may never ask for.
+    server.table('items').set('old', hidden);
+    await engine.refetch(['items', 'not-synced']);
+    expect(await names(engine)).toEqual(['last month', 'milk']);
+
+    // A lapse hides it again: the full pull drops it from the device.
+    server.table('items').delete('old');
+    await engine.refetch(['items']);
+    expect(await names(engine)).toEqual(['milk']);
+  });
+
   it('runs one sync at a time, folding calls made meanwhile into one more', async () => {
     const { server, device } = setup();
     const engine = await device();
