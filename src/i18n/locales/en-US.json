@@ -1429,7 +1429,19 @@
       "cancel": "Stop waiting"
     },
     "review": {
-      "title": "Check the recipe"
+      "title": "Check the recipe",
+      "intro": "Check the details, fix anything that's wrong, then save. Nothing is saved until you do.",
+      "original": "In the recipe: “{{text}}”",
+      "lowConfidence": "Check this line",
+      "unmatched": "New ingredient: check the name",
+      "notChecked": "Not checked for allergens",
+      "lineAllergen": "{{allergen}}: {{person}} is allergic",
+      "sourceMentions": "The recipe says it may contain {{allergens}}. Check the ingredients before you save.",
+      "discard": "Discard",
+      "discardTitle": "Discard this recipe?",
+      "discardBody": "The imported recipe won't be saved.",
+      "keep": "Keep checking",
+      "gone": "This import isn't available any more."
     },
     "errors": {
       "unauthenticated": "You're signed out. Sign in again to import.",

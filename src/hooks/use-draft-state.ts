@@ -51,6 +51,15 @@ export function useDraftState<T>(key: string, initial: T) {
   return [value, update, clear] as const;
 }
 
+/** Removes one saved draft from outside its form, such as a discarded import review. */
+export function clearDraft(key: string): void {
+  try {
+    Storage.removeItemSync(PREFIX + key);
+  } catch {
+    // Nothing to remove.
+  }
+}
+
 /** Removes every saved draft, for sign-out and account deletion. */
 export async function clearAllDrafts(): Promise<void> {
   const keys = await Storage.getAllKeys();

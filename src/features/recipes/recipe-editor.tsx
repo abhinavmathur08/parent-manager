@@ -1,6 +1,6 @@
 import { randomUUID } from 'expo-crypto';
 import { router } from 'expo-router';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Keyboard, StyleSheet, View } from 'react-native';
 
@@ -32,7 +32,7 @@ import {
 import { formatLine } from './format-line';
 import { LineSheet, type LineSheetResult } from './line-sheet';
 import { quickAddLine } from './quick-add';
-import { RECIPE_LIMITS, RECIPE_TAGS, tagNameKey } from './tables';
+import { RECIPE_LIMITS, RECIPE_TAGS, tagNameKey, type RecipeSourceType } from './tables';
 
 type Household = { locale: AppLocale; region: Region; unitSystem: UnitSystem };
 
@@ -51,6 +51,7 @@ export function RecipeEditor({
   household,
   onSaved,
   initialDraft,
+  review,
 }: {
   /** The recipe being edited, or null for a new one. */
   saved: SavedRecipe | null;
@@ -58,9 +59,20 @@ export function RecipeEditor({
   /** Where the unsaved form is kept on the device. */
   draftKey: string;
   household: Household;
-  onSaved: (recipeId: string) => void;
+  onSaved: (recipeId: string, saved: RecipeDraft) => void;
   /** A new recipe's starting form, such as an import's text (FR-AI-13). */
   initialDraft?: RecipeDraft;
+  /** The import review (S-21): the same form, with notices, line marks and its own actions. */
+  review?: {
+    title: string;
+    sourceType: RecipeSourceType;
+    /** Above the form, such as the allergen notice (FR-AI-7). */
+    header: (draft: RecipeDraft) => ReactNode;
+    /** Under each ingredient line, such as its original text and highlights (FR-AI-5, FR-AI-6). */
+    lineExtra: (line: DraftLine, index: number) => ReactNode;
+    /** After the save button, such as discard and "enter manually instead" (FR-AI-13). */
+    footer: (draft: RecipeDraft) => ReactNode;
+  };
 }) {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -136,10 +148,15 @@ export function RecipeEditor({
     setFormError(undefined);
     try {
       await apply(
-        planSave(saved, draft, { recipeId, locale, dimension: (id) => ingredients.dimension(id) }),
+        planSave(saved, draft, {
+          recipeId,
+          locale,
+          dimension: (id) => ingredients.dimension(id),
+          origin: review ? { sourceType: review.sourceType, libraryRecipeId: null } : undefined,
+        }),
       );
       clearDraft();
-      onSaved(recipeId);
+      onSaved(recipeId, draft);
     } catch (error) {
       setFormError(
         error instanceof Error && error.message.includes('not open')
@@ -152,13 +169,16 @@ export function RecipeEditor({
 
   return (
     <Screen
-      title={saved ? t('recipes.editor.editTitle') : t('recipes.editor.newTitle')}
+      title={
+        review?.title ?? (saved ? t('recipes.editor.editTitle') : t('recipes.editor.newTitle'))
+      }
       onBack={() => router.back()}
       actions={[
         { label: t('recipes.editor.save'), onPress: () => void save(), testID: 'recipe-save-top' },
       ]}
       testID="recipe-editor"
     >
+      {review?.header(draft)}
       <View style={{ gap: theme.space[4] }}>
         <TextField
           label={t('recipes.editor.name')}
@@ -232,16 +252,18 @@ export function RecipeEditor({
         {draft.lines.map((line, i) => {
           const text = formatLine(line, { name: lineName(line), locale, t });
           return (
-            <ListRow
-              key={line.id}
-              title={text}
-              subtitle={line.optional ? t('recipes.line.optional') : undefined}
-              variant="navigation"
-              onPress={() => openLine({ ...line, isNew: false })}
-              accessibilityHint={t('recipes.editor.editLine', { line: text })}
-              divider={i < draft.lines.length - 1}
-              testID={`recipe-line-${i}`}
-            />
+            <View key={line.id}>
+              <ListRow
+                title={text}
+                subtitle={line.optional ? t('recipes.line.optional') : undefined}
+                variant="navigation"
+                onPress={() => openLine({ ...line, isNew: false })}
+                accessibilityHint={t('recipes.editor.editLine', { line: text })}
+                divider={!review && i < draft.lines.length - 1}
+                testID={`recipe-line-${i}`}
+              />
+              {review?.lineExtra(line, i)}
+            </View>
           );
         })}
         {errors.lines ? <Text color="error">{t(errors.lines)}</Text> : null}
@@ -357,6 +379,7 @@ export function RecipeEditor({
           fullWidth
           testID="recipe-save"
         />
+        {review?.footer(draft)}
       </View>
 
       {editing ? (
