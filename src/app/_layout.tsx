@@ -15,6 +15,7 @@ import { HouseholdProvider, useHousehold } from '@/features/household/membership
 import { ForcedUpdateGate } from '@/features/remote-config/forced-update';
 import { RemoteConfigProvider } from '@/features/remote-config/provider';
 import { EntitlementProvider } from '@/features/subscription/entitlement';
+import { PremiumSheetProvider } from '@/features/subscription/premium-sheet';
 import { useTheme } from '@/hooks/use-theme';
 import { initCrashReporting, wrapRoot } from '@/lib/crash-reporting';
 
@@ -94,8 +95,10 @@ function RootLayout() {
           <AuthProvider>
             <HouseholdProvider>
               <EntitlementProvider>
-                <AnalyticsIdentity />
-                <RootStack />
+                <PremiumSheetProvider>
+                  <AnalyticsIdentity />
+                  <RootStack />
+                </PremiumSheetProvider>
               </EntitlementProvider>
             </HouseholdProvider>
           </AuthProvider>
