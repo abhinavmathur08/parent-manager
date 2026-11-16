@@ -18,6 +18,28 @@ jest.mock('expo-crypto', () => ({
   randomUUID: () => `00000000-0000-4000-8000-${String(++mockUuid).padStart(12, '0')}`,
 }));
 jest.mock('@/features/people/data', () => ({ fetchPeople: () => mockPeople() }));
+jest.mock('@/hooks/use-online', () => ({ useOnline: () => true }));
+let mockPremium = false;
+const mockOpenPremiumSheet = jest.fn();
+jest.mock('@/features/subscription/entitlement', () => ({
+  useEntitlement: () => ({ isPremium: mockPremium }),
+}));
+jest.mock('@/features/subscription/premium-sheet', () => ({
+  usePremiumSheet: () => ({ openPremiumSheet: mockOpenPremiumSheet }),
+}));
+let mockTemplates: unknown[] = [];
+const mockTemplateInsert = jest.fn(async (_row: unknown) => ({ error: null }));
+jest.mock('@/lib/supabase', () => ({
+  getSupabase: () => ({
+    from: () => {
+      const chain: Record<string, unknown> = {};
+      for (const m of ['select', 'eq']) chain[m] = () => chain;
+      chain.order = async () => ({ data: mockTemplates, error: null });
+      chain.insert = (row: unknown) => mockTemplateInsert(row);
+      return chain;
+    },
+  }),
+}));
 
 const metrics = {
   frame: { x: 0, y: 0, width: 390, height: 844 },
@@ -554,5 +576,92 @@ describe('leftover links (P-04, FR-PLAN-8)', () => {
       position: 1,
     });
     expect(mockUpdate).toHaveBeenCalledWith('plan_entries', 'tue', { leftover_of_entry_id: null });
+  });
+});
+
+describe('saved week templates (P-05, FR-PLAN-10)', () => {
+  beforeEach(() => {
+    mockPremium = false;
+    mockTemplates = [];
+    mockOpenPremiumSheet.mockClear();
+    mockTemplateInsert.mockClear();
+  });
+
+  it('opens the Premium sheet for a free household, from save and from apply', async () => {
+    mockRows = { plan_entries: [entry('mine', '2026-11-16', 'dinner', { free_text: 'Pizza' })] };
+    await show();
+    await fireEvent.press(screen.getByTestId('plan-save-template'));
+    expect(mockOpenPremiumSheet).toHaveBeenCalledWith('template');
+    await fireEvent.press(screen.getByTestId('plan-apply-template'));
+    expect(mockOpenPremiumSheet).toHaveBeenCalledTimes(2);
+    expect(mockTemplateInsert).not.toHaveBeenCalled();
+  });
+
+  it('saves the shown week with weekday offsets', async () => {
+    mockPremium = true;
+    mockRows = {
+      plan_entries: [
+        entry('mine', '2026-11-16', 'dinner', { free_text: 'Pizza' }),
+        entry('last', '2026-11-10', 'dinner', { free_text: 'Soup' }),
+      ],
+    };
+    await show();
+    await fireEvent.press(screen.getByTestId('plan-save-template'));
+    await fireEvent.changeText(screen.getByTestId('template-name'), 'Busy week');
+    await fireEvent.press(screen.getByTestId('template-save'));
+    expect(mockTemplateInsert).toHaveBeenCalledWith({
+      household_id: 'hh',
+      name: 'Busy week',
+      entries: [
+        expect.objectContaining({ id: 'mine', day: 1, slot: 'dinner', free_text: 'Pizza' }),
+      ],
+    });
+  });
+
+  it('applies a template to an empty week on the saved weekdays and slots', async () => {
+    mockPremium = true;
+    mockRows = {};
+    mockTemplates = [
+      {
+        id: 't1',
+        name: 'Busy week',
+        entries: [
+          {
+            id: 'x',
+            day: 0,
+            slot: 'dinner',
+            position: 0,
+            recipe_id: null,
+            free_text: 'Chili',
+            title: null,
+            servings: 4,
+            leftover_of: null,
+            portions: [],
+          },
+          {
+            id: 'y',
+            day: 6,
+            slot: 'lunch',
+            position: 0,
+            recipe_id: 'gone',
+            free_text: null,
+            title: 'Old soup',
+            servings: 2,
+            leftover_of: null,
+            portions: [],
+          },
+        ],
+      },
+    ];
+    await show();
+    await fireEvent.press(screen.getByTestId('plan-apply-template'));
+    await fireEvent.press(await screen.findByTestId('template-apply-add'));
+    expect(
+      insertsInto('plan_entries').map(([, , v]) => [v.date, v.slot, v.free_text, v.recipe_id]),
+    ).toEqual([
+      ['2026-11-15', 'dinner', 'Chili', null],
+      // The recipe was deleted since, so its saved title is planned as free text.
+      ['2026-11-21', 'lunch', 'Old soup', null],
+    ]);
   });
 });

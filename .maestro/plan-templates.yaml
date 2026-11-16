@@ -1,0 +1,99 @@
+# Saved week templates (P-05, FR-PLAN-10): on Free, "apply a template" opens the Premium sheet
+# with templates first; after the trial starts, a parent saves this week as a template and
+# applies it to next week. Uses the mock store: needs the local stack with
+# BILLING_MOCK_ENABLED=true (see premium.yaml and README.md).
+appId: ${APP_ID || 'com.myparentmanager'}
+tags:
+  - backend
+---
+- runFlow: subflows/create-household.yaml
+- scrollUntilVisible:
+    element:
+      id: plan-apply-template
+    direction: UP
+- tapOn:
+    id: plan-apply-template
+- extendedWaitUntil:
+    visible:
+      id: premium-sheet-header
+    timeout: 10000
+- assertVisible:
+    id: premium-benefit-templates
+- scrollUntilVisible:
+    element:
+      id: premium-terms
+- tapOn:
+    id: premium-start-trial
+- extendedWaitUntil:
+    visible:
+      id: premium-status-active
+    timeout: 90000
+- tapOn:
+    id: premium-done
+
+# Plan a dinner on the first day from the starter library.
+- scrollUntilVisible:
+    element:
+      id: plan-add-0-dinner
+    centerElement: true
+- tapOn:
+    id: plan-add-0-dinner
+- extendedWaitUntil:
+    visible:
+      id: add-search
+    timeout: 10000
+- tapOn:
+    id: add-search
+- inputText: lentil
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: add-starter-0
+- tapOn:
+    id: add-starter-0
+- extendedWaitUntil:
+    notVisible:
+      id: add-search
+    timeout: 10000
+
+# Save the week as a template.
+- scrollUntilVisible:
+    element:
+      id: plan-save-template
+    direction: UP
+- tapOn:
+    id: plan-save-template
+- extendedWaitUntil:
+    visible:
+      id: template-name
+    timeout: 10000
+- tapOn:
+    id: template-name
+- inputText: Usual week
+- hideKeyboard
+- tapOn:
+    id: template-save
+- extendedWaitUntil:
+    notVisible:
+      id: template-name
+    timeout: 15000
+
+# Apply it to next week.
+- tapOn:
+    id: plan-next
+- scrollUntilVisible:
+    element:
+      id: plan-apply-template
+    direction: UP
+- tapOn:
+    id: plan-apply-template
+- extendedWaitUntil:
+    visible:
+      id: template-option-0
+    timeout: 15000
+- tapOn:
+    id: template-apply-add
+- scrollUntilVisible:
+    element:
+      id: plan-slot-0-dinner-entry-0
+    centerElement: true

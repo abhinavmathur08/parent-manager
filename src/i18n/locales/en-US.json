@@ -934,6 +934,30 @@
       "unlink": "Unlink leftovers",
       "tag": "Leftovers",
       "note": "Leftovers of {{title}} ({{when}}). They add nothing to the list: that meal's ingredients cover these servings."
+    },
+    "saveTemplate": "Save as template",
+    "templates": {
+      "saveTitle": "Save this week as a template",
+      "nameLabel": "Template name",
+      "nameHint": "Up to {{max}} characters, such as \"Busy week\".",
+      "save": "Save template",
+      "saved": "Saved \"{{name}}\"",
+      "applyTitle": "Apply a template",
+      "none": "No templates yet. Plan a week you like, then save it as a template.",
+      "meals_one": "{{count}} meal",
+      "meals_other": "{{count}} meals",
+      "applyEmpty": "Apply to this week",
+      "add": "Add to this week",
+      "replace": "Replace this week",
+      "replaced": "Replaced this week with \"{{name}}\"",
+      "delete": "Delete this template",
+      "deleted": "Deleted \"{{name}}\"",
+      "errors": {
+        "name": "Give the template a name.",
+        "limit": "The household has 50 templates, the most allowed. Delete one first.",
+        "offline": "Templates need an internet connection.",
+        "generic": "That didn't work. Try again."
+      }
     }
   },
   "recipes": {
