@@ -429,6 +429,10 @@ The G-06.1 spike checked EventKit and `expo-calendar` 58 (`ExpoCalendar.createRe
 ## 8. Free and Premium entitlements (household level)
 
 - **The household is what's entitled,** not the person. `household_entitlements` is the single source of truth, which the app reads through sync, so every member sees Premium the moment it's bought.
+- **Billing provider interface (M-01.1, D-10 interim):** the app buys through `src/lib/billing/`, a provider-neutral interface shaped like RevenueCat's `react-native-purchases`: `getOfferings`, `purchasePackage`, `restorePurchases`, `getCustomerInfo`, `logIn` and `setAttributes`, returning the same `Offerings`, `Package` and `CustomerInfo` shapes and RevenueCat's error codes. `EXPO_PUBLIC_BILLING_PROVIDER` picks the implementation:
+  - **`mock` (the only one for now):** the mock store. Offerings come from a catalog of PROPOSED placeholder prices (monthly and annual, with the 14-day trial), priced in the device's store currency through the `src/i18n` helpers. Purchases and restores go to the server's mock store, which charges nobody. app.config.ts allows the mock only in development and preview builds and in the local end-to-end build (`billingMockAllowed`); a production build selects no provider whatever the variable says.
+  - **`revenuecat` (later):** a second class implementing the same interface by calling the SDK, selected in `getBilling()`. Screens don't change.
+  - **Unset:** no provider. Offerings are empty and buying fails with `CONFIGURATION_ERROR`.
 - **RevenueCat setup:**
   - **App user ID:** the RevenueCat app user ID is the purchaser's Supabase user ID.
   - **Household attribute:** at purchase, the app sets a RevenueCat attribute `household_id`.
