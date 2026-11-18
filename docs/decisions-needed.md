@@ -14,7 +14,7 @@ Updated 2026-11-15.
 | D-4  | Sentry, PostHog and Resend accounts        | Deferred 2026-11-08                                    | Before the internal beta. The wrappers do nothing without keys until then      |
 | D-5  | Apple and Google developer accounts        | Decided 2026-11-08: publish as an individual. Enrolled |                                                                                |
 | D-6  | Onboarding: due date or age, and age range | Decided 2026-11-08                                     |                                                                                |
-| D-7  | AI provider and data terms                 | Deferred 2026-11-08                                    | Before AI parsing (R-05.3, #54)                                                |
+| D-7  | AI provider and data terms                 | Deferred 2026-11-08; built with a fake provider        | Before real AI parsing; steps in D-7 below                                     |
 | D-8  | Starter recipe content                     | Deferred                                               | Before the internal beta (L-03.1). Development uses placeholder recipes        |
 | D-9  | Free-tier limits                           | Decided 2026-11-08                                     |                                                                                |
 | D-10 | RevenueCat, products, prices and trial     | Interim, decided 2026-11-15: mock store                | Real products, prices and RevenueCat before the beta                           |
@@ -87,12 +87,28 @@ These don't block development or staging. Each is listed with the point by which
 - **Recommendation for later:** free tiers are enough until the beta. Use PostHog US Cloud for the US launch, and revisit EU hosting before the UK. Resend needs the domain from D-2.
 - **You do, before the beta:** create the accounts, and add the keys and DSNs as EAS or GitHub secrets when asked. Never paste them into chat or code.
 
-### D-7 AI provider and data terms: needed before R-05.3
+### D-7 AI provider and data terms: needed before real AI parsing
 
 - **Decided 2026-11-08:** defer until R-05.3 AI parsing (#54). The import function, quotas and link extraction (R-05.1, R-05.2) don't need it.
+- **Built while it's open (R-05.3):** parsing sits behind a provider interface in the `import-recipe` Edge Function (architecture section 6). Tests, CI, local development and E2E use a deterministic fake provider. A Claude adapter is written but stays off until the secrets below are set. With no provider set, imports fail cleanly with "can't import right now" and don't use the allowance; links with embedded recipe data still import, because they need no AI call.
 - **Needs:** structured JSON output, image input, strong parsing quality, and terms that rule out training on our data, with short retention.
 - **Recommendation for later:** run R-05.4's evaluation set on two providers, and choose on accuracy, cost and terms. Calls go through our Edge Function only, so switching later is cheap.
-- **You do, then:** approve the provider, sign up for a paid API account, and add the key as a Supabase secret.
+- **What the model receives:** only the recipe text or image, the household's locale and region, and the allowed unit, tag and allergen lists. Never names, people, allergies or plans.
+- **You do, to turn on real parsing with Claude:**
+  1. Approve Anthropic as the provider after reading its commercial terms (API data isn't used for training by default; check the current retention period).
+  2. Create an Anthropic Console account for the business, add billing, and create an API key in a workspace named for this app. Set a monthly spend limit there.
+  3. Add the secrets to the Supabase project yourself (never paste the key into chat), then deploy the function:
+
+     ```bash
+     pnpm supabase secrets set --project-ref <project-ref> AI_PROVIDER=anthropic ANTHROPIC_API_KEY=<your key>
+     pnpm supabase functions deploy import-recipe --project-ref <project-ref>
+     ```
+
+     Optional: `AI_MODEL` picks the model. It defaults to `claude-opus-5-5`; `claude-sonnet-5-5` and `claude-haiku-5-5` are cheaper, and the evaluation set (R-05.4) shows whether they're accurate enough.
+
+  4. Run the evaluation set against the real provider (R-05.4, `pnpm run eval:ai`) and check it passes the thresholds in spec AI-22 before relying on it.
+- **To turn it off again:** `pnpm supabase secrets unset --project-ref <project-ref> AI_PROVIDER`. The remote kill switch (`app.kill_switches`, `ai_import`) also hides import in the app.
+- **Another provider:** add one adapter file next to `ai/anthropic.ts` and one line in `ai/select.ts`, then run the evaluation set on it.
 
 ### D-1 Supabase production plan: needed before the external beta
 
