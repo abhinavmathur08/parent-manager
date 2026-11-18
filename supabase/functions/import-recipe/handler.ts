@@ -59,14 +59,15 @@ export function createHandler(deps: HandlerDeps): (req: Request) => Promise<Resp
 
     const read = await readRequest(req);
     if ('error' in read) return errorResponse(read.error, 400);
-    const request = read.request;
+    const { request, jobId } = read;
 
     let job;
     try {
-      job = await deps.jobs.start(userId, inputTypeOf(request));
+      job = await deps.jobs.start(userId, inputTypeOf(request), jobId);
     } catch (error) {
       if (error instanceof JobRefused) {
-        return errorResponse(error.code, error.code === 'import.rate_limited' ? 429 : 403);
+        const status = { 'import.rate_limited': 429, 'import.invalid_request': 400 }[error.code];
+        return errorResponse(error.code, status ?? 403);
       }
       log('import.start_failed', {});
       return errorResponse('import.failed', 500);
@@ -181,7 +182,8 @@ function bearerToken(req: Request): string | null {
   return match ? match[1] : null;
 }
 
-type ReadResult = { request: ImportRequest } | { error: string };
+type ReadResult = { request: ImportRequest; jobId?: string } | { error: string };
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const INVALID: ReadResult = { error: 'import.invalid_request' };
 
 /** Reads and validates the body. Links are checked for shape before any job starts. */
@@ -203,18 +205,23 @@ async function readRequest(req: Request): Promise<ReadResult> {
     return INVALID;
   }
   if (typeof body !== 'object' || body === null) return INVALID;
-  const input = (body as { input?: unknown }).input;
+  const { input, jobId } = body as { input?: unknown; jobId?: unknown };
   if (typeof input !== 'object' || input === null) return INVALID;
+  // The app's own job ID, so it can read the result after leaving the screen (R-06.1).
+  if (jobId !== undefined && (typeof jobId !== 'string' || !UUID.test(jobId))) return INVALID;
+  const withId = jobId ? { jobId: jobId.toLowerCase() } : {};
   const { type, text, url } = input as { type?: unknown; text?: unknown; url?: unknown };
 
   if (type === 'text' && typeof text === 'string') {
     const trimmed = text.trim();
     if (trimmed.length === 0 || trimmed.length > MAX_TEXT_CHARS) return INVALID;
-    return { request: { type: 'text', text: trimmed } };
+    return { request: { type: 'text', text: trimmed }, ...withId };
   }
   if (type === 'link' && typeof url === 'string') {
     const link = checkLinkShape(url.trim());
-    return link ? { request: { type: 'link', url: link.href } } : { error: 'import.link_refused' };
+    return link
+      ? { request: { type: 'link', url: link.href }, ...withId }
+      : { error: 'import.link_refused' };
   }
   return INVALID;
 }
