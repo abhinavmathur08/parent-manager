@@ -365,13 +365,16 @@ Most edits are small and touch different rows, so simple rules are enough:
    - **Otherwise** the readable text is extracted (scripts, styles and page furniture removed, capped at 20,000 characters) and goes to the parser like pasted text.
    - **Text:** used as given.
    - **Images:** passed to the LLM's image input.
-4. **LLM parsing** with a strict JSON output schema:
-   - **Output:** title, servings, times, steps, and ingredient lines with quantity, unit and ingredient name, plus suggested tags and possible allergens.
-   - **Inputs:** the household's `locale` and `region` go into every prompt. The unit ID list is given to the model, so it must pick from known units.
-5. **Normalization on the server:**
-   - **Units:** mapped to unit IDs.
-   - **Ingredients:** matched against the catalog by name and synonyms for the locale, then fuzzy matching, then the LLM's suggestion. Anything unmatched becomes a household ingredient marked "unmatched".
-   - **Confidence:** each line gets a confidence score.
+4. **LLM parsing** (R-05.3) with a strict JSON output schema, in `supabase/functions/import-recipe/ai/`:
+   - **Provider seam:** `createAiParser` (`ai_parser.ts`) builds one provider-neutral request (`prompt.ts`: instructions, the schema, the user content) and hands it to an `AiProvider` adapter. `ai/select.ts` picks the adapter from the function's secrets: `AI_PROVIDER=anthropic` with `ANTHROPIC_API_KEY` (and optionally `AI_MODEL`) uses Claude (`anthropic.ts`, plain `fetch`, structured output through `output_config.format`); `AI_PROVIDER=fake` uses a deterministic rule-based fake (`fake.ts`) and works only when `SUPABASE_URL` is a local stack; anything else leaves imports failing with `import.parser_unavailable`, uncounted. Adding a provider is one adapter file and one line in `select.ts`.
+   - **Output:** title, servings, times, steps, and ingredient lines with the original text, quantity, unit ID, ingredient name, note and confidence, plus suggested tags and allergens the source mentions. `validate.ts` checks every field again: units, tags and allergens must come from the fixed lists (`vocabulary.ts`, kept equal to the app's by a Jest test), numbers are range-checked, and lines with no amount or an inferred ingredient have their confidence capped.
+   - **Inputs:** only the source content, the household's `locale` and `region`, the regional unit words and the allowed lists (AI-8, AI-15). The source sits inside `<source>` tags as data (AI-9).
+   - **Retry:** invalid output, a rate limit, overload or a network error is retried once after 1 second (AI-18); a refusal, a bad key or a non-recipe fails at once. Output is capped at 8,000 tokens per call, the per-job cost ceiling.
+5. **Normalization on the device** (`src/features/import/normalize.ts`), when the review screen opens:
+   - **Why on the device:** the matcher (R-01.3), the bundled catalog and the household's own ingredients already live there, and the recipe editor uses the same code, so imported and typed lines match the same way. The server never needs the household's ingredient list.
+   - **Ingredients:** the model's ingredient name and the original line are both run through `parseIngredientLine`; the better match wins. Anything unmatched becomes a new household ingredient (section "other") when the recipe is saved.
+   - **Units:** the model's unit ID, already checked on the server; lines from embedded page data are parsed on the device.
+   - **Confidence:** the model's confidence, capped by how the match was found (exact 1, partial 0.85, fuzzy search 0.5, none 0). Lines below 0.7 or unmatched are highlighted (FR-AI-6).
 6. **Review (always):** the client shows the draft. Nothing is saved before the user confirms.
    - Low-confidence lines and unmatched ingredients are highlighted.
    - Detected allergens that match a household member's profile get a warning with the "not medical advice" disclaimer.
@@ -398,7 +401,7 @@ Voice import is out of the MVP. The vision lists it, but it adds speech-recognit
 
 ### Quality
 
-A small evaluation set of real recipes in US, UK and Australian formats runs before each model or prompt change. It measures whether ingredients, units and allergens are parsed correctly.
+An evaluation set of recipes in US, UK and Australian formats runs before each model or prompt change (R-05.4). It measures whether ingredients, units and allergens are parsed correctly.
 
 ## 7. Getting the grocery list out of the app
 

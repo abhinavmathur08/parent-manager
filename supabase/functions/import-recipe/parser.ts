@@ -1,13 +1,11 @@
-// The seam where the AI parser plugs in (R-05.3).
-//
-// The provider isn't chosen yet (decision D-7), so no implementation calls a model. R-05.3
-// adds one that implements RecipeParser and is passed to createHandler in index.ts.
+// The seam where the AI parser plugs in. ai/ai_parser.ts implements it over a provider
+// adapter; index.ts picks the adapter from the AI_PROVIDER secret (decision D-7).
 
-import type { Locale, RecipeDraft, Region } from './types.ts';
+import type { Locale, ParseSource, RecipeDraft, Region } from './types.ts';
 
 /** Everything a parser may see (spec AI-8): the source content, locale and region only. */
 export interface ParseRequest {
-  source: { kind: 'text'; text: string };
+  source: ParseSource;
   /** Always set (FR-AI-14, AI-15). */
   locale: Locale;
   region: Region;
@@ -35,7 +33,7 @@ export class ParserError extends Error {
   }
 }
 
-/** Used until R-05.3: every parse fails cleanly, so the reservation is released. */
+/** Used while no provider is configured: every parse fails cleanly and nothing is counted. */
 export const parserNotConfigured: RecipeParser = {
   parse() {
     return Promise.reject(new ParserError('import.parser_unavailable'));
