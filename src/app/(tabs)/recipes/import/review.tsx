@@ -1,15 +1,15 @@
-import { useTranslation } from 'react-i18next';
+import { useLocalSearchParams } from 'expo-router';
 
-import { PlaceholderScreen } from '@/components/placeholder-screen';
+import { useHousehold } from '@/features/household/membership';
+import { ReviewScreen } from '@/features/import/review-screen';
 
-// Placeholder until the review screen (S-21, R-06.2) lands.
+/** S-21: `/recipes/import/review?job=<id>` reviews an import's draft before it's saved. */
 export default function ImportReviewRoute() {
-  const { t } = useTranslation();
+  const { job } = useLocalSearchParams<{ job?: string }>();
+  const { state } = useHousehold();
+  if (!job || state.status !== 'member' || state.membership.role === 'caregiver') return null;
+  const { householdId, locale, region, unitSystem } = state.membership;
   return (
-    <PlaceholderScreen
-      title={t('importRecipe.review.title')}
-      icon="recipes"
-      testID="import-review"
-    />
+    <ReviewScreen key={job} job={job} household={{ id: householdId, locale, region, unitSystem }} />
   );
 }

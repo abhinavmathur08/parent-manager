@@ -31,6 +31,13 @@ const MISSING_MS = 20_000;
 // Requests still in flight, by job ID, so a screen that remounts waits on the same request
 // instead of sending another.
 const inflight = new Map<string, Promise<ImportResult>>();
+// Finished drafts this app session, so review opens without reading the job back.
+const results = new Map<string, ImportResult>();
+
+/** A draft this app session already has, or undefined (review then reads the job back). */
+export function cachedResult(jobId: string): ImportResult | undefined {
+  return results.get(jobId);
+}
 
 function request(pending: PendingImport): Promise<ImportResult> {
   let promise = inflight.get(pending.jobId);
@@ -65,6 +72,7 @@ export function useImportRun(now: () => number = Date.now) {
 
   const finish = useCallback(
     (p: PendingImport, outcome: { result: ImportResult } | { code: ImportErrorCode }) => {
+      if ('result' in outcome) results.set(p.jobId, outcome.result);
       if (!active.current) return;
       setRun(
         'result' in outcome

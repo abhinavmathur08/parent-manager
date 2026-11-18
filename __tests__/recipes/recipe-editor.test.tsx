@@ -83,7 +83,7 @@ it('makes an unknown ingredient a household ingredient and saves through the syn
     default_dimension: 'volume',
   });
   expect(mockInsert.mock.calls[2][2].ingredient_id).toMatch(/^ingredient\.h\.[0-9a-f]{32}$/);
-  expect(onSaved).toHaveBeenCalledWith('recipe-1');
+  expect(onSaved).toHaveBeenCalledWith('recipe-1', expect.objectContaining({ title: 'Flatbread' }));
 });
 
 it('asks for a title before saving', async () => {
