@@ -5,7 +5,16 @@ export type Region = 'US' | 'GB' | 'AU';
 export type InputType = 'link' | 'text' | 'image';
 
 /** What the app sends. The household's locale and region are read on the server. */
-export type ImportRequest = { type: 'text'; text: string } | { type: 'link'; url: string };
+export type ImportRequest =
+  | { type: 'text'; text: string }
+  | { type: 'link'; url: string }
+  /** One photo or screenshot, compressed on the device (FR-AI-12). Never stored. */
+  | {
+      type: 'image';
+      kind: 'photo' | 'screenshot';
+      mediaType: 'image/jpeg' | 'image/png';
+      base64: string;
+    };
 
 /** What a parser reads: text (pasted, or extracted from a page) or one image (FR-AI-1). */
 export type ParseSource =
