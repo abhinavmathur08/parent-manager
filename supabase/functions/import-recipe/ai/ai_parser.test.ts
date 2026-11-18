@@ -174,6 +174,8 @@ Deno.test('the fake provider parses through the real pipeline', async () => {
         '3 ripe bananas, mashed',
         '1 1/2 cups plain flour',
         '2 tbsp honey',
+        '1/2 cup milk',
+        '¾ cup oats',
         'Method',
         '1. Mash the bananas.',
         '2. Bake.',
@@ -192,6 +194,8 @@ Deno.test('the fake provider parses through the real pipeline', async () => {
       [3, 'unit.each', 'ripe bananas', 'mashed'],
       [1.5, 'unit.cup_metric', 'plain flour', null],
       [2, 'unit.tbsp_au', 'honey', null],
+      [0.5, 'unit.cup_metric', 'milk', null],
+      [0.75, 'unit.cup_metric', 'oats', null],
     ],
   );
   assertEquals(draft.steps, ['Mash the bananas.', 'Bake.']);

@@ -1,0 +1,263 @@
+{
+  "provider": "fake",
+  "model": "fake-parser-1",
+  "promptVersion": "recipe-parse-1",
+  "overall": {
+    "recipes": 60,
+    "failed": 0,
+    "goldLines": 356,
+    "ingredientAccuracy": 0.9831,
+    "linesWithQuantity": 350,
+    "unitAccuracy": 0.9914,
+    "goldAllergens": 180,
+    "allergenRecall": 1,
+    "outputLines": 356,
+    "hallucinationRate": 0
+  },
+  "byRegion": {
+    "US": {
+      "recipes": 20,
+      "failed": 0,
+      "goldLines": 121,
+      "ingredientAccuracy": 1,
+      "linesWithQuantity": 120,
+      "unitAccuracy": 0.9917,
+      "goldAllergens": 60,
+      "allergenRecall": 1,
+      "outputLines": 121,
+      "hallucinationRate": 0
+    },
+    "GB": {
+      "recipes": 20,
+      "failed": 0,
+      "goldLines": 118,
+      "ingredientAccuracy": 0.9831,
+      "linesWithQuantity": 114,
+      "unitAccuracy": 0.9912,
+      "goldAllergens": 59,
+      "allergenRecall": 1,
+      "outputLines": 118,
+      "hallucinationRate": 0
+    },
+    "AU": {
+      "recipes": 20,
+      "failed": 0,
+      "goldLines": 117,
+      "ingredientAccuracy": 0.9658,
+      "linesWithQuantity": 116,
+      "unitAccuracy": 0.9914,
+      "goldAllergens": 61,
+      "allergenRecall": 1,
+      "outputLines": 117,
+      "hallucinationRate": 0
+    }
+  },
+  "byInput": {
+    "text": {
+      "recipes": 33,
+      "failed": 0,
+      "goldLines": 194,
+      "ingredientAccuracy": 0.9948,
+      "linesWithQuantity": 189,
+      "unitAccuracy": 1,
+      "goldAllergens": 100,
+      "allergenRecall": 1,
+      "outputLines": 194,
+      "hallucinationRate": 0
+    },
+    "link": {
+      "recipes": 9,
+      "failed": 0,
+      "goldLines": 53,
+      "ingredientAccuracy": 0.9811,
+      "linesWithQuantity": 52,
+      "unitAccuracy": 1,
+      "goldAllergens": 27,
+      "allergenRecall": 1,
+      "outputLines": 53,
+      "hallucinationRate": 0
+    },
+    "link_structured": {
+      "recipes": 6,
+      "failed": 0,
+      "goldLines": 37,
+      "ingredientAccuracy": 1,
+      "linesWithQuantity": 37,
+      "unitAccuracy": 0.9189,
+      "goldAllergens": 16,
+      "allergenRecall": 1,
+      "outputLines": 37,
+      "hallucinationRate": 0
+    },
+    "screenshot": {
+      "recipes": 6,
+      "failed": 0,
+      "goldLines": 32,
+      "ingredientAccuracy": 0.9375,
+      "linesWithQuantity": 32,
+      "unitAccuracy": 1,
+      "goldAllergens": 17,
+      "allergenRecall": 1,
+      "outputLines": 32,
+      "hallucinationRate": 0
+    },
+    "photo": {
+      "recipes": 6,
+      "failed": 0,
+      "goldLines": 40,
+      "ingredientAccuracy": 0.95,
+      "linesWithQuantity": 40,
+      "unitAccuracy": 1,
+      "goldAllergens": 20,
+      "allergenRecall": 1,
+      "outputLines": 40,
+      "hallucinationRate": 0
+    }
+  },
+  "medianLinkLatencyMs": 0,
+  "recipes": [
+    {
+      "id": "us-04",
+      "latencyMs": 0,
+      "missing": [],
+      "wrongIngredient": [],
+      "wrongUnit": [
+        {
+          "original": "4 salmon fillets",
+          "expected": [
+            "unit.each",
+            4
+          ],
+          "got": [
+            null,
+            4
+          ]
+        }
+      ],
+      "missedAllergens": [],
+      "hallucinated": []
+    },
+    {
+      "id": "gb-08",
+      "latencyMs": 0,
+      "missing": [],
+      "wrongIngredient": [
+        {
+          "original": "125g light brown soft sugar",
+          "expected": "ingredient.brown_sugar",
+          "got": "ingredient.sugar"
+        }
+      ],
+      "wrongUnit": [],
+      "missedAllergens": [],
+      "hallucinated": []
+    },
+    {
+      "id": "gb-12",
+      "latencyMs": 0,
+      "missing": [],
+      "wrongIngredient": [],
+      "wrongUnit": [
+        {
+          "original": "8 pork sausages",
+          "expected": [
+            "unit.each",
+            8
+          ],
+          "got": [
+            null,
+            8
+          ]
+        }
+      ],
+      "missedAllergens": [],
+      "hallucinated": []
+    },
+    {
+      "id": "gb-17",
+      "latencyMs": 0,
+      "missing": [],
+      "wrongIngredient": [
+        {
+          "original": "75g demerara sugar",
+          "expected": "ingredient.brown_sugar",
+          "got": "ingredient.sugar"
+        }
+      ],
+      "wrongUnit": [],
+      "missedAllergens": [],
+      "hallucinated": []
+    },
+    {
+      "id": "au-07",
+      "latencyMs": 0,
+      "missing": [],
+      "wrongIngredient": [
+        {
+          "original": "3 green onions, sliced",
+          "expected": "ingredient.scallion",
+          "got": "ingredient.onion"
+        }
+      ],
+      "wrongUnit": [],
+      "missedAllergens": [],
+      "hallucinated": []
+    },
+    {
+      "id": "au-12",
+      "latencyMs": 0,
+      "missing": [],
+      "wrongIngredient": [],
+      "wrongUnit": [
+        {
+          "original": "4 barramundi fillets",
+          "expected": [
+            "unit.each",
+            4
+          ],
+          "got": [
+            null,
+            4
+          ]
+        }
+      ],
+      "missedAllergens": [],
+      "hallucinated": []
+    },
+    {
+      "id": "au-14",
+      "latencyMs": 0,
+      "missing": [],
+      "wrongIngredient": [
+        {
+          "original": "420g can creamed corn",
+          "expected": "ingredient.canned_corn",
+          "got": null
+        },
+        {
+          "original": "2 green onions, sliced",
+          "expected": "ingredient.scallion",
+          "got": "ingredient.onion"
+        }
+      ],
+      "wrongUnit": [],
+      "missedAllergens": [],
+      "hallucinated": []
+    },
+    {
+      "id": "au-17",
+      "latencyMs": 0,
+      "missing": [],
+      "wrongIngredient": [
+        {
+          "original": "500g beef stir-fry strips",
+          "expected": "ingredient.beef_steak",
+          "got": null
+        }
+      ],
+      "wrongUnit": [],
+      "missedAllergens": [],
+      "hallucinated": []
+    }
+  ]
+}

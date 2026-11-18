@@ -48,3 +48,6 @@ example
 # test output
 coverage/
 maestro-report.xml
+
+# AI evaluation runs with the fake provider through `pnpm run eval:ai` (CI keeps results/fake.json)
+ai-eval/results/fake-*.json

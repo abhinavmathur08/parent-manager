@@ -1,0 +1,2874 @@
+{
+  "version": 1,
+  "note": "Original recipes written for this evaluation set (spec AI-21). Not copied from any site or book.",
+  "recipes": [
+    {
+      "id": "us-01",
+      "region": "US",
+      "locale": "en-US",
+      "input": "text",
+      "text": "Banana oat pancakes\nServes 2\nPrep: 5 mins | Cook: 10 mins\n\nIngredients\n2 ripe bananas\n1 cup rolled oats\n2 large eggs\n1/2 cup milk\n1 tsp baking powder\n1 tbsp butter, for the pan\n\nDirections\n1. Blend everything except the butter until smooth.\n2. Melt a little butter in a skillet and cook small pancakes for 2 minutes a side.",
+      "gold": {
+        "title": "Banana oat pancakes",
+        "lines": [
+          {
+            "original": "2 ripe bananas",
+            "ingredientId": "ingredient.banana",
+            "unitId": "unit.each",
+            "quantity": 2
+          },
+          {
+            "original": "1 cup rolled oats",
+            "ingredientId": "ingredient.rolled_oats",
+            "unitId": "unit.cup_us",
+            "quantity": 1
+          },
+          {
+            "original": "2 large eggs",
+            "ingredientId": "ingredient.egg",
+            "unitId": "unit.each",
+            "quantity": 2
+          },
+          {
+            "original": "1/2 cup milk",
+            "ingredientId": "ingredient.milk",
+            "unitId": "unit.cup_us",
+            "quantity": 0.5
+          },
+          {
+            "original": "1 tsp baking powder",
+            "ingredientId": "ingredient.baking_powder",
+            "unitId": "unit.tsp_us",
+            "quantity": 1
+          },
+          {
+            "original": "1 tbsp butter, for the pan",
+            "ingredientId": "ingredient.butter",
+            "unitId": "unit.tbsp_us",
+            "quantity": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "us-02",
+      "region": "US",
+      "locale": "en-US",
+      "input": "text",
+      "text": "Easy turkey chili\nServes 6\nPrep: 15 mins | Cook: 40 mins\n\nIngredients\n1 lb ground turkey\n1 yellow onion, diced\n2 cloves garlic, minced\n1 (15 oz) can black beans, drained\n1 (28 oz) can crushed tomatoes\n2 tbsp chili powder\n1 tsp ground cumin\n1 cup chicken broth\n\nDirections\n1. Brown the turkey with the onion and garlic.\n2. Add everything else and simmer for 30 minutes.\n3. Freezes well for up to 3 months.",
+      "gold": {
+        "title": "Easy turkey chili",
+        "lines": [
+          {
+            "original": "1 lb ground turkey",
+            "ingredientId": "ingredient.ground_turkey",
+            "unitId": "unit.lb",
+            "quantity": 1
+          },
+          {
+            "original": "1 yellow onion, diced",
+            "ingredientId": "ingredient.onion",
+            "unitId": "unit.each",
+            "quantity": 1
+          },
+          {
+            "original": "2 cloves garlic, minced",
+            "ingredientId": "ingredient.garlic",
+            "unitId": "unit.each",
+            "quantity": 2
+          },
+          {
+            "original": "1 (15 oz) can black beans, drained",
+            "ingredientId": "ingredient.black_beans",
+            "unitId": "unit.each",
+            "quantity": 1
+          },
+          {
+            "original": "1 (28 oz) can crushed tomatoes",
+            "ingredientId": "ingredient.canned_tomatoes",
+            "unitId": "unit.each",
+            "quantity": 1
+          },
+          {
+            "original": "2 tbsp chili powder",
+            "ingredientId": "ingredient.chili_powder",
+            "unitId": "unit.tbsp_us",
+            "quantity": 2
+          },
+          {
+            "original": "1 tsp ground cumin",
+            "ingredientId": "ingredient.cumin",
+            "unitId": "unit.tsp_us",
+            "quantity": 1
+          },
+          {
+            "original": "1 cup chicken broth",
+            "ingredientId": "ingredient.chicken_stock",
+            "unitId": "unit.cup_us",
+            "quantity": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "us-03",
+      "region": "US",
+      "locale": "en-US",
+      "input": "link",
+      "html": "<!doctype html><html><head><title>Stovetop mac and cheese | Example Kitchen</title><style>body{font-family:sans-serif}</style></head><body><header><nav><a href=\"/\">Home</a> <a href=\"/recipes\">Recipes</a> <a href=\"/about\">About</a></nav></header><main><article><h1>Stovetop mac and cheese</h1><p>Serves 4 · Prep 5 min · Cook 20 min</p><h2>Ingredients</h2><ul><li>8 oz elbow macaroni</li><li>2 tbsp butter</li><li>2 tbsp all-purpose flour</li><li>2 cups whole milk</li><li>2 cups shredded cheddar cheese</li><li>1/2 tsp salt</li></ul><h2>Method</h2><ol><li>Cook the macaroni and drain.</li><li>Melt the butter, stir in the flour, then whisk in the milk until thick.</li><li>Stir in the cheese and the macaroni.</li></ol></article></main><footer><p>Example Kitchen. All recipes written for the Parent Manager evaluation set.</p></footer></body></html>",
+      "gold": {
+        "title": "Stovetop mac and cheese",
+        "lines": [
+          {
+            "original": "8 oz elbow macaroni",
+            "ingredientId": "ingredient.pasta",
+            "unitId": "unit.oz",
+            "quantity": 8
+          },
+          {
+            "original": "2 tbsp butter",
+            "ingredientId": "ingredient.butter",
+            "unitId": "unit.tbsp_us",
+            "quantity": 2
+          },
+          {
+            "original": "2 tbsp all-purpose flour",
+            "ingredientId": "ingredient.flour",
+            "unitId": "unit.tbsp_us",
+            "quantity": 2
+          },
+          {
+            "original": "2 cups whole milk",
+            "ingredientId": "ingredient.milk",
+            "unitId": "unit.cup_us",
+            "quantity": 2
+          },
+          {
+            "original": "2 cups shredded cheddar cheese",
+            "ingredientId": "ingredient.cheddar",
+            "unitId": "unit.cup_us",
+            "quantity": 2
+          },
+          {
+            "original": "1/2 tsp salt",
+            "ingredientId": "ingredient.salt",
+            "unitId": "unit.tsp_us",
+            "quantity": 0.5
+          }
+        ]
+      }
+    },
+    {
+      "id": "us-04",
+      "region": "US",
+      "locale": "en-US",
+      "input": "link_structured",
+      "html": "<!doctype html><html><head><title>Sheet-pan salmon and asparagus | Example Kitchen</title><script type=\"application/ld+json\">{\"@context\": \"https://schema.org\", \"@type\": \"Recipe\", \"name\": \"Sheet-pan salmon and asparagus\", \"recipeYield\": \"4 servings\", \"prepTime\": \"PT10M\", \"recipeIngredient\": [\"4 salmon fillets\", \"1 lb asparagus, trimmed\", \"2 tbsp olive oil\", \"1 lemon, sliced\", \"2 cloves garlic, minced\", \"1/4 tsp black pepper\"], \"recipeInstructions\": [{\"@type\": \"HowToStep\", \"text\": \"Heat the oven to 400°F.\"}, {\"@type\": \"HowToStep\", \"text\": \"Toss the asparagus with half the oil and lay the salmon alongside.\"}, {\"@type\": \"HowToStep\", \"text\": \"Top with lemon, garlic and pepper and roast for 15 minutes.\"}], \"cookTime\": \"PT15M\"}</script><style>body{font-family:sans-serif}</style></head><body><header><nav><a href=\"/\">Home</a> <a href=\"/recipes\">Recipes</a> <a href=\"/about\">About</a></nav></header><main><article><h1>Sheet-pan salmon and asparagus</h1><p>Serves 4 · Prep 10 min · Cook 15 min</p><h2>Ingredients</h2><ul><li>4 salmon fillets</li><li>1 lb asparagus, trimmed</li><li>2 tbsp olive oil</li><li>1 lemon, sliced</li><li>2 cloves garlic, minced</li><li>1/4 tsp black pepper</li></ul><h2>Method</h2><ol><li>Heat the oven to 400°F.</li><li>Toss the asparagus with half the oil and lay the salmon alongside.</li><li>Top with lemon, garlic and pepper and roast for 15 minutes.</li></ol></article></main><footer><p>Example Kitchen. All recipes written for the Parent Manager evaluation set.</p></footer></body></html>",
+      "gold": {
+        "title": "Sheet-pan salmon and asparagus",
+        "lines": [
+          {
+            "original": "4 salmon fillets",
+            "ingredientId": "ingredient.salmon",
+            "unitId": "unit.each",
+            "quantity": 4
+          },
+          {
+            "original": "1 lb asparagus, trimmed",
+            "ingredientId": "ingredient.asparagus",
+            "unitId": "unit.lb",
+            "quantity": 1
+          },
+          {
+            "original": "2 tbsp olive oil",
+            "ingredientId": "ingredient.olive_oil",
+            "unitId": "unit.tbsp_us",
+            "quantity": 2
+          },
+          {
+            "original": "1 lemon, sliced",
+            "ingredientId": "ingredient.lemon",
+            "unitId": "unit.each",
+            "quantity": 1
+          },
+          {
+            "original": "2 cloves garlic, minced",
+            "ingredientId": "ingredient.garlic",
+            "unitId": "unit.each",
+            "quantity": 2
+          },
+          {
+            "original": "1/4 tsp black pepper",
+            "ingredientId": "ingredient.black_pepper",
+            "unitId": "unit.tsp_us",
+            "quantity": 0.25
+          }
+        ]
+      }
+    },
+    {
+      "id": "us-05",
+      "region": "US",
+      "locale": "en-US",
+      "input": "screenshot",
+      "image": "us-05.jpg",
+      "transcript": "Chicken quesadillas\nServes 4\nPrep: 10 mins | Cook: 10 mins\n\nIngredients\n2 cups shredded rotisserie chicken\n4 flour tortillas\n1 cup Mexican cheese blend\n1/2 cup salsa\n1 tbsp vegetable oil\n\nDirections\n1. Fill half of each tortilla with chicken, cheese and salsa and fold.\n2. Cook in the oiled pan until golden on both sides.",
+      "gold": {
+        "title": "Chicken quesadillas",
+        "lines": [
+          {
+            "original": "2 cups shredded rotisserie chicken",
+            "ingredientId": "ingredient.rotisserie_chicken",
+            "unitId": "unit.cup_us",
+            "quantity": 2
+          },
+          {
+            "original": "4 flour tortillas",
+            "ingredientId": "ingredient.flour_tortilla",
+            "unitId": "unit.each",
+            "quantity": 4
+          },
+          {
+            "original": "1 cup Mexican cheese blend",
+            "ingredientId": "ingredient.mexican_cheese",
+            "unitId": "unit.cup_us",
+            "quantity": 1
+          },
+          {
+            "original": "1/2 cup salsa",
+            "ingredientId": "ingredient.salsa",
+            "unitId": "unit.cup_us",
+            "quantity": 0.5
+          },
+          {
+            "original": "1 tbsp vegetable oil",
+            "ingredientId": "ingredient.vegetable_oil",
+            "unitId": "unit.tbsp_us",
+            "quantity": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "us-06",
+      "region": "US",
+      "locale": "en-US",
+      "input": "text",
+      "text": "Blueberry overnight oats\nServes 1\nPrep: 5 mins\n\nIngredients\n- 1/2 cup rolled oats\n- 1/2 cup Greek yogurt\n- 1/2 cup almond milk\n- 1 tbsp chia seeds\n- 1 tbsp maple syrup\n- 1/2 cup blueberries\n\nDirections\n1. Stir everything together in a jar.\n2. Refrigerate overnight.",
+      "gold": {
+        "title": "Blueberry overnight oats",
+        "lines": [
+          {
+            "original": "1/2 cup rolled oats",
+            "ingredientId": "ingredient.rolled_oats",
+            "unitId": "unit.cup_us",
+            "quantity": 0.5
+          },
+          {
+            "original": "1/2 cup Greek yogurt",
+            "ingredientId": "ingredient.greek_yogurt",
+            "unitId": "unit.cup_us",
+            "quantity": 0.5
+          },
+          {
+            "original": "1/2 cup almond milk",
+            "ingredientId": "ingredient.almond_milk",
+            "unitId": "unit.cup_us",
+            "quantity": 0.5
+          },
+          {
+            "original": "1 tbsp chia seeds",
+            "ingredientId": "ingredient.chia_seeds",
+            "unitId": "unit.tbsp_us",
+            "quantity": 1
+          },
+          {
+            "original": "1 tbsp maple syrup",
+            "ingredientId": "ingredient.maple_syrup",
+            "unitId": "unit.tbsp_us",
+            "quantity": 1
+          },
+          {
+            "original": "1/2 cup blueberries",
+            "ingredientId": "ingredient.blueberry",
+            "unitId": "unit.cup_us",
+            "quantity": 0.5
+          }
+        ]
+      }
+    },
+    {
+      "id": "us-07",
+      "region": "US",
+      "locale": "en-US",
+      "input": "link",
+      "html": "<!doctype html><html><head><title>Weeknight beef tacos | Example Kitchen</title><style>body{font-family:sans-serif}</style></head><body><header><nav><a href=\"/\">Home</a> <a href=\"/recipes\">Recipes</a> <a href=\"/about\">About</a></nav></header><main><article><h1>Weeknight beef tacos</h1><p>Serves 4 · Prep 5 min · Cook 15 min</p><h2>Ingredients</h2><ul><li>1 lb ground beef</li><li>1 packet taco seasoning</li><li>8 taco shells</li><li>1 cup shredded lettuce</li><li>1 tomato, diced</li><li>1/2 cup sour cream</li></ul><h2>Method</h2><ol><li>Brown the beef, add the seasoning and a splash of water.</li><li>Warm the shells and fill.</li></ol></article></main><footer><p>Example Kitchen. All recipes written for the Parent Manager evaluation set.</p></footer></body></html>",
+      "gold": {
+        "title": "Weeknight beef tacos",
+        "lines": [
+          {
+            "original": "1 lb ground beef",
+            "ingredientId": "ingredient.ground_beef",
+            "unitId": "unit.lb",
+            "quantity": 1
+          },
+          {
+            "original": "1 packet taco seasoning",
+            "ingredientId": "ingredient.taco_seasoning",
+            "unitId": "unit.each",
+            "quantity": 1
+          },
+          {
+            "original": "8 taco shells",
+            "ingredientId": "ingredient.taco_shells",
+            "unitId": "unit.each",
+            "quantity": 8
+          },
+          {
+            "original": "1 cup shredded lettuce",
+            "ingredientId": "ingredient.lettuce",
+            "unitId": "unit.cup_us",
+            "quantity": 1
+          },
+          {
+            "original": "1 tomato, diced",
+            "ingredientId": "ingredient.tomato",
+            "unitId": "unit.each",
+            "quantity": 1
+          },
+          {
+            "original": "1/2 cup sour cream",
+            "ingredientId": "ingredient.sour_cream",
+            "unitId": "unit.cup_us",
+            "quantity": 0.5
+          }
+        ]
+      }
+    },
+    {
+      "id": "us-08",
+      "region": "US",
+      "locale": "en-US",
+      "input": "text",
+      "text": "Peanut butter energy bites\nMakes 12\nPrep: 15 mins\n\nIngredients\n1 cup quick oats\n1/2 cup peanut butter\n1/3 cup honey\n1/2 cup chocolate chips\n2 tbsp ground flaxseed\n1 tsp vanilla extract\n\nDirections\n1. Mix everything in a bowl.\n2. Roll into 12 balls and chill for 30 minutes.",
+      "gold": {
+        "title": "Peanut butter energy bites",
+        "lines": [
+          {
+            "original": "1 cup quick oats",
+            "ingredientId": "ingredient.quick_oats",
+            "unitId": "unit.cup_us",
+            "quantity": 1
+          },
+          {
+            "original": "1/2 cup peanut butter",
+            "ingredientId": "ingredient.peanut_butter",
+            "unitId": "unit.cup_us",
+            "quantity": 0.5
+          },
+          {
+            "original": "1/3 cup honey",
+            "ingredientId": "ingredient.honey",
+            "unitId": "unit.cup_us",
+            "quantity": 0.3333
+          },
+          {
+            "original": "1/2 cup chocolate chips",
+            "ingredientId": "ingredient.chocolate_chips",
+            "unitId": "unit.cup_us",
+            "quantity": 0.5
+          },
+          {
+            "original": "2 tbsp ground flaxseed",
+            "ingredientId": "ingredient.flaxseed",
+            "unitId": "unit.tbsp_us",
+            "quantity": 2
+          },
+          {
+            "original": "1 tsp vanilla extract",
+            "ingredientId": "ingredient.vanilla",
+            "unitId": "unit.tsp_us",
+            "quantity": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "us-09",
+      "region": "US",
+      "locale": "en-US",
+      "input": "photo",
+      "image": "us-09.jpg",
+      "transcript": "Garden minestrone\nServes 6\nPrep: 15 mins | Cook: 30 mins\n\nIngredients\n- 2 tbsp olive oil\n- 1 onion, chopped\n- 2 carrots, diced\n- 2 celery stalks, diced\n- 1 zucchini, diced\n- 4 cups vegetable broth\n- 1 cup small pasta\n- 1 (15 oz) can cannellini beans\n\nDirections\n1. Soften the vegetables in the oil.\n2. Add the broth and simmer for 15 minutes.\n3. Add the pasta and beans and cook until tender.",
+      "gold": {
+        "title": "Garden minestrone",
+        "lines": [
+          {
+            "original": "2 tbsp olive oil",
+            "ingredientId": "ingredient.olive_oil",
+            "unitId": "unit.tbsp_us",
+            "quantity": 2
+          },
+          {
+            "original": "1 onion, chopped",
+            "ingredientId": "ingredient.onion",
+            "unitId": "unit.each",
+            "quantity": 1
+          },
+          {
+            "original": "2 carrots, diced",
+            "ingredientId": "ingredient.carrot",
+            "unitId": "unit.each",
+            "quantity": 2
+          },
+          {
+            "original": "2 celery stalks, diced",
+            "ingredientId": "ingredient.celery",
+            "unitId": "unit.each",
+            "quantity": 2
+          },
+          {
+            "original": "1 zucchini, diced",
+            "ingredientId": "ingredient.zucchini",
+            "unitId": "unit.each",
+            "quantity": 1
+          },
+          {
+            "original": "4 cups vegetable broth",
+            "ingredientId": "ingredient.vegetable_stock",
+            "unitId": "unit.cup_us",
+            "quantity": 4
+          },
+          {
+            "original": "1 cup small pasta",
+            "ingredientId": "ingredient.pasta",
+            "unitId": "unit.cup_us",
+            "quantity": 1
+          },
+          {
+            "original": "1 (15 oz) can cannellini beans",
+            "ingredientId": "ingredient.cannellini_beans",
+            "unitId": "unit.each",
+            "quantity": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "us-10",
+      "region": "US",
+      "locale": "en-US",
+      "input": "text",
+      "text": "Soft scrambled eggs on toast\nServes 2\nPrep: 2 mins | Cook: 5 mins\n\nIngredients\n4 eggs\n2 tbsp milk\n1 tbsp butter\n2 slices whole wheat bread\nPinch of salt\n\nDirections\n1. Whisk the eggs with the milk and salt.\n2. Cook gently in the butter, stirring, and serve on toast.",
+      "gold": {
+        "title": "Soft scrambled eggs on toast",
+        "lines": [
+          {
+            "original": "4 eggs",
+            "ingredientId": "ingredient.egg",
+            "unitId": "unit.each",
+            "quantity": 4
+          },
+          {
+            "original": "2 tbsp milk",
+            "ingredientId": "ingredient.milk",
+            "unitId": "unit.tbsp_us",
+            "quantity": 2
+          },
+          {
+            "original": "1 tbsp butter",
+            "ingredientId": "ingredient.butter",
+            "unitId": "unit.tbsp_us",
+            "quantity": 1
+          },
+          {
+            "original": "2 slices whole wheat bread",
+            "ingredientId": "ingredient.whole_wheat_bread",
+            "unitId": "unit.each",
+            "quantity": 2
+          },
+          {
+            "original": "Pinch of salt",
+            "ingredientId": "ingredient.salt",
+            "unitId": "unit.pinch",
+            "quantity": null
+          }
+        ]
+      }
+    },
+    {
+      "id": "us-11",
+      "region": "US",
+      "locale": "en-US",
+      "input": "text",
+      "text": "Cherry tomato pesto pasta\nServes 4\nPrep: 5 mins | Cook: 12 mins\n\nIngredients\n12 oz spaghetti\n1/2 cup basil pesto\n1 cup cherry tomatoes, halved\n1/4 cup grated Parmesan\n2 tbsp pine nuts\n\nDirections\n1. Cook the spaghetti.\n2. Toss with the pesto and tomatoes and top with Parmesan and pine nuts.",
+      "gold": {
+        "title": "Cherry tomato pesto pasta",
+        "lines": [
+          {
+            "original": "12 oz spaghetti",
+            "ingredientId": "ingredient.spaghetti",
+            "unitId": "unit.oz",
+            "quantity": 12
+          },
+          {
+            "original": "1/2 cup basil pesto",
+            "ingredientId": "ingredient.pesto",
+            "unitId": "unit.cup_us",
+            "quantity": 0.5
+          },
+          {
+            "original": "1 cup cherry tomatoes, halved",
+            "ingredientId": "ingredient.cherry_tomato",
+            "unitId": "unit.cup_us",
+            "quantity": 1
+          },
+          {
+            "original": "1/4 cup grated Parmesan",
+            "ingredientId": "ingredient.parmesan",
+            "unitId": "unit.cup_us",
+            "quantity": 0.25
+          },
+          {
+            "original": "2 tbsp pine nuts",
+            "ingredientId": "ingredient.pine_nuts",
+            "unitId": "unit.tbsp_us",
+            "quantity": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "us-12",
+      "region": "US",
+      "locale": "en-US",
+      "input": "link_structured",
+      "html": "<!doctype html><html><head><title>Ginger chicken stir-fry | Example Kitchen</title><script type=\"application/ld+json\">{\"@context\": \"https://schema.org\", \"@type\": \"Recipe\", \"name\": \"Ginger chicken stir-fry\", \"recipeYield\": \"4 servings\", \"prepTime\": \"PT15M\", \"recipeIngredient\": [\"1 lb boneless chicken breast, sliced\", \"2 cups broccoli florets\", \"1 red bell pepper, sliced\", \"3 tbsp soy sauce\", \"1 tbsp sesame oil\", \"1 tbsp fresh ginger, grated\", \"2 cups cooked white rice\"], \"recipeInstructions\": [{\"@type\": \"HowToStep\", \"text\": \"Stir-fry the chicken in the sesame oil.\"}, {\"@type\": \"HowToStep\", \"text\": \"Add the vegetables and ginger, then the soy sauce.\"}, {\"@type\": \"HowToStep\", \"text\": \"Serve over rice.\"}], \"cookTime\": \"PT10M\"}</script><style>body{font-family:sans-serif}</style></head><body><header><nav><a href=\"/\">Home</a> <a href=\"/recipes\">Recipes</a> <a href=\"/about\">About</a></nav></header><main><article><h1>Ginger chicken stir-fry</h1><p>Serves 4 · Prep 15 min · Cook 10 min</p><h2>Ingredients</h2><ul><li>1 lb boneless chicken breast, sliced</li><li>2 cups broccoli florets</li><li>1 red bell pepper, sliced</li><li>3 tbsp soy sauce</li><li>1 tbsp sesame oil</li><li>1 tbsp fresh ginger, grated</li><li>2 cups cooked white rice</li></ul><h2>Method</h2><ol><li>Stir-fry the chicken in the sesame oil.</li><li>Add the vegetables and ginger, then the soy sauce.</li><li>Serve over rice.</li></ol></article></main><footer><p>Example Kitchen. All recipes written for the Parent Manager evaluation set.</p></footer></body></html>",
+      "gold": {
+        "title": "Ginger chicken stir-fry",
+        "lines": [
+          {
+            "original": "1 lb boneless chicken breast, sliced",
+            "ingredientId": "ingredient.chicken_breast",
+            "unitId": "unit.lb",
+            "quantity": 1
+          },
+          {
+            "original": "2 cups broccoli florets",
+            "ingredientId": "ingredient.broccoli",
+            "unitId": "unit.cup_us",
+            "quantity": 2
+          },
+          {
+            "original": "1 red bell pepper, sliced",
+            "ingredientId": "ingredient.bell_pepper",
+            "unitId": "unit.each",
+            "quantity": 1
+          },
+          {
+            "original": "3 tbsp soy sauce",
+            "ingredientId": "ingredient.soy_sauce",
+            "unitId": "unit.tbsp_us",
+            "quantity": 3
+          },
+          {
+            "original": "1 tbsp sesame oil",
+            "ingredientId": "ingredient.sesame_oil",
+            "unitId": "unit.tbsp_us",
+            "quantity": 1
+          },
+          {
+            "original": "1 tbsp fresh ginger, grated",
+            "ingredientId": "ingredient.ginger",
+            "unitId": "unit.tbsp_us",
+            "quantity": 1
+          },
+          {
+            "original": "2 cups cooked white rice",
+            "ingredientId": "ingredient.white_rice",
+            "unitId": "unit.cup_us",
+            "quantity": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "us-13",
+      "region": "US",
+      "locale": "en-US",
+      "input": "text",
+      "text": "Walnut banana bread\nServes 10\nPrep: 15 mins | Cook: 60 mins\n\nIngredients\n3 ripe bananas, mashed\n1/3 cup melted butter\n3/4 cup brown sugar\n1 egg, beaten\n1 tsp baking soda\n1 1/2 cups all-purpose flour\n1/2 cup chopped walnuts\n\nDirections\n1. Mix the wet ingredients, then fold in the dry ones and the nuts.\n2. Bake at 350°F for an hour.",
+      "gold": {
+        "title": "Walnut banana bread",
+        "lines": [
+          {
+            "original": "3 ripe bananas, mashed",
+            "ingredientId": "ingredient.banana",
+            "unitId": "unit.each",
+            "quantity": 3
+          },
+          {
+            "original": "1/3 cup melted butter",
+            "ingredientId": "ingredient.butter",
+            "unitId": "unit.cup_us",
+            "quantity": 0.3333
+          },
+          {
+            "original": "3/4 cup brown sugar",
+            "ingredientId": "ingredient.brown_sugar",
+            "unitId": "unit.cup_us",
+            "quantity": 0.75
+          },
+          {
+            "original": "1 egg, beaten",
+            "ingredientId": "ingredient.egg",
+            "unitId": "unit.each",
+            "quantity": 1
+          },
+          {
+            "original": "1 tsp baking soda",
+            "ingredientId": "ingredient.baking_soda",
+            "unitId": "unit.tsp_us",
+            "quantity": 1
+          },
+          {
+            "original": "1 1/2 cups all-purpose flour",
+            "ingredientId": "ingredient.flour",
+            "unitId": "unit.cup_us",
+            "quantity": 1.5
+          },
+          {
+            "original": "1/2 cup chopped walnuts",
+            "ingredientId": "ingredient.walnuts",
+            "unitId": "unit.cup_us",
+            "quantity": 0.5
+          }
+        ]
+      }
+    },
+    {
+      "id": "us-14",
+      "region": "US",
+      "locale": "en-US",
+      "input": "screenshot",
+      "image": "us-14.jpg",
+      "transcript": "Golden lentil soup\nServes 6\nPrep: 10 mins | Cook: 35 mins\n\nIngredients\n1 cup dried brown lentils\n1 onion, diced\n2 carrots, diced\n1 tsp ground turmeric\n6 cups vegetable broth\n2 cups baby spinach\n\nDirections\n1. Simmer everything except the spinach for 30 minutes.\n2. Stir in the spinach until wilted.",
+      "gold": {
+        "title": "Golden lentil soup",
+        "lines": [
+          {
+            "original": "1 cup dried brown lentils",
+            "ingredientId": "ingredient.dried_lentils",
+            "unitId": "unit.cup_us",
+            "quantity": 1
+          },
+          {
+            "original": "1 onion, diced",
+            "ingredientId": "ingredient.onion",
+            "unitId": "unit.each",
+            "quantity": 1
+          },
+          {
+            "original": "2 carrots, diced",
+            "ingredientId": "ingredient.carrot",
+            "unitId": "unit.each",
+            "quantity": 2
+          },
+          {
+            "original": "1 tsp ground turmeric",
+            "ingredientId": "ingredient.turmeric",
+            "unitId": "unit.tsp_us",
+            "quantity": 1
+          },
+          {
+            "original": "6 cups vegetable broth",
+            "ingredientId": "ingredient.vegetable_stock",
+            "unitId": "unit.cup_us",
+            "quantity": 6
+          },
+          {
+            "original": "2 cups baby spinach",
+            "ingredientId": "ingredient.spinach",
+            "unitId": "unit.cup_us",
+            "quantity": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "us-15",
+      "region": "US",
+      "locale": "en-US",
+      "input": "text",
+      "text": "Pork chops with apples\nServes 4\nPrep: 10 mins | Cook: 25 mins\n\nIngredients\n- 4 bone-in pork chops\n- 2 apples, sliced\n- 2 tbsp butter\n- 1 tbsp Dijon mustard\n- 1/4 cup apple cider vinegar\n- 1 tsp dried thyme\n\nDirections\n1. Sear the chops and set aside.\n2. Cook the apples in the butter, add the vinegar, mustard and thyme, and return the chops.",
+      "gold": {
+        "title": "Pork chops with apples",
+        "lines": [
+          {
+            "original": "4 bone-in pork chops",
+            "ingredientId": "ingredient.pork_chop",
+            "unitId": "unit.each",
+            "quantity": 4
+          },
+          {
+            "original": "2 apples, sliced",
+            "ingredientId": "ingredient.apple",
+            "unitId": "unit.each",
+            "quantity": 2
+          },
+          {
+            "original": "2 tbsp butter",
+            "ingredientId": "ingredient.butter",
+            "unitId": "unit.tbsp_us",
+            "quantity": 2
+          },
+          {
+            "original": "1 tbsp Dijon mustard",
+            "ingredientId": "ingredient.dijon_mustard",
+            "unitId": "unit.tbsp_us",
+            "quantity": 1
+          },
+          {
+            "original": "1/4 cup apple cider vinegar",
+            "ingredientId": "ingredient.apple_cider_vinegar",
+            "unitId": "unit.cup_us",
+            "quantity": 0.25
+          },
+          {
+            "original": "1 tsp dried thyme",
+            "ingredientId": "ingredient.thyme_dried",
+            "unitId": "unit.tsp_us",
+            "quantity": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "us-16",
+      "region": "US",
+      "locale": "en-US",
+      "input": "link",
+      "html": "<!doctype html><html><head><title>Strawberry yogurt parfaits | Example Kitchen</title><style>body{font-family:sans-serif}</style></head><body><header><nav><a href=\"/\">Home</a> <a href=\"/recipes\">Recipes</a> <a href=\"/about\">About</a></nav></header><main><article><h1>Strawberry yogurt parfaits</h1><p>Serves 4 · Prep 10 min</p><h2>Ingredients</h2><ul><li>2 cups vanilla Greek yogurt</li><li>1 cup granola</li><li>1 cup strawberries, sliced</li><li>2 tbsp honey</li></ul><h2>Method</h2><ol><li>Layer yogurt, granola and strawberries in glasses.</li><li>Drizzle with honey.</li></ol></article></main><footer><p>Example Kitchen. All recipes written for the Parent Manager evaluation set.</p></footer></body></html>",
+      "gold": {
+        "title": "Strawberry yogurt parfaits",
+        "lines": [
+          {
+            "original": "2 cups vanilla Greek yogurt",
+            "ingredientId": "ingredient.greek_yogurt",
+            "unitId": "unit.cup_us",
+            "quantity": 2
+          },
+          {
+            "original": "1 cup granola",
+            "ingredientId": "ingredient.granola",
+            "unitId": "unit.cup_us",
+            "quantity": 1
+          },
+          {
+            "original": "1 cup strawberries, sliced",
+            "ingredientId": "ingredient.strawberry",
+            "unitId": "unit.cup_us",
+            "quantity": 1
+          },
+          {
+            "original": "2 tbsp honey",
+            "ingredientId": "ingredient.honey",
+            "unitId": "unit.tbsp_us",
+            "quantity": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "us-17",
+      "region": "US",
+      "locale": "en-US",
+      "input": "photo",
+      "image": "us-17.jpg",
+      "transcript": "Shrimp fried rice\nServes 4\nPrep: 10 mins | Cook: 15 mins\n\nIngredients\n12 oz shrimp, peeled\n3 cups cooked jasmine rice\n2 eggs\n1 cup frozen mixed vegetables\n3 scallions, sliced\n2 tbsp soy sauce\n1 tbsp vegetable oil\n\nDirections\n1. Cook the shrimp in the oil and set aside.\n2. Scramble the eggs, add the rice and vegetables, then the soy sauce and shrimp.",
+      "gold": {
+        "title": "Shrimp fried rice",
+        "lines": [
+          {
+            "original": "12 oz shrimp, peeled",
+            "ingredientId": "ingredient.shrimp",
+            "unitId": "unit.oz",
+            "quantity": 12
+          },
+          {
+            "original": "3 cups cooked jasmine rice",
+            "ingredientId": "ingredient.jasmine_rice",
+            "unitId": "unit.cup_us",
+            "quantity": 3
+          },
+          {
+            "original": "2 eggs",
+            "ingredientId": "ingredient.egg",
+            "unitId": "unit.each",
+            "quantity": 2
+          },
+          {
+            "original": "1 cup frozen mixed vegetables",
+            "ingredientId": "ingredient.frozen_mixed_veg",
+            "unitId": "unit.cup_us",
+            "quantity": 1
+          },
+          {
+            "original": "3 scallions, sliced",
+            "ingredientId": "ingredient.scallion",
+            "unitId": "unit.each",
+            "quantity": 3
+          },
+          {
+            "original": "2 tbsp soy sauce",
+            "ingredientId": "ingredient.soy_sauce",
+            "unitId": "unit.tbsp_us",
+            "quantity": 2
+          },
+          {
+            "original": "1 tbsp vegetable oil",
+            "ingredientId": "ingredient.vegetable_oil",
+            "unitId": "unit.tbsp_us",
+            "quantity": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "us-18",
+      "region": "US",
+      "locale": "en-US",
+      "input": "text",
+      "text": "Loaded sweet potatoes\nServes 4\nPrep: 10 mins | Cook: 50 mins\n\nIngredients\n- 4 sweet potatoes\n- 1 (15 oz) can black beans, warmed\n- 1/2 cup sour cream\n- 1/2 cup shredded cheddar\n- 2 tbsp chopped cilantro\n\nDirections\n1. Bake the sweet potatoes at 400°F until soft.\n2. Split and fill with the beans, cheese, sour cream and cilantro.",
+      "gold": {
+        "title": "Loaded sweet potatoes",
+        "lines": [
+          {
+            "original": "4 sweet potatoes",
+            "ingredientId": "ingredient.sweet_potato",
+            "unitId": "unit.each",
+            "quantity": 4
+          },
+          {
+            "original": "1 (15 oz) can black beans, warmed",
+            "ingredientId": "ingredient.black_beans",
+            "unitId": "unit.each",
+            "quantity": 1
+          },
+          {
+            "original": "1/2 cup sour cream",
+            "ingredientId": "ingredient.sour_cream",
+            "unitId": "unit.cup_us",
+            "quantity": 0.5
+          },
+          {
+            "original": "1/2 cup shredded cheddar",
+            "ingredientId": "ingredient.cheddar",
+            "unitId": "unit.cup_us",
+            "quantity": 0.5
+          },
+          {
+            "original": "2 tbsp chopped cilantro",
+            "ingredientId": "ingredient.cilantro",
+            "unitId": "unit.tbsp_us",
+            "quantity": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "us-19",
+      "region": "US",
+      "locale": "en-US",
+      "input": "text",
+      "text": "Classic chocolate chip cookies\nMakes 24\nPrep: 15 mins | Cook: 11 mins\n\nIngredients\n2 1/4 cups all-purpose flour\n1 tsp baking soda\n1 cup butter, softened\n3/4 cup granulated sugar\n3/4 cup packed brown sugar\n2 large eggs\n2 cups chocolate chips\n\nDirections\n1. Cream the butter and sugars, then beat in the eggs.\n2. Stir in the flour, soda and chips.\n3. Bake spoonfuls at 375°F for 11 minutes.",
+      "gold": {
+        "title": "Classic chocolate chip cookies",
+        "lines": [
+          {
+            "original": "2 1/4 cups all-purpose flour",
+            "ingredientId": "ingredient.flour",
+            "unitId": "unit.cup_us",
+            "quantity": 2.25
+          },
+          {
+            "original": "1 tsp baking soda",
+            "ingredientId": "ingredient.baking_soda",
+            "unitId": "unit.tsp_us",
+            "quantity": 1
+          },
+          {
+            "original": "1 cup butter, softened",
+            "ingredientId": "ingredient.butter",
+            "unitId": "unit.cup_us",
+            "quantity": 1
+          },
+          {
+            "original": "3/4 cup granulated sugar",
+            "ingredientId": "ingredient.sugar",
+            "unitId": "unit.cup_us",
+            "quantity": 0.75
+          },
+          {
+            "original": "3/4 cup packed brown sugar",
+            "ingredientId": "ingredient.brown_sugar",
+            "unitId": "unit.cup_us",
+            "quantity": 0.75
+          },
+          {
+            "original": "2 large eggs",
+            "ingredientId": "ingredient.egg",
+            "unitId": "unit.each",
+            "quantity": 2
+          },
+          {
+            "original": "2 cups chocolate chips",
+            "ingredientId": "ingredient.chocolate_chips",
+            "unitId": "unit.cup_us",
+            "quantity": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "us-20",
+      "region": "US",
+      "locale": "en-US",
+      "input": "text",
+      "text": "Lunchbox tuna salad\nServes 4\nPrep: 10 mins\n\nIngredients\n2 (5 oz) cans tuna, drained\n1/3 cup mayonnaise\n1 celery stalk, finely chopped\n1 tbsp sweet pickle relish\n1 tsp Dijon mustard\n\nDirections\n1. Mix everything together.\n2. Serve in sandwiches or with crackers.",
+      "gold": {
+        "title": "Lunchbox tuna salad",
+        "lines": [
+          {
+            "original": "2 (5 oz) cans tuna, drained",
+            "ingredientId": "ingredient.canned_tuna",
+            "unitId": "unit.each",
+            "quantity": 2
+          },
+          {
+            "original": "1/3 cup mayonnaise",
+            "ingredientId": "ingredient.mayonnaise",
+            "unitId": "unit.cup_us",
+            "quantity": 0.3333
+          },
+          {
+            "original": "1 celery stalk, finely chopped",
+            "ingredientId": "ingredient.celery",
+            "unitId": "unit.each",
+            "quantity": 1
+          },
+          {
+            "original": "1 tbsp sweet pickle relish",
+            "ingredientId": "ingredient.relish",
+            "unitId": "unit.tbsp_us",
+            "quantity": 1
+          },
+          {
+            "original": "1 tsp Dijon mustard",
+            "ingredientId": "ingredient.dijon_mustard",
+            "unitId": "unit.tsp_us",
+            "quantity": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "gb-01",
+      "region": "GB",
+      "locale": "en-GB",
+      "input": "text",
+      "text": "Shepherd's pie\nServes 4\nPrep: 20 mins | Cook: 45 mins\n\nIngredients\n500g lamb mince\n1 onion, finely chopped\n2 carrots, diced\n1 tbsp tomato purée\n400ml beef stock\n900g potatoes, peeled\n50g butter\n100ml milk\n\nMethod\n1. Brown the mince with the onion and carrots, add the purée and stock and simmer for 20 minutes.\n2. Mash the potatoes with the butter and milk.\n3. Top the mince with the mash and bake at 200C for 25 minutes.",
+      "gold": {
+        "title": "Shepherd's pie",
+        "lines": [
+          {
+            "original": "500g lamb mince",
+            "ingredientId": "ingredient.ground_lamb",
+            "unitId": "unit.g",
+            "quantity": 500
+          },
+          {
+            "original": "1 onion, finely chopped",
+            "ingredientId": "ingredient.onion",
+            "unitId": "unit.each",
+            "quantity": 1
+          },
+          {
+            "original": "2 carrots, diced",
+            "ingredientId": "ingredient.carrot",
+            "unitId": "unit.each",
+            "quantity": 2
+          },
+          {
+            "original": "1 tbsp tomato purée",
+            "ingredientId": "ingredient.tomato_paste",
+            "unitId": "unit.tbsp_metric",
+            "quantity": 1
+          },
+          {
+            "original": "400ml beef stock",
+            "ingredientId": "ingredient.beef_stock",
+            "unitId": "unit.ml",
+            "quantity": 400
+          },
+          {
+            "original": "900g potatoes, peeled",
+            "ingredientId": "ingredient.potato",
+            "unitId": "unit.g",
+            "quantity": 900
+          },
+          {
+            "original": "50g butter",
+            "ingredientId": "ingredient.butter",
+            "unitId": "unit.g",
+            "quantity": 50
+          },
+          {
+            "original": "100ml milk",
+            "ingredientId": "ingredient.milk",
+            "unitId": "unit.ml",
+            "quantity": 100
+          }
+        ]
+      }
+    },
+    {
+      "id": "gb-02",
+      "region": "GB",
+      "locale": "en-GB",
+      "input": "text",
+      "text": "Golden syrup porridge\nServes 1\nPrep: 2 mins | Cook: 5 mins\n\nIngredients\n50g porridge oats\n300ml semi-skimmed milk\n1 tbsp golden syrup\n1 banana, sliced\n\nMethod\n1. Simmer the oats in the milk for 5 minutes, stirring.\n2. Top with banana and syrup.",
+      "gold": {
+        "title": "Golden syrup porridge",
+        "lines": [
+          {
+            "original": "50g porridge oats",
+            "ingredientId": "ingredient.rolled_oats",
+            "unitId": "unit.g",
+            "quantity": 50
+          },
+          {
+            "original": "300ml semi-skimmed milk",
+            "ingredientId": "ingredient.milk",
+            "unitId": "unit.ml",
+            "quantity": 300
+          },
+          {
+            "original": "1 tbsp golden syrup",
+            "ingredientId": "ingredient.golden_syrup",
+            "unitId": "unit.tbsp_metric",
+            "quantity": 1
+          },
+          {
+            "original": "1 banana, sliced",
+            "ingredientId": "ingredient.banana",
+            "unitId": "unit.each",
+            "quantity": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "gb-03",
+      "region": "GB",
+      "locale": "en-GB",
+      "input": "link",
+      "html": "<!doctype html><html><head><title>Victoria sponge | Example Kitchen</title><style>body{font-family:sans-serif}</style></head><body><header><nav><a href=\"/\">Home</a> <a href=\"/recipes\">Recipes</a> <a href=\"/about\">About</a></nav></header><main><article><h1>Victoria sponge</h1><p>Serves 8 · Prep 20 min · Cook 25 min</p><h2>Ingredients</h2><ul><li>200g caster sugar</li><li>200g softened butter</li><li>4 eggs, beaten</li><li>200g self-raising flour</li><li>1 tsp baking powder</li><li>2 tbsp milk</li><li>4 tbsp strawberry jam</li></ul><h2>Method</h2><ol><li>Beat the butter and sugar, then the eggs.</li><li>Fold in the flour, baking powder and milk and bake in two tins at 190C for 20 minutes.</li><li>Sandwich with jam.</li></ol></article></main><footer><p>Example Kitchen. All recipes written for the Parent Manager evaluation set.</p></footer></body></html>",
+      "gold": {
+        "title": "Victoria sponge",
+        "lines": [
+          {
+            "original": "200g caster sugar",
+            "ingredientId": "ingredient.caster_sugar",
+            "unitId": "unit.g",
+            "quantity": 200
+          },
+          {
+            "original": "200g softened butter",
+            "ingredientId": "ingredient.butter",
+            "unitId": "unit.g",
+            "quantity": 200
+          },
+          {
+            "original": "4 eggs, beaten",
+            "ingredientId": "ingredient.egg",
+            "unitId": "unit.each",
+            "quantity": 4
+          },
+          {
+            "original": "200g self-raising flour",
+            "ingredientId": "ingredient.self_rising_flour",
+            "unitId": "unit.g",
+            "quantity": 200
+          },
+          {
+            "original": "1 tsp baking powder",
+            "ingredientId": "ingredient.baking_powder",
+            "unitId": "unit.tsp_metric",
+            "quantity": 1
+          },
+          {
+            "original": "2 tbsp milk",
+            "ingredientId": "ingredient.milk",
+            "unitId": "unit.tbsp_metric",
+            "quantity": 2
+          },
+          {
+            "original": "4 tbsp strawberry jam",
+            "ingredientId": "ingredient.jam",
+            "unitId": "unit.tbsp_metric",
+            "quantity": 4
+          }
+        ]
+      }
+    },
+    {
+      "id": "gb-04",
+      "region": "GB",
+      "locale": "en-GB",
+      "input": "link_structured",
+      "html": "<!doctype html><html><head><title>Family fish pie | Example Kitchen</title><script type=\"application/ld+json\">{\"@context\": \"https://schema.org\", \"@type\": \"Recipe\", \"name\": \"Family fish pie\", \"recipeYield\": \"6 servings\", \"prepTime\": \"PT30M\", \"recipeIngredient\": [\"400g white fish fillets\", \"150g raw king prawns\", \"500ml whole milk\", \"40g butter\", \"40g plain flour\", \"1kg floury potatoes\", \"2 tbsp chopped parsley\"], \"recipeInstructions\": [{\"@type\": \"HowToStep\", \"text\": \"Poach the fish in the milk, then make a sauce with the butter, flour and milk.\"}, {\"@type\": \"HowToStep\", \"text\": \"Add the fish, prawns and parsley to a dish and top with mash.\"}, {\"@type\": \"HowToStep\", \"text\": \"Bake for 30 minutes.\"}], \"cookTime\": \"PT40M\"}</script><style>body{font-family:sans-serif}</style></head><body><header><nav><a href=\"/\">Home</a> <a href=\"/recipes\">Recipes</a> <a href=\"/about\">About</a></nav></header><main><article><h1>Family fish pie</h1><p>Serves 6 · Prep 30 min · Cook 40 min</p><h2>Ingredients</h2><ul><li>400g white fish fillets</li><li>150g raw king prawns</li><li>500ml whole milk</li><li>40g butter</li><li>40g plain flour</li><li>1kg floury potatoes</li><li>2 tbsp chopped parsley</li></ul><h2>Method</h2><ol><li>Poach the fish in the milk, then make a sauce with the butter, flour and milk.</li><li>Add the fish, prawns and parsley to a dish and top with mash.</li><li>Bake for 30 minutes.</li></ol></article></main><footer><p>Example Kitchen. All recipes written for the Parent Manager evaluation set.</p></footer></body></html>",
+      "gold": {
+        "title": "Family fish pie",
+        "lines": [
+          {
+            "original": "400g white fish fillets",
+            "ingredientId": "ingredient.white_fish",
+            "unitId": "unit.g",
+            "quantity": 400
+          },
+          {
+            "original": "150g raw king prawns",
+            "ingredientId": "ingredient.shrimp",
+            "unitId": "unit.g",
+            "quantity": 150
+          },
+          {
+            "original": "500ml whole milk",
+            "ingredientId": "ingredient.milk",
+            "unitId": "unit.ml",
+            "quantity": 500
+          },
+          {
+            "original": "40g butter",
+            "ingredientId": "ingredient.butter",
+            "unitId": "unit.g",
+            "quantity": 40
+          },
+          {
+            "original": "40g plain flour",
+            "ingredientId": "ingredient.flour",
+            "unitId": "unit.g",
+            "quantity": 40
+          },
+          {
+            "original": "1kg floury potatoes",
+            "ingredientId": "ingredient.potato",
+            "unitId": "unit.kg",
+            "quantity": 1
+          },
+          {
+            "original": "2 tbsp chopped parsley",
+            "ingredientId": "ingredient.parsley",
+            "unitId": "unit.tbsp_metric",
+            "quantity": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "gb-05",
+      "region": "GB",
+      "locale": "en-GB",
+      "input": "screenshot",
+      "image": "gb-05.jpg",
+      "transcript": "Cheesy beans on toast\nServes 2\nPrep: 2 mins | Cook: 5 mins\n\nIngredients\n1 x 415g tin baked beans\n2 slices wholemeal bread\n15g butter\n30g mature cheddar, grated\n\nMethod\n1. Warm the beans.\n2. Butter the toast, pile on the beans and top with cheese.",
+      "gold": {
+        "title": "Cheesy beans on toast",
+        "lines": [
+          {
+            "original": "1 x 415g tin baked beans",
+            "ingredientId": "ingredient.baked_beans",
+            "unitId": "unit.each",
+            "quantity": 1
+          },
+          {
+            "original": "2 slices wholemeal bread",
+            "ingredientId": "ingredient.whole_wheat_bread",
+            "unitId": "unit.each",
+            "quantity": 2
+          },
+          {
+            "original": "15g butter",
+            "ingredientId": "ingredient.butter",
+            "unitId": "unit.g",
+            "quantity": 15
+          },
+          {
+            "original": "30g mature cheddar, grated",
+            "ingredientId": "ingredient.cheddar",
+            "unitId": "unit.g",
+            "quantity": 30
+          }
+        ]
+      }
+    },
+    {
+      "id": "gb-06",
+      "region": "GB",
+      "locale": "en-GB",
+      "input": "text",
+      "text": "Leek and potato soup\nServes 4\nPrep: 15 mins | Cook: 30 mins\n\nIngredients\n- 30g butter\n- 3 leeks, sliced\n- 1 onion, chopped\n- 400g potatoes, peeled and cubed\n- 1.2 litres vegetable stock\n- 100ml double cream\n\nMethod\n1. Soften the leeks and onion in the butter.\n2. Add the potatoes and stock and simmer for 20 minutes.\n3. Blend and stir in the cream. Suitable for freezing.",
+      "gold": {
+        "title": "Leek and potato soup",
+        "lines": [
+          {
+            "original": "30g butter",
+            "ingredientId": "ingredient.butter",
+            "unitId": "unit.g",
+            "quantity": 30
+          },
+          {
+            "original": "3 leeks, sliced",
+            "ingredientId": "ingredient.leek",
+            "unitId": "unit.each",
+            "quantity": 3
+          },
+          {
+            "original": "1 onion, chopped",
+            "ingredientId": "ingredient.onion",
+            "unitId": "unit.each",
+            "quantity": 1
+          },
+          {
+            "original": "400g potatoes, peeled and cubed",
+            "ingredientId": "ingredient.potato",
+            "unitId": "unit.g",
+            "quantity": 400
+          },
+          {
+            "original": "1.2 litres vegetable stock",
+            "ingredientId": "ingredient.vegetable_stock",
+            "unitId": "unit.l",
+            "quantity": 1.2
+          },
+          {
+            "original": "100ml double cream",
+            "ingredientId": "ingredient.heavy_cream",
+            "unitId": "unit.ml",
+            "quantity": 100
+          }
+        ]
+      }
+    },
+    {
+      "id": "gb-07",
+      "region": "GB",
+      "locale": "en-GB",
+      "input": "link",
+      "html": "<!doctype html><html><head><title>Spaghetti bolognese | Example Kitchen</title><style>body{font-family:sans-serif}</style></head><body><header><nav><a href=\"/\">Home</a> <a href=\"/recipes\">Recipes</a> <a href=\"/about\">About</a></nav></header><main><article><h1>Spaghetti bolognese</h1><p>Serves 4 · Prep 10 min · Cook 40 min</p><h2>Ingredients</h2><ul><li>1 tbsp olive oil</li><li>500g beef mince</li><li>1 onion, chopped</li><li>2 garlic cloves, crushed</li><li>2 x 400g tins chopped tomatoes</li><li>2 tbsp tomato purée</li><li>400g spaghetti</li><li>1 tsp dried oregano</li></ul><h2>Method</h2><ol><li>Brown the mince with the onion and garlic.</li><li>Add the tomatoes, purée and oregano and simmer for 30 minutes.</li><li>Serve with the spaghetti.</li></ol></article></main><footer><p>Example Kitchen. All recipes written for the Parent Manager evaluation set.</p></footer></body></html>",
+      "gold": {
+        "title": "Spaghetti bolognese",
+        "lines": [
+          {
+            "original": "1 tbsp olive oil",
+            "ingredientId": "ingredient.olive_oil",
+            "unitId": "unit.tbsp_metric",
+            "quantity": 1
+          },
+          {
+            "original": "500g beef mince",
+            "ingredientId": "ingredient.ground_beef",
+            "unitId": "unit.g",
+            "quantity": 500
+          },
+          {
+            "original": "1 onion, chopped",
+            "ingredientId": "ingredient.onion",
+            "unitId": "unit.each",
+            "quantity": 1
+          },
+          {
+            "original": "2 garlic cloves, crushed",
+            "ingredientId": "ingredient.garlic",
+            "unitId": "unit.each",
+            "quantity": 2
+          },
+          {
+            "original": "2 x 400g tins chopped tomatoes",
+            "ingredientId": "ingredient.canned_tomatoes",
+            "unitId": "unit.each",
+            "quantity": 2
+          },
+          {
+            "original": "2 tbsp tomato purée",
+            "ingredientId": "ingredient.tomato_paste",
+            "unitId": "unit.tbsp_metric",
+            "quantity": 2
+          },
+          {
+            "original": "400g spaghetti",
+            "ingredientId": "ingredient.spaghetti",
+            "unitId": "unit.g",
+            "quantity": 400
+          },
+          {
+            "original": "1 tsp dried oregano",
+            "ingredientId": "ingredient.oregano",
+            "unitId": "unit.tsp_metric",
+            "quantity": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "gb-08",
+      "region": "GB",
+      "locale": "en-GB",
+      "input": "text",
+      "text": "Chewy flapjacks\nMakes 12\nPrep: 10 mins | Cook: 25 mins\n\nIngredients\n250g porridge oats\n125g butter\n125g light brown soft sugar\n3 tbsp golden syrup\n\nMethod\n1. Melt the butter, sugar and syrup.\n2. Stir in the oats, press into a tin and bake at 180C for 20 minutes.",
+      "gold": {
+        "title": "Chewy flapjacks",
+        "lines": [
+          {
+            "original": "250g porridge oats",
+            "ingredientId": "ingredient.rolled_oats",
+            "unitId": "unit.g",
+            "quantity": 250
+          },
+          {
+            "original": "125g butter",
+            "ingredientId": "ingredient.butter",
+            "unitId": "unit.g",
+            "quantity": 125
+          },
+          {
+            "original": "125g light brown soft sugar",
+            "ingredientId": "ingredient.brown_sugar",
+            "unitId": "unit.g",
+            "quantity": 125
+          },
+          {
+            "original": "3 tbsp golden syrup",
+            "ingredientId": "ingredient.golden_syrup",
+            "unitId": "unit.tbsp_metric",
+            "quantity": 3
+          }
+        ]
+      }
+    },
+    {
+      "id": "gb-09",
+      "region": "GB",
+      "locale": "en-GB",
+      "input": "photo",
+      "image": "gb-09.jpg",
+      "transcript": "Chicken tikka traybake\nServes 4\nPrep: 15 mins | Cook: 35 mins\n\nIngredients\n- 6 chicken thighs\n- 150g natural yoghurt\n- 2 tbsp tikka curry paste\n- 1 red onion, cut into wedges\n- 2 red peppers, sliced\n- 1 tsp garam masala\n\nMethod\n1. Coat the chicken in the yoghurt and curry paste.\n2. Roast with the onion and peppers at 200C for 35 minutes.",
+      "gold": {
+        "title": "Chicken tikka traybake",
+        "lines": [
+          {
+            "original": "6 chicken thighs",
+            "ingredientId": "ingredient.chicken_thigh",
+            "unitId": "unit.each",
+            "quantity": 6
+          },
+          {
+            "original": "150g natural yoghurt",
+            "ingredientId": "ingredient.yogurt",
+            "unitId": "unit.g",
+            "quantity": 150
+          },
+          {
+            "original": "2 tbsp tikka curry paste",
+            "ingredientId": "ingredient.curry_paste",
+            "unitId": "unit.tbsp_metric",
+            "quantity": 2
+          },
+          {
+            "original": "1 red onion, cut into wedges",
+            "ingredientId": "ingredient.red_onion",
+            "unitId": "unit.each",
+            "quantity": 1
+          },
+          {
+            "original": "2 red peppers, sliced",
+            "ingredientId": "ingredient.bell_pepper",
+            "unitId": "unit.each",
+            "quantity": 2
+          },
+          {
+            "original": "1 tsp garam masala",
+            "ingredientId": "ingredient.garam_masala",
+            "unitId": "unit.tsp_metric",
+            "quantity": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "gb-10",
+      "region": "GB",
+      "locale": "en-GB",
+      "input": "text",
+      "text": "Cheese scones\nServes 8\nPrep: 15 mins | Cook: 12 mins\n\nIngredients\n225g self-raising flour\n55g butter\n100g mature cheddar, grated\n150ml milk\nPinch of salt\n\nMethod\n1. Rub the butter into the flour and salt, then stir in most of the cheese.\n2. Add the milk, cut out rounds, top with cheese and bake at 220C for 12 minutes.",
+      "gold": {
+        "title": "Cheese scones",
+        "lines": [
+          {
+            "original": "225g self-raising flour",
+            "ingredientId": "ingredient.self_rising_flour",
+            "unitId": "unit.g",
+            "quantity": 225
+          },
+          {
+            "original": "55g butter",
+            "ingredientId": "ingredient.butter",
+            "unitId": "unit.g",
+            "quantity": 55
+          },
+          {
+            "original": "100g mature cheddar, grated",
+            "ingredientId": "ingredient.cheddar",
+            "unitId": "unit.g",
+            "quantity": 100
+          },
+          {
+            "original": "150ml milk",
+            "ingredientId": "ingredient.milk",
+            "unitId": "unit.ml",
+            "quantity": 150
+          },
+          {
+            "original": "Pinch of salt",
+            "ingredientId": "ingredient.salt",
+            "unitId": "unit.pinch",
+            "quantity": null
+          }
+        ]
+      }
+    },
+    {
+      "id": "gb-11",
+      "region": "GB",
+      "locale": "en-GB",
+      "input": "text",
+      "text": "Pea and mint soup\nServes 4\nPrep: 10 mins | Cook: 15 mins\n\nIngredients\n1 tbsp olive oil\n1 onion, chopped\n500g frozen peas\n750ml vegetable stock\nSmall handful of fresh mint\n2 tbsp crème fraîche\n\nMethod\n1. Soften the onion in the oil.\n2. Add the peas and stock and simmer for 5 minutes, then blend with the mint.\n3. Swirl in the crème fraîche.",
+      "gold": {
+        "title": "Pea and mint soup",
+        "lines": [
+          {
+            "original": "1 tbsp olive oil",
+            "ingredientId": "ingredient.olive_oil",
+            "unitId": "unit.tbsp_metric",
+            "quantity": 1
+          },
+          {
+            "original": "1 onion, chopped",
+            "ingredientId": "ingredient.onion",
+            "unitId": "unit.each",
+            "quantity": 1
+          },
+          {
+            "original": "500g frozen peas",
+            "ingredientId": "ingredient.pea",
+            "unitId": "unit.g",
+            "quantity": 500
+          },
+          {
+            "original": "750ml vegetable stock",
+            "ingredientId": "ingredient.vegetable_stock",
+            "unitId": "unit.ml",
+            "quantity": 750
+          },
+          {
+            "original": "Small handful of fresh mint",
+            "ingredientId": "ingredient.mint",
+            "unitId": null,
+            "quantity": null
+          },
+          {
+            "original": "2 tbsp crème fraîche",
+            "ingredientId": "ingredient.creme_fraiche",
+            "unitId": "unit.tbsp_metric",
+            "quantity": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "gb-12",
+      "region": "GB",
+      "locale": "en-GB",
+      "input": "link_structured",
+      "html": "<!doctype html><html><head><title>Toad in the hole | Example Kitchen</title><script type=\"application/ld+json\">{\"@context\": \"https://schema.org\", \"@type\": \"Recipe\", \"name\": \"Toad in the hole\", \"recipeYield\": \"4 servings\", \"prepTime\": \"PT10M\", \"recipeIngredient\": [\"8 pork sausages\", \"140g plain flour\", \"2 eggs\", \"175ml milk\", \"2 tbsp sunflower oil\", \"1 tbsp wholegrain mustard\"], \"recipeInstructions\": [{\"@type\": \"HowToStep\", \"text\": \"Brown the sausages in the oil in a roasting tin.\"}, {\"@type\": \"HowToStep\", \"text\": \"Whisk the flour, eggs, milk and mustard into a batter, pour over and bake at 220C for 30 minutes.\"}], \"cookTime\": \"PT40M\"}</script><style>body{font-family:sans-serif}</style></head><body><header><nav><a href=\"/\">Home</a> <a href=\"/recipes\">Recipes</a> <a href=\"/about\">About</a></nav></header><main><article><h1>Toad in the hole</h1><p>Serves 4 · Prep 10 min · Cook 40 min</p><h2>Ingredients</h2><ul><li>8 pork sausages</li><li>140g plain flour</li><li>2 eggs</li><li>175ml milk</li><li>2 tbsp sunflower oil</li><li>1 tbsp wholegrain mustard</li></ul><h2>Method</h2><ol><li>Brown the sausages in the oil in a roasting tin.</li><li>Whisk the flour, eggs, milk and mustard into a batter, pour over and bake at 220C for 30 minutes.</li></ol></article></main><footer><p>Example Kitchen. All recipes written for the Parent Manager evaluation set.</p></footer></body></html>",
+      "gold": {
+        "title": "Toad in the hole",
+        "lines": [
+          {
+            "original": "8 pork sausages",
+            "ingredientId": "ingredient.sausage",
+            "unitId": "unit.each",
+            "quantity": 8
+          },
+          {
+            "original": "140g plain flour",
+            "ingredientId": "ingredient.flour",
+            "unitId": "unit.g",
+            "quantity": 140
+          },
+          {
+            "original": "2 eggs",
+            "ingredientId": "ingredient.egg",
+            "unitId": "unit.each",
+            "quantity": 2
+          },
+          {
+            "original": "175ml milk",
+            "ingredientId": "ingredient.milk",
+            "unitId": "unit.ml",
+            "quantity": 175
+          },
+          {
+            "original": "2 tbsp sunflower oil",
+            "ingredientId": "ingredient.vegetable_oil",
+            "unitId": "unit.tbsp_metric",
+            "quantity": 2
+          },
+          {
+            "original": "1 tbsp wholegrain mustard",
+            "ingredientId": "ingredient.wholegrain_mustard",
+            "unitId": "unit.tbsp_metric",
+            "quantity": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "gb-13",
+      "region": "GB",
+      "locale": "en-GB",
+      "input": "text",
+      "text": "Banana and blueberry muffins\nMakes 12\nPrep: 15 mins | Cook: 22 mins\n\nIngredients\n2 ripe bananas, mashed\n250g self-raising flour\n100g caster sugar\n1 egg\n125ml milk\n80ml vegetable oil\n150g blueberries\n\nMethod\n1. Mix the wet ingredients, then fold in the flour, sugar and blueberries.\n2. Bake in cases at 200C for 22 minutes.",
+      "gold": {
+        "title": "Banana and blueberry muffins",
+        "lines": [
+          {
+            "original": "2 ripe bananas, mashed",
+            "ingredientId": "ingredient.banana",
+            "unitId": "unit.each",
+            "quantity": 2
+          },
+          {
+            "original": "250g self-raising flour",
+            "ingredientId": "ingredient.self_rising_flour",
+            "unitId": "unit.g",
+            "quantity": 250
+          },
+          {
+            "original": "100g caster sugar",
+            "ingredientId": "ingredient.caster_sugar",
+            "unitId": "unit.g",
+            "quantity": 100
+          },
+          {
+            "original": "1 egg",
+            "ingredientId": "ingredient.egg",
+            "unitId": "unit.each",
+            "quantity": 1
+          },
+          {
+            "original": "125ml milk",
+            "ingredientId": "ingredient.milk",
+            "unitId": "unit.ml",
+            "quantity": 125
+          },
+          {
+            "original": "80ml vegetable oil",
+            "ingredientId": "ingredient.vegetable_oil",
+            "unitId": "unit.ml",
+            "quantity": 80
+          },
+          {
+            "original": "150g blueberries",
+            "ingredientId": "ingredient.blueberry",
+            "unitId": "unit.g",
+            "quantity": 150
+          }
+        ]
+      }
+    },
+    {
+      "id": "gb-14",
+      "region": "GB",
+      "locale": "en-GB",
+      "input": "screenshot",
+      "image": "gb-14.jpg",
+      "transcript": "Lemon salmon with new potatoes\nServes 2\nPrep: 10 mins | Cook: 20 mins\n\nIngredients\n2 salmon fillets\n500g new potatoes\n200g green beans, trimmed\n1 lemon\n2 tbsp olive oil\n\nMethod\n1. Boil the potatoes for 15 minutes, adding the beans for the last 4.\n2. Roast the salmon with lemon and oil for 12 minutes.",
+      "gold": {
+        "title": "Lemon salmon with new potatoes",
+        "lines": [
+          {
+            "original": "2 salmon fillets",
+            "ingredientId": "ingredient.salmon",
+            "unitId": "unit.each",
+            "quantity": 2
+          },
+          {
+            "original": "500g new potatoes",
+            "ingredientId": "ingredient.baby_potato",
+            "unitId": "unit.g",
+            "quantity": 500
+          },
+          {
+            "original": "200g green beans, trimmed",
+            "ingredientId": "ingredient.green_bean",
+            "unitId": "unit.g",
+            "quantity": 200
+          },
+          {
+            "original": "1 lemon",
+            "ingredientId": "ingredient.lemon",
+            "unitId": "unit.each",
+            "quantity": 1
+          },
+          {
+            "original": "2 tbsp olive oil",
+            "ingredientId": "ingredient.olive_oil",
+            "unitId": "unit.tbsp_metric",
+            "quantity": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "gb-15",
+      "region": "GB",
+      "locale": "en-GB",
+      "input": "text",
+      "text": "Cauliflower cheese\nServes 4\nPrep: 15 mins | Cook: 25 mins\n\nIngredients\n- 1 cauliflower, broken into florets\n- 50g butter\n- 50g plain flour\n- 600ml milk\n- 150g cheddar, grated\n- 1 tsp English mustard\n\nMethod\n1. Boil the cauliflower for 5 minutes and drain.\n2. Make a cheese sauce with the butter, flour, milk, cheese and mustard.\n3. Pour over and bake at 200C for 20 minutes.",
+      "gold": {
+        "title": "Cauliflower cheese",
+        "lines": [
+          {
+            "original": "1 cauliflower, broken into florets",
+            "ingredientId": "ingredient.cauliflower",
+            "unitId": "unit.each",
+            "quantity": 1
+          },
+          {
+            "original": "50g butter",
+            "ingredientId": "ingredient.butter",
+            "unitId": "unit.g",
+            "quantity": 50
+          },
+          {
+            "original": "50g plain flour",
+            "ingredientId": "ingredient.flour",
+            "unitId": "unit.g",
+            "quantity": 50
+          },
+          {
+            "original": "600ml milk",
+            "ingredientId": "ingredient.milk",
+            "unitId": "unit.ml",
+            "quantity": 600
+          },
+          {
+            "original": "150g cheddar, grated",
+            "ingredientId": "ingredient.cheddar",
+            "unitId": "unit.g",
+            "quantity": 150
+          },
+          {
+            "original": "1 tsp English mustard",
+            "ingredientId": "ingredient.mustard",
+            "unitId": "unit.tsp_metric",
+            "quantity": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "gb-16",
+      "region": "GB",
+      "locale": "en-GB",
+      "input": "link",
+      "html": "<!doctype html><html><head><title>Egg fried rice | Example Kitchen</title><style>body{font-family:sans-serif}</style></head><body><header><nav><a href=\"/\">Home</a> <a href=\"/recipes\">Recipes</a> <a href=\"/about\">About</a></nav></header><main><article><h1>Egg fried rice</h1><p>Serves 4 · Prep 5 min · Cook 15 min</p><h2>Ingredients</h2><ul><li>250g basmati rice</li><li>2 eggs</li><li>100g frozen peas</li><li>2 spring onions, sliced</li><li>2 tbsp soy sauce</li><li>1 tbsp sesame oil</li></ul><h2>Method</h2><ol><li>Cook the rice and let it cool.</li><li>Fry the rice in the oil, push aside and scramble the eggs, then add the peas, onions and soy sauce.</li></ol></article></main><footer><p>Example Kitchen. All recipes written for the Parent Manager evaluation set.</p></footer></body></html>",
+      "gold": {
+        "title": "Egg fried rice",
+        "lines": [
+          {
+            "original": "250g basmati rice",
+            "ingredientId": "ingredient.basmati_rice",
+            "unitId": "unit.g",
+            "quantity": 250
+          },
+          {
+            "original": "2 eggs",
+            "ingredientId": "ingredient.egg",
+            "unitId": "unit.each",
+            "quantity": 2
+          },
+          {
+            "original": "100g frozen peas",
+            "ingredientId": "ingredient.pea",
+            "unitId": "unit.g",
+            "quantity": 100
+          },
+          {
+            "original": "2 spring onions, sliced",
+            "ingredientId": "ingredient.scallion",
+            "unitId": "unit.each",
+            "quantity": 2
+          },
+          {
+            "original": "2 tbsp soy sauce",
+            "ingredientId": "ingredient.soy_sauce",
+            "unitId": "unit.tbsp_metric",
+            "quantity": 2
+          },
+          {
+            "original": "1 tbsp sesame oil",
+            "ingredientId": "ingredient.sesame_oil",
+            "unitId": "unit.tbsp_metric",
+            "quantity": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "gb-17",
+      "region": "GB",
+      "locale": "en-GB",
+      "input": "photo",
+      "image": "gb-17.jpg",
+      "transcript": "Bramley apple crumble\nServes 6\nPrep: 20 mins | Cook: 40 mins\n\nIngredients\n6 Bramley apples, peeled and sliced\n100g caster sugar\n1 tsp ground cinnamon\n175g plain flour\n100g cold butter, cubed\n75g demerara sugar\n\nMethod\n1. Toss the apples with the caster sugar and cinnamon.\n2. Rub the butter into the flour, stir in the demerara and scatter over.\n3. Bake at 180C for 40 minutes.",
+      "gold": {
+        "title": "Bramley apple crumble",
+        "lines": [
+          {
+            "original": "6 Bramley apples, peeled and sliced",
+            "ingredientId": "ingredient.apple",
+            "unitId": "unit.each",
+            "quantity": 6
+          },
+          {
+            "original": "100g caster sugar",
+            "ingredientId": "ingredient.caster_sugar",
+            "unitId": "unit.g",
+            "quantity": 100
+          },
+          {
+            "original": "1 tsp ground cinnamon",
+            "ingredientId": "ingredient.cinnamon",
+            "unitId": "unit.tsp_metric",
+            "quantity": 1
+          },
+          {
+            "original": "175g plain flour",
+            "ingredientId": "ingredient.flour",
+            "unitId": "unit.g",
+            "quantity": 175
+          },
+          {
+            "original": "100g cold butter, cubed",
+            "ingredientId": "ingredient.butter",
+            "unitId": "unit.g",
+            "quantity": 100
+          },
+          {
+            "original": "75g demerara sugar",
+            "ingredientId": "ingredient.brown_sugar",
+            "unitId": "unit.g",
+            "quantity": 75
+          }
+        ]
+      }
+    },
+    {
+      "id": "gb-18",
+      "region": "GB",
+      "locale": "en-GB",
+      "input": "text",
+      "text": "Tuna pasta bake\nServes 4\nPrep: 10 mins | Cook: 25 mins\n\nIngredients\n- 300g penne\n- 2 x 145g tins tuna, drained\n- 1 x 400g tin chopped tomatoes\n- 125g mozzarella, torn\n- 50g cheddar, grated\n\nMethod\n1. Cook the penne and mix with the tuna and tomatoes.\n2. Top with the cheeses and bake at 200C for 20 minutes.",
+      "gold": {
+        "title": "Tuna pasta bake",
+        "lines": [
+          {
+            "original": "300g penne",
+            "ingredientId": "ingredient.penne",
+            "unitId": "unit.g",
+            "quantity": 300
+          },
+          {
+            "original": "2 x 145g tins tuna, drained",
+            "ingredientId": "ingredient.canned_tuna",
+            "unitId": "unit.each",
+            "quantity": 2
+          },
+          {
+            "original": "1 x 400g tin chopped tomatoes",
+            "ingredientId": "ingredient.canned_tomatoes",
+            "unitId": "unit.each",
+            "quantity": 1
+          },
+          {
+            "original": "125g mozzarella, torn",
+            "ingredientId": "ingredient.mozzarella",
+            "unitId": "unit.g",
+            "quantity": 125
+          },
+          {
+            "original": "50g cheddar, grated",
+            "ingredientId": "ingredient.cheddar",
+            "unitId": "unit.g",
+            "quantity": 50
+          }
+        ]
+      }
+    },
+    {
+      "id": "gb-19",
+      "region": "GB",
+      "locale": "en-GB",
+      "input": "text",
+      "text": "Lemony hummus\nServes 6\nPrep: 10 mins\n\nIngredients\n1 x 400g tin chickpeas, drained\n2 tbsp tahini\n1 lemon, juiced\n1 garlic clove\n3 tbsp olive oil\n½ tsp ground cumin\n\nMethod\n1. Blend everything until smooth, adding a splash of water if needed.\n2. Contains sesame.",
+      "gold": {
+        "title": "Lemony hummus",
+        "lines": [
+          {
+            "original": "1 x 400g tin chickpeas, drained",
+            "ingredientId": "ingredient.chickpeas",
+            "unitId": "unit.each",
+            "quantity": 1
+          },
+          {
+            "original": "2 tbsp tahini",
+            "ingredientId": "ingredient.tahini",
+            "unitId": "unit.tbsp_metric",
+            "quantity": 2
+          },
+          {
+            "original": "1 lemon, juiced",
+            "ingredientId": "ingredient.lemon",
+            "unitId": "unit.each",
+            "quantity": 1
+          },
+          {
+            "original": "1 garlic clove",
+            "ingredientId": "ingredient.garlic",
+            "unitId": "unit.each",
+            "quantity": 1
+          },
+          {
+            "original": "3 tbsp olive oil",
+            "ingredientId": "ingredient.olive_oil",
+            "unitId": "unit.tbsp_metric",
+            "quantity": 3
+          },
+          {
+            "original": "½ tsp ground cumin",
+            "ingredientId": "ingredient.cumin",
+            "unitId": "unit.tsp_metric",
+            "quantity": 0.5
+          }
+        ]
+      }
+    },
+    {
+      "id": "gb-20",
+      "region": "GB",
+      "locale": "en-GB",
+      "input": "text",
+      "text": "Pancake day pancakes\nServes 8\nPrep: 5 mins | Cook: 20 mins\n\nIngredients\n100g plain flour\n2 large eggs\n300ml milk\n1 tbsp sunflower oil\nLemon wedges, to serve\nCaster sugar, to serve\n\nMethod\n1. Whisk the flour, eggs and milk into a smooth batter.\n2. Cook thin pancakes in a lightly oiled pan and serve with lemon and sugar.",
+      "gold": {
+        "title": "Pancake day pancakes",
+        "lines": [
+          {
+            "original": "100g plain flour",
+            "ingredientId": "ingredient.flour",
+            "unitId": "unit.g",
+            "quantity": 100
+          },
+          {
+            "original": "2 large eggs",
+            "ingredientId": "ingredient.egg",
+            "unitId": "unit.each",
+            "quantity": 2
+          },
+          {
+            "original": "300ml milk",
+            "ingredientId": "ingredient.milk",
+            "unitId": "unit.ml",
+            "quantity": 300
+          },
+          {
+            "original": "1 tbsp sunflower oil",
+            "ingredientId": "ingredient.vegetable_oil",
+            "unitId": "unit.tbsp_metric",
+            "quantity": 1
+          },
+          {
+            "original": "Lemon wedges, to serve",
+            "ingredientId": "ingredient.lemon",
+            "unitId": null,
+            "quantity": null
+          },
+          {
+            "original": "Caster sugar, to serve",
+            "ingredientId": "ingredient.caster_sugar",
+            "unitId": null,
+            "quantity": null
+          }
+        ]
+      }
+    },
+    {
+      "id": "au-01",
+      "region": "AU",
+      "locale": "en-AU",
+      "input": "text",
+      "text": "Anzac biscuits\nMakes 20\nPrep: 15 mins | Cook: 15 mins\n\nIngredients\n1 cup rolled oats\n1 cup plain flour\n1 cup brown sugar\n3/4 cup desiccated coconut\n125g butter\n2 tbsp golden syrup\n1/2 tsp bicarbonate of soda\n\nMethod\n1. Mix the oats, flour, sugar and coconut.\n2. Melt the butter and syrup, add the soda and stir into the dry mix.\n3. Roll into balls and bake at 160C for 15 minutes.",
+      "gold": {
+        "title": "Anzac biscuits",
+        "lines": [
+          {
+            "original": "1 cup rolled oats",
+            "ingredientId": "ingredient.rolled_oats",
+            "unitId": "unit.cup_metric",
+            "quantity": 1
+          },
+          {
+            "original": "1 cup plain flour",
+            "ingredientId": "ingredient.flour",
+            "unitId": "unit.cup_metric",
+            "quantity": 1
+          },
+          {
+            "original": "1 cup brown sugar",
+            "ingredientId": "ingredient.brown_sugar",
+            "unitId": "unit.cup_metric",
+            "quantity": 1
+          },
+          {
+            "original": "3/4 cup desiccated coconut",
+            "ingredientId": "ingredient.desiccated_coconut",
+            "unitId": "unit.cup_metric",
+            "quantity": 0.75
+          },
+          {
+            "original": "125g butter",
+            "ingredientId": "ingredient.butter",
+            "unitId": "unit.g",
+            "quantity": 125
+          },
+          {
+            "original": "2 tbsp golden syrup",
+            "ingredientId": "ingredient.golden_syrup",
+            "unitId": "unit.tbsp_au",
+            "quantity": 2
+          },
+          {
+            "original": "1/2 tsp bicarbonate of soda",
+            "ingredientId": "ingredient.baking_soda",
+            "unitId": "unit.tsp_metric",
+            "quantity": 0.5
+          }
+        ]
+      }
+    },
+    {
+      "id": "au-02",
+      "region": "AU",
+      "locale": "en-AU",
+      "input": "text",
+      "text": "Midweek spag bol\nServes 4\nPrep: 10 mins | Cook: 35 mins\n\nIngredients\n500g beef mince\n1 brown onion, finely chopped\n2 garlic cloves, crushed\n700g jar passata\n375g spaghetti\n1/4 cup grated parmesan\n\nMethod\n1. Brown the mince with the onion and garlic.\n2. Add the passata and simmer for 25 minutes.\n3. Serve over spaghetti with parmesan.",
+      "gold": {
+        "title": "Midweek spag bol",
+        "lines": [
+          {
+            "original": "500g beef mince",
+            "ingredientId": "ingredient.ground_beef",
+            "unitId": "unit.g",
+            "quantity": 500
+          },
+          {
+            "original": "1 brown onion, finely chopped",
+            "ingredientId": "ingredient.onion",
+            "unitId": "unit.each",
+            "quantity": 1
+          },
+          {
+            "original": "2 garlic cloves, crushed",
+            "ingredientId": "ingredient.garlic",
+            "unitId": "unit.each",
+            "quantity": 2
+          },
+          {
+            "original": "700g jar passata",
+            "ingredientId": "ingredient.tomato_sauce",
+            "unitId": "unit.g",
+            "quantity": 700
+          },
+          {
+            "original": "375g spaghetti",
+            "ingredientId": "ingredient.spaghetti",
+            "unitId": "unit.g",
+            "quantity": 375
+          },
+          {
+            "original": "1/4 cup grated parmesan",
+            "ingredientId": "ingredient.parmesan",
+            "unitId": "unit.cup_metric",
+            "quantity": 0.25
+          }
+        ]
+      }
+    },
+    {
+      "id": "au-03",
+      "region": "AU",
+      "locale": "en-AU",
+      "input": "link",
+      "html": "<!doctype html><html><head><title>Creamy pumpkin soup | Example Kitchen</title><style>body{font-family:sans-serif}</style></head><body><header><nav><a href=\"/\">Home</a> <a href=\"/recipes\">Recipes</a> <a href=\"/about\">About</a></nav></header><main><article><h1>Creamy pumpkin soup</h1><p>Serves 6 · Prep 15 min · Cook 30 min</p><h2>Ingredients</h2><ul><li>1kg butternut pumpkin, peeled and chopped</li><li>1 brown onion, chopped</li><li>2 cups chicken stock</li><li>1/2 cup thickened cream</li><li>1 tbsp olive oil</li></ul><h2>Method</h2><ol><li>Cook the onion in the oil, add the pumpkin and stock and simmer for 25 minutes.</li><li>Blend and stir through the cream.</li></ol></article></main><footer><p>Example Kitchen. All recipes written for the Parent Manager evaluation set.</p></footer></body></html>",
+      "gold": {
+        "title": "Creamy pumpkin soup",
+        "lines": [
+          {
+            "original": "1kg butternut pumpkin, peeled and chopped",
+            "ingredientId": "ingredient.butternut_squash",
+            "unitId": "unit.kg",
+            "quantity": 1
+          },
+          {
+            "original": "1 brown onion, chopped",
+            "ingredientId": "ingredient.onion",
+            "unitId": "unit.each",
+            "quantity": 1
+          },
+          {
+            "original": "2 cups chicken stock",
+            "ingredientId": "ingredient.chicken_stock",
+            "unitId": "unit.cup_metric",
+            "quantity": 2
+          },
+          {
+            "original": "1/2 cup thickened cream",
+            "ingredientId": "ingredient.heavy_cream",
+            "unitId": "unit.cup_metric",
+            "quantity": 0.5
+          },
+          {
+            "original": "1 tbsp olive oil",
+            "ingredientId": "ingredient.olive_oil",
+            "unitId": "unit.tbsp_au",
+            "quantity": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "au-04",
+      "region": "AU",
+      "locale": "en-AU",
+      "input": "link_structured",
+      "html": "<!doctype html><html><head><title>Garlic and rosemary lamb roast | Example Kitchen</title><script type=\"application/ld+json\">{\"@context\": \"https://schema.org\", \"@type\": \"Recipe\", \"name\": \"Garlic and rosemary lamb roast\", \"recipeYield\": \"6 servings\", \"prepTime\": \"PT15M\", \"recipeIngredient\": [\"2kg lamb leg\", \"2 tbsp olive oil\", \"4 garlic cloves, sliced\", \"2 sprigs rosemary\", \"1kg potatoes, halved\"], \"recipeInstructions\": [{\"@type\": \"HowToStep\", \"text\": \"Stud the lamb with garlic and rosemary and rub with oil.\"}, {\"@type\": \"HowToStep\", \"text\": \"Roast with the potatoes at 180C for 1 1/2 hours.\"}], \"cookTime\": \"PT90M\"}</script><style>body{font-family:sans-serif}</style></head><body><header><nav><a href=\"/\">Home</a> <a href=\"/recipes\">Recipes</a> <a href=\"/about\">About</a></nav></header><main><article><h1>Garlic and rosemary lamb roast</h1><p>Serves 6 · Prep 15 min · Cook 90 min</p><h2>Ingredients</h2><ul><li>2kg lamb leg</li><li>2 tbsp olive oil</li><li>4 garlic cloves, sliced</li><li>2 sprigs rosemary</li><li>1kg potatoes, halved</li></ul><h2>Method</h2><ol><li>Stud the lamb with garlic and rosemary and rub with oil.</li><li>Roast with the potatoes at 180C for 1 1/2 hours.</li></ol></article></main><footer><p>Example Kitchen. All recipes written for the Parent Manager evaluation set.</p></footer></body></html>",
+      "gold": {
+        "title": "Garlic and rosemary lamb roast",
+        "lines": [
+          {
+            "original": "2kg lamb leg",
+            "ingredientId": "ingredient.lamb_leg",
+            "unitId": "unit.kg",
+            "quantity": 2
+          },
+          {
+            "original": "2 tbsp olive oil",
+            "ingredientId": "ingredient.olive_oil",
+            "unitId": "unit.tbsp_au",
+            "quantity": 2
+          },
+          {
+            "original": "4 garlic cloves, sliced",
+            "ingredientId": "ingredient.garlic",
+            "unitId": "unit.each",
+            "quantity": 4
+          },
+          {
+            "original": "2 sprigs rosemary",
+            "ingredientId": "ingredient.rosemary",
+            "unitId": "unit.each",
+            "quantity": 2
+          },
+          {
+            "original": "1kg potatoes, halved",
+            "ingredientId": "ingredient.potato",
+            "unitId": "unit.kg",
+            "quantity": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "au-05",
+      "region": "AU",
+      "locale": "en-AU",
+      "input": "screenshot",
+      "image": "au-05.jpg",
+      "transcript": "One-bowl banana bread\nServes 10\nPrep: 15 mins | Cook: 50 mins\n\nIngredients\n3 overripe bananas, mashed\n2 eggs\n1/2 cup caster sugar\n80g butter, melted\n1 1/2 cups self-raising flour\n1 tsp ground cinnamon\n\nMethod\n1. Mix the bananas, eggs, sugar and butter.\n2. Fold in the flour and cinnamon and bake at 180C for 50 minutes.",
+      "gold": {
+        "title": "One-bowl banana bread",
+        "lines": [
+          {
+            "original": "3 overripe bananas, mashed",
+            "ingredientId": "ingredient.banana",
+            "unitId": "unit.each",
+            "quantity": 3
+          },
+          {
+            "original": "2 eggs",
+            "ingredientId": "ingredient.egg",
+            "unitId": "unit.each",
+            "quantity": 2
+          },
+          {
+            "original": "1/2 cup caster sugar",
+            "ingredientId": "ingredient.caster_sugar",
+            "unitId": "unit.cup_metric",
+            "quantity": 0.5
+          },
+          {
+            "original": "80g butter, melted",
+            "ingredientId": "ingredient.butter",
+            "unitId": "unit.g",
+            "quantity": 80
+          },
+          {
+            "original": "1 1/2 cups self-raising flour",
+            "ingredientId": "ingredient.self_rising_flour",
+            "unitId": "unit.cup_metric",
+            "quantity": 1.5
+          },
+          {
+            "original": "1 tsp ground cinnamon",
+            "ingredientId": "ingredient.cinnamon",
+            "unitId": "unit.tsp_metric",
+            "quantity": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "au-06",
+      "region": "AU",
+      "locale": "en-AU",
+      "input": "text",
+      "text": "Crumbed chicken schnitzel\nServes 4\nPrep: 15 mins | Cook: 15 mins\n\nIngredients\n- 2 chicken breast fillets\n- 1/2 cup plain flour\n- 2 eggs, lightly beaten\n- 1 1/2 cups panko breadcrumbs\n- 1/3 cup vegetable oil\n- 1 lemon, cut into wedges\n\nMethod\n1. Halve the chicken and pound thin.\n2. Coat in flour, egg and crumbs and shallow-fry in the oil for 4 minutes a side.",
+      "gold": {
+        "title": "Crumbed chicken schnitzel",
+        "lines": [
+          {
+            "original": "2 chicken breast fillets",
+            "ingredientId": "ingredient.chicken_breast",
+            "unitId": "unit.each",
+            "quantity": 2
+          },
+          {
+            "original": "1/2 cup plain flour",
+            "ingredientId": "ingredient.flour",
+            "unitId": "unit.cup_metric",
+            "quantity": 0.5
+          },
+          {
+            "original": "2 eggs, lightly beaten",
+            "ingredientId": "ingredient.egg",
+            "unitId": "unit.each",
+            "quantity": 2
+          },
+          {
+            "original": "1 1/2 cups panko breadcrumbs",
+            "ingredientId": "ingredient.panko",
+            "unitId": "unit.cup_metric",
+            "quantity": 1.5
+          },
+          {
+            "original": "1/3 cup vegetable oil",
+            "ingredientId": "ingredient.vegetable_oil",
+            "unitId": "unit.cup_metric",
+            "quantity": 0.3333
+          },
+          {
+            "original": "1 lemon, cut into wedges",
+            "ingredientId": "ingredient.lemon",
+            "unitId": "unit.each",
+            "quantity": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "au-07",
+      "region": "AU",
+      "locale": "en-AU",
+      "input": "link",
+      "html": "<!doctype html><html><head><title>Bacon fried rice | Example Kitchen</title><style>body{font-family:sans-serif}</style></head><body><header><nav><a href=\"/\">Home</a> <a href=\"/recipes\">Recipes</a> <a href=\"/about\">About</a></nav></header><main><article><h1>Bacon fried rice</h1><p>Serves 4 · Prep 10 min · Cook 15 min</p><h2>Ingredients</h2><ul><li>3 cups cooked jasmine rice</li><li>4 rashers bacon, chopped</li><li>2 eggs</li><li>1 cup frozen peas</li><li>3 green onions, sliced</li><li>2 tbsp soy sauce</li></ul><h2>Method</h2><ol><li>Fry the bacon until crisp.</li><li>Add the eggs, then the rice, peas, onions and soy sauce.</li></ol></article></main><footer><p>Example Kitchen. All recipes written for the Parent Manager evaluation set.</p></footer></body></html>",
+      "gold": {
+        "title": "Bacon fried rice",
+        "lines": [
+          {
+            "original": "3 cups cooked jasmine rice",
+            "ingredientId": "ingredient.jasmine_rice",
+            "unitId": "unit.cup_metric",
+            "quantity": 3
+          },
+          {
+            "original": "4 rashers bacon, chopped",
+            "ingredientId": "ingredient.bacon",
+            "unitId": "unit.each",
+            "quantity": 4
+          },
+          {
+            "original": "2 eggs",
+            "ingredientId": "ingredient.egg",
+            "unitId": "unit.each",
+            "quantity": 2
+          },
+          {
+            "original": "1 cup frozen peas",
+            "ingredientId": "ingredient.pea",
+            "unitId": "unit.cup_metric",
+            "quantity": 1
+          },
+          {
+            "original": "3 green onions, sliced",
+            "ingredientId": "ingredient.scallion",
+            "unitId": "unit.each",
+            "quantity": 3
+          },
+          {
+            "original": "2 tbsp soy sauce",
+            "ingredientId": "ingredient.soy_sauce",
+            "unitId": "unit.tbsp_au",
+            "quantity": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "au-08",
+      "region": "AU",
+      "locale": "en-AU",
+      "input": "text",
+      "text": "Pavlova with berries\nServes 8\nPrep: 20 mins | Cook: 90 mins\n\nIngredients\n4 egg whites\n1 cup caster sugar\n1 tsp white vinegar\n2 tsp cornflour\n300ml thickened cream, whipped\n250g strawberries, halved\n2 passionfruit\n\nMethod\n1. Whisk the whites to soft peaks, then add the sugar a spoonful at a time.\n2. Fold in the vinegar and cornflour and bake at 120C for 1 1/2 hours.\n3. Top with cream and fruit.",
+      "gold": {
+        "title": "Pavlova with berries",
+        "lines": [
+          {
+            "original": "4 egg whites",
+            "ingredientId": "ingredient.egg",
+            "unitId": "unit.each",
+            "quantity": 4
+          },
+          {
+            "original": "1 cup caster sugar",
+            "ingredientId": "ingredient.caster_sugar",
+            "unitId": "unit.cup_metric",
+            "quantity": 1
+          },
+          {
+            "original": "1 tsp white vinegar",
+            "ingredientId": "ingredient.white_vinegar",
+            "unitId": "unit.tsp_metric",
+            "quantity": 1
+          },
+          {
+            "original": "2 tsp cornflour",
+            "ingredientId": "ingredient.cornstarch",
+            "unitId": "unit.tsp_metric",
+            "quantity": 2
+          },
+          {
+            "original": "300ml thickened cream, whipped",
+            "ingredientId": "ingredient.heavy_cream",
+            "unitId": "unit.ml",
+            "quantity": 300
+          },
+          {
+            "original": "250g strawberries, halved",
+            "ingredientId": "ingredient.strawberry",
+            "unitId": "unit.g",
+            "quantity": 250
+          },
+          {
+            "original": "2 passionfruit",
+            "ingredientId": "ingredient.passion_fruit",
+            "unitId": "unit.each",
+            "quantity": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "au-09",
+      "region": "AU",
+      "locale": "en-AU",
+      "input": "photo",
+      "image": "au-09.jpg",
+      "transcript": "Zucchini slice\nServes 8\nPrep: 15 mins | Cook: 35 mins\n\nIngredients\n- 5 eggs\n- 1 cup self-raising flour\n- 375g zucchini, grated\n- 1 large brown onion, chopped\n- 200g bacon, chopped\n- 1 cup grated tasty cheese\n- 1/4 cup vegetable oil\n\nMethod\n1. Whisk the eggs and flour, then stir in everything else.\n2. Bake in a lined tin at 180C for 35 minutes. Freezes well.",
+      "gold": {
+        "title": "Zucchini slice",
+        "lines": [
+          {
+            "original": "5 eggs",
+            "ingredientId": "ingredient.egg",
+            "unitId": "unit.each",
+            "quantity": 5
+          },
+          {
+            "original": "1 cup self-raising flour",
+            "ingredientId": "ingredient.self_rising_flour",
+            "unitId": "unit.cup_metric",
+            "quantity": 1
+          },
+          {
+            "original": "375g zucchini, grated",
+            "ingredientId": "ingredient.zucchini",
+            "unitId": "unit.g",
+            "quantity": 375
+          },
+          {
+            "original": "1 large brown onion, chopped",
+            "ingredientId": "ingredient.onion",
+            "unitId": "unit.each",
+            "quantity": 1
+          },
+          {
+            "original": "200g bacon, chopped",
+            "ingredientId": "ingredient.bacon",
+            "unitId": "unit.g",
+            "quantity": 200
+          },
+          {
+            "original": "1 cup grated tasty cheese",
+            "ingredientId": "ingredient.cheddar",
+            "unitId": "unit.cup_metric",
+            "quantity": 1
+          },
+          {
+            "original": "1/4 cup vegetable oil",
+            "ingredientId": "ingredient.vegetable_oil",
+            "unitId": "unit.cup_metric",
+            "quantity": 0.25
+          }
+        ]
+      }
+    },
+    {
+      "id": "au-10",
+      "region": "AU",
+      "locale": "en-AU",
+      "input": "text",
+      "text": "Campfire damper\nServes 8\nPrep: 10 mins | Cook: 30 mins\n\nIngredients\n3 cups self-raising flour\n1 tsp salt\n80g butter, chopped\n1 1/2 cups milk\n\nMethod\n1. Rub the butter into the flour and salt.\n2. Mix in the milk to a soft dough, shape and bake at 200C for 30 minutes.",
+      "gold": {
+        "title": "Campfire damper",
+        "lines": [
+          {
+            "original": "3 cups self-raising flour",
+            "ingredientId": "ingredient.self_rising_flour",
+            "unitId": "unit.cup_metric",
+            "quantity": 3
+          },
+          {
+            "original": "1 tsp salt",
+            "ingredientId": "ingredient.salt",
+            "unitId": "unit.tsp_metric",
+            "quantity": 1
+          },
+          {
+            "original": "80g butter, chopped",
+            "ingredientId": "ingredient.butter",
+            "unitId": "unit.g",
+            "quantity": 80
+          },
+          {
+            "original": "1 1/2 cups milk",
+            "ingredientId": "ingredient.milk",
+            "unitId": "unit.cup_metric",
+            "quantity": 1.5
+          }
+        ]
+      }
+    },
+    {
+      "id": "au-11",
+      "region": "AU",
+      "locale": "en-AU",
+      "input": "text",
+      "text": "Lamb kofta with yoghurt\nServes 4\nPrep: 20 mins | Cook: 12 mins\n\nIngredients\n500g lamb mince\n1 small red onion, grated\n2 tsp ground cumin\n1 tsp ground coriander\n1/4 cup chopped fresh mint\n200g Greek yoghurt\n\nMethod\n1. Mix the mince, onion, spices and half the mint and shape onto skewers.\n2. Grill for 12 minutes and serve with yoghurt and the rest of the mint.",
+      "gold": {
+        "title": "Lamb kofta with yoghurt",
+        "lines": [
+          {
+            "original": "500g lamb mince",
+            "ingredientId": "ingredient.ground_lamb",
+            "unitId": "unit.g",
+            "quantity": 500
+          },
+          {
+            "original": "1 small red onion, grated",
+            "ingredientId": "ingredient.red_onion",
+            "unitId": "unit.each",
+            "quantity": 1
+          },
+          {
+            "original": "2 tsp ground cumin",
+            "ingredientId": "ingredient.cumin",
+            "unitId": "unit.tsp_metric",
+            "quantity": 2
+          },
+          {
+            "original": "1 tsp ground coriander",
+            "ingredientId": "ingredient.coriander_ground",
+            "unitId": "unit.tsp_metric",
+            "quantity": 1
+          },
+          {
+            "original": "1/4 cup chopped fresh mint",
+            "ingredientId": "ingredient.mint",
+            "unitId": "unit.cup_metric",
+            "quantity": 0.25
+          },
+          {
+            "original": "200g Greek yoghurt",
+            "ingredientId": "ingredient.greek_yogurt",
+            "unitId": "unit.g",
+            "quantity": 200
+          }
+        ]
+      }
+    },
+    {
+      "id": "au-12",
+      "region": "AU",
+      "locale": "en-AU",
+      "input": "link_structured",
+      "html": "<!doctype html><html><head><title>Barramundi with tomato salad | Example Kitchen</title><script type=\"application/ld+json\">{\"@context\": \"https://schema.org\", \"@type\": \"Recipe\", \"name\": \"Barramundi with tomato salad\", \"recipeYield\": \"4 servings\", \"prepTime\": \"PT10M\", \"recipeIngredient\": [\"4 barramundi fillets\", \"2 tbsp olive oil\", \"1 lemon\", \"100g baby spinach\", \"250g cherry tomatoes, halved\", \"1 Lebanese cucumber, sliced\"], \"recipeInstructions\": [{\"@type\": \"HowToStep\", \"text\": \"Pan-fry the fish in half the oil for 3 minutes a side.\"}, {\"@type\": \"HowToStep\", \"text\": \"Toss the spinach, tomatoes and cucumber with the rest of the oil and lemon juice.\"}], \"cookTime\": \"PT10M\"}</script><style>body{font-family:sans-serif}</style></head><body><header><nav><a href=\"/\">Home</a> <a href=\"/recipes\">Recipes</a> <a href=\"/about\">About</a></nav></header><main><article><h1>Barramundi with tomato salad</h1><p>Serves 4 · Prep 10 min · Cook 10 min</p><h2>Ingredients</h2><ul><li>4 barramundi fillets</li><li>2 tbsp olive oil</li><li>1 lemon</li><li>100g baby spinach</li><li>250g cherry tomatoes, halved</li><li>1 Lebanese cucumber, sliced</li></ul><h2>Method</h2><ol><li>Pan-fry the fish in half the oil for 3 minutes a side.</li><li>Toss the spinach, tomatoes and cucumber with the rest of the oil and lemon juice.</li></ol></article></main><footer><p>Example Kitchen. All recipes written for the Parent Manager evaluation set.</p></footer></body></html>",
+      "gold": {
+        "title": "Barramundi with tomato salad",
+        "lines": [
+          {
+            "original": "4 barramundi fillets",
+            "ingredientId": "ingredient.white_fish",
+            "unitId": "unit.each",
+            "quantity": 4
+          },
+          {
+            "original": "2 tbsp olive oil",
+            "ingredientId": "ingredient.olive_oil",
+            "unitId": "unit.tbsp_au",
+            "quantity": 2
+          },
+          {
+            "original": "1 lemon",
+            "ingredientId": "ingredient.lemon",
+            "unitId": "unit.each",
+            "quantity": 1
+          },
+          {
+            "original": "100g baby spinach",
+            "ingredientId": "ingredient.spinach",
+            "unitId": "unit.g",
+            "quantity": 100
+          },
+          {
+            "original": "250g cherry tomatoes, halved",
+            "ingredientId": "ingredient.cherry_tomato",
+            "unitId": "unit.g",
+            "quantity": 250
+          },
+          {
+            "original": "1 Lebanese cucumber, sliced",
+            "ingredientId": "ingredient.cucumber",
+            "unitId": "unit.each",
+            "quantity": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "au-13",
+      "region": "AU",
+      "locale": "en-AU",
+      "input": "text",
+      "text": "Cheesy Vegemite scrolls\nMakes 12\nPrep: 20 mins | Cook: 20 mins\n\nIngredients\n2 cups self-raising flour\n30g butter\n3/4 cup milk\n2 tbsp Vegemite\n1 cup grated cheddar\n\nMethod\n1. Rub the butter into the flour and mix in the milk.\n2. Roll out, spread with Vegemite, scatter with cheese, roll up and slice.\n3. Bake at 200C for 20 minutes.",
+      "gold": {
+        "title": "Cheesy Vegemite scrolls",
+        "lines": [
+          {
+            "original": "2 cups self-raising flour",
+            "ingredientId": "ingredient.self_rising_flour",
+            "unitId": "unit.cup_metric",
+            "quantity": 2
+          },
+          {
+            "original": "30g butter",
+            "ingredientId": "ingredient.butter",
+            "unitId": "unit.g",
+            "quantity": 30
+          },
+          {
+            "original": "3/4 cup milk",
+            "ingredientId": "ingredient.milk",
+            "unitId": "unit.cup_metric",
+            "quantity": 0.75
+          },
+          {
+            "original": "2 tbsp Vegemite",
+            "ingredientId": "ingredient.yeast_spread",
+            "unitId": "unit.tbsp_au",
+            "quantity": 2
+          },
+          {
+            "original": "1 cup grated cheddar",
+            "ingredientId": "ingredient.cheddar",
+            "unitId": "unit.cup_metric",
+            "quantity": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "au-14",
+      "region": "AU",
+      "locale": "en-AU",
+      "input": "screenshot",
+      "image": "au-14.jpg",
+      "transcript": "Chicken and corn soup\nServes 4\nPrep: 10 mins | Cook: 15 mins\n\nIngredients\n1L chicken stock\n420g can creamed corn\n2 cups shredded barbecue chicken\n2 eggs, lightly whisked\n2 green onions, sliced\n1 tbsp soy sauce\n\nMethod\n1. Bring the stock and corn to a simmer.\n2. Add the chicken, drizzle in the egg while stirring, then add the onions and soy sauce.",
+      "gold": {
+        "title": "Chicken and corn soup",
+        "lines": [
+          {
+            "original": "1L chicken stock",
+            "ingredientId": "ingredient.chicken_stock",
+            "unitId": "unit.l",
+            "quantity": 1
+          },
+          {
+            "original": "420g can creamed corn",
+            "ingredientId": "ingredient.canned_corn",
+            "unitId": "unit.g",
+            "quantity": 420
+          },
+          {
+            "original": "2 cups shredded barbecue chicken",
+            "ingredientId": "ingredient.rotisserie_chicken",
+            "unitId": "unit.cup_metric",
+            "quantity": 2
+          },
+          {
+            "original": "2 eggs, lightly whisked",
+            "ingredientId": "ingredient.egg",
+            "unitId": "unit.each",
+            "quantity": 2
+          },
+          {
+            "original": "2 green onions, sliced",
+            "ingredientId": "ingredient.scallion",
+            "unitId": "unit.each",
+            "quantity": 2
+          },
+          {
+            "original": "1 tbsp soy sauce",
+            "ingredientId": "ingredient.soy_sauce",
+            "unitId": "unit.tbsp_au",
+            "quantity": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "au-15",
+      "region": "AU",
+      "locale": "en-AU",
+      "input": "text",
+      "text": "Hidden veg sausage rolls\nMakes 24\nPrep: 25 mins | Cook: 25 mins\n\nIngredients\n- 500g pork mince\n- 1 brown onion, grated\n- 1 carrot, grated\n- 1/2 cup dried breadcrumbs\n- 3 sheets frozen puff pastry\n- 1 egg, lightly beaten\n- 1 tbsp sesame seeds\n\nMethod\n1. Mix the mince, onion, carrot and breadcrumbs.\n2. Roll in the pastry, brush with egg, sprinkle with seeds and cut.\n3. Bake at 200C for 25 minutes. Freeze unbaked rolls for later.",
+      "gold": {
+        "title": "Hidden veg sausage rolls",
+        "lines": [
+          {
+            "original": "500g pork mince",
+            "ingredientId": "ingredient.ground_pork",
+            "unitId": "unit.g",
+            "quantity": 500
+          },
+          {
+            "original": "1 brown onion, grated",
+            "ingredientId": "ingredient.onion",
+            "unitId": "unit.each",
+            "quantity": 1
+          },
+          {
+            "original": "1 carrot, grated",
+            "ingredientId": "ingredient.carrot",
+            "unitId": "unit.each",
+            "quantity": 1
+          },
+          {
+            "original": "1/2 cup dried breadcrumbs",
+            "ingredientId": "ingredient.breadcrumbs",
+            "unitId": "unit.cup_metric",
+            "quantity": 0.5
+          },
+          {
+            "original": "3 sheets frozen puff pastry",
+            "ingredientId": "ingredient.puff_pastry",
+            "unitId": "unit.each",
+            "quantity": 3
+          },
+          {
+            "original": "1 egg, lightly beaten",
+            "ingredientId": "ingredient.egg",
+            "unitId": "unit.each",
+            "quantity": 1
+          },
+          {
+            "original": "1 tbsp sesame seeds",
+            "ingredientId": "ingredient.sesame_seeds",
+            "unitId": "unit.tbsp_au",
+            "quantity": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "au-16",
+      "region": "AU",
+      "locale": "en-AU",
+      "input": "link",
+      "html": "<!doctype html><html><head><title>Smashed avo on sourdough | Example Kitchen</title><style>body{font-family:sans-serif}</style></head><body><header><nav><a href=\"/\">Home</a> <a href=\"/recipes\">Recipes</a> <a href=\"/about\">About</a></nav></header><main><article><h1>Smashed avo on sourdough</h1><p>Serves 4 · Prep 10 min · Cook 2 min</p><h2>Ingredients</h2><ul><li>2 ripe avocados</li><li>1/2 lemon, juiced</li><li>100g feta, crumbled</li><li>4 slices sourdough</li><li>Pinch of chilli flakes</li></ul><h2>Method</h2><ol><li>Smash the avocado with the lemon juice.</li><li>Spread on toast and top with feta and chilli.</li></ol></article></main><footer><p>Example Kitchen. All recipes written for the Parent Manager evaluation set.</p></footer></body></html>",
+      "gold": {
+        "title": "Smashed avo on sourdough",
+        "lines": [
+          {
+            "original": "2 ripe avocados",
+            "ingredientId": "ingredient.avocado",
+            "unitId": "unit.each",
+            "quantity": 2
+          },
+          {
+            "original": "1/2 lemon, juiced",
+            "ingredientId": "ingredient.lemon",
+            "unitId": "unit.each",
+            "quantity": 0.5
+          },
+          {
+            "original": "100g feta, crumbled",
+            "ingredientId": "ingredient.feta",
+            "unitId": "unit.g",
+            "quantity": 100
+          },
+          {
+            "original": "4 slices sourdough",
+            "ingredientId": "ingredient.sourdough",
+            "unitId": "unit.each",
+            "quantity": 4
+          },
+          {
+            "original": "Pinch of chilli flakes",
+            "ingredientId": "ingredient.red_pepper_flakes",
+            "unitId": "unit.pinch",
+            "quantity": null
+          }
+        ]
+      }
+    },
+    {
+      "id": "au-17",
+      "region": "AU",
+      "locale": "en-AU",
+      "input": "photo",
+      "image": "au-17.jpg",
+      "transcript": "Beef and broccoli stir-fry\nServes 4\nPrep: 15 mins | Cook: 10 mins\n\nIngredients\n500g beef stir-fry strips\n1 head broccoli, cut into florets\n1 red capsicum, sliced\n2 tbsp oyster sauce\n1 tbsp soy sauce\n2 cups cooked rice\n\nMethod\n1. Stir-fry the beef in batches.\n2. Add the vegetables, then the sauces, and serve with rice.",
+      "gold": {
+        "title": "Beef and broccoli stir-fry",
+        "lines": [
+          {
+            "original": "500g beef stir-fry strips",
+            "ingredientId": "ingredient.beef_steak",
+            "unitId": "unit.g",
+            "quantity": 500
+          },
+          {
+            "original": "1 head broccoli, cut into florets",
+            "ingredientId": "ingredient.broccoli",
+            "unitId": "unit.each",
+            "quantity": 1
+          },
+          {
+            "original": "1 red capsicum, sliced",
+            "ingredientId": "ingredient.bell_pepper",
+            "unitId": "unit.each",
+            "quantity": 1
+          },
+          {
+            "original": "2 tbsp oyster sauce",
+            "ingredientId": "ingredient.oyster_sauce",
+            "unitId": "unit.tbsp_au",
+            "quantity": 2
+          },
+          {
+            "original": "1 tbsp soy sauce",
+            "ingredientId": "ingredient.soy_sauce",
+            "unitId": "unit.tbsp_au",
+            "quantity": 1
+          },
+          {
+            "original": "2 cups cooked rice",
+            "ingredientId": "ingredient.white_rice",
+            "unitId": "unit.cup_metric",
+            "quantity": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "au-18",
+      "region": "AU",
+      "locale": "en-AU",
+      "input": "text",
+      "text": "Honey muesli bars\nMakes 16\nPrep: 15 mins | Cook: 25 mins\n\nIngredients\n- 2 cups rolled oats\n- 1/2 cup honey\n- 80g butter\n- 1/2 cup sultanas\n- 1/4 cup pepitas\n- 1/4 cup sunflower seeds\n\nMethod\n1. Melt the honey and butter and stir through everything else.\n2. Press into a tin and bake at 160C for 25 minutes.",
+      "gold": {
+        "title": "Honey muesli bars",
+        "lines": [
+          {
+            "original": "2 cups rolled oats",
+            "ingredientId": "ingredient.rolled_oats",
+            "unitId": "unit.cup_metric",
+            "quantity": 2
+          },
+          {
+            "original": "1/2 cup honey",
+            "ingredientId": "ingredient.honey",
+            "unitId": "unit.cup_metric",
+            "quantity": 0.5
+          },
+          {
+            "original": "80g butter",
+            "ingredientId": "ingredient.butter",
+            "unitId": "unit.g",
+            "quantity": 80
+          },
+          {
+            "original": "1/2 cup sultanas",
+            "ingredientId": "ingredient.raisins",
+            "unitId": "unit.cup_metric",
+            "quantity": 0.5
+          },
+          {
+            "original": "1/4 cup pepitas",
+            "ingredientId": "ingredient.pumpkin_seeds",
+            "unitId": "unit.cup_metric",
+            "quantity": 0.25
+          },
+          {
+            "original": "1/4 cup sunflower seeds",
+            "ingredientId": "ingredient.sunflower_seeds",
+            "unitId": "unit.cup_metric",
+            "quantity": 0.25
+          }
+        ]
+      }
+    },
+    {
+      "id": "au-19",
+      "region": "AU",
+      "locale": "en-AU",
+      "input": "text",
+      "text": "Crispy fish tacos\nServes 4\nPrep: 15 mins | Cook: 10 mins\n\nIngredients\n500g firm white fish fillets\n8 small flour tortillas\n2 cups shredded red cabbage\n1/2 cup sour cream\n1 lime, cut into wedges\n1 avocado, sliced\n\nMethod\n1. Pan-fry the fish and flake.\n2. Fill the tortillas with fish, cabbage, avocado and sour cream and serve with lime.",
+      "gold": {
+        "title": "Crispy fish tacos",
+        "lines": [
+          {
+            "original": "500g firm white fish fillets",
+            "ingredientId": "ingredient.white_fish",
+            "unitId": "unit.g",
+            "quantity": 500
+          },
+          {
+            "original": "8 small flour tortillas",
+            "ingredientId": "ingredient.flour_tortilla",
+            "unitId": "unit.each",
+            "quantity": 8
+          },
+          {
+            "original": "2 cups shredded red cabbage",
+            "ingredientId": "ingredient.red_cabbage",
+            "unitId": "unit.cup_metric",
+            "quantity": 2
+          },
+          {
+            "original": "1/2 cup sour cream",
+            "ingredientId": "ingredient.sour_cream",
+            "unitId": "unit.cup_metric",
+            "quantity": 0.5
+          },
+          {
+            "original": "1 lime, cut into wedges",
+            "ingredientId": "ingredient.lime",
+            "unitId": "unit.each",
+            "quantity": 1
+          },
+          {
+            "original": "1 avocado, sliced",
+            "ingredientId": "ingredient.avocado",
+            "unitId": "unit.each",
+            "quantity": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "au-20",
+      "region": "AU",
+      "locale": "en-AU",
+      "input": "text",
+      "text": "Pikelets\nMakes 16\nPrep: 5 mins | Cook: 15 mins\n\nIngredients\n1 cup self-raising flour\n1/4 cup caster sugar\n1 egg\n3/4 cup milk\n20g butter, melted\n\nMethod\n1. Whisk everything into a smooth batter.\n2. Cook tablespoons in a hot pan until bubbles appear, then flip.",
+      "gold": {
+        "title": "Pikelets",
+        "lines": [
+          {
+            "original": "1 cup self-raising flour",
+            "ingredientId": "ingredient.self_rising_flour",
+            "unitId": "unit.cup_metric",
+            "quantity": 1
+          },
+          {
+            "original": "1/4 cup caster sugar",
+            "ingredientId": "ingredient.caster_sugar",
+            "unitId": "unit.cup_metric",
+            "quantity": 0.25
+          },
+          {
+            "original": "1 egg",
+            "ingredientId": "ingredient.egg",
+            "unitId": "unit.each",
+            "quantity": 1
+          },
+          {
+            "original": "3/4 cup milk",
+            "ingredientId": "ingredient.milk",
+            "unitId": "unit.cup_metric",
+            "quantity": 0.75
+          },
+          {
+            "original": "20g butter, melted",
+            "ingredientId": "ingredient.butter",
+            "unitId": "unit.g",
+            "quantity": 20
+          }
+        ]
+      }
+    }
+  ]
+}
