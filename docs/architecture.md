@@ -366,7 +366,7 @@ Most edits are small and touch different rows, so simple rules are enough:
    - **Text:** used as given.
    - **Images:** passed to the LLM's image input.
 4. **LLM parsing** (R-05.3) with a strict JSON output schema, in `supabase/functions/import-recipe/ai/`:
-   - **Provider seam:** `createAiParser` (`ai_parser.ts`) builds one provider-neutral request (`prompt.ts`: instructions, the schema, the user content) and hands it to an `AiProvider` adapter. `ai/select.ts` picks the adapter from the function's secrets: `AI_PROVIDER=anthropic` with `ANTHROPIC_API_KEY` (and optionally `AI_MODEL`) uses Claude (`anthropic.ts`, plain `fetch`, structured output through `output_config.format`); `AI_PROVIDER=fake` uses a deterministic rule-based fake (`fake.ts`) and works only when `SUPABASE_URL` is a local stack; anything else leaves imports failing with `import.parser_unavailable`, uncounted. Adding a provider is one adapter file and one line in `select.ts`.
+   - **Provider seam:** `createAiParser` (`ai_parser.ts`) builds one provider-neutral request (`prompt.ts`: instructions, the schema, the user content) and hands it to an `AiProvider` adapter. `ai/select.ts` picks the adapter from the function's secrets: `AI_PROVIDER=anthropic` with `ANTHROPIC_API_KEY` (and optionally `AI_MODEL`) uses Claude (`anthropic.ts`, plain `fetch`, structured output through `output_config.format`); `AI_PROVIDER=fake` uses a deterministic rule-based fake (`fake.ts`) and works only when `SUPABASE_URL` is a local stack (there, links on the reserved `.test` domain get canned pages from `fake_pages.ts`, for E2E); anything else leaves imports failing with `import.parser_unavailable`, uncounted. Adding a provider is one adapter file and one line in `select.ts`.
    - **Output:** title, servings, times, steps, and ingredient lines with the original text, quantity, unit ID, ingredient name, note and confidence, plus suggested tags and allergens the source mentions. `validate.ts` checks every field again: units, tags and allergens must come from the fixed lists (`vocabulary.ts`, kept equal to the app's by a Jest test), numbers are range-checked, and lines with no amount or an inferred ingredient have their confidence capped.
    - **Inputs:** only the source content, the household's `locale` and `region`, the regional unit words and the allowed lists (AI-8, AI-15). The source sits inside `<source>` tags as data (AI-9).
    - **Retry:** invalid output, a rate limit, overload or a network error is retried once after 1 second (AI-18); a refusal, a bad key or a non-recipe fails at once. Output is capped at 8,000 tokens per call, the per-job cost ceiling.
@@ -375,10 +375,11 @@ Most edits are small and touch different rows, so simple rules are enough:
    - **Ingredients:** the model's ingredient name and the original line are both run through `parseIngredientLine`; the better match wins. Anything unmatched becomes a new household ingredient (section "other") when the recipe is saved.
    - **Units:** the model's unit ID, already checked on the server; lines from embedded page data are parsed on the device.
    - **Confidence:** the model's confidence, capped by how the match was found (exact 1, partial 0.85, fuzzy search 0.5, none 0). Lines below 0.7 or unmatched are highlighted (FR-AI-6).
-6. **Review (always):** the client shows the draft. Nothing is saved before the user confirms.
-   - Low-confidence lines and unmatched ingredients are highlighted.
-   - Detected allergens that match a household member's profile get a warning with the "not medical advice" disclaimer.
-   - The parent can fix any line, then saves.
+6. **Review (always, S-21, `src/features/import/review-screen.tsx`):** the draft opens in the recipe editor (S-18) with review extras. Nothing is saved before the user confirms.
+   - Each line shows the source's original text. Low-confidence lines and unmatched ingredients are highlighted with a text tag, and also marked "not checked for allergens" (AI-13).
+   - Allergens are matched on the device from the catalog against the household's allergy profiles (AI-11); allergens the source itself mentions add to them. Matches get the import-review AllergenNotice with the disclaimer at the top, and the affected lines are marked. The notice can't be dismissed, and doesn't block saving.
+   - Saving writes through the sync layer with `source_type` `url` or `text` and the link (FR-AI-15). Discard asks first. "Enter manually instead" opens the editor prefilled with the title and the raw text in notes (FR-AI-13).
+   - The form and the review highlights are kept on the device (`useDraftState`) until saved or discarded, so the app being killed loses nothing.
 7. **Cleanup:** the uploaded image is deleted. The job row keeps the draft and metadata for support and quality evaluation for 30 days, then is purged.
 
 ### Voice
