@@ -1078,6 +1078,7 @@
     },
     "addShort": "Add",
     "import": "Import a recipe",
+    "importShort": "Import",
     "search": "Search recipes, ingredients or tags",
     "filters": "Filter by tag",
     "household": "Your recipes",
@@ -1403,6 +1404,49 @@
       "hide": "Hides the staples your plan uses",
       "add": "Tap to add to this week's list",
       "addHint": "Adds {{name}} to this week's list"
+    }
+  },
+  "importRecipe": {
+    "title": "Import a recipe",
+    "fromLink": "From a link",
+    "linkLabel": "Recipe link",
+    "linkHint": "Paste the address of a recipe page.",
+    "importLink": "Import link",
+    "fromText": "From text",
+    "textLabel": "Recipe text",
+    "textHint": "Paste the ingredients and steps from a note, message or email.",
+    "importText": "Import text",
+    "addByHand": "Add a recipe by hand instead",
+    "offline": "You're offline. Importing a recipe needs a connection.",
+    "retry": "Try again",
+    "pasteTextInstead": "Paste the text instead",
+    "enterManually": "Enter it manually instead",
+    "startOver": "Start over",
+    "progress": {
+      "title": "Importing",
+      "reading": "Reading the recipe…",
+      "canLeave": "This can take up to a minute. You can leave this screen: we'll keep going, and the recipe will be here when you come back.",
+      "cancel": "Stop waiting"
+    },
+    "review": {
+      "title": "Check the recipe"
+    },
+    "errors": {
+      "unauthenticated": "You're signed out. Sign in again to import.",
+      "invalid_request": "That didn't work. Check what you pasted and try again.",
+      "forbidden": "Your role in this household can't import recipes.",
+      "rate_limited": "That's a lot of imports in an hour. Try again a little later.",
+      "quota_exceeded": "You've used this month's imports. You can still add the recipe by hand.",
+      "timeout": "That took too long. Try again, or paste the recipe's text instead.",
+      "parser_unavailable": "Importing isn't available right now. You can add the recipe by hand.",
+      "parse_failed": "We couldn't read a recipe from that. Try again, or enter it manually.",
+      "failed": "Something went wrong. Try again.",
+      "link_refused": "That link can't be imported. Check it's a web page address starting with http.",
+      "link_unreachable": "We couldn't reach that page. Check the link, or paste the recipe's text instead.",
+      "link_unsupported": "That link isn't a web page we can read. Paste the recipe's text instead.",
+      "link_too_large": "That page is too large to import. Paste the recipe's text instead.",
+      "no_recipe_found": "We couldn't find a recipe there. Paste the recipe's text instead, or enter it manually.",
+      "network": "We lost the connection. Check you're online and try again."
     }
   }
 }

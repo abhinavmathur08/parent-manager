@@ -44,7 +44,7 @@ EXPO_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321 EXPO_PUBLIC_SUPABASE_PUBLISHABLE
 pnpm run test:e2e
 ```
 
-The Premium flows (`premium*.yaml`) buy through the mock store (D-10 interim), which never charges anyone. Before `pnpm supabase start`, turn it on for the local stack with `echo BILLING_MOCK_ENABLED=true > supabase/functions/.env` (git-ignored). Build with `EXPO_PUBLIC_BILLING_PROVIDER=mock` and `E2E_LOCAL_BACKEND=1` on either platform: a release build only uses the mock store when `E2E_LOCAL_BACKEND=1` marks it as a test build.
+The Premium flows (`premium*.yaml`) buy through the mock store (D-10 interim), which never charges anyone, and the import flows (`recipe-import*.yaml`) parse with the fake AI provider (D-7 is open). Before `pnpm supabase start`, turn both on for the local stack with `printf 'BILLING_MOCK_ENABLED=true\nAI_PROVIDER=fake\n' > supabase/functions/.env` (git-ignored). The fake only runs against a local stack. Build with `EXPO_PUBLIC_BILLING_PROVIDER=mock` and `E2E_LOCAL_BACKEND=1` on either platform: a release build only uses the mock store when `E2E_LOCAL_BACKEND=1` marks it as a test build.
 
 On Android, also set `E2E_LOCAL_BACKEND=1` for the build, which allows plain HTTP to the stack, and run `adb reverse tcp:54321 tcp:54321` so the emulator reaches it on 127.0.0.1. Without a backend, skip those flows with `pnpm run test:e2e --exclude-tags backend`. In CI, Android runs every flow against the local stack, and iOS skips the `backend` flows because macOS runners have no Docker.
 

@@ -50,6 +50,7 @@ export function RecipeEditor({
   draftKey,
   household,
   onSaved,
+  initialDraft,
 }: {
   /** The recipe being edited, or null for a new one. */
   saved: SavedRecipe | null;
@@ -58,6 +59,8 @@ export function RecipeEditor({
   draftKey: string;
   household: Household;
   onSaved: (recipeId: string) => void;
+  /** A new recipe's starting form, such as an import's text (FR-AI-13). */
+  initialDraft?: RecipeDraft;
 }) {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -68,7 +71,7 @@ export function RecipeEditor({
 
   const [draft, setDraft, clearDraft] = useDraftState<RecipeDraft>(
     draftKey,
-    saved ? draftFromRecipe(saved) : emptyDraft(),
+    saved ? draftFromRecipe(saved) : (initialDraft ?? emptyDraft()),
   );
   const [quickText, setQuickText] = useState('');
   const [editing, setEditing] = useState<Editing>(null);

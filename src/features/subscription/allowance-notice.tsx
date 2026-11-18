@@ -14,20 +14,16 @@ import { getSupabase } from '@/lib/supabase';
 import { useEntitlement } from './entitlement';
 import { usePremiumSheet } from './premium-sheet';
 
-type Allowance = { used: number; allowance: number; resets_on: string };
+export type Allowance = { used: number; allowance: number; resets_on: string };
 
 /**
- * The month's AI import allowance on the import screen (FR-AI-2, FR-AI-10). When it's used
- * up, it shows the reset date and, for a free household, opens the Premium sheet at this
- * moment of need (FR-PAY-5). Manual recipe creation stays available either way.
+ * The household's AI import allowance this month (FR-AI-2), read from the server. Changing
+ * `refresh` reads it again, such as after an import. Null until loaded, and offline.
  */
-export function AllowanceNotice() {
-  const { t, i18n } = useTranslation();
-  const theme = useTheme();
+export function useAiAllowance(refresh = 0): Allowance | null {
   const household = useHousehold().state;
   const householdId = household.status === 'member' ? household.membership.householdId : null;
   const { isPremium } = useEntitlement();
-  const { openPremiumSheet } = usePremiumSheet();
   const [allowance, setAllowance] = useState<Allowance | null>(null);
 
   useEffect(() => {
@@ -46,7 +42,21 @@ export function AllowanceNotice() {
     return () => {
       active = false;
     };
-  }, [householdId, isPremium]);
+  }, [householdId, isPremium, refresh]);
+
+  return allowance;
+}
+
+/**
+ * The month's AI import allowance on the import screen (FR-AI-2, FR-AI-10). When it's used
+ * up, it shows the reset date and, for a free household, opens the Premium sheet at this
+ * moment of need (FR-PAY-5). Manual recipe creation stays available either way.
+ */
+export function AllowanceNotice({ allowance }: { allowance: Allowance | null }) {
+  const { t, i18n } = useTranslation();
+  const theme = useTheme();
+  const { isPremium } = useEntitlement();
+  const { openPremiumSheet } = usePremiumSheet();
 
   if (!allowance) return null;
   const reached = allowance.used >= allowance.allowance;
