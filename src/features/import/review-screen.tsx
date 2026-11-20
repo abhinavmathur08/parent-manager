@@ -23,6 +23,7 @@ import { formatList, type AppLocale, type Region, type UnitSystem } from '@/i18n
 import { track } from '@/lib/analytics';
 
 import { fetchJob, type ImportInput, type ImportResult } from './api';
+import { discardImage } from './image';
 import { setManualPrefill } from './manual';
 import { needsReview, normalizeDraft, type LineReview } from './normalize';
 import { cachedResult, PENDING_IMPORT_KEY, type PendingImport } from './use-import-run';
@@ -44,7 +45,9 @@ const signature = (l: DraftLine) =>
 
 /** The saved recipe's source type (FR-AI-15) and the analytics input type. */
 export function sourceTypeOf(input: ImportInput | undefined): RecipeSourceType {
-  return input?.type === 'link' ? 'url' : 'text';
+  if (input?.type === 'link') return 'url';
+  if (input?.type === 'image') return input.kind;
+  return 'text';
 }
 
 const formKey = (job: string) => `import:review:${job}`;
@@ -67,7 +70,11 @@ export function ReviewScreen({ job, household }: { job: string; household: House
   const vocabulary = useMemo(() => loadParserVocabulary(household.locale), [household.locale]);
   const [initialDraft, setInitialDraft] = useState<RecipeDraft>();
   const input = pending?.jobId === job ? pending.input : undefined;
-  const inputType = sourceTypeOf(input) === 'url' ? 'url' : 'text';
+  const sourceType = sourceTypeOf(input);
+  const inputType =
+    sourceType === 'url' || sourceType === 'photo' || sourceType === 'screenshot'
+      ? sourceType
+      : 'text';
 
   // A review reopened after the app was killed has its form saved; otherwise read the job.
   useEffect(() => {
@@ -121,6 +128,7 @@ export function ReviewScreen({ job, household }: { job: string; household: House
   }, [meta, result, ingredients, vocabulary, household.region, input, inputType, pending, setMeta]);
 
   function finish() {
+    discardImage(input);
     clearDraft(formKey(job));
     clearDraft(metaKey(job));
     clearPending();
@@ -168,7 +176,7 @@ export function ReviewScreen({ job, household }: { job: string; household: House
       meta={meta}
       household={household}
       initialDraft={initialDraft}
-      sourceType={sourceTypeOf(input)}
+      sourceType={sourceType}
       onSaved={(recipeId, draft) => {
         const edited = draft.lines.filter((l) => meta.initial[l.id] !== signature(l)).length;
         const removed = Object.keys(meta.initial).filter(

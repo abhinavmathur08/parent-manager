@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, View } from 'react-native';
+import { ActivityIndicator, Linking, View } from 'react-native';
 
 import { Banner } from '@/components/banner';
 import { Button } from '@/components/button';
@@ -16,11 +16,13 @@ import { useTheme } from '@/hooks/use-theme';
 import { track } from '@/lib/analytics';
 
 import { isLinkProblem, isRetryable, type ImportErrorCode, type ImportInput } from './api';
+import { pickImage } from './image';
 import { setManualPrefill } from './manual';
 import { useImportRun } from './use-import-run';
 
 /** The input type as analytics names it (spec section 3.5). */
-export const analyticsInput = (input: ImportInput) => (input.type === 'link' ? 'url' : 'text');
+export const analyticsInput = (input: ImportInput) =>
+  input.type === 'link' ? 'url' : input.type === 'image' ? input.kind : 'text';
 
 /** The translation key of an error's explanation: `import.timeout` is `importRecipe.errors.timeout`. */
 export const errorKey = (code: ImportErrorCode) => `importRecipe.errors.${code.slice(7)}`;
@@ -38,6 +40,8 @@ export function ImportScreen() {
   const [link, setLink, clearLink] = useDraftState('import:link', '');
   const [text, setText, clearText] = useDraftState('import:text', '');
   const [refresh, setRefresh] = useState(0);
+  const [picking, setPicking] = useState(false);
+  const [imageProblem, setImageProblem] = useState<'denied' | 'settings' | 'failed' | null>(null);
   const allowance = useAiAllowance(refresh);
 
   const reported = useRef<string | null>(null);
@@ -64,9 +68,29 @@ export function ImportScreen() {
     start(input);
   }
 
+  async function fromImage(from: 'camera' | 'library') {
+    setImageProblem(null);
+    setPicking(true);
+    try {
+      const outcome = await pickImage(from);
+      if (outcome.status === 'picked') begin(outcome.input);
+      else if (outcome.status === 'denied') {
+        setImageProblem(outcome.canAskAgain ? 'denied' : 'settings');
+      } else if (outcome.status === 'failed') setImageProblem('failed');
+    } catch {
+      setImageProblem('failed');
+    } finally {
+      setPicking(false);
+    }
+  }
+
   function enterManually(input: ImportInput) {
     setManualPrefill(
-      input.type === 'link' ? { sourceUrl: input.url } : { notes: input.text.slice(0, 5000) },
+      input.type === 'link'
+        ? { sourceUrl: input.url }
+        : input.type === 'text'
+          ? { notes: input.text.slice(0, 5000) }
+          : {},
     );
     reset();
     router.replace({ pathname: '/recipes/edit', params: { from: 'import' } });
@@ -215,6 +239,45 @@ export function ImportScreen() {
           fullWidth
           testID="import-text-submit"
         />
+      </View>
+      <View style={{ gap: theme.space[3] }}>
+        <Text variant="sectionLabel" accessibilityRole="header">
+          {t('importRecipe.photo.fromImage')}
+        </Text>
+        <Text color="textSecondary">{t('importRecipe.photo.hint')}</Text>
+        <Button
+          variant="secondary"
+          icon="camera"
+          label={picking ? t('importRecipe.photo.preparing') : t('importRecipe.photo.takePhoto')}
+          onPress={() => void fromImage('camera')}
+          disabled={!online || picking}
+          fullWidth
+          testID="import-take-photo"
+        />
+        <Button
+          variant="secondary"
+          icon="image"
+          label={t('importRecipe.photo.chooseImage')}
+          onPress={() => void fromImage('library')}
+          disabled={!online || picking}
+          fullWidth
+          testID="import-choose-image"
+        />
+        {imageProblem ? (
+          <Text color="error" accessibilityRole="alert" testID="import-image-problem">
+            {imageProblem === 'failed'
+              ? t('importRecipe.photo.imageFailed')
+              : t('importRecipe.photo.cameraDenied')}
+          </Text>
+        ) : null}
+        {imageProblem === 'settings' ? (
+          <Button
+            variant="ghost"
+            label={t('importRecipe.photo.openSettings')}
+            onPress={() => void Linking.openSettings()}
+            testID="import-open-settings"
+          />
+        ) : null}
       </View>
       <Button
         variant="ghost"

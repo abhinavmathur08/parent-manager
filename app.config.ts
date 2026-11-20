@@ -197,6 +197,16 @@ function buildConfig(
           defaultChannel: 'default',
         },
       ],
+      // Photo and screenshot import (R-07): the camera and photo library only, never the
+      // microphone. Each is asked for in context, the first time it's needed.
+      [
+        'expo-image-picker',
+        {
+          cameraPermission: enUS.importRecipe.photo.cameraPermission,
+          photosPermission: enUS.importRecipe.photo.photosPermission,
+          microphonePermission: false,
+        },
+      ],
       // Apple Reminders export (G-06.2): reminders only, never the calendar.
       [
         'expo-calendar',

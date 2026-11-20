@@ -33,6 +33,8 @@ const SYMBOLS = {
   print: { ios: 'printer', android: 'print' },
   pdf: { ios: 'doc.richtext', android: 'picture_as_pdf' },
   copy: { ios: 'doc.on.doc', android: 'content_copy' },
+  camera: { ios: 'camera', android: 'photo_camera' },
+  image: { ios: 'photo', android: 'image' },
 } as const;
 
 export type IconName = keyof typeof SYMBOLS;
