@@ -66,6 +66,8 @@ end;
 $$;
 
 revoke all on function private.valid_repeat(jsonb) from public;
+-- Check constraints run as the writer, so every role that writes events needs it.
+grant execute on function private.valid_repeat(jsonb) to authenticated, service_role;
 
 -- Replaces C-01.1's plain "an object" check. Existing rows are checked as the constraint is
 -- added; the calendar has no screens yet, so there are none to fail.
