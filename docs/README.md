@@ -7,6 +7,7 @@ Product and engineering documentation that lives alongside the code.
 - [spec-phase2.md](spec-phase2.md): the Phase 2 specification (calendar, appointments, documents and records), with `FR2-`, `NFR2-` and `R2-` requirements.
 - [architecture.md](architecture.md): how the app is built, covering the data model, security, sync, AI import, entitlements and operations.
 - [backlog.md](backlog.md): the ordered Phase 1 (MVP) backlog.
+- [backlog-phase2.md](backlog-phase2.md): the ordered Phase 2 backlog (calendar and documents).
 - [design-system.md](design-system.md): tokens, components and accessibility rules for the chosen direction.
 - [design-directions.md](design-directions.md): three visual and UX directions, with a recommendation.
 - [decisions-needed.md](decisions-needed.md): decisions and accounts needed from the product owner.
