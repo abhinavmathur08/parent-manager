@@ -42,10 +42,10 @@ begin
     if jsonb_typeof(r -> 'weekdays') is distinct from 'array'
       or jsonb_array_length(r -> 'weekdays') not between 1 and 7
       or exists (
-        select 1 from jsonb_array_elements(r -> 'weekdays') d
-        where d not in ('1', '2', '3', '4', '5', '6', '7')
+        select 1 from jsonb_array_elements(r -> 'weekdays') as d (day)
+        where d.day not in ('1', '2', '3', '4', '5', '6', '7')
       )
-      or (select count(distinct d) from jsonb_array_elements(r -> 'weekdays') d)
+      or (select count(distinct d.day) from jsonb_array_elements(r -> 'weekdays') as d (day))
         <> jsonb_array_length(r -> 'weekdays') then
       return false;
     end if;
