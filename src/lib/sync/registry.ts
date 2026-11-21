@@ -33,6 +33,7 @@ export function validateDefinition(definition: SyncTableDefinition): SyncTableDe
 export function defineSyncTable<C extends Record<string, ColumnType>>(definition: {
   name: string;
   columns: C;
+  scoped?: boolean;
 }): SyncTableDefinition {
   const checked = validateDefinition(definition);
   tables.set(checked.name, checked);

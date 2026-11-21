@@ -21,6 +21,10 @@ export class FakeServer {
   readonly checkColumns = new Map<string, string[]>();
   /** Users who are no longer members; RLS hides everything from them. */
   readonly removed = new Set<string>();
+  /** Per-row visibility, like an unshared event hidden from a caregiver (C-01.3). */
+  canSee: (user: string, table: string, row: SyncRow) => boolean = () => true;
+  /** Tables `visibleIds` answers for, like the server's scoped registry. */
+  readonly scoped = new Set<string>();
   private tick = 0;
   private readonly subscribers = new Set<{
     user: string;
@@ -75,7 +79,8 @@ export class FakeServer {
       if (
         s.tables.includes(name) &&
         s.householdId === row.household_id &&
-        !this.removed.has(s.user)
+        !this.removed.has(s.user) &&
+        this.canSee(s.user, name, row)
       ) {
         const copy = { ...row };
         queueMicrotask(() => s.listener.onRow(name, copy));
@@ -113,14 +118,16 @@ export class FakeServer {
       this.requests += 1;
       if (device.offline || this.offline) throw new RemoteError('Network request failed', 0, '');
     };
-    const visible = (row: SyncRow | undefined) =>
-      row && !this.removed.has(user) ? { ...row } : null;
+    const sees = (name: string, row: SyncRow) =>
+      !this.removed.has(user) && this.canSee(user, name, row);
+    const visible = (name: string, row: SyncRow | undefined) =>
+      row && sees(name, row) ? { ...row } : null;
     return {
       fetchPage: async (name: string, householdId: string, page: PageRequest) => {
         request();
         if (this.removed.has(user)) return [];
         return [...this.table(name).values()]
-          .filter((r) => r.household_id === householdId)
+          .filter((r) => r.household_id === householdId && sees(name, r))
           .filter((r) => page.includeDeleted || !r.deleted_at)
           .filter((r) => !page.since || r.updated_at! >= page.since.replace('Z', '+00:00'))
           .filter(
@@ -135,7 +142,18 @@ export class FakeServer {
       },
       fetchRow: async (name, id) => {
         request();
-        return visible(this.table(name).get(id));
+        return visible(name, this.table(name).get(id));
+      },
+      fetchRows: async (name, ids) => {
+        request();
+        return ids.flatMap((id) => visible(name, this.table(name).get(id)) ?? []);
+      },
+      visibleIds: async (name, householdId) => {
+        request();
+        if (!this.scoped.has(name)) throw new RemoteError('not a scoped sync table', 400, '22023');
+        return [...this.table(name).values()]
+          .filter((r) => r.household_id === householdId && !r.deleted_at && sees(name, r))
+          .map((r) => r.id);
       },
       insert: async (name, rows) => {
         request();
@@ -148,7 +166,7 @@ export class FakeServer {
       update: async (name, id, values) => {
         request();
         const old = this.table(name).get(id);
-        if (!old || this.removed.has(user)) return null;
+        if (!old || !sees(name, old)) return null;
         return this.applyUpdate(name, old, values, user);
       },
       subscribe: (householdId, tables, listener) => {

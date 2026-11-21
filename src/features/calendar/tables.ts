@@ -8,6 +8,8 @@ import type { SyncRow, SyncTableDefinition } from '@/lib/sync/types';
  */
 export const EVENTS = {
   name: 'events',
+  // Parents see every event; others only shared ones (D-16, C-01.3).
+  scoped: true,
   columns: {
     kind: 'text',
     title: 'text',
@@ -28,6 +30,7 @@ export const EVENTS = {
 
 export const EVENT_PEOPLE = {
   name: 'event_people',
+  scoped: true,
   columns: {
     event_id: 'text',
     person_id: 'text',
@@ -36,6 +39,7 @@ export const EVENT_PEOPLE = {
 
 export const EVENT_REMINDERS = {
   name: 'event_reminders',
+  scoped: true,
   columns: {
     event_id: 'text',
     offset_minutes: 'integer',
@@ -45,6 +49,7 @@ export const EVENT_REMINDERS = {
 /** One changed occurrence of a repeating event (C-01.2, FR2-CAL-4, R2-CAL-2). */
 export const EVENT_EXCEPTIONS = {
   name: 'event_exceptions',
+  scoped: true,
   columns: {
     event_id: 'text',
     original_date: 'text',

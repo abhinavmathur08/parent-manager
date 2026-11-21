@@ -422,7 +422,11 @@ Most edits are small and touch different rows, so simple rules are enough:
 
 ### Per-row visibility (Phase 2)
 
-Phase 1 tables are visible to every member, so a pull by `updated_at` is enough. Phase 2 events and documents can stop being visible to a member without the row changing for them (unshared, a share removed, a lapse), so their pulls never see a tombstone. Tables registered with `defineSyncTable({ ..., scoped: true })` also call `public.visible_ids(table)` on each full pull and on rejoining the channel, and delete local rows the server no longer returns. Busy blocks are scoped the same way. The two-device harness covers unsharing and removal (NFR2-OFF-2, C-01.3).
+Phase 1 tables are visible to every member, so a pull by `updated_at` is enough. Phase 2 events and documents can stop being visible to a member without the row changing for them (unshared, a share removed, a lapse, a removal), so their pulls never see a tombstone, and Realtime sends them nothing (C-01.3, R2-ACC-2, NFR2-OFF-2):
+
+- **Server.** A synced table is marked scoped with `private.enable_scoped_sync('public.<table>')` (registry `private.scoped_sync_tables`). `public.visible_ids(target, household)` runs as the caller, so RLS decides, and returns the IDs of the household's live rows the caller can see now, as one `uuid[]` so PostgREST's row limit can't cut the list short. Other tables are refused (`22023`).
+- **Device.** Tables registered with `defineSyncTable({ ..., scoped: true })` are checked against `visible_ids`: local rows the server no longer returns are dropped (unless a write is queued), and visible rows missing locally are fetched, such as an event's unchanged people and reminders when it's shared again. The engine checks on opening, on every Realtime (re)join, and every 60 seconds while connected (`VISIBILITY_INTERVAL_MS`), so an unshared event leaves a caregiver's device within a minute online and right after reconnecting. A failed check (offline) changes nothing.
+- The calendar's four tables are scoped; busy blocks and the document tables will be too. The two-device harness covers unsharing, a lapse and a removal.
 
 ## 6. AI recipe import
 

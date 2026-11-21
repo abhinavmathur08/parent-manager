@@ -42,6 +42,12 @@ export const INSERT_BATCH = 100;
 /** Up to this many updates to different rows are sent at once (NFR-OFF-4). */
 export const PARALLEL_UPDATES = 8;
 const MAX_RETRY_MS = 30_000;
+/**
+ * While connected, scoped tables are checked against what the server lets the member see this
+ * often. Losing sight of a row (unshared, a lapse) sends no Realtime event, so this is how it
+ * leaves the device within a minute (R2-ACC-2, NFR2-OFF-2).
+ */
+export const VISIBILITY_INTERVAL_MS = 60_000;
 
 type Clock = () => number;
 
@@ -88,6 +94,10 @@ export class SyncEngine {
   private retryTimer: ReturnType<typeof setTimeout> | null = null;
   private unsubscribeStore: (() => void) | null = null;
   private unsubscribeRealtime: (() => void) | null = null;
+  /** Scoped tables are checked on the next run: on opening, and on each (re)join. */
+  private visibilityDue = true;
+  private visibilityCheckedAt = 0;
+  private visibilityTimer: ReturnType<typeof setInterval> | null = null;
 
   constructor(
     readonly store: LocalStore,
@@ -194,7 +204,12 @@ export class SyncEngine {
       onState: (realtime) => {
         if (!active || this.stopped || realtime === this.status.realtime) return;
         this.setStatus({ realtime });
-        if (realtime === 'connected') void this.sync();
+        if (realtime === 'connected') {
+          // Anything unshared while disconnected sent no event, so check scoped tables.
+          this.visibilityDue = true;
+          this.startVisibilityTimer();
+          void this.sync();
+        }
       },
     });
     this.unsubscribeRealtime = () => {
@@ -203,8 +218,72 @@ export class SyncEngine {
     };
   }
 
+  /**
+   * Checks scoped tables against what the server lets this member see, dropping rows they no
+   * longer may and fetching ones they newly may (C-01.3). Runs between syncs, never during one.
+   */
+  checkVisibility(): Promise<void> {
+    this.visibilityDue = true;
+    if (this.stopped || !this.scopedTables().length) return Promise.resolve();
+    if (this.running) {
+      this.again = true;
+      return this.running;
+    }
+    this.running = this.verifyScoped()
+      .catch(() => {
+        // Offline: the next run checks again.
+      })
+      .finally(() => {
+        this.running = null;
+        if (this.again) {
+          this.again = false;
+          void this.sync();
+        }
+      });
+    return this.running;
+  }
+
+  private startVisibilityTimer(): void {
+    if (this.visibilityTimer || !this.scopedTables().length) return;
+    this.visibilityTimer = setInterval(() => void this.checkVisibility(), VISIBILITY_INTERVAL_MS);
+  }
+
+  private stopVisibilityTimer(): void {
+    if (this.visibilityTimer) clearInterval(this.visibilityTimer);
+    this.visibilityTimer = null;
+  }
+
+  private scopedTables(): string[] {
+    return this.store.tableNames().filter((table) => this.store.definition(table).scoped);
+  }
+
+  /** Brings each scoped table in line with the IDs the server says this member can see. */
+  private async verifyScoped(): Promise<void> {
+    const results = await Promise.allSettled(
+      this.scopedTables().map(async (table) => {
+        const visible = new Set(await this.remote.visibleIds(table, this.householdId));
+        if (this.stopped) return;
+        const local = new Set(await this.store.liveIds(table));
+        // Rows that became visible without changing, such as an event's people when it's
+        // shared again, are fetched; rows no longer visible leave the device.
+        const missing = [...visible].filter((id) => !local.has(id));
+        if (missing.length) {
+          const rows = await this.remote.fetchRows(table, missing);
+          if (this.stopped) return;
+          await this.store.applyServerRows(table, rows);
+        }
+        await this.store.removeRowsExcept(table, visible);
+      }),
+    );
+    const failed = results.find((result) => result.status === 'rejected');
+    if (failed) throw failed.reason;
+    this.visibilityDue = false;
+    this.visibilityCheckedAt = this.now();
+  }
+
   /** Stops listening, for example while offline or in the background. */
   stopRealtime(): void {
+    this.stopVisibilityTimer();
     const unsubscribe = this.unsubscribeRealtime;
     this.unsubscribeRealtime = null;
     unsubscribe?.();
@@ -381,6 +460,12 @@ export class SyncEngine {
     );
     const failed = results.find((result) => result.status === 'rejected');
     if (failed) throw failed.reason;
+    if (
+      this.scopedTables().length &&
+      (this.visibilityDue || this.now() - this.visibilityCheckedAt >= VISIBILITY_INTERVAL_MS)
+    ) {
+      await this.verifyScoped();
+    }
   }
 
   /**

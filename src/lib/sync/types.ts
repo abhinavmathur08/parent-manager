@@ -13,6 +13,12 @@ export type SyncTableDefinition = {
   name: string;
   /** The table's own columns, without the system columns every synced table has. */
   columns: Readonly<Record<string, ColumnType>>;
+  /**
+   * Rows a member can stop seeing without the row changing for them (unshared, a share
+   * removed, a lapse), so a pull never brings a tombstone. The engine also asks the server
+   * which rows are visible (`public.visible_ids`) and drops the others (architecture section 5).
+   */
+  scoped?: boolean;
 };
 
 /** Columns every synced table has on the server (architecture section 3). */

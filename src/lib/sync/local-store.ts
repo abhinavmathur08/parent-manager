@@ -176,6 +176,18 @@ export class LocalStore {
     });
   }
 
+  /** The IDs of the rows of `table` that aren't deleted. */
+  liveIds(table: string): Promise<string[]> {
+    const definition = this.definition(table);
+    return this.serial(async () => {
+      const raw = await this.db.getAllAsync<{ id: string }>(
+        `SELECT id FROM ${quote(definition.name)} WHERE deleted_at IS NULL`,
+        [],
+      );
+      return raw.map((r) => r.id);
+    });
+  }
+
   /** One row, including a deleted one, or null. */
   row(table: string, id: string): Promise<SyncRow | null> {
     return this.serial(() => this.rowUnsafe(table, id));

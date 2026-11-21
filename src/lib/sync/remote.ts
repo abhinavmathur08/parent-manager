@@ -31,6 +31,13 @@ export type SyncRemote = {
   fetchPage(table: string, householdId: string, request: PageRequest): Promise<SyncRow[]>;
   /** One row, or null if it doesn't exist or the caller can't see it. */
   fetchRow(table: string, id: string): Promise<SyncRow | null>;
+  /** Rows by ID; ones that don't exist or the caller can't see are left out. */
+  fetchRows(table: string, ids: readonly string[]): Promise<SyncRow[]>;
+  /**
+   * The IDs of the household's live rows of a scoped table that the caller can see now
+   * (`public.visible_ids`, C-01.3).
+   */
+  visibleIds(table: string, householdId: string): Promise<string[]>;
   /** Creates rows; the server answers with them as stored. */
   insert(table: string, rows: readonly Record<string, unknown>[]): Promise<SyncRow[]>;
   /** Updates one row; null if the caller can't see or change it. */
@@ -55,6 +62,8 @@ type Failure = { message: string; code?: string } | null;
 export function toRemoteError(error: Failure, status: number): RemoteError {
   return new RemoteError(error?.message ?? 'Request failed', status, error?.code ?? '');
 }
+
+const ID_PAGE = 100;
 
 // PostgREST filter values with punctuation (timestamps have `:` and `+`) must be quoted.
 const literal = (value: string) => `"${value.replace(/"/g, '\\"')}"`;
@@ -86,6 +95,29 @@ export function createSupabaseRemote(client: SupabaseClient): SyncRemote {
         .maybeSingle();
       if (error) throw toRemoteError(error, status);
       return (data ?? null) as SyncRow | null;
+    },
+
+    async fetchRows(table, ids) {
+      const rows: SyncRow[] = [];
+      // Short pages, so the ID list fits in the request URL.
+      for (let i = 0; i < ids.length; i += ID_PAGE) {
+        const { data, error, status } = await client
+          .from(table)
+          .select('*')
+          .in('id', ids.slice(i, i + ID_PAGE));
+        if (error) throw toRemoteError(error, status);
+        rows.push(...((data ?? []) as SyncRow[]));
+      }
+      return rows;
+    },
+
+    async visibleIds(table, householdId) {
+      const { data, error, status } = await client.rpc('visible_ids', {
+        target: table,
+        household: householdId,
+      });
+      if (error) throw toRemoteError(error, status);
+      return (data ?? []) as string[];
     },
 
     async insert(table, rows) {
