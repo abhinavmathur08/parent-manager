@@ -48,7 +48,7 @@ These are in the vision but outside its MVP row:
 - **Pantry depth:** pantry quantities, expiry tracking and running-low alerts.
 - **Suggestions:** purchase recommendations ("you usually buy milk every 8 days") and "fill my week" suggestions.
 - **List depth:** multiple lists, custom aisle order per store, and price and budget estimates.
-- **Other:** email digests, the meal train and grocery gifting, the caregiver handoff brief, and the UK and Australia store launch (Phase 2).
+- **Other:** email digests, the meal train and grocery gifting, the caregiver handoff brief, and the UK and Australia store launch (Phase 7).
 
 ### 1.4 Glossary
 
@@ -739,7 +739,7 @@ When Premium lapses (FR-PAY-9):
 
 ### 3.10 Purchase memory (MEM)
 
-Phase 1 builds the foundation and one free feature. Recommendations are Phase 2 (see section 9, conflict C-1).
+Phase 1 builds the foundation and one free feature. Recommendations are Phase 5 (see section 9, conflict C-1).
 
 **User stories**
 
@@ -1435,8 +1435,8 @@ Each line needs the product owner's sign-off.
 
 ### 9.3 Conflicts and gaps found with the other docs
 
-- **C-1, purchase memory phase.** The vision's Phase 1 section and the free table include purchase memory ("frequently bought items" free; recommendations Premium). The roadmap table puts "purchase memory and recommendations" in Phase 2.
-  - **This spec:** puts the foundation and frequently bought suggestions in Phase 1, and recommendations in Phase 2.
+- **C-1, purchase memory phase.** The vision's Phase 1 section and the free table include purchase memory ("frequently bought items" free; recommendations Premium). The roadmap table puts "purchase memory and recommendations" in Phase 5 (Phase 2 before the 2026-11-21 reorder).
+  - **This spec:** puts the foundation and frequently bought suggestions in Phase 1, and recommendations in Phase 5.
   - **Backlog:** has no item for frequently bought suggestions (G-04 only records events).
   - **Proposed fix:** add backlog item **G-09 frequently bought suggestions (S)**. Owner to confirm the split, and whether the vision's roadmap should say "recommendations" only.
 - **C-2, Phase 1 extras in the vision.** The vision's Phase 1 section lists voice import, barcode scanning, widgets and lock-screen shortcuts, pantry expiry and running-low flags, while its MVP row and the backlog leave them out. This spec follows the MVP row (section 1.3). Owner to confirm.

@@ -160,6 +160,6 @@ It blocks nothing.
 
 - **Expo organization account:** optional now. Move the EAS project from the personal account `abhinav08` to an organization if others will join.
 - **Which languages and regions after English:** this decides which translations come first. The localization foundation (F-05) doesn't depend on it.
-- **Whether the UK and Australia launch together or one first:** a Phase 2 decision.
-- **Which baby trackers to integrate:** Phase 5 research.
+- **Whether the UK and Australia launch together or one first:** a Phase 7 decision.
+- **Which baby trackers to integrate:** Phase 6 research.
 - **Whether to open household data to outside AI assistants:** decide after the MVP, with privacy review.
