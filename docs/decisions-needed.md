@@ -4,7 +4,7 @@ This is the decision log. Each entry names the backlog items and GitHub issues i
 
 ## Status at a glance
 
-Updated 2026-11-15.
+Updated 2026-11-21. D-14 to D-21 are Phase 2 decisions ([spec-phase2.md](spec-phase2.md)).
 
 | ID   | Decision                                   | Status                                                 | Needed by                                                                      |
 | ---- | ------------------------------------------ | ------------------------------------------------------ | ------------------------------------------------------------------------------ |
@@ -21,6 +21,14 @@ Updated 2026-11-15.
 | D-11 | Legal review and no ads                    | Deferred                                               | Before the external beta (L-01.2, #102)                                        |
 | D-12 | Updates channel                            | Deferred                                               | Any time; blocks nothing                                                       |
 | D-13 | Offline sync approach                      | Decided 2026-11-08: build our own                      |                                                                                |
+| D-14 | Phase 2: device calendar sync              | Decided 2026-11-21: device copy and busy times         |                                                                                |
+| D-15 | Phase 2: free and Premium split            | Decided 2026-11-21                                     |                                                                                |
+| D-16 | Phase 2: what caregivers see               | Decided 2026-11-21: shared items only                  |                                                                                |
+| D-17 | Phase 2: document storage                  | Decided 2026-11-21: private bucket and vault lock      |                                                                                |
+| D-18 | Phase 2: busy days and the plan            | Decided 2026-11-21: rule and one-tap suggestion        |                                                                                |
+| D-19 | Phase 2: children's records                | Decided 2026-11-21: files only, no medical fields      |                                                                                |
+| D-20 | Phase 2: security reviewer and budget      | Open                                                   | Before the Phase 2 beta (L-06)                                                 |
+| D-21 | Phase 2: storage plan for documents        | Open                                                   | Before the Phase 2 beta; part of D-1                                           |
 
 ## Decided
 
@@ -66,6 +74,39 @@ Both stores will use personal (individual) accounts, not a company.
 - **Why:** the Legend-State spike (H-06.1, #27, PR #110) failed two offline conflict rules on the device. A sync vendor such as PowerSync would be another processor holding children's data, from about USD 49 a month. Building our own adds no vendor, at the cost of about 2 to 3 more days, and we own any sync bugs.
 - **Reused from the spike:** the server-side conflict rules (server-set `updated_at` and `version`, soft deletes) held, and the two-device test harness carries over as H-06.3's acceptance test. PR #110 is closed, and its branch is kept for reference.
 - **Unblocks:** H-06.2 to H-06.4 (#28, #30, #31).
+
+### D-14 Device calendar sync: decided 2026-11-21
+
+- **Decision:** connect through the phone's own calendars (`expo-calendar`), with no server connection to Google or Apple. Household events are copied one way into a calendar on each member's phone: a new "Parent Manager" calendar, or an existing writable one such as their Google account calendar. Each member can also share busy times from calendars they pick, as busy blocks with no titles. Two-way sync is later.
+- **Why:** it reaches iCloud and Google calendars on both platforms with no OAuth app verification or Google security assessment, no tokens on our server, and no new processor.
+- **Unblocks:** C-05.1 to C-05.3 in [backlog-phase2.md](backlog-phase2.md). Spec FR2-DEV-1 to FR2-DEV-6.
+
+### D-15 Phase 2 free and Premium split: decided 2026-11-21
+
+- **Free:** shared calendar, appointments, repeats, 1 reminder per event, device copy, busy times, busy-day markers and easy-meal suggestions, and up to 25 documents with scanning, the vault lock and attachments.
+- **Premium:** up to 5 reminders per event, change notifications, caregiver and family access to shared events and documents, document expiry reminders, and up to 2 GB of documents.
+- **Always free:** export and deletion of all Phase 2 data, the vault lock and privacy settings.
+- **Tuning:** every number is a server setting.
+- **Vision conflict:** the vision's table puts busy-day meal suggestions in Premium. Spec conflict C2-1 proposes the vision edit, which needs your approval of the exact text.
+
+### D-16 What caregivers see: decided 2026-11-21, shared items only
+
+Family members and caregivers see only events a parent shares (shared by default for childcare events) and documents a parent shares with them by name. Nothing in the vault is visible by default, and an attachment never widens access. Spec section 2.
+
+### D-17 Document storage: decided 2026-11-21
+
+- **Storage:** a private Supabase Storage bucket under `<household_id>/`, encrypted at rest by Supabase, read through signed links that expire after 60 seconds.
+- **On the device:** a vault lock (biometric or passcode) on by default, screen capture blocked, and no files kept on the device beyond a temporary viewer cache. Documents aren't available offline.
+- **Limits:** PDF, JPEG, PNG and HEIC, up to 10 MB a file. Kept until a parent deletes them; deleted files are purged from storage within 24 hours.
+- **Not chosen:** client-side encryption (key sharing and recovery make it a large build) and an offline cache. Both can be revisited after the security review.
+
+### D-18 Busy days and the plan: decided 2026-11-21
+
+A day is busy when a parent's event or busy block overlaps 16:00 to 19:00, or 3 or more hours are booked between 07:00 and 21:00, or a member marks it. The Plan tab shows the marker and reason and offers one-tap easy dinners. It never changes the plan without a tap. Spec section 3.4 and R2-BUSY-1.
+
+### D-19 Children's records: decided 2026-11-21, files only
+
+The vault holds files a parent chooses, with a category and an optional person tag. There are no structured medical fields: no diagnoses, vaccine logs or schedules, growth or medications. A `doc.medical` category is allowed and never reaches AI, analytics or notifications. Appointment notes are free text the parent writes.
 
 ## Deferred until the beta or launch
 
@@ -155,6 +196,19 @@ It blocks nothing.
 
 - **Recommendation:** GitHub as the record, since each PR says what changed and how it was tested.
 - **Optional extra:** a short email or Slack summary per session if you want push updates. Slack needs a workspace and the Slack integration.
+
+### D-20 Phase 2 security reviewer and budget: needed before the Phase 2 beta
+
+- **Why:** Phase 2 is done only when a security review is passed (vision roadmap), and the vault holds identity and insurance documents.
+- **Recommendation:** an internal review against OWASP MASVS L1 with a written threat model (L-05), then a short external mobile and API penetration test of the calendar and vault, scoped at 3 to 5 days. Typical cost is several thousand USD; get two quotes.
+- **You do:** choose the reviewer and approve the budget. Claude won't engage a vendor or create accounts.
+- **Blocks:** L-06 only.
+
+### D-21 Storage plan for documents: needed before the Phase 2 beta
+
+- **Why:** the Supabase Free plan includes 1 GB of file storage for the whole project, and a 50 MB file limit. Premium allows 2 GB per household.
+- **Recommendation:** decide together with D-1: Supabase Pro includes 100 GB, then pay as you go. Development and staging use test files only until then.
+- **Blocks:** nothing in development.
 
 ## Not blocking Phase 1 (decide later)
 

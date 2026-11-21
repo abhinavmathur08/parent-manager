@@ -1,6 +1,6 @@
 # Parent Manager: architecture
 
-Status: proposal for review, 2026-11-07. [vision.md](vision.md) is the source of truth for scope, and [spec.md](spec.md) defines how Phase 1 behaves. This document describes how we build it, and [backlog.md](backlog.md) breaks the work into Phase 1 items. Decisions that need the product owner are marked **Decision** and collected in [decisions-needed.md](decisions-needed.md).
+Status: proposal for review, 2026-11-07. [vision.md](vision.md) is the source of truth for scope, and [spec.md](spec.md) defines how Phase 1 behaves, and [spec-phase2.md](spec-phase2.md) how Phase 2 (calendar and documents) behaves. This document describes how we build it, and [backlog.md](backlog.md) breaks the work into Phase 1 items. Decisions that need the product owner are marked **Decision** and collected in [decisions-needed.md](decisions-needed.md).
 
 ## 1. Where we start
 
@@ -39,13 +39,14 @@ src/
       list/                 grocery list
       recipes/              library, detail, edit
       household/            members, settings, subscription, privacy
+      calendar/             agenda, day and week views, event detail (Phase 2)
     import/                 recipe import flow (modal stack)
     invite/[token].tsx      invitation deep link
     paywall.tsx             modal
   features/<module>/        components, hooks and data access per module
   components/               shared UI kit (design system)
   i18n/                     i18next setup, locale files, Intl formatters
-  lib/                      supabase, sync, analytics, sentry, purchases, notifications
+  lib/                      supabase, sync, analytics, sentry, purchases, notifications, device-calendar (Phase 2)
 supabase/
   migrations/               SQL migrations
   functions/                Edge Functions (Deno): import-recipe, revenuecat-webhook, notify, invite, account
@@ -93,6 +94,8 @@ All tables live in Postgres. Every table holding household data has `household_i
 | Subscription                     | Manage         | No             | No                   |
 
 Family members and caregivers are Premium seats.
+
+In Phase 2, family members and caregivers see only the events and documents a parent shares (D-16, spec-phase2 section 2). Busy blocks are for parents only.
 
 ### 3.2 Phase 1 entities
 
@@ -269,6 +272,49 @@ select private.register_for_deletion('public.recipes', 'created_by', 'user', 'se
 | `ai_import_jobs`              | The user's own jobs, with drafts           | With the household; `user_id` set null with the account; purged after 30 days |
 | `ai_usage`                    | Monthly counts                             | With the household                                                            |
 | `household_deletion_requests` | Not exported (a pending action)            | With the household; with the account of the parent who asked                  |
+| `events`                      | All rows                                   | With the household; `created_by`, `taking_user_id` cleared with the account   |
+| `event_exceptions`            | With their event                           | With the household                                                            |
+| `event_people`                | With their event                           | With the household                                                            |
+| `event_reminders`             | With their event                           | With the household                                                            |
+| `busy_blocks`                 | The member's own rows (account export)     | With the household, and with the account                                      |
+| `busy_day_overrides`          | All rows                                   | With the household; `set_by` set null with the account                        |
+| `documents`                   | All rows, with files in `documents/`       | With the household; files purged through `storage_purge_queue`                |
+| `document_shares`             | All rows                                   | With the household, and with the account of the member shared with            |
+| `event_documents`             | All rows                                   | With the household                                                            |
+
+### 3.5 Phase 2 entities: calendar and documents
+
+Phase 2 follows section 3's rules: every table has `household_id`, the system columns and RLS, and is registered for export and deletion in its own migration. Spec IDs are in [spec-phase2.md](spec-phase2.md).
+
+#### Calendar
+
+| Table                | Key columns                                                                                                                                                                                                         | Notes                                                                                                                      |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `events`             | `id`, `household_id`, `kind` (`kind.*`), `title`, `starts_at`, `ends_at` or `all_day` with `start_date`, `end_date`; `place`, `notes`, `taking_user_id`, `shared`, `repeat` (JSON rule), `created_by`, `updated_by` | Repeats are expanded on the device for the visible range (R2-CAL-1). `shared` decides family and caregiver visibility.     |
+| `event_exceptions`   | `event_id`, `household_id`, `original_start`, `status` (`moved` or `skipped`), `starts_at`, `ends_at`, `taking_user_id`                                                                                             | One row per changed occurrence, with an ID from `stableId(event, original_start)` so two devices write one row (R2-CAL-2). |
+| `event_people`       | `event_id`, `household_id`, `person_id`                                                                                                                                                                             | Who the event is for. Tombstoned with the person.                                                                          |
+| `event_reminders`    | `event_id`, `household_id`, `offset_minutes`                                                                                                                                                                        | A trigger allows 1 per event on Free and 5 on Premium (`app_config` `calendar.reminders`).                                 |
+| `busy_blocks`        | `id`, `household_id`, `user_id`, `starts_at`, `ends_at`                                                                                                                                                             | No text columns, by design (R2-BUSY-3); a database test asserts it. Parents read; each member writes only their own.       |
+| `busy_day_overrides` | `household_id`, `date`, `busy`, `set_by`                                                                                                                                                                            | One live row per date, with a `stableId`.                                                                                  |
+
+- **Busy-day engine (B-01.1).** A pure function in `src/features/calendar/busy.ts` takes the week's expanded occurrences, parents' busy blocks, overrides, the household's timezone and the thresholds from `app_config` (`calendar.busy_rule`), and returns each day's busy state and reason (R2-BUSY-1). The Plan tab and the easy dinner sheet read it, so it works offline. Easy-meal candidates reuse the planner's leftover candidates and the recipes' tags.
+- **Device calendars (C-05, D-14).** `src/lib/device-calendar` wraps `expo-calendar`'s object API (`ExpoCalendar`, `ExpoCalendarEvent`). Phase 2 needs full calendar access on iOS, since write-only access (iOS 17+) can't create our calendar, update copies or read busy times; the config plugin's `calendarPermission` string is added, and the permission is asked only when a member turns a feature on (NFR2-SEC-5). Android has no single default calendar, so the member picks a writable calendar or the app creates a local "Parent Manager" one.
+  - **Copy out:** a `DeviceCalendarSync` component in the tabs layout writes each visible occurrence from 30 days back to 180 days ahead (PROPOSED) as a single device event, not a device repeat, so exceptions need no mapping. The device-event ID for each occurrence is kept in the `expo-sqlite` key-value store per household, so updates and deletions find their copy. It runs on start, on foreground and after sync, and never reads the copies back.
+  - **Busy times in:** the same component reads the chosen calendars for the next 14 days in memory, skips all-day events and its own copies, and replaces the member's `busy_blocks` through the sync layer. Nothing else from the device leaves memory.
+
+#### Documents
+
+| Table                           | Key columns                                                                                                                                                         | Notes                                                                                      |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `documents`                     | `id`, `household_id`, `title`, `category` (`doc.*`), `person_id`, `expires_on`, `mime`, `page_count`, `size_bytes`, `status` (`uploading` or `ready`), `created_by` | Metadata syncs; files never do. No other free text (R2-DOC-3).                             |
+| `document_shares`               | `document_id`, `household_id`, `user_id`, `shared_by`                                                                                                               | One per member shared with. Premium: `household_role()` is already null for seats on Free. |
+| `event_documents`               | `event_id`, `document_id`, `household_id`                                                                                                                           | Attachments. Parents write. Never widens access (R2-ACC-1).                                |
+| `storage_purge_queue` (private) | `bucket`, `prefix`, `due_at`                                                                                                                                        | Files to remove after a document, household or account is deleted. No client access.       |
+
+- **Storage (V-02.2, D-17).** A private bucket, `documents`, with paths `<household_id>/<document_id>/<page>.jpg` or `.pdf`. Clients never upload directly: the Edge Function `documents` checks the role and the limits (25 documents on Free, 2 GB on Premium, 10 MB a file, from `app_config` `documents.limits`), creates the row as `uploading`, and returns signed upload URLs; a second call checks the stored objects and marks it `ready`. Rows stuck in `uploading` for 24 hours are removed. Reads use `createSignedUrl` with a 60-second expiry, allowed by a storage policy that calls `private.can_read_document(document_id)` (a parent, or a live share for the caller).
+- **Purging files.** SQL can't safely delete storage objects, so deleting a document, `erase_household` and `erase_user` add prefixes to `storage_purge_queue`, and a scheduled run of the `documents` function deletes them through the Storage API every hour (R2-DOC-4, FR2-PRIV-2).
+- **On the device (V-03).** The vault lock uses `expo-local-authentication` with its own timeout, separate from the app lock. Vault screens call `expo-screen-capture`'s `usePreventScreenCapture` (screenshots and recordings blocked; Android's `FLAG_SECURE` also blanks the app switcher) and, on iOS, `enableAppSwitcherProtectionAsync` for a blur in the app switcher. Pages download to a cache folder deleted when the viewer closes and on sign-out.
+- **Scanning and PDFs (V-01 spike).** Expo SDK 58 has no document scanner and no in-app PDF viewer. The spike compares `react-native-document-scanner-plugin` (an Expo config plugin over the platform scanners) with the camera and `expo-image-manipulator`, and picks a PDF viewer or decides to open PDFs through the share sheet. Each new dependency needs its reason in that PR.
 
 ## 4. Row-level security and household isolation
 
@@ -280,6 +326,7 @@ select private.register_for_deletion('public.recipes', 'created_by', 'user', 'se
 - **Invitations.** `create_invitation` returns a 6-character code and a link token once; only their SHA-256 hashes are stored (`code_hash`, `token_hash`), and clients can't select either column. `preview_invitation` and `accept_invitation` take a code or a token and return a `status` (`ok`, `invalid`, `rate_limited`, `revoked`, `used`, `expired`, `premium_required`, `already_member`, `in_other_household` or `seat_limit`) instead of raising, so a wrong attempt is recorded in `invite_attempts` rather than rolled back. Accepting locks the household row and re-checks the seats, so two acceptances can't both take the last seat. The Premium seat cap is `app_config` key `household.premium_seats` (6 if unset). `revoke_invitation` is for parents.
 - **Members.** `change_member_role` and `remove_member` are for parents. Role changes keep the seat rules (2 parents; family and caregiver seats need Premium and fit the cap) and never leave the household without a parent (FR-HH-14). Removing sets the member's `status` to `removed`, so `household_role()` refuses them at once; leaving yourself is `leave_household`, which sets `left`. The last parent can't leave while anyone else is a member, even a paused one (FR-HH-14); the only member's leaving deletes the household and everything that cascades from it (FR-HH-8). `membership_status()` tells a signed-in user whether they're a `member`, `paused` (a family member or caregiver while the household is on Free), `removed` or have `none`, which RLS alone can't, so the app can show S-35.
 - **Storage.** Private buckets use paths of the form `<household_id>/...`, with storage policies that check membership of the first path segment. Images for recipe import are never stored: they go to the import function in the request body (section 6).
+- **Per-row visibility (Phase 2).** Events and documents add a second check after membership: `private.can_read_event(id)` (a parent, or `shared` for family and caregivers) and `private.can_read_document(id)`. Child tables (`event_people`, `event_reminders`, `event_exceptions`, `event_documents`) follow their parent. pgTAP tests cover each role with and without a share, and storage policies get the same tests (NFR2-SEC-1).
 - **Tests.** pgTAP tests in `supabase/tests` create two households and assert that every table is invisible and unwritable across them, for each role. They run in CI against a local Supabase stack (F-04).
 
 ## 5. Real-time sharing, offline sync and conflicts
@@ -352,6 +399,10 @@ Most edits are small and touch different rows, so simple rules are enough:
   - The harness measures delivery between two devices against the 2-second p95 target (FR-HH-13, NFR-PERF-3).
 - **Removed members:** Realtime checks RLS for every change, through `private.household_role()`, so a removed member stops receiving changes at once, and the harness checks this. When the app next loads membership and finds the user no longer belongs to the household, it deletes the local copy (`resetSync`).
 - **Presence:** "Sam is shopping" is optional polish for later.
+
+### Per-row visibility (Phase 2)
+
+Phase 1 tables are visible to every member, so a pull by `updated_at` is enough. Phase 2 events and documents can stop being visible to a member without the row changing for them (unshared, a share removed, a lapse), so their pulls never see a tombstone. Tables registered with `defineSyncTable({ ..., scoped: true })` also call `public.visible_ids(table)` on each full pull and on rejoining the channel, and delete local rows the server no longer returns. Busy blocks are scoped the same way. The two-device harness covers unsharing and removal (NFR2-OFF-2, C-01.3).
 
 ## 6. AI recipe import
 
@@ -488,6 +539,9 @@ Supabase Auth, with:
 - **Email:** sent through Resend, for invitations and, later, digests.
 - **"List is ready" (FR-NOT-4):** `announce_list_ready(week, source)` tells the household's other members, through `enqueue_notification()`, that the list for that week is ready. The List tab's button calls it (`button`), and so does the device whose own change plans the week (`week_planned`). `list_ready_events` (one row per household, week and local day) makes it at most once per list per day, whichever comes first, and lets the button say it was sent today.
 - **"Defrost tonight" (FR-NOT-5):** local notifications, scheduled by `DefrostScheduler` in the tabs layout from the synced plan. Each live dinner in the next 14 days whose recipe has `tag.needs_defrosting` gets one at 08:00 device time (spec AS-7), or at the end of quiet hours if they cover 08:00, naming the meal. The scheduler reconciles the device's scheduled notifications (IDs `defrost.<entry>`) whenever the plan, recipes or settings change and when the app returns to the foreground, so a moved or removed entry moves or cancels its reminder. Nothing is scheduled while the type is off or permission isn't granted, and sign-out cancels them.
+- **Phase 2 notifications.** `notification_prefs` gains `calendar_reminders`, `event_changes`, `who_taking` and `document_expiry`.
+  - **Event reminders (FR2-REM-2):** local, like "defrost tonight". An `EventReminderScheduler` schedules the nearest reminders of visible events from the synced copy. iOS keeps at most 64 pending local notifications per app, so both schedulers share a budget of 60, nearest first, refilled on start, foreground and sync.
+  - **Server types:** `event_changed` (Premium; a trigger on `events` enqueues it for the other members who can see the event, deduplicated per event and hour), `who_taking` (a `pg_cron` job at 18:00 household time) and `document_expiring` (Premium; daily, 30 and 7 days before). Payloads carry IDs, kinds and dates only; titles appear only in local notifications when the member allows it (FR2-REM-3).
 
 ### Environments
 
@@ -579,6 +633,8 @@ Supabase Auth, with:
 | Apple Reminders            | The public API has no sections and no ordering.                                                                          | Decided in the G-06.1 spike: one list per week, with the section in each reminder's notes (section 7).                              |
 | Android export             | No native checklist target.                                                                                              | The share sheet and Copy for the MVP. Consider the Google Tasks API later.                                                          |
 | Children's and health data | Legal exposure, such as UK GDPR and US state health-data laws.                                                           | Collect the minimum (age bands), no ads, and legal review before beta.                                                              |
+| Device calendars           | Server sync with Google needs OAuth verification and a security assessment; iCloud has no public API.                    | Device-level copy and busy times through `expo-calendar` (D-14). Two-way sync later.                                                |
+| Document security          | Host encryption means the server operator could read files.                                                              | Private bucket, 60-second links, vault lock and capture blocking (D-17). Revisit client-side encryption after review.               |
 | Household entitlement      | Store subscriptions belong to a person, but ours cover a household.                                                      | Webhook-driven `household_entitlements`, with clear rules for when the purchaser leaves.                                            |
 | Supabase plan              | Free limits and pausing.                                                                                                 | Pro for production (a **Decision**).                                                                                                |
 | Google Play launch         | New personal developer accounts must run a closed test before production access (at last check, 12 testers for 14 days). | Start closed testing early, or register as an organization (a **Decision**).                                                        |
