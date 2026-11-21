@@ -237,7 +237,10 @@ begin
   end if;
   -- Refuse non-members first. A cascade from another trigger (an event or person deleted) is
   -- the server's own write and skips this.
-  if pg_trigger_depth() = 1 and private.household_role(new.household_id) is null then
+  -- An event the caller can't see is refused the same way, so a wrong ID never tells them that
+  -- another household's event exists.
+  if pg_trigger_depth() = 1 and (private.household_role(new.household_id) is null
+    or not private.can_read_event(new.event_id)) then
     raise exception 'not a member of this household' using errcode = '42501';
   end if;
   if tg_op = 'UPDATE' and new.event_id <> old.event_id then
