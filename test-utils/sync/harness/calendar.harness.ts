@@ -1,12 +1,20 @@
 /**
  * @jest-environment node
  */
-// The calendar on two devices (C-01.2 acceptance, FR2-CAL-4, R2-CAL-2): two parents changing
-// the same occurrence of a repeating event offline write one exception row, and both devices
-// end up with the same one. Runs against the real calendar tables from the migrations.
+// The calendar on several devices, against the real calendar tables from the migrations:
+// - C-01.2 (FR2-CAL-4, R2-CAL-2): two parents changing the same occurrence of a repeating event
+//   offline write one exception row, and both devices end up with the same one.
+// - C-01.3 (R2-ACC-2, NFR2-OFF-2): unsharing an event removes it from a caregiver's device within
+//   60 seconds of reconnecting, and a lapse or a removal clears every scoped table there.
 import { createClient } from '@supabase/supabase-js';
 
-import { CALENDAR_TABLES, EVENT_EXCEPTIONS, EVENTS, exceptionId } from '@/features/calendar/tables';
+import {
+  CALENDAR_TABLES,
+  EVENT_EXCEPTIONS,
+  EVENT_REMINDERS,
+  EVENTS,
+  exceptionId,
+} from '@/features/calendar/tables';
 import { SyncEngine } from '@/lib/sync/engine';
 import { LocalStore } from '@/lib/sync/local-store';
 import { createSupabaseRemote } from '@/lib/sync/remote';
@@ -87,11 +95,14 @@ async function createDevice(email: string): Promise<Device> {
 
 let A: Device;
 let B: Device;
+/** A caregiver, who sees only shared events while the household has Premium (D-16). */
+let C: Device;
+let caregiverId = '';
 
 beforeAll(async () => {
   const emails: string[] = [];
   const ids: string[] = [];
-  for (const name of ['a', 'b']) {
+  for (const name of ['a', 'b', 'c']) {
     const { data, error } = await admin.auth.admin.createUser({
       email: `calendar-${name}-${crypto.randomUUID()}@example.test`,
       password,
@@ -115,20 +126,62 @@ beforeAll(async () => {
     .single();
   if (error) throw error;
   householdId = household.id;
-  const { error: membersError } = await admin
-    .from('household_members')
-    .insert(ids.map((user_id) => ({ household_id: householdId, user_id, role: 'parent' })));
+  // A caregiver seat needs Premium (FR-HH-1).
+  await setTier('premium');
+  caregiverId = ids[2];
+  const { error: membersError } = await admin.from('household_members').insert(
+    ids.map((user_id, i) => ({
+      household_id: householdId,
+      user_id,
+      role: i < 2 ? 'parent' : 'caregiver',
+    })),
+  );
   if (membersError) throw membersError;
 
   A = await createDevice(emails[0]);
   B = await createDevice(emails[1]);
+  C = await createDevice(emails[2]);
   await sleep(1500);
 });
 
 afterAll(() => {
   A?.engine.stop();
   B?.engine.stop();
+  C?.engine.stop();
 });
+
+async function setTier(tier: 'free' | 'premium') {
+  const { error } = await admin
+    .from('household_entitlements')
+    .update({ tier })
+    .eq('household_id', householdId);
+  if (error) throw error;
+}
+
+const event = (title: string, shared: boolean) => ({
+  kind: 'kind.childcare',
+  title,
+  all_day: false,
+  starts_at: '2026-12-02T14:00:00.000Z',
+  ends_at: '2026-12-02T15:00:00.000Z',
+  start_date: null,
+  end_date: null,
+  place: null,
+  notes: null,
+  taking_user_id: null,
+  shared,
+  repeat: null,
+  created_by: null,
+  updated_by: null,
+});
+
+/** Live rows in every calendar table on a device. */
+async function calendarRows(device: Device) {
+  const counts = await Promise.all(
+    CALENDAR_TABLES.map(async (table) => (await device.engine.store.liveIds(table.name)).length),
+  );
+  return counts.reduce((sum, n) => sum + n, 0);
+}
 
 it('writes one exception when two parents change the same occurrence offline (R2-CAL-2)', async () => {
   // A weekly Monday daycare pickup at 17:00 New York time.
@@ -187,4 +240,65 @@ it('writes one exception when two parents change the same occurrence offline (R2
     expect(device.engine.getStatus()).toMatchObject({ pending: 0, rejected: 0 });
     expect((await device.row(EVENT_EXCEPTIONS.name, occurrence))?.status).toBe('moved');
   }
+});
+
+it('removes an unshared event from a caregiver within 60 seconds of reconnecting (R2-ACC-2)', async () => {
+  const id = crypto.randomUUID();
+  const reminder = crypto.randomUUID();
+  await A.engine.insert(EVENTS.name, id, event('Grandma has the baby', true));
+  await A.engine.insert(EVENT_REMINDERS.name, reminder, { event_id: id, offset_minutes: 60 });
+  await A.engine.sync();
+  await C.engine.sync();
+  expect(await C.row(EVENTS.name, id)).not.toBeNull();
+  expect(await C.row(EVENT_REMINDERS.name, reminder)).not.toBeNull();
+
+  C.goOffline();
+  await A.engine.update(EVENTS.name, id, { shared: false });
+  await A.engine.sync();
+
+  const reconnected = performance.now();
+  await C.goOnline();
+  const ms = await waitUntil(async () => (await C.row(EVENTS.name, id)) === null, 60_000);
+  console.log(`unshared event left the caregiver's device ${ms?.toFixed(0)} ms after reconnecting`);
+  expect(ms).not.toBeNull();
+  expect(performance.now() - reconnected).toBeLessThan(60_000);
+  expect(await C.row(EVENT_REMINDERS.name, reminder)).toBeNull();
+  // Parents keep it.
+  expect(await B.row(EVENTS.name, id)).not.toBeNull();
+
+  // Shared again: the event and its unchanged reminder come back.
+  await A.engine.update(EVENTS.name, id, { shared: true });
+  await A.engine.sync();
+  await C.engine.sync();
+  await C.engine.checkVisibility();
+  expect(await C.row(EVENTS.name, id)).not.toBeNull();
+  expect(await C.row(EVENT_REMINDERS.name, reminder)).not.toBeNull();
+});
+
+it("clears every scoped table on a caregiver's device on a lapse and on removal (NFR2-OFF-2)", async () => {
+  await A.engine.insert(EVENTS.name, crypto.randomUUID(), event('Swim class', true));
+  await A.engine.sync();
+  await C.engine.sync();
+  await C.engine.checkVisibility();
+  expect(await calendarRows(C)).toBeGreaterThan(0);
+
+  await setTier('free');
+  await C.engine.checkVisibility();
+  expect(await calendarRows(C)).toBe(0);
+  // Parents keep everything.
+  await A.engine.checkVisibility();
+  expect(await calendarRows(A)).toBeGreaterThan(0);
+
+  await setTier('premium');
+  await C.engine.checkVisibility();
+  expect(await calendarRows(C)).toBeGreaterThan(0);
+
+  const { error } = await admin
+    .from('household_members')
+    .update({ status: 'removed' })
+    .eq('household_id', householdId)
+    .eq('user_id', caregiverId);
+  expect(error).toBeNull();
+  await C.engine.checkVisibility();
+  expect(await calendarRows(C)).toBe(0);
 });
