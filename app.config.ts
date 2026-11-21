@@ -202,9 +202,21 @@ function buildConfig(
       [
         'expo-image-picker',
         {
-          cameraPermission: enUS.importRecipe.photo.cameraPermission,
+          cameraPermission: enUS.app.cameraPermission,
           photosPermission: enUS.importRecipe.photo.photosPermission,
           microphonePermission: false,
+        },
+      ],
+      // Document scanning (V-01, FR2-DOC-2): `CameraView.scanDocumentAsync` opens VisionKit's
+      // scanner on iOS and ML Kit's on Android. iOS has one camera string for the app, so both
+      // plugins set the same one. No microphone, and no barcode scanning to keep the app small.
+      [
+        'expo-camera',
+        {
+          cameraPermission: enUS.app.cameraPermission,
+          microphonePermission: false,
+          recordAudioAndroid: false,
+          barcodeScannerEnabled: false,
         },
       ],
       // Apple Reminders export (G-06.2): reminders only, never the calendar.
