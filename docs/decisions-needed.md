@@ -83,11 +83,10 @@ Both stores will use personal (individual) accounts, not a company.
 
 ### D-15 Phase 2 free and Premium split: decided 2026-11-21
 
-- **Free:** shared calendar, appointments, repeats, 1 reminder per event, device copy, busy times, busy-day markers and easy-meal suggestions, and up to 25 documents with scanning, the vault lock and attachments.
-- **Premium:** up to 5 reminders per event, change notifications, caregiver and family access to shared events and documents, document expiry reminders, and up to 2 GB of documents.
+- **Free:** shared calendar, appointments, repeats, 1 reminder per event, device copy, busy times, busy-day detection, markers and manual marking, and up to 25 documents with scanning, the vault lock and attachments.
+- **Premium:** easy-meal suggestions on busy days (as the vision's table says; confirmed by the product owner, "Keep busy day meals suggestions in Premium"), up to 5 reminders per event, change notifications, caregiver and family access to shared events and documents, document expiry reminders, and up to 2 GB of documents.
 - **Always free:** export and deletion of all Phase 2 data, the vault lock and privacy settings.
 - **Tuning:** every number is a server setting.
-- **Vision conflict:** the vision's table puts busy-day meal suggestions in Premium. Spec conflict C2-1 proposes the vision edit, which needs your approval of the exact text.
 
 ### D-16 What caregivers see: decided 2026-11-21, shared items only
 
@@ -102,7 +101,7 @@ Family members and caregivers see only events a parent shares (shared by default
 
 ### D-18 Busy days and the plan: decided 2026-11-21
 
-A day is busy when a parent's event or busy block overlaps 16:00 to 19:00, or 3 or more hours are booked between 07:00 and 21:00, or a member marks it. The Plan tab shows the marker and reason and offers one-tap easy dinners. It never changes the plan without a tap. Spec section 3.4 and R2-BUSY-1.
+A day is busy when a parent's event or busy block overlaps 16:00 to 19:00, or 3 or more hours are booked between 07:00 and 21:00, or a member marks it. The Plan tab shows the marker and reason (free) and, for Premium households, offers one-tap easy dinners (D-15). It never changes the plan without a tap. Spec section 3.4 and R2-BUSY-1.
 
 ### D-19 Children's records: decided 2026-11-21, files only
 

@@ -27,7 +27,7 @@ Phase 2 gives the household one shared calendar for appointments and family plan
 1. **Shared calendar:** events and appointments with a day, week and agenda view, simple repeats, offline use and real-time sharing.
 2. **Appointment details:** who the event is for, who is taking them, preparation notes, a free-text place, reminders and attached documents.
 3. **Device calendars (D-14):** a one-way copy of household events into each member's phone calendar, and an optional "busy times" import from calendars a member picks, shared as busy blocks without titles.
-4. **Busy days (D-18):** a fixed rule marks busy days on the Plan tab and offers a one-tap easy dinner.
+4. **Busy days (D-18):** a fixed rule marks busy days on the Plan tab (free), and Premium households get a one-tap easy dinner (D-15).
 5. **Meals on the calendar:** each day in the calendar shows its planned meals.
 6. **Document vault (D-17, D-19):** scan or upload files, categories, an optional person tag and expiry date, a biometric lock, and attach to appointments.
 7. **Sharing with family members and caregivers (D-16):** only events and documents a parent shares.
@@ -177,21 +177,25 @@ Decided in D-14: one-way copy through the phone's own calendars, plus optional b
 
 ### 3.4 Busy days and the meal plan (BUSY)
 
-Decided in D-18. This is the module link the Phase 2 "done when" measures.
+Decided in D-18, with the tiers from D-15: detecting, marking and showing busy days is free; easy-meal suggestions are Premium, as the vision's free and Premium table says. This is the module link the Phase 2 "done when" measures.
 
 - **FR2-BUSY-1:** The Plan tab marks each busy day of the week (R2-BUSY-1) on its day header with an icon and a reason ("appointments after 4pm", "6 hours booked", "marked busy"), never by color alone.
-- **FR2-BUSY-2:** On a busy day, if dinner is empty the day offers "add an easy dinner"; if dinner is a recipe that isn't an easy meal and takes over 30 minutes, it offers "swap for an easy meal". The sheet lists up to 5 easy meals: leftovers candidates first (Phase 1 leftover links), then household recipes, then starter recipes, avoiding recipes in the last 7 days (PROPOSED). One tap applies, with a 5-second undo.
+- **FR2-BUSY-2:** On a busy day, if dinner is empty the day offers "add an easy dinner"; if dinner is a recipe that isn't an easy meal and takes over 30 minutes, it offers "swap for an easy meal". The sheet lists up to 5 easy meals: leftovers candidates first (Phase 1 leftover links), then household recipes, then starter recipes, avoiding recipes in the last 7 days (PROPOSED). One tap applies, with a 5-second undo. Suggestions are Premium (FR2-BUSY-5).
 - **FR2-BUSY-3:** The app never changes the plan without a tap. Dismissing a suggestion hides it for that day.
 - **FR2-BUSY-4:** Parents and family members can mark a day "busy" or "not busy" from the Plan or Calendar tab, which overrides the rule for that day.
-- **FR2-BUSY-5:** Busy days and suggestions are free (D-15). They work offline from the synced events and busy blocks.
+- **FR2-BUSY-5:** **Tiers (D-15):** busy-day detection, the marker and reason, and manual marking are free. Easy-meal suggestions (FR2-BUSY-2) are Premium. On a free household, a busy day with an empty or hard dinner shows one "easy dinner ideas" action that opens the Premium sheet (trigger `busy_day_meals`, FR-PAY-4), shown at most once per week per member (PROPOSED). On a lapse, suggestions stop and the markers stay. Both work offline from the synced events and busy blocks.
 - **FR2-BUSY-6:** Allergy notices on suggested recipes follow Phase 1 (AI-11, AI-12).
 
 **Acceptance criteria**
 
 - **Busy day changes the plan:**
-  - **Given** a household with a 16:30 appointment on Wednesday and an empty Wednesday dinner
+  - **Given** a Premium household with a 16:30 appointment on Wednesday and an empty Wednesday dinner
   - **When** a parent opens the Plan tab
   - **Then** Wednesday shows the busy marker and "add an easy dinner", and one tap adds a `tag.quick` recipe, recording `busy_day_suggestion_applied`.
+- **Free household at the moment of need:**
+  - **Given** a free household with the same Wednesday
+  - **When** a parent opens the Plan tab
+  - **Then** Wednesday shows the busy marker and reason, and "easy dinner ideas" opens the Premium sheet naming busy-day meal suggestions first, recording `paywall_viewed` with `trigger=busy_day_meals`.
 
 **Analytics events:** `busy_day_shown` (`reason`), `busy_day_suggestion_shown` (`mode` `add` or `swap`, `candidates_count`), `busy_day_suggestion_applied` (`mode`, `source` `leftovers`, `household` or `starter`), `busy_day_overridden` (`busy`).
 
@@ -252,13 +256,13 @@ Decided in D-15.
 | Capability  | Free                                                                                  | Premium                                                  |
 | ----------- | ------------------------------------------------------------------------------------- | -------------------------------------------------------- |
 | Calendar    | Shared calendar, appointments, repeats, 1 reminder per event, device copy, busy times | Up to 5 reminders per event, change notifications        |
-| Busy days   | Busy markers and easy-meal suggestions                                                | Same                                                     |
+| Busy days   | Busy-day detection, markers and reasons, and manual marking                           | Easy-meal suggestions on busy days                       |
 | Sharing     | Two parents see everything                                                            | Family and caregivers see shared events and documents    |
 | Documents   | Up to 25, with scanning, vault lock, attachments and send out                         | Up to 2 GB, expiry reminders, sharing with named members |
 | Always free | Export and deletion of all Phase 2 data, vault lock, privacy settings                 |                                                          |
 
-- **FR2-PAY-1:** New Premium sheet triggers: `reminders`, `documents` (limit), `document_share` and `caregiver_calendar` (sharing with a household that has no seats).
-- **FR2-PAY-2:** Every limit is enforced on the server as well as in the app (architecture section 4).
+- **FR2-PAY-1:** New Premium sheet triggers: `reminders`, `busy_day_meals`, `documents` (limit), `document_share` and `caregiver_calendar` (sharing with a household that has no seats).
+- **FR2-PAY-2:** Every limit is enforced on the server as well as in the app (architecture section 4). The one exception is busy-day suggestions: they're worked out on the device and write ordinary plan entries that any member may add by hand, so the app gates them by the household's synced entitlement, and the server has nothing to refuse.
 
 ## 4. Screens
 
@@ -310,7 +314,7 @@ Phase 1's NFRs apply to every Phase 2 screen and table. Additions:
 ### 7.1 Phase 2 definition of done
 
 1. Every Phase 2 backlog item is merged, and every `FR2-` is covered by a test or manual case.
-2. **Busy days visibly change the plan:** in beta, at least half of households with a busy day in a week see the marker, and at least 1 in 5 of those apply a suggestion (PROPOSED).
+2. **Busy days visibly change the plan:** in beta, at least half of households with a busy day in a week see the marker, and at least 1 in 5 Premium or trial households that see one apply a suggestion (PROPOSED).
 3. **Documents attach to appointments:** the attach-and-open flow passes in Maestro on both platforms, and caregiver isolation passes in pgTAP.
 4. **A security review is passed** (NFR2-SEC-4), with its report kept with the release notes.
 5. Store privacy answers and the data inventory are updated for calendar and document data (vision launch gates).
@@ -335,6 +339,5 @@ Open decisions are D-20 (security reviewer and budget) and D-21 (storage plan fo
 
 ### 8.3 Conflicts with other docs
 
-- **C2-1, busy-day suggestions tier.** The vision's free and Premium table lists "busy-day meal suggestions" under Premium. D-15 makes them free so the "done when" can be met by every household. Proposed fix, needing the product owner's approval of the exact text: move "busy-day meal suggestions" from the Premium column to the Free column in the vision's "Calendar and appointments" row.
-- **C2-2, document storage limit.** The vision says "a handful of documents" free and "large storage" Premium. D-15 sets 25 and 2 GB. No vision change needed.
-- **C2-3, Phase 1 spec section 1.5** lists Documents and Records and Shared Calendar as separate later modules. They're one phase now (PR #232); this spec covers both.
+- **C2-1, document storage limit.** The vision says "a handful of documents" free and "large storage" Premium. D-15 sets 25 and 2 GB. No vision change needed.
+- **C2-2, Phase 1 spec section 1.5** lists Documents and Records and Shared Calendar as separate later modules. They're one phase now (PR #232); this spec covers both.
