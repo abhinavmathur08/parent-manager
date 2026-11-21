@@ -116,3 +116,20 @@ describe('Apple Reminders export (G-06.2)', () => {
     );
   });
 });
+
+describe('Document scanning (V-01)', () => {
+  it('uses one camera string for scanning and photo import, with no microphone or barcodes', () => {
+    const config = configFor('production');
+    const find = (name: string) =>
+      config.plugins?.find((p) => Array.isArray(p) && p[0] === name) as [string, object];
+    const camera = find('expo-camera')[1];
+    const picker = find('expo-image-picker')[1] as { cameraPermission: string };
+    expect(camera).toEqual({
+      cameraPermission: picker.cameraPermission,
+      microphonePermission: false,
+      recordAudioAndroid: false,
+      barcodeScannerEnabled: false,
+    });
+    expect(picker.cameraPermission).toEqual(expect.stringContaining('scan a document'));
+  });
+});
