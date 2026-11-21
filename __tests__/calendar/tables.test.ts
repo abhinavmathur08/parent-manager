@@ -1,6 +1,7 @@
 import {
   CALENDAR_TABLES,
   EVENT_KINDS,
+  exceptionId,
   isEventKind,
   REMINDER_OFFSETS,
 } from '@/features/calendar/tables';
@@ -18,6 +19,7 @@ describe('calendar sync tables (C-01.1)', () => {
       'events',
       'event_people',
       'event_reminders',
+      'event_exceptions',
     ]);
   });
 
@@ -29,5 +31,11 @@ describe('calendar sync tables (C-01.1)', () => {
 
   it('offers the five reminder offsets the server accepts', () => {
     expect(REMINDER_OFFSETS).toEqual([0, 15, 60, 1440, 2880]);
+  });
+
+  it('names the exception for an occurrence the same way on every device (R2-CAL-2)', () => {
+    const event = '3f2a1c4e-8b7d-4e6f-9a0b-1c2d3e4f5a6b';
+    expect(exceptionId(event, '2026-12-07')).toBe(exceptionId(event, '2026-12-07'));
+    expect(exceptionId(event, '2026-12-07')).not.toBe(exceptionId(event, '2026-12-14'));
   });
 });
