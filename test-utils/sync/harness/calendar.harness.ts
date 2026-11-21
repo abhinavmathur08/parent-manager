@@ -264,6 +264,7 @@ it('removes an unshared event from a caregiver within 60 seconds of reconnecting
   expect(performance.now() - reconnected).toBeLessThan(60_000);
   expect(await C.row(EVENT_REMINDERS.name, reminder)).toBeNull();
   // Parents keep it.
+  await B.engine.sync();
   expect(await B.row(EVENTS.name, id)).not.toBeNull();
 
   // Shared again: the event and its unchanged reminder come back.

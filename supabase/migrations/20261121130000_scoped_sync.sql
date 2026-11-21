@@ -15,6 +15,8 @@ create table private.scoped_sync_tables (
 );
 
 revoke all on private.scoped_sync_tables from public, anon, authenticated;
+-- visible_ids runs as the caller and looks the table up here. It holds table names only.
+grant select on private.scoped_sync_tables to authenticated;
 
 create function private.enable_scoped_sync(target regclass)
 returns void
@@ -35,21 +37,6 @@ $$;
 
 revoke all on function private.enable_scoped_sync(regclass) from public;
 
--- The scoped table named `target` in public, or null.
-create function private.scoped_sync_table(target text)
-returns regclass
-language sql
-stable
-security definer
-set search_path = ''
-as $$
-  select s.table_name from private.scoped_sync_tables s
-  where s.table_name = to_regclass('public.' || pg_catalog.quote_ident(target))
-$$;
-
-revoke all on function private.scoped_sync_table(text) from public;
-grant execute on function private.scoped_sync_table(text) to authenticated;
-
 -- The IDs of the household's live rows of a scoped table that the caller can see now. Runs as
 -- the caller, so RLS decides: another household, a paused or removed member, or an unshared
 -- event gives no IDs. One array rather than a set of rows, so PostgREST's row limit never cuts
@@ -62,9 +49,11 @@ security invoker
 set search_path = ''
 as $$
 declare
-  rel constant regclass := private.scoped_sync_table(target);
+  rel regclass;
   ids uuid[];
 begin
+  select s.table_name into rel from private.scoped_sync_tables s
+  where s.table_name = to_regclass('public.' || pg_catalog.quote_ident(target));
   if rel is null then
     raise exception 'not a scoped sync table: %', target using errcode = '22023';
   end if;
