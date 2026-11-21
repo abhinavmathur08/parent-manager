@@ -1,3 +1,4 @@
+import { stableId } from '@/lib/sync/stable-id';
 import type { SyncRow, SyncTableDefinition } from '@/lib/sync/types';
 
 /**
@@ -41,7 +42,22 @@ export const EVENT_REMINDERS = {
   },
 } as const satisfies SyncTableDefinition;
 
-export const CALENDAR_TABLES = [EVENTS, EVENT_PEOPLE, EVENT_REMINDERS] as const;
+/** One changed occurrence of a repeating event (C-01.2, FR2-CAL-4, R2-CAL-2). */
+export const EVENT_EXCEPTIONS = {
+  name: 'event_exceptions',
+  columns: {
+    event_id: 'text',
+    original_date: 'text',
+    status: 'text',
+    starts_at: 'text',
+    ends_at: 'text',
+    start_date: 'text',
+    end_date: 'text',
+    taking_user_id: 'text',
+  },
+} as const satisfies SyncTableDefinition;
+
+export const CALENDAR_TABLES = [EVENTS, EVENT_PEOPLE, EVENT_REMINDERS, EVENT_EXCEPTIONS] as const;
 
 /** Event kinds, stored as identifiers; names come from translations (NFR2-L10N-1). */
 export const EVENT_KINDS = [
@@ -101,3 +117,26 @@ export type EventReminderRow = SyncRow & {
   event_id: string;
   offset_minutes: ReminderOffset;
 };
+
+/** moved: new times; skipped: deleted from the series; restored: a change undone. */
+export type ExceptionStatus = 'moved' | 'skipped' | 'restored';
+
+export type EventExceptionRow = SyncRow & {
+  event_id: string;
+  /** The occurrence's original date in the household's timezone, `YYYY-MM-DD`. */
+  original_date: string;
+  status: ExceptionStatus;
+  starts_at: string | null;
+  ends_at: string | null;
+  start_date: string | null;
+  end_date: string | null;
+  taking_user_id: string | null;
+};
+
+/**
+ * The ID of the exception row for one occurrence, the same on every device, so two devices
+ * changing the same occurrence offline write one row (R2-CAL-2).
+ */
+export function exceptionId(eventId: string, originalDate: string): string {
+  return stableId('event_exception', eventId, originalDate);
+}
