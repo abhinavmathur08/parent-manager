@@ -34,6 +34,7 @@
         "npm:eslint@^9.39.5",
         "npm:expo-apple-authentication@~58.0.3",
         "npm:expo-calendar@~58.0.8",
+        "npm:expo-camera@~58.0.14",
         "npm:expo-clipboard@~58.0.4",
         "npm:expo-constants@~58.0.16",
         "npm:expo-crypto@~58.0.8",

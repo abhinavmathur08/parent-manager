@@ -1,6 +1,7 @@
 {
   "app": {
-    "name": "Parent Manager"
+    "name": "Parent Manager",
+    "cameraPermission": "Parent Manager uses the camera when you take a photo of a recipe or scan a document."
   },
   "home": {
     "title": "Parent Manager",
@@ -1466,7 +1467,6 @@
       "hint": "A cookbook page, a handwritten card or a screenshot of a recipe. One image per import.",
       "takePhoto": "Take a photo",
       "chooseImage": "Choose an image",
-      "cameraPermission": "Parent Manager uses the camera when you take a photo of a recipe to import it.",
       "photosPermission": "Parent Manager opens your photos when you choose a recipe photo or screenshot to import.",
       "cameraDenied": "Parent Manager can't use the camera. Turn on camera access in Settings, or choose an image instead.",
       "openSettings": "Open Settings",
