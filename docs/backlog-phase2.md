@@ -165,14 +165,15 @@ Day headers show the busy icon and reason; parents and family can mark a day bus
 
 ### 13. B-01.3 Easy dinner sheet
 
-S-43: "add an easy dinner" and "swap for an easy meal" with leftovers, household and starter candidates, one-tap apply with undo, and allergen notices.
+S-43: "add an easy dinner" and "swap for an easy meal" with leftovers, household and starter candidates, one-tap apply with undo, and allergen notices. Suggestions are Premium (D-15): the app checks the household's synced entitlement, and a free household's busy day shows "easy dinner ideas", which opens the Premium sheet with the `busy_day_meals` trigger.
 
 - **Area:** Planner
 - **Size:** S
-- **Spec:** FR2-BUSY-2, FR2-BUSY-3, FR2-BUSY-6
+- **Spec:** FR2-BUSY-2, FR2-BUSY-3, FR2-BUSY-5, FR2-BUSY-6, FR2-PAY-2
 - **Depends on:** B-01.2
 - **Acceptance:**
-  - Maestro: a busy day with an empty dinner gets a `tag.quick` recipe in one tap
+  - Maestro: on a Premium household, a busy day with an empty dinner gets a `tag.quick` recipe in one tap
+  - On a free household, the busy marker shows, no suggestions are listed, and "easy dinner ideas" opens the Premium sheet (component test)
   - Nothing changes in the plan without a tap; dismiss hides it for that day
   - `busy_day_suggestion_applied` recorded with `mode` and `source`
 
@@ -334,15 +335,16 @@ Share and unshare with named family members and caregivers (Premium), and the "s
 
 ### 27. M-04 Phase 2 Premium triggers and lapse
 
-Premium sheet triggers `reminders`, `documents`, `document_share` and `caregiver_calendar`, and lapse behavior for reminders, shares and expiry reminders.
+Premium sheet triggers `reminders`, `busy_day_meals`, `documents`, `document_share` and `caregiver_calendar`, with each benefit's copy, and lapse behavior for reminders, busy-day suggestions, shares and expiry reminders.
 
 - **Area:** Subscriptions
 - **Size:** S
-- **Spec:** FR2-PAY-1, FR2-PAY-2, FR2-DOC-8, FR2-REM-6
-- **Depends on:** V-06, C-04.2
+- **Spec:** FR2-PAY-1, FR2-PAY-2, FR2-DOC-8, FR2-REM-6, FR2-BUSY-5
+- **Depends on:** V-06, C-04.2, B-01.3
 - **Acceptance:**
   - Each trigger opens the sheet with its benefit first
   - After a lapse nothing is deleted and every document stays viewable and exportable
+  - After a lapse busy-day markers stay and suggestions stop
 
 ### 28. A-05 Export and deletion for Phase 2
 
