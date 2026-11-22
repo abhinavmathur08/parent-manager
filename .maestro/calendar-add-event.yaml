@@ -1,0 +1,62 @@
+# C-03.2 (FR2-CAL-2, FR2-CAL-7): a parent adds an appointment from the Calendar tab with a
+# title and the default start, opens its detail, and takes it. Ends signed out.
+# Needs the local stack; see the Testing section of README.md.
+appId: ${APP_ID || 'com.myparentmanager'}
+tags:
+  - backend
+---
+- runFlow: subflows/create-household.yaml
+- tapOn:
+    id: tab-calendar
+- extendedWaitUntil:
+    visible:
+      id: calendar-empty-state
+    timeout: 10000
+
+# The sheet opens with the title focused and today at the next whole hour: type, then Save.
+- tapOn:
+    id: calendar-add
+- extendedWaitUntil:
+    visible:
+      id: event-title
+    timeout: 10000
+- inputText: Pediatrician
+- hideKeyboard
+- tapOn:
+    id: event-save
+- extendedWaitUntil:
+    notVisible:
+      id: event-title
+    timeout: 10000
+- assertNotVisible:
+    id: calendar-empty-state
+
+# The agenda row opens the detail (S-38).
+- scrollUntilVisible:
+    element:
+      id: calendar-event-.*
+- tapOn:
+    id: calendar-event-.*
+- extendedWaitUntil:
+    visible:
+      id: event-detail-when
+    timeout: 10000
+- assertVisible:
+    text: .*Pediatrician.*
+- scrollUntilVisible:
+    element:
+      id: event-take
+- tapOn:
+    id: event-take
+- extendedWaitUntil:
+    visible:
+      id: event-step-back
+    timeout: 10000
+- tapOn:
+    id: event-detail-title-back
+- extendedWaitUntil:
+    visible:
+      id: calendar-screen
+    timeout: 10000
+
+- runFlow: subflows/sign-out.yaml

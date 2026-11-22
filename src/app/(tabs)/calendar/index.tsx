@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
 import { AddEventButton } from '@/features/calendar/add-event-button';
@@ -32,6 +33,12 @@ function Calendar({ membership }: { membership: Membership }) {
           weekStart: membership.weekStart === 1 ? 1 : 7,
           timezone: membership.timezone ?? null,
         }}
+        onOpen={(item) =>
+          router.push({
+            pathname: '/calendar/[id]',
+            params: { id: item.event.id, date: item.occurrence.originalDate },
+          })
+        }
         footer={<AddEventButton label={t('calendar.add')} onPress={editor.open} />}
       />
       {editor.sheet}

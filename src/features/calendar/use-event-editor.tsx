@@ -67,6 +67,7 @@ export function useEventEditor({
   const sheet = stored.draft ? (
     <EventEditorSheet
       visible={stored.open}
+      title={t('calendar.editor.title')}
       draft={stored.draft}
       onChange={(draft) => setStored({ open: true, draft })}
       onSave={() => void save()}

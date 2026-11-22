@@ -6,7 +6,7 @@
 begin;
 create extension if not exists pgtap with schema extensions;
 
-select plan(88);
+select plan(90);
 
 -- ---------------------------------------------------------------------------
 -- Helpers (rolled back with the test)
@@ -333,6 +333,13 @@ select throws_ok(
 select throws_ok(
   $$update public.events set title = 'Mine now' where id = 'aaaaaaaa-7777-0000-0000-000000000003'$$,
   '42501', null, 'a caregiver can''t edit a family member''s event');
+select throws_ok(
+  $$update public.events set deleted_at = now() where id = 'aaaaaaaa-7777-0000-0000-000000000002'$$,
+  '42501', null, 'a caregiver can''t delete a parent''s event (C-03.2)');
+select isnt_empty(
+  $$update public.events set taking_user_id = null
+    where id = 'aaaaaaaa-7777-0000-0000-000000000002' returning id$$,
+  'a caregiver who took an event can step back to "nobody yet" (C-03.2)');
 select is_empty(
   $$select id from public.event_people where event_id = 'aaaaaaaa-7777-0000-0000-000000000001'$$,
   'a caregiver can''t read who an unshared event is for');
