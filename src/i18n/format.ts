@@ -26,6 +26,16 @@ export function formatDate(
 }
 
 /**
+ * A time of day at an instant, on the clock of `timeZone` (the household's), in the locale's
+ * 12- or 24-hour style (NFR2-L10N-1).
+ */
+export function formatTime(instant: Date, locale: string, timeZone: string): string {
+  return new Intl.DateTimeFormat(locale, { hour: 'numeric', minute: '2-digit', timeZone }).format(
+    instant,
+  );
+}
+
+/**
  * A short list such as "Peanuts, Egg and Milk", in the locale's list format. Hermes may not
  * have Intl.ListFormat, so it falls back to the locale file's separator.
  */

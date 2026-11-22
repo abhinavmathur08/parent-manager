@@ -130,6 +130,8 @@ export const ANALYTICS_EVENTS = {
   template_saved: { entries_count: count() },
   template_applied: { entries_count: count(), mode: weekMode },
   week_planned: { dinners_count: count(7), days_until_week_start: count(366) },
+  // Phase 2, 3.1 Shared calendar
+  calendar_viewed: { view: oneOf('agenda', 'day', 'week') },
   // 3.7 Staples and pantry
   staple_added: { is_catalog_ingredient: bool },
   staple_removed: {},
