@@ -160,6 +160,8 @@ export function AgendaScreen({ household, onOpen, footer, headerActions }: Agend
             />
           </View>
         )}
+        {/* Room for the docked main action, so the last day isn't under it. */}
+        {footer ? <View style={{ height: theme.layout.minTarget + theme.space[4] }} /> : null}
       </Screen>
       {footer}
     </View>
