@@ -2,7 +2,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react-nativ
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { BusyDaysProvider, type BusyViewer } from '@/features/calendar/busy-days';
-import { BusyDayMarker, resetShownBusyDays } from '@/features/calendar/busy-marker';
+import { BusyDayMarker, BusyMarkButton, resetShownBusyDays } from '@/features/calendar/busy-marker';
 import { zonedInstant } from '@/features/calendar/repeat';
 import { busyDayId, overrideId } from '@/features/calendar/tables';
 
@@ -73,6 +73,7 @@ const show = (role: BusyViewer['role'], userId = `${role}-1`) =>
     <SafeAreaProvider initialMetrics={metrics}>
       <BusyDaysProvider viewer={viewer(role, userId)}>
         <BusyDayMarker date={DATE} locale="en-US" />
+        <BusyMarkButton date={DATE} locale="en-US" />
       </BusyDaysProvider>
     </SafeAreaProvider>,
   );
@@ -157,6 +158,7 @@ describe('marking a day (FR2-BUSY-4)', () => {
       <SafeAreaProvider initialMetrics={metrics}>
         <BusyDaysProvider viewer={viewer('family', 'family-1')}>
           <BusyDayMarker date={DATE} locale="en-US" />
+          <BusyMarkButton date={DATE} locale="en-US" />
         </BusyDaysProvider>
       </SafeAreaProvider>,
     );

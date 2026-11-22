@@ -24,7 +24,7 @@ import { EmptyState } from '@/components/empty-state';
 import { Text } from '@/components/text';
 import { Toast } from '@/components/toast';
 import type { TopBarProps } from '@/components/top-bar';
-import { BusyDayMarker } from '@/features/calendar/busy-marker';
+import { BusyDayMarker, BusyMarkButton } from '@/features/calendar/busy-marker';
 import { useIngredients } from '@/features/ingredients/use-ingredients';
 import { useTheme } from '@/hooks/use-theme';
 import { formatDate, formatList, formatNumber, type AppLocale } from '@/i18n';
@@ -529,6 +529,7 @@ export function PlanWeekScreen({
                       {formatDate(toDate(date), locale, dayFormat)}
                     </Text>
                     {isToday ? <Tag label={t('plan.today')} testID="plan-today-tag" /> : null}
+                    <BusyMarkButton date={date} locale={locale} />
                   </View>
                   <BusyDayMarker date={date} locale={locale} />
                   {easyDinner.actionFor(date)}
