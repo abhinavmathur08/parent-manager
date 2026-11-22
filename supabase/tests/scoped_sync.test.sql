@@ -50,8 +50,8 @@ reset role;
 select ok(
   (select array_agg(c.relname::text)
    from private.scoped_sync_tables t join pg_catalog.pg_class c on c.oid = t.table_name)
-    @> array['event_exceptions', 'event_people', 'event_reminders', 'events'],
-  'the calendar tables are scoped');
+    @> array['busy_blocks', 'event_exceptions', 'event_people', 'event_reminders', 'events'],
+  'the calendar tables and busy blocks are scoped');
 select tests.as_user('aaaaaaaa-0000-0000-0000-000000000001');
 
 select is(
