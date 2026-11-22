@@ -8,16 +8,23 @@ import { usePremiumSheet } from '@/features/subscription/premium-sheet';
 import { useDraftState } from '@/hooks/use-draft-state';
 import type { AppLocale } from '@/i18n';
 
-import { newDraft, REMINDERS_PER_EVENT, type EventDraft } from './editor';
+import { draftFromEvent, newDraft, REMINDERS_PER_EVENT, type EventDraft } from './editor';
 import { EventEditorSheet } from './event-editor-sheet';
+import type { EventRow } from './tables';
 import { useCalendarMembers } from './use-members';
-import { useCreateEvent } from './writes';
+import { useCreateEvent, useUpdateEvent, type EventChildren } from './writes';
 
-type Stored = { open: boolean; draft: EventDraft | null };
+/** `eventId` is set when editing; null for a new event. */
+type Stored = { open: boolean; eventId: string | null; draft: EventDraft | null };
 
-export const EDITOR_DRAFT_KEY = 'calendar:event:new';
+/** A new event's draft, and an edit's, are kept apart so each screen restores its own. */
+export const EDITOR_DRAFT_KEYS = {
+  add: 'calendar:event:new',
+  edit: 'calendar:event:edit',
+} as const;
 
 export type EventEditorOptions = {
+  mode: keyof typeof EDITOR_DRAFT_KEYS;
   householdId: string;
   locale: AppLocale;
   timeZone: string;
@@ -26,10 +33,11 @@ export type EventEditorOptions = {
 };
 
 /**
- * The add-event sheet and its draft. Whether it's open and what's typed are kept on the
- * device, so the sheet comes back as it was after the app is killed (NFR-A11Y-8).
+ * The event editor sheet (S-37) and its draft. Whether it's open and what's typed are kept on
+ * the device, so the sheet comes back as it was after the app is killed (NFR-A11Y-8).
  */
 export function useEventEditor({
+  mode,
   householdId,
   locale,
   timeZone,
@@ -37,8 +45,9 @@ export function useEventEditor({
   isParent,
 }: EventEditorOptions) {
   const { t } = useTranslation();
-  const [stored, setStored, clear] = useDraftState<Stored>(EDITOR_DRAFT_KEY, {
+  const [stored, setStored, clear] = useDraftState<Stored>(EDITOR_DRAFT_KEYS[mode], {
     open: false,
+    eventId: null,
     draft: null,
   });
   const [saving, setSaving] = useState(false);
@@ -47,15 +56,47 @@ export function useEventEditor({
   const people = usePlanPeople(householdId).people;
   const members = useCalendarMembers(householdId);
   const create = useCreateEvent(timeZone, userId);
+  const update = useUpdateEvent(timeZone, userId);
+  const [editing, setEditing] = useState<{ event: EventRow; children: EventChildren } | null>(null);
 
+  /** Opens a new event, or the unsaved one left from before. */
   const open = () =>
-    setStored((s) => ({ open: true, draft: s.draft ?? newDraft(new Date(), timeZone, isParent) }));
+    setStored((s) => ({
+      open: true,
+      eventId: null,
+      draft: s.draft ?? newDraft(new Date(), timeZone, isParent),
+    }));
+
+  /** Opens an event to edit; an unsaved edit of the same event comes back as it was. */
+  const edit = (event: EventRow, children: EventChildren) => {
+    setEditing({ event, children });
+    setStored((s) => ({
+      open: true,
+      eventId: event.id,
+      draft:
+        s.eventId === event.id && s.draft
+          ? s.draft
+          : draftFromEvent(
+              event,
+              children.people.filter((p) => p.event_id === event.id).map((p) => p.person_id),
+              children.reminders
+                .filter((r) => r.event_id === event.id)
+                .map((r) => r.offset_minutes),
+              timeZone,
+            ),
+    }));
+  };
 
   const save = async () => {
     if (!stored.draft || saving) return;
     setSaving(true);
     try {
-      await create(stored.draft);
+      if (stored.eventId) {
+        if (!editing || editing.event.id !== stored.eventId) return;
+        await update(editing.event, stored.draft, editing.children);
+      } else {
+        await create(stored.draft);
+      }
       clear();
     } catch {
       Alert.alert(t('calendar.editor.failed'));
@@ -64,16 +105,19 @@ export function useEventEditor({
     }
   };
 
+  // An edit restored after a restart waits for its screen to pass the event again.
+  const visible = stored.open && (!stored.eventId || editing?.event.id === stored.eventId);
+
   const sheet = stored.draft ? (
     <EventEditorSheet
-      visible={stored.open}
-      title={t('calendar.editor.title')}
+      visible={visible}
+      title={t(stored.eventId ? 'calendar.editor.editTitle' : 'calendar.editor.title')}
       draft={stored.draft}
-      onChange={(draft) => setStored({ open: true, draft })}
+      onChange={(draft) => setStored((s) => ({ ...s, open: true, draft }))}
       onSave={() => void save()}
       onClose={clear}
       onPremiumRequired={() => {
-        // The draft is kept, so "Add an event" opens it again after the Premium sheet.
+        // The draft is kept, so the sheet opens again as it was after the Premium sheet.
         setStored((s) => ({ ...s, open: false }));
         openPremiumSheet('reminders', { afterSheet: true });
       }}
@@ -88,5 +132,5 @@ export function useEventEditor({
     />
   ) : null;
 
-  return { open, sheet };
+  return { open, edit, pendingEditId: stored.open ? stored.eventId : null, sheet };
 }

@@ -21,9 +21,9 @@ import { kindKey } from './agenda-screen';
 import { useCalendarRows } from './data';
 import { eventPermissions } from './permissions';
 import { expandOccurrences } from './repeat';
-import { REMINDER_OFFSETS } from './tables';
+import { REMINDER_OFFSETS, type EventRow } from './tables';
 import { useCalendarMembers } from './use-members';
-import { useEventActions } from './writes';
+import { useEventActions, type EventChildren } from './writes';
 
 export type EventDetailProps = {
   eventId: string;
@@ -33,6 +33,7 @@ export type EventDetailProps = {
   role: MemberRole;
   userId: string | null;
   onBack: () => void;
+  onEdit: (event: EventRow, children: EventChildren) => void;
 };
 
 const DATE_FORMAT = { weekday: 'long', month: 'long', day: 'numeric', timeZone: 'UTC' } as const;
@@ -49,6 +50,7 @@ export function EventDetailScreen({
   role,
   userId,
   onBack,
+  onEdit,
 }: EventDetailProps) {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -109,6 +111,7 @@ export function EventDetailScreen({
   }
 
   const can = eventPermissions(event, role, userId);
+  const children = { people: rows.people, reminders: rows.reminders };
   const forNames = rows.people
     .filter((row) => row.event_id === event.id)
     .map((row) => people.find((p) => p.id === row.person_id)?.displayName)
@@ -240,12 +243,20 @@ export function EventDetailScreen({
         ) : null}
 
         {can.canEdit ? (
-          <Button
-            variant="destructive"
-            label={t('calendar.detail.delete')}
-            onPress={remove}
-            testID="event-delete"
-          />
+          <View style={{ gap: theme.space[2] }}>
+            <Button
+              variant="secondary"
+              label={t('calendar.detail.edit')}
+              onPress={() => onEdit(event, children)}
+              testID="event-edit"
+            />
+            <Button
+              variant="destructive"
+              label={t('calendar.detail.delete')}
+              onPress={remove}
+              testID="event-delete"
+            />
+          </View>
         ) : null}
       </Screen>
     </View>

@@ -5,7 +5,14 @@ import { track } from '@/lib/analytics';
 import { useSyncWriter } from '@/lib/sync';
 
 import { draftValues, type EventDraft } from './editor';
-import { EVENT_PEOPLE, EVENT_REMINDERS, EVENTS, type EventRow } from './tables';
+import {
+  EVENT_PEOPLE,
+  EVENT_REMINDERS,
+  EVENTS,
+  type EventPersonRow,
+  type EventReminderRow,
+  type EventRow,
+} from './tables';
 
 /** The fixed-value half of a kind's identifier, for analytics: `kind.appointment` is `appointment`. */
 export function kindCode(kind: string): string {
@@ -75,4 +82,52 @@ export function useEventActions(userId: string | null) {
       track('event_deleted', { kind: kindCode(event.kind), scope: 'all' });
     },
   };
+}
+
+export type EventChildren = {
+  people: readonly EventPersonRow[];
+  reminders: readonly EventReminderRow[];
+};
+
+/**
+ * Saves an edited event: its columns, then its people and reminders as the draft has them,
+ * removing the rows that went and adding the ones that came (FR2-CAL-2).
+ */
+export function useUpdateEvent(timeZone: string, userId: string | null) {
+  const writer = useSyncWriter();
+  return useCallback(
+    async (event: EventRow, draft: EventDraft, children: EventChildren): Promise<void> => {
+      await writer.update(EVENTS.name, event.id, {
+        ...draftValues(draft, timeZone),
+        updated_by: userId,
+      });
+      const people = children.people.filter((row) => row.event_id === event.id);
+      for (const row of people) {
+        if (!draft.personIds.includes(row.person_id))
+          await writer.remove(EVENT_PEOPLE.name, row.id);
+      }
+      for (const personId of draft.personIds) {
+        if (people.some((row) => row.person_id === personId)) continue;
+        await writer.insert(EVENT_PEOPLE.name, randomUUID(), {
+          event_id: event.id,
+          person_id: personId,
+        });
+      }
+      const reminders = children.reminders.filter((row) => row.event_id === event.id);
+      for (const row of reminders) {
+        if (!draft.reminders.includes(row.offset_minutes)) {
+          await writer.remove(EVENT_REMINDERS.name, row.id);
+        }
+      }
+      for (const offset of draft.reminders) {
+        if (reminders.some((row) => row.offset_minutes === offset)) continue;
+        await writer.insert(EVENT_REMINDERS.name, randomUUID(), {
+          event_id: event.id,
+          offset_minutes: offset,
+        });
+      }
+      track('event_updated', { kind: kindCode(draft.kind), scope: 'all' });
+    },
+    [writer, timeZone, userId],
+  );
 }

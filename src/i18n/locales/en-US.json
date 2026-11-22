@@ -144,6 +144,7 @@
     "add": "Add an event",
     "editor": {
       "title": "New event",
+      "editTitle": "Edit event",
       "titleLabel": "Title",
       "titleHint": "For example, pediatrician",
       "kind": "Kind",
@@ -186,6 +187,7 @@
       "changedBy": "Last changed by {{name}}",
       "when": "{{date}}, {{time}}",
       "allDayOn": "{{date}}, all day",
+      "edit": "Edit",
       "takeIt": "I'll take it",
       "stepBack": "I can't take it",
       "shared": "Shared with family and caregivers",
