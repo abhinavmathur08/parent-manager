@@ -1,0 +1,50 @@
+# B-01.2 (FR2-BUSY-1, FR2-BUSY-4): a parent marks a day busy from the Plan tab, sees the marker
+# with its reason, then hands the day back to the calendar and the marker goes. Free (D-15).
+# Ends signed out. Needs the local stack; see the Testing section of README.md.
+appId: ${APP_ID || 'com.myparentmanager'}
+tags:
+  - backend
+---
+- runFlow: subflows/create-household.yaml
+- extendedWaitUntil:
+    visible:
+      id: plan-screen
+    timeout: 10000
+
+# The first day of the week: no appointments, so no marker until it's marked.
+- scrollUntilVisible:
+    element:
+      id: busy-mark-open-.*
+    centerElement: true
+- assertNotVisible:
+    id: busy-marker-.*
+- tapOn:
+    id: busy-mark-open-.*
+- extendedWaitUntil:
+    visible:
+      id: busy-mark-sheet
+    timeout: 10000
+- tapOn:
+    id: busy-mark-busy
+- extendedWaitUntil:
+    visible:
+      id: busy-marker-.*
+    timeout: 10000
+- assertVisible:
+    text: Marked busy
+
+# "Follow the calendar" clears the mark.
+- tapOn:
+    id: busy-mark-open-.*
+- extendedWaitUntil:
+    visible:
+      id: busy-mark-sheet
+    timeout: 10000
+- tapOn:
+    id: busy-mark-auto
+- extendedWaitUntil:
+    notVisible:
+      id: busy-marker-.*
+    timeout: 10000
+
+- runFlow: subflows/sign-out.yaml

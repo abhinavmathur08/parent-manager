@@ -132,6 +132,9 @@ export const ANALYTICS_EVENTS = {
   template_applied: { entries_count: count(), mode: weekMode },
   week_planned: { dinners_count: count(7), days_until_week_start: count(366) },
   // Phase 2, 3.1 Shared calendar
+  // 3.4 Busy days and the meal plan (FR2-BUSY)
+  busy_day_shown: { reason: oneOf('dinner', 'booked', 'marked') },
+  busy_day_overridden: { busy: bool },
   calendar_viewed: { view: oneOf('agenda', 'day', 'week') },
   event_created: {
     kind: code,

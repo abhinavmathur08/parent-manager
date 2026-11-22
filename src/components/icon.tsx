@@ -23,6 +23,7 @@ const SYMBOLS = {
   offline: { ios: 'wifi.slash', android: 'wifi_off' },
   plan: { ios: 'fork.knife', android: 'restaurant' },
   calendar: { ios: 'calendar', android: 'calendar_month' },
+  busy: { ios: 'calendar.badge.clock', android: 'event_busy' },
   list: { ios: 'checklist', android: 'checklist' },
   recipes: { ios: 'book', android: 'menu_book' },
   household: { ios: 'house', android: 'home' },

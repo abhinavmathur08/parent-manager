@@ -124,6 +124,26 @@
     "household": "Household",
     "calendar": "Calendar"
   },
+  "busy": {
+    "marker": "Busy day: {{reason}}",
+    "reason": {
+      "dinner": "Busy around dinner",
+      "booked": "Busy day",
+      "bookedHours": "{{hours}} hours booked",
+      "marked": "Marked busy"
+    },
+    "mark": {
+      "open": "Mark {{day}} busy or not busy",
+      "title": "Mark this day",
+      "message": "A mark overrides what the calendar says, for everyone in the household.",
+      "busy": "Busy",
+      "busyDetail": "Show the busy marker on this day",
+      "notBusy": "Not busy",
+      "notBusyDetail": "Hide the busy marker on this day",
+      "auto": "Follow the calendar",
+      "autoDetail": "Busy when appointments are around dinner or the day is booked up"
+    }
+  },
   "calendar": {
     "title": "Calendar",
     "offline": "You're offline. The calendar still works, and changes sync when you're back.",
