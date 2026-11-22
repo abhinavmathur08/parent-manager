@@ -27,9 +27,8 @@ export function busyReasonKey(day: ShownBusyDay): { key: string; hours?: number 
 const dayFormat = { weekday: 'long', month: 'long', day: 'numeric', timeZone: 'UTC' } as const;
 
 /**
- * A day header's busy marker, an icon and the reason, never color alone (FR2-BUSY-1), and for
- * parents and family members a button to mark the day (FR2-BUSY-4). Renders nothing outside
- * a `BusyDaysProvider`, or on a day that isn't busy and can't be marked.
+ * A day's busy marker, an icon and the reason, never color alone (FR2-BUSY-1). Renders nothing
+ * outside a `BusyDaysProvider` or on a day that isn't busy, so quiet days keep their height.
  */
 export function BusyDayMarker({ date, locale }: { date: PlanDate; locale: AppLocale }) {
   const { t } = useTranslation();
@@ -44,39 +43,43 @@ export function BusyDayMarker({ date, locale }: { date: PlanDate; locale: AppLoc
     track('busy_day_shown', { reason });
   }, [date, reason]);
 
-  if (!busy || !day || (!day.busy && !busy.canMark)) return null;
+  if (!day?.busy) return null;
   const { key, hours } = busyReasonKey(day);
   const reasonText = t(key, {
     hours: hours === undefined ? undefined : formatNumber(hours, locale),
   });
   return (
-    <View style={[styles.row, { gap: theme.space[2] }]}>
-      {day.busy ? (
-        <View
-          style={[styles.row, styles.grow, { gap: theme.space[1] }]}
-          accessible
-          accessibilityLabel={t('busy.marker', { reason: reasonText })}
-          testID={`busy-marker-${date}`}
-        >
-          <Icon name="busy" size="sm" color="warning" />
-          <Text variant="caption" color="textSecondary" style={styles.grow}>
-            {reasonText}
-          </Text>
-        </View>
-      ) : (
-        <View style={styles.grow} />
-      )}
-      {busy.canMark ? (
-        <IconButton
-          icon="busy"
-          accessibilityLabel={t('busy.mark.open', {
-            day: formatDate(toDate(date), locale, dayFormat),
-          })}
-          onPress={() => busy.openMark(date)}
-          testID={`busy-mark-open-${date}`}
-        />
-      ) : null}
+    <View
+      style={[styles.row, { gap: theme.space[1] }]}
+      accessible
+      accessibilityLabel={t('busy.marker', { reason: reasonText })}
+      testID={`busy-marker-${date}`}
+    >
+      <Icon name="busy" size="sm" color="warning" />
+      <Text variant="caption" color="textSecondary" style={styles.grow}>
+        {reasonText}
+      </Text>
     </View>
+  );
+}
+
+/**
+ * The button that marks a day busy or not busy (FR2-BUSY-4), for the day's header row. Only
+ * parents and family members get it.
+ */
+export function BusyMarkButton({ date, locale }: { date: PlanDate; locale: AppLocale }) {
+  const { t } = useTranslation();
+  const busy = useBusyDaysContext();
+  if (!busy?.canMark) return null;
+  return (
+    <IconButton
+      icon="busy"
+      accessibilityLabel={t('busy.mark.open', {
+        day: formatDate(toDate(date), locale, dayFormat),
+      })}
+      onPress={() => busy.openMark(date)}
+      testID={`busy-mark-open-${date}`}
+    />
   );
 }
 
