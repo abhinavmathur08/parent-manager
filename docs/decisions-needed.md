@@ -4,7 +4,7 @@ This is the decision log. Each entry names the backlog items and GitHub issues i
 
 ## Status at a glance
 
-Updated 2026-11-21. D-14 to D-21 are Phase 2 decisions ([spec-phase2.md](spec-phase2.md)).
+Updated 2026-11-22. D-14 to D-22 are Phase 2 decisions ([spec-phase2.md](spec-phase2.md)).
 
 | ID   | Decision                                   | Status                                                 | Needed by                                                                      |
 | ---- | ------------------------------------------ | ------------------------------------------------------ | ------------------------------------------------------------------------------ |
@@ -29,6 +29,7 @@ Updated 2026-11-21. D-14 to D-21 are Phase 2 decisions ([spec-phase2.md](spec-ph
 | D-19 | Phase 2: children's records                | Decided 2026-11-21: files only, no medical fields      |                                                                                |
 | D-20 | Phase 2: security reviewer and budget      | Open                                                   | Before the Phase 2 beta (L-06)                                                 |
 | D-21 | Phase 2: storage plan for documents        | Open                                                   | Before the Phase 2 beta; part of D-1                                           |
+| D-22 | Phase 2: who signs document read links     | Decided 2026-11-22: the `documents` function only      |                                                                                |
 
 ## Decided
 
@@ -106,6 +107,10 @@ A day is busy when a parent's event or busy block overlaps 16:00 to 19:00, or 3 
 ### D-19 Children's records: decided 2026-11-21, files only
 
 The vault holds files a parent chooses, with a category and an optional person tag. There are no structured medical fields: no diagnoses, vaccine logs or schedules, growth or medications. A `doc.medical` category is allowed and never reaches AI, analytics or notifications. Appointment notes are free text the parent writes.
+
+### D-22 Document read links: decided 2026-11-22, signed on the server only
+
+Only the `documents` Edge Function issues read links, after its own `private.can_read_document` check for the caller, signed with the service role for 60 seconds. Clients have no storage policy on the `documents` bucket, so no member can read, list or sign a file directly, or mint a link that lasts longer (V-02.3, R2-DOC-1, NFR2-SEC-1).
 
 ## Deferred until the beta or launch
 
