@@ -156,6 +156,7 @@ export const ANALYTICS_EVENTS = {
   event_shared: { shared: bool },
   // 3.3 Device calendars
   calendar_permission_result: { granted: bool },
+  device_calendar_copy_changed: { enabled: bool, target: oneOf('new', 'existing') },
   // 3.7 Staples and pantry
   staple_added: { is_catalog_ingredient: bool },
   staple_removed: {},

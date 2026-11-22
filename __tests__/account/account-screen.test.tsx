@@ -17,7 +17,10 @@ jest.mock('@/features/onboarding/profile', () => ({
   fetchDisplayName: async () => 'Sam',
   saveDisplayName: (...args: unknown[]) => mockSave(...args),
 }));
-jest.mock('@/features/auth/sign-out', () => ({ signOut: () => mockSignOut() }));
+jest.mock('@/features/auth/sign-out', () => ({
+  signOut: () => mockSignOut(),
+  onSignOut: () => () => undefined,
+}));
 jest.mock('@/features/biometric/lock-settings', () => ({ LockSettingsSection: () => null }));
 jest.mock('@/features/documents/vault/vault-lock-settings', () => ({
   VaultLockSettingsSection: () => null,

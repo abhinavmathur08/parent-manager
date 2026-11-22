@@ -12,6 +12,7 @@ import { useHousehold } from '@/features/household/membership';
 import '@/features/ingredients/sync';
 import { useAuth } from '@/features/auth/session';
 import { BusyDayPublisher } from '@/features/calendar/busy-publisher';
+import { DeviceCalendarSync } from '@/features/calendar/device/device-calendar-sync';
 import { DefrostScheduler } from '@/features/notifications/defrost-scheduler';
 import { NotificationResponses } from '@/features/notifications/notification-responses';
 import { PushRegistration } from '@/features/notifications/push-registration';
@@ -64,6 +65,7 @@ export default function TabsLayout() {
         <GroceryListKeeper />
         <HistorySync />
         <PushRegistration />
+        <DeviceCalendarSync membership={state.membership} />
         {auth.status === 'signedIn' ? (
           <>
             <NotificationResponses userId={auth.session.user.id} />

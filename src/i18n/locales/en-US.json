@@ -282,7 +282,15 @@
     "copy": {
       "section": "Copy to my calendar",
       "label": "Copy events to my phone's calendar",
-      "description": "Events you can see appear in your phone's calendar and stay up to date. Changes made there aren't copied back."
+      "description": "Events you can see appear in your phone's calendar and stay up to date. Changes made there aren't copied back.",
+      "target": "Copy to",
+      "calendarName": "Parent Manager",
+      "newCalendar": "A new calendar on this phone, just for household events",
+      "chosenCalendar": "Chosen calendar",
+      "meals": "Include planned dinners",
+      "mealsDescription": "Adds each day's dinner as an all-day event.",
+      "mealTitle": "Dinner: {{meals}}",
+      "mealNotes": "Planned dinner from Parent Manager"
     },
     "busy": {
       "section": "Share my busy times",
@@ -301,7 +309,14 @@
     },
     "declined": "Calendar access is off, so copying and busy times aren't available. Everything else works as usual.",
     "paused": "Calendar access is off, so copying and busy times are paused until you turn it back on.",
-    "openSettings": "Open Settings"
+    "openSettings": "Open Settings",
+    "signOut": {
+      "title": "Remove copied events?",
+      "body": "Events copied to this phone's calendar can stay there or be removed. Busy times stop being shared either way.",
+      "keep": "Keep them",
+      "remove": "Remove them",
+      "cancel": "Cancel"
+    }
   },
   "placeholder": {
     "comingSoon": "This part of the app is on its way."

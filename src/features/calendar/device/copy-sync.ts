@@ -4,6 +4,7 @@ import { onSignOut } from '@/features/auth/sign-out';
 import * as calendars from '@/lib/device-calendar/calendars';
 
 import { planCopies, type CopyItem, type CopyState } from './copy';
+import { readDeviceSettings, writeDeviceSettings } from './settings';
 
 /** The device calendar calls the copy needs, replaceable in tests. */
 export type CopyApi = Pick<
@@ -46,8 +47,20 @@ export type CopyRun = {
   calendarColor: string;
 };
 
+// Runs and removals take turns, so a run never writes copies while they're being removed.
+let turn: Promise<unknown> = Promise.resolve();
+function exclusive<T>(work: () => Promise<T>): Promise<T> {
+  const result = turn.then(work, work);
+  turn = result.catch(() => undefined);
+  return result;
+}
+
 /** Deletes every copy this device made and, if it was ours, the calendar too. */
-export async function removeCopies(api: CopyApi = calendars): Promise<void> {
+export function removeCopies(api: CopyApi = calendars): Promise<void> {
+  return exclusive(() => removeNow(api));
+}
+
+async function removeNow(api: CopyApi): Promise<void> {
   const state = readCopyState();
   if (!state) return;
   if (state.own) {
@@ -79,15 +92,21 @@ async function chooseCalendar(run: CopyRun, state: CopyState | null, api: CopyAp
  * changed since the last run. Moving to another calendar or household removes the old copies
  * first. A copy that fails is tried again on the next run.
  */
-export async function syncCopies(run: CopyRun, api: CopyApi = calendars): Promise<void> {
+export function syncCopies(run: CopyRun, api: CopyApi = calendars): Promise<void> {
+  return exclusive(() => syncNow(run, api));
+}
+
+async function syncNow(run: CopyRun, api: CopyApi): Promise<void> {
+  // Turned off (or signing out) while this run waited its turn.
+  if (!readDeviceSettings(run.householdId).copy) return;
   let state = readCopyState();
   if (state && state.householdId !== run.householdId) {
-    await removeCopies(api);
+    await removeNow(api);
     state = null;
   }
   const { calendarId, own } = await chooseCalendar(run, state, api);
   if (state && state.calendarId !== calendarId) {
-    await removeCopies(api);
+    await removeNow(api);
     state = null;
   }
   const copies = { ...(state?.copies ?? {}) };
@@ -112,4 +131,24 @@ export async function syncCopies(run: CopyRun, api: CopyApi = calendars): Promis
     }
   }
   save();
+}
+
+/** Whether signing out should ask about copies: only if this device made some. */
+export function hasCopies(): boolean {
+  return Object.keys(readCopyState()?.copies ?? {}).length > 0;
+}
+
+/**
+ * Before signing out (FR2-PRIV-4): stops copying and, if the member chose to, removes the
+ * copies. Kept by default, since they're in the member's own calendar.
+ */
+export async function beforeSignOut(remove: boolean, api: CopyApi = calendars): Promise<void> {
+  const state = readCopyState();
+  if (state) {
+    writeDeviceSettings(state.householdId, {
+      ...readDeviceSettings(state.householdId),
+      copy: false,
+    });
+  }
+  if (remove) await removeCopies(api).catch(() => undefined);
 }
