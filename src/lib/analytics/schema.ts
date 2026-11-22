@@ -156,6 +156,11 @@ export const ANALYTICS_EVENTS = {
   event_shared: { shared: bool },
   // Phase 2, 3.5 Document vault. Never a title, a category or a person (FR2-DOC-11).
   vault_opened: { unlocked_with: oneOf('biometric', 'passcode', 'none') },
+  document_added: {
+    source: oneOf('scan', 'photo', 'file'),
+    pages_count: count(20),
+    size_bucket: oneOf('under_1mb', '1_5mb', '5_20mb', 'over_20mb'),
+  },
   // 3.7 Staples and pantry
   staple_added: { is_catalog_ingredient: bool },
   staple_removed: {},
