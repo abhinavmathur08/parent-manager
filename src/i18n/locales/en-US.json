@@ -1300,6 +1300,10 @@
       "reminders": {
         "title": "More event reminders",
         "body": "Up to 5 reminders for each event, such as a day and an hour before."
+      },
+      "busy_meals": {
+        "title": "Easy dinners on busy days",
+        "body": "On days full of appointments, add or swap in an easy dinner in one tap."
       }
     },
     "sheet": {

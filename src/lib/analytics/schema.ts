@@ -47,6 +47,7 @@ export const PAYWALL_TRIGGERS = [
   'history',
   'premium_section',
   'reminders',
+  'busy_day_meals',
 ] as const;
 const productPeriod = oneOf('monthly', 'annual');
 
@@ -135,6 +136,11 @@ export const ANALYTICS_EVENTS = {
   // 3.4 Busy days and the meal plan (FR2-BUSY)
   busy_day_shown: { reason: oneOf('dinner', 'booked', 'marked') },
   busy_day_overridden: { busy: bool },
+  busy_day_suggestion_shown: { mode: oneOf('add', 'swap'), candidates_count: count(5) },
+  busy_day_suggestion_applied: {
+    mode: oneOf('add', 'swap'),
+    source: oneOf('leftovers', 'household', 'starter'),
+  },
   calendar_viewed: { view: oneOf('agenda', 'day', 'week') },
   event_created: {
     kind: code,
