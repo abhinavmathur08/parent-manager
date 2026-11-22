@@ -45,6 +45,14 @@ function Calendar({ membership }: { membership: Membership }) {
           })
         }
         footer={<AddEventButton label={t('calendar.add')} onPress={editor.open} />}
+        headerActions={[
+          {
+            label: t('calendarSettings.title'),
+            icon: 'settings',
+            onPress: () => router.push('/calendar/settings'),
+            testID: 'calendar-open-settings-screen',
+          },
+        ]}
       />
       {editor.sheet}
     </HouseholdBusyDays>

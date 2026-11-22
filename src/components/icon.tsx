@@ -24,6 +24,7 @@ const SYMBOLS = {
   plan: { ios: 'fork.knife', android: 'restaurant' },
   calendar: { ios: 'calendar', android: 'calendar_month' },
   busy: { ios: 'calendar.badge.clock', android: 'event_busy' },
+  settings: { ios: 'gearshape', android: 'settings' },
   list: { ios: 'checklist', android: 'checklist' },
   recipes: { ios: 'book', android: 'menu_book' },
   household: { ios: 'house', android: 'home' },
