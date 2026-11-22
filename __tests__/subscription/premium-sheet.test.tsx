@@ -80,10 +80,11 @@ describe('S-32 Premium sheet (FR-PAY-4)', () => {
     expect(screen.getByTestId('premium-benefit-seats')).toBeOnTheScreen();
     expect(benefitsFor('caregiver_invite')).toEqual({
       lead: 'seats',
-      others: ['ai', 'templates', 'history', 'reminders'],
+      others: ['ai', 'templates', 'history', 'reminders', 'busy_meals'],
     });
     expect(benefitsFor('ai_allowance').lead).toBe('ai');
     expect(benefitsFor('reminders').lead).toBe('reminders');
+    expect(benefitsFor('busy_day_meals').lead).toBe('busy_meals');
     expect(benefitsFor('premium_section').lead).toBeNull();
     expect(mockTrack).toHaveBeenCalledWith('paywall_viewed', {
       trigger: 'caregiver_invite',
