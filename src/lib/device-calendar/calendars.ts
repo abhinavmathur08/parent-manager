@@ -159,3 +159,28 @@ export async function deleteEvent(id: string): Promise<void> {
   const event = await Calendar.ExpoCalendarEvent.get(id).catch(() => null);
   await event?.delete();
 }
+
+/**
+ * Only what busy times may use from a device event: its ID (to skip our own copies), whether
+ * it's all day, and its times (R2-BUSY-3). Titles, places, notes and attendees are dropped
+ * here, and never leave this function.
+ */
+export type DeviceBusyEvent = { id: string; allDay: boolean; startsAt: number; endsAt: number };
+
+/** The events of these calendars that overlap a range, as times only (FR2-DEV-4). */
+export async function busyEvents(
+  calendarIds: readonly string[],
+  from: Date,
+  to: Date,
+): Promise<DeviceBusyEvent[]> {
+  if (calendarIds.length === 0) return [];
+  const events = await Calendar.listEvents([...calendarIds], from, to);
+  return events
+    .filter((event) => event.status !== Calendar.EventStatus.CANCELED)
+    .map((event) => ({
+      id: event.id,
+      allDay: event.allDay,
+      startsAt: new Date(event.startDate).getTime(),
+      endsAt: new Date(event.endDate).getTime(),
+    }));
+}
