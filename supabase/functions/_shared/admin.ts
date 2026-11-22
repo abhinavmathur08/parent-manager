@@ -38,6 +38,14 @@ export interface AdminClient {
   select<T>(table: string, query: Record<string, string>): Promise<RestResult<T[]>>;
   /** Inserts or updates on the primary key, as the service role. */
   upsert(table: string, row: Record<string, unknown>): Promise<RestResult<null>>;
+  /** Inserts a new row, as the service role; an existing key is an error (23505). */
+  insert(table: string, row: Record<string, unknown>): Promise<RestResult<null>>;
+  /** PATCH /rest/v1/<table>?<query>, as the service role. */
+  update(
+    table: string,
+    query: Record<string, string>,
+    patch: Record<string, unknown>,
+  ): Promise<RestResult<null>>;
 }
 
 export function adminClient(
@@ -90,6 +98,20 @@ export function adminClient(
         body: JSON.stringify(row),
       });
       return result;
+    },
+    insert(table, row) {
+      return call<null>(`/rest/v1/${table}`, {
+        method: 'POST',
+        headers: { Prefer: 'return=minimal' },
+        body: JSON.stringify(row),
+      });
+    },
+    update(table, query, patch) {
+      return call<null>(`/rest/v1/${table}?${new URLSearchParams(query)}`, {
+        method: 'PATCH',
+        headers: { Prefer: 'return=minimal' },
+        body: JSON.stringify(patch),
+      });
     },
   };
 }

@@ -64,6 +64,32 @@ export const EVENT_EXCEPTIONS = {
 
 export const CALENDAR_TABLES = [EVENTS, EVENT_PEOPLE, EVENT_REMINDERS, EVENT_EXCEPTIONS] as const;
 
+/**
+ * A member's busy time from their device calendar (B-01.1, D-14): only the member, start and
+ * end, never a title (R2-BUSY-3). Parents see every block; others only their own (C9).
+ */
+export const BUSY_BLOCKS = {
+  name: 'busy_blocks',
+  scoped: true,
+  columns: {
+    user_id: 'text',
+    starts_at: 'text',
+    ends_at: 'text',
+  },
+} as const satisfies SyncTableDefinition;
+
+/** A day marked busy or not busy by a member (FR2-BUSY-4); `busy` null is a cleared mark. */
+export const BUSY_DAY_OVERRIDES = {
+  name: 'busy_day_overrides',
+  columns: {
+    date: 'text',
+    busy: 'boolean',
+    set_by: 'text',
+  },
+} as const satisfies SyncTableDefinition;
+
+export const BUSY_TABLES = [BUSY_BLOCKS, BUSY_DAY_OVERRIDES] as const;
+
 /** Event kinds, stored as identifiers; names come from translations (NFR2-L10N-1). */
 export const EVENT_KINDS = [
   'kind.appointment',
@@ -144,4 +170,27 @@ export type EventExceptionRow = SyncRow & {
  */
 export function exceptionId(eventId: string, originalDate: string): string {
   return stableId('event_exception', eventId, originalDate);
+}
+
+export type BusyBlockRow = SyncRow & {
+  /** Set by the server to the member who shared it. */
+  user_id: string;
+  starts_at: string;
+  ends_at: string;
+};
+
+export type BusyDayOverrideRow = SyncRow & {
+  /** The day in the household's timezone, `YYYY-MM-DD`. */
+  date: string;
+  /** Marked busy (true) or not busy (false); null when the mark was cleared. */
+  busy: boolean | null;
+  set_by: string | null;
+};
+
+/**
+ * The ID of a day's override row, the same on every device, so two members marking the same
+ * day offline write one row. Clearing a mark sets `busy` to null rather than deleting the row.
+ */
+export function overrideId(householdId: string, date: string): string {
+  return stableId('busy_day_override', householdId, date);
 }
