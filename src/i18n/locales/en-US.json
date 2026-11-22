@@ -140,6 +140,43 @@
       "activity": "Activity",
       "family": "Family",
       "other": "Other"
+    },
+    "add": "Add an event",
+    "editor": {
+      "title": "New event",
+      "titleLabel": "Title",
+      "titleHint": "For example, pediatrician",
+      "kind": "Kind",
+      "allDay": "All day",
+      "date": "Date",
+      "startHour": "Start hour",
+      "startMinute": "Start minute",
+      "length": "Ends",
+      "endsAt": "Ends {{time}}",
+      "days": "Last day",
+      "for": "For",
+      "taking": "Who's taking",
+      "nobody": "Nobody yet",
+      "me": "Me",
+      "member": "A member",
+      "place": "Place",
+      "notes": "Notes",
+      "notesHint": "Questions to ask, what to bring",
+      "reminders": "Reminders",
+      "remindersLimit": "Free includes 1 reminder for each event.",
+      "seePremium": "More reminders with Premium",
+      "shared": "Share with family and caregivers",
+      "sharedHint": "Parents always see every event.",
+      "sharedAlways": "Events you add are shared with the household.",
+      "save": "Save",
+      "failed": "Couldn't save the event. Try again."
+    },
+    "reminders": {
+      "0": "At the time",
+      "15": "15 minutes before",
+      "60": "1 hour before",
+      "1440": "1 day before",
+      "2880": "2 days before"
     }
   },
   "placeholder": {
@@ -1178,6 +1215,10 @@
       "history": {
         "title": "All your past weeks",
         "body": "See every past plan and list, not just the last 4 weeks."
+      },
+      "reminders": {
+        "title": "More event reminders",
+        "body": "Up to 5 reminders for each event, such as a day and an hour before."
       }
     },
     "sheet": {
