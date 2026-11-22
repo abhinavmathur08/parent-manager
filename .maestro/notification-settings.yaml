@@ -46,6 +46,13 @@ tags:
 - assertVisible:
     id: notification-type-calendar_reminders
     checked: true
+# C-04.2 (FR2-REM-4, FR2-REM-5): calendar changes and "who's taking?" start on.
+- assertVisible:
+    id: notification-type-event_changes
+    checked: true
+- assertVisible:
+    id: notification-type-who_taking
+    checked: true
 - assertVisible:
     id: event-details-switch
     checked: false

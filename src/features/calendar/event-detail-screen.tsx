@@ -39,6 +39,8 @@ export type EventDetailProps = {
   onBack: () => void;
   /** Opens the editor for the series, or for one occurrence ("this event", FR2-CAL-4). */
   onEdit: (event: EventRow, children: EditTarget, occurrence: Occurrence | null) => void;
+  /** After the member takes it: answers a "who's taking?" prompt when opened from one. */
+  onTaken?: () => void;
 };
 
 const DATE_FORMAT = { weekday: 'long', month: 'long', day: 'numeric', timeZone: 'UTC' } as const;
@@ -56,6 +58,7 @@ export function EventDetailScreen({
   userId,
   onBack,
   onEdit,
+  onTaken,
 }: EventDetailProps) {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -275,7 +278,12 @@ export function EventDetailScreen({
           ) : (
             <Button
               label={t('calendar.detail.takeIt')}
-              onPress={() => run(() => actions.setTaking(event, userId))}
+              onPress={() =>
+                run(async () => {
+                  await actions.setTaking(event, userId);
+                  onTaken?.();
+                })
+              }
               testID="event-take"
             />
           )
