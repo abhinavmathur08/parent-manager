@@ -46,11 +46,12 @@ insert into public.event_reminders (id, household_id, event_id, offset_minutes) 
    'aaaaaaaa-7777-0000-0000-000000000002', 60);
 
 reset role;
-select is(
-  (select array_agg(c.relname::text order by c.relname::text)
-   from private.scoped_sync_tables t join pg_catalog.pg_class c on c.oid = t.table_name),
-  array['event_exceptions', 'event_people', 'event_reminders', 'events'],
-  'the calendar tables are scoped');
+-- Other features add their own scoped tables, so this checks the calendar's are among them.
+select ok(
+  (select array_agg(c.relname::text)
+   from private.scoped_sync_tables t join pg_catalog.pg_class c on c.oid = t.table_name)
+    @> array['busy_blocks', 'event_exceptions', 'event_people', 'event_reminders', 'events'],
+  'the calendar tables and busy blocks are scoped');
 select tests.as_user('aaaaaaaa-0000-0000-0000-000000000001');
 
 select is(
