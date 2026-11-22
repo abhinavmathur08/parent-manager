@@ -1,0 +1,94 @@
+# B-01.3 (FR2-BUSY-2, FR2-BUSY-3, FR2-BUSY-5): on Free, a busy day shows the marker and "easy
+# dinner ideas", which opens the Premium sheet with busy-day meals first. After the trial
+# starts, the same day's empty dinner gets a tag.quick starter in one tap, with an undo bar.
+# Uses the mock store (see premium.yaml). Ends signed out. Needs the local stack; see the
+# Testing section of README.md.
+appId: ${APP_ID || 'com.myparentmanager'}
+tags:
+  - backend
+---
+- runFlow: subflows/create-household.yaml
+- extendedWaitUntil:
+    visible:
+      id: plan-screen
+    timeout: 10000
+
+# Next week, so the first day is in the future, marked busy.
+- scrollUntilVisible:
+    element:
+      id: plan-next
+    direction: UP
+- tapOn:
+    id: plan-next
+- scrollUntilVisible:
+    element:
+      id: busy-mark-open-.*
+    centerElement: true
+- tapOn:
+    id: busy-mark-open-.*
+- extendedWaitUntil:
+    visible:
+      id: busy-mark-sheet
+    timeout: 10000
+- tapOn:
+    id: busy-mark-busy
+- extendedWaitUntil:
+    visible:
+      id: busy-marker-.*
+    timeout: 10000
+
+# Free: no suggestions, one action that opens the Premium sheet.
+- assertNotVisible:
+    id: easy-dinner-open-.*
+- tapOn:
+    id: easy-dinner-ideas-.*
+- extendedWaitUntil:
+    visible:
+      id: premium-sheet-header
+    timeout: 10000
+- assertVisible:
+    id: premium-benefit-busy_meals
+- scrollUntilVisible:
+    element:
+      id: premium-plan-monthly
+    centerElement: true
+- tapOn:
+    id: premium-plan-monthly
+- scrollUntilVisible:
+    element:
+      id: premium-terms
+- tapOn:
+    id: premium-start-trial
+- extendedWaitUntil:
+    visible:
+      id: premium-status-active
+    timeout: 90000
+- tapOn:
+    id: premium-done
+
+# Premium: one tap adds an easy dinner.
+- scrollUntilVisible:
+    element:
+      id: easy-dinner-open-.*
+    centerElement: true
+- assertNotVisible:
+    id: plan-slot-0-dinner
+- tapOn:
+    id: easy-dinner-open-.*
+- extendedWaitUntil:
+    visible:
+      id: easy-dinner-sheet
+    timeout: 10000
+- tapOn:
+    id: easy-dinner-0
+- extendedWaitUntil:
+    visible:
+      id: plan-undo
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: plan-slot-0-dinner
+- assertNotVisible:
+    id: easy-dinner-open-.*
+
+- runFlow: subflows/sign-out.yaml

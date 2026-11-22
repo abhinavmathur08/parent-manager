@@ -142,6 +142,23 @@
       "notBusyDetail": "Hide the busy marker on this day",
       "auto": "Follow the calendar",
       "autoDetail": "Busy when appointments are around dinner or the day is booked up"
+    },
+    "easy": {
+      "add": "Add an easy dinner",
+      "swap": "Swap for an easy meal",
+      "ideas": "Easy dinner ideas",
+      "dismiss": "Hide this suggestion for today",
+      "addTitle": "Add an easy dinner",
+      "swapTitle": "Swap for an easy meal",
+      "none": "No easy meals yet. Tag your quick recipes as Quick to see them here.",
+      "leftoversOf": "Leftovers: {{title}}",
+      "source": {
+        "leftovers": "From earlier this week",
+        "household": "Your recipe",
+        "starter": "Starter recipe"
+      },
+      "added": "Added {{title}}",
+      "swapped": "Swapped in {{title}}"
     }
   },
   "calendar": {
