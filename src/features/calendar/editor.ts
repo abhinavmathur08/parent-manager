@@ -3,9 +3,16 @@
  * saved on the device so it survives the app being killed (NFR-A11Y-8), and turned into an
  * `events` row on save. Times are wall times on the household's clock until then.
  */
-import { addDays, daysBetween, type PlanDate } from '@/features/planner/week';
+import { addDays, daysBetween, isoWeekday, type PlanDate } from '@/features/planner/week';
 
-import { wallTime, zonedInstant } from './repeat';
+import {
+  parseRepeat,
+  REPEAT_LIMITS,
+  wallTime,
+  zonedInstant,
+  type Occurrence,
+  type RepeatRule,
+} from './repeat';
 import {
   EVENT_LIMITS,
   REMINDER_OFFSETS,
@@ -13,6 +20,37 @@ import {
   type EventRow,
   type ReminderOffset,
 } from './tables';
+
+/** The repeat picker's choices (FR2-CAL-4); "every 2 weeks" is a weekly rule with interval 2. */
+export const REPEAT_CHOICES = ['none', 'daily', 'weekly', 'biweekly', 'monthly'] as const;
+export type RepeatChoice = (typeof REPEAT_CHOICES)[number];
+export const REPEAT_ENDS = ['never', 'until', 'count'] as const;
+export type RepeatEnd = (typeof REPEAT_ENDS)[number];
+
+export type RepeatDraft = {
+  choice: RepeatChoice;
+  /** ISO weekdays for weekly rules, 1 Monday to 7 Sunday. */
+  weekdays: number[];
+  end: RepeatEnd;
+  /** The last date, when it ends on a date. */
+  until: PlanDate;
+  /** How many times, when it ends after a count. */
+  count: number;
+};
+
+export const DEFAULT_REPEAT_COUNT = 10;
+/** "Ends on a date" starts 3 months out (PROPOSED). */
+const DEFAULT_UNTIL_DAYS = 91;
+
+export function defaultRepeat(date: PlanDate): RepeatDraft {
+  return {
+    choice: 'none',
+    weekdays: [isoWeekday(date)],
+    end: 'never',
+    until: addDays(date, DEFAULT_UNTIL_DAYS),
+    count: DEFAULT_REPEAT_COUNT,
+  };
+}
 
 export type EventDraft = {
   title: string;
@@ -34,7 +72,49 @@ export type EventDraft = {
   shared: boolean;
   /** Set once the member changes sharing, so a kind change no longer decides it. */
   sharedChosen: boolean;
+  /** Missing from drafts saved before repeats; read it through `repeatOf`. */
+  repeat?: RepeatDraft;
 };
+
+export function repeatOf(draft: EventDraft): RepeatDraft {
+  return draft.repeat ?? defaultRepeat(draft.date);
+}
+
+/** The rule stored on the event (C-01.2), or null when it doesn't repeat. */
+export function repeatRule(draft: EventDraft): RepeatRule | null {
+  const repeat = repeatOf(draft);
+  if (repeat.choice === 'none') return null;
+  const rule: RepeatRule =
+    repeat.choice === 'weekly' || repeat.choice === 'biweekly'
+      ? {
+          freq: 'weekly',
+          ...(repeat.choice === 'biweekly' ? { interval: 2 as const } : {}),
+          weekdays: [...repeat.weekdays].sort((a, b) => a - b),
+        }
+      : { freq: repeat.choice };
+  if (repeat.end === 'until') rule.until = repeat.until < draft.date ? draft.date : repeat.until;
+  if (repeat.end === 'count') {
+    rule.count = Math.min(REPEAT_LIMITS.maxCount, Math.max(1, Math.round(repeat.count)));
+  }
+  return rule;
+}
+
+/** The picker's state for a stored rule. */
+export function repeatFromRule(value: unknown, date: PlanDate): RepeatDraft {
+  const rule = parseRepeat(value);
+  const repeat = defaultRepeat(date);
+  if (!rule) return repeat;
+  const choice: RepeatChoice =
+    rule.freq === 'weekly' ? (rule.interval === 2 ? 'biweekly' : 'weekly') : rule.freq;
+  return {
+    ...repeat,
+    choice,
+    weekdays: rule.weekdays ?? repeat.weekdays,
+    end: rule.until ? 'until' : rule.count ? 'count' : 'never',
+    until: rule.until ?? repeat.until,
+    count: rule.count ?? repeat.count,
+  };
+}
 
 export const DEFAULT_LENGTH_MINUTES = 60;
 export const LENGTH_STEP_MINUTES = 15;
@@ -112,7 +192,13 @@ export function wallInstant(date: PlanDate, minutes: number, timeZone: string): 
 /** The title is the only required field; the rest have defaults or are optional. */
 export function canSave(draft: EventDraft): boolean {
   const title = draft.title.trim();
-  return title.length > 0 && title.length <= EVENT_LIMITS.titleLength;
+  const repeat = repeatOf(draft);
+  const weekly = repeat.choice === 'weekly' || repeat.choice === 'biweekly';
+  return (
+    title.length > 0 &&
+    title.length <= EVENT_LIMITS.titleLength &&
+    !(weekly && !repeat.weekdays.length)
+  );
 }
 
 export type EventValues = Pick<
@@ -128,6 +214,7 @@ export type EventValues = Pick<
   | 'notes'
   | 'taking_user_id'
   | 'shared'
+  | 'repeat'
 >;
 
 /** The event's columns from a draft (R2-CAL-1): instants when timed, dates when all day. */
@@ -148,6 +235,7 @@ export function draftValues(draft: EventDraft, timeZone: string): EventValues {
     notes: text(draft.notes, EVENT_LIMITS.notesLength),
     taking_user_id: draft.takingUserId,
     shared: draft.shared,
+    repeat: repeatRule(draft),
   };
 }
 
@@ -179,5 +267,32 @@ export function draftFromEvent(
     reminders: REMINDER_OFFSETS.filter((offset) => reminders.includes(offset)),
     shared: event.shared,
     sharedChosen: true,
+    repeat: repeatFromRule(event.repeat, date),
   };
+}
+
+/**
+ * The draft for changing one occurrence ("this event", FR2-CAL-4): the event's details with
+ * the occurrence's own times. Only times and taking are saved, as an exception.
+ */
+export function draftFromOccurrence(
+  event: EventRow,
+  occurrence: Occurrence,
+  personIds: readonly string[],
+  reminders: readonly number[],
+  timeZone: string,
+): EventDraft {
+  return draftFromEvent(
+    {
+      ...event,
+      starts_at: occurrence.startsAt,
+      ends_at: occurrence.endsAt,
+      start_date: occurrence.startDate,
+      end_date: occurrence.endDate,
+      taking_user_id: occurrence.takingUserId,
+    },
+    personIds,
+    reminders,
+    timeZone,
+  );
 }

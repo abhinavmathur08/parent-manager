@@ -24,6 +24,7 @@ import {
   type EventDraft,
 } from './editor';
 import { kindKey } from './agenda-screen';
+import { RepeatPicker } from './repeat-picker';
 import { EVENT_KINDS, EVENT_LIMITS, REMINDER_OFFSETS } from './tables';
 
 export type EditorPerson = { id: string; displayName: string };
@@ -47,6 +48,11 @@ export type EventEditorSheetProps = {
   people: readonly EditorPerson[];
   members: readonly EditorMember[];
   saving?: boolean;
+  /**
+   * Changing one occurrence of a series ("this event", FR2-CAL-4): only its date, times and
+   * taking member can differ from the series, so the other fields are hidden.
+   */
+  occurrenceOnly?: boolean;
 };
 
 const EPOCH = '1970-01-01';
@@ -73,6 +79,7 @@ export function EventEditorSheet({
   people,
   members,
   saving = false,
+  occurrenceOnly = false,
 }: EventEditorSheetProps) {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -103,37 +110,45 @@ export function EventEditorSheet({
       }
     >
       <View style={{ gap: theme.space[4] }}>
-        <TextField
-          label={t('calendar.editor.titleLabel')}
-          placeholder={t('calendar.editor.titleHint')}
-          value={draft.title}
-          onChangeText={(title) => set({ title })}
-          maxLength={EVENT_LIMITS.titleLength}
-          autoFocus
-          returnKeyType="done"
-          testID="event-title"
-        />
+        {occurrenceOnly ? (
+          <Text color="textSecondary" testID="event-editor-one">
+            {t('calendar.editor.oneOnly', { title: draft.title })}
+          </Text>
+        ) : (
+          <>
+            <TextField
+              label={t('calendar.editor.titleLabel')}
+              placeholder={t('calendar.editor.titleHint')}
+              value={draft.title}
+              onChangeText={(title) => set({ title })}
+              maxLength={EVENT_LIMITS.titleLength}
+              autoFocus
+              returnKeyType="done"
+              testID="event-title"
+            />
 
-        <Group label={t('calendar.editor.kind')}>
-          <View style={[styles.wrap, gap]}>
-            {EVENT_KINDS.map((kind) => (
-              <Chip
-                key={kind}
-                label={t(kindKey(kind))}
-                selected={draft.kind === kind}
-                onPress={() => onChange(withKind(draft, kind))}
-                testID={`event-kind-${kind}`}
-              />
-            ))}
-          </View>
-        </Group>
+            <Group label={t('calendar.editor.kind')}>
+              <View style={[styles.wrap, gap]}>
+                {EVENT_KINDS.map((kind) => (
+                  <Chip
+                    key={kind}
+                    label={t(kindKey(kind))}
+                    selected={draft.kind === kind}
+                    onPress={() => onChange(withKind(draft, kind))}
+                    testID={`event-kind-${kind}`}
+                  />
+                ))}
+              </View>
+            </Group>
 
-        <Switch
-          label={t('calendar.editor.allDay')}
-          value={draft.allDay}
-          onValueChange={(allDay) => set({ allDay })}
-          testID="event-all-day"
-        />
+            <Switch
+              label={t('calendar.editor.allDay')}
+              value={draft.allDay}
+              onValueChange={(allDay) => set({ allDay })}
+              testID="event-all-day"
+            />
+          </>
+        )}
         <Group label={t('calendar.editor.date')}>
           <Stepper
             accessibilityLabel={t('calendar.editor.date')}
@@ -208,7 +223,7 @@ export function EventEditorSheet({
           </>
         )}
 
-        {people.length > 0 ? (
+        {!occurrenceOnly && people.length > 0 ? (
           <Group label={t('calendar.editor.for')}>
             <View style={[styles.wrap, gap]}>
               {people.map((person) => {
@@ -264,64 +279,74 @@ export function EventEditorSheet({
           </View>
         </Group>
 
-        <TextField
-          label={t('calendar.editor.place')}
-          value={draft.place}
-          onChangeText={(place) => set({ place })}
-          maxLength={EVENT_LIMITS.placeLength}
-          testID="event-place"
-        />
-        <TextField
-          label={t('calendar.editor.notes')}
-          placeholder={t('calendar.editor.notesHint')}
-          value={draft.notes}
-          onChangeText={(notes) => set({ notes })}
-          maxLength={EVENT_LIMITS.notesLength}
-          multiline
-          testID="event-notes"
-        />
+        {occurrenceOnly ? null : (
+          <>
+            <RepeatPicker
+              repeat={draft.repeat}
+              date={draft.date}
+              locale={locale}
+              onChange={(repeat) => set({ repeat })}
+            />
+            <TextField
+              label={t('calendar.editor.place')}
+              value={draft.place}
+              onChangeText={(place) => set({ place })}
+              maxLength={EVENT_LIMITS.placeLength}
+              testID="event-place"
+            />
+            <TextField
+              label={t('calendar.editor.notes')}
+              placeholder={t('calendar.editor.notesHint')}
+              value={draft.notes}
+              onChangeText={(notes) => set({ notes })}
+              maxLength={EVENT_LIMITS.notesLength}
+              multiline
+              testID="event-notes"
+            />
 
-        <Group label={t('calendar.editor.reminders')}>
-          <View style={[styles.wrap, gap]}>
-            {REMINDER_OFFSETS.map((offset) => (
-              <Chip
-                key={offset}
-                label={t(`calendar.reminders.${offset}`)}
-                selected={draft.reminders.includes(offset)}
-                onPress={() => {
-                  const next = toggleReminder(draft, offset, reminderLimit);
-                  setOverLimit(next.overLimit);
-                  if (!next.overLimit) onChange(next.draft);
-                }}
-                testID={`event-reminder-${offset}`}
-              />
-            ))}
-          </View>
-          {overLimit ? (
-            <View style={gap} testID="event-reminders-limit">
-              <Text color="textSecondary">{t('calendar.editor.remindersLimit')}</Text>
-              <Button
-                variant="secondary"
-                label={t('calendar.editor.seePremium')}
-                onPress={onPremiumRequired}
-                testID="event-reminders-premium"
-              />
-            </View>
-          ) : null}
-        </Group>
+            <Group label={t('calendar.editor.reminders')}>
+              <View style={[styles.wrap, gap]}>
+                {REMINDER_OFFSETS.map((offset) => (
+                  <Chip
+                    key={offset}
+                    label={t(`calendar.reminders.${offset}`)}
+                    selected={draft.reminders.includes(offset)}
+                    onPress={() => {
+                      const next = toggleReminder(draft, offset, reminderLimit);
+                      setOverLimit(next.overLimit);
+                      if (!next.overLimit) onChange(next.draft);
+                    }}
+                    testID={`event-reminder-${offset}`}
+                  />
+                ))}
+              </View>
+              {overLimit ? (
+                <View style={gap} testID="event-reminders-limit">
+                  <Text color="textSecondary">{t('calendar.editor.remindersLimit')}</Text>
+                  <Button
+                    variant="secondary"
+                    label={t('calendar.editor.seePremium')}
+                    onPress={onPremiumRequired}
+                    testID="event-reminders-premium"
+                  />
+                </View>
+              ) : null}
+            </Group>
 
-        {isParent ? (
-          <Switch
-            label={t('calendar.editor.shared')}
-            description={t('calendar.editor.sharedHint')}
-            value={draft.shared}
-            onValueChange={(shared) => set({ shared, sharedChosen: true })}
-            testID="event-shared"
-          />
-        ) : (
-          <Text color="textSecondary" testID="event-shared-always">
-            {t('calendar.editor.sharedAlways')}
-          </Text>
+            {isParent ? (
+              <Switch
+                label={t('calendar.editor.shared')}
+                description={t('calendar.editor.sharedHint')}
+                value={draft.shared}
+                onValueChange={(shared) => set({ shared, sharedChosen: true })}
+                testID="event-shared"
+              />
+            ) : (
+              <Text color="textSecondary" testID="event-shared-always">
+                {t('calendar.editor.sharedAlways')}
+              </Text>
+            )}
+          </>
         )}
       </View>
     </BottomSheet>

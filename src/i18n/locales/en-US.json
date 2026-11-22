@@ -145,6 +145,8 @@
     "editor": {
       "title": "New event",
       "editTitle": "Edit event",
+      "editOneTitle": "Edit this event",
+      "oneOnly": "Changes to the time and who's taking apply to this {{title}} only.",
       "titleLabel": "Title",
       "titleHint": "For example, pediatrician",
       "kind": "Kind",
@@ -172,8 +174,36 @@
       "save": "Save",
       "failed": "Couldn't save the event. Try again."
     },
+    "repeat": {
+      "label": "Repeat",
+      "none": "Doesn't repeat",
+      "daily": "Every day",
+      "weekly": "Every week",
+      "biweekly": "Every 2 weeks",
+      "monthly": "Every month",
+      "weekdays": "On these days",
+      "ends": "Ends",
+      "end": {
+        "never": "Never",
+        "until": "On a date",
+        "count": "After a number of times"
+      },
+      "until": "Last date",
+      "count": "Number of times",
+      "times_one": "{{formatted}} time",
+      "times_other": "{{formatted}} times"
+    },
+    "scope": {
+      "editTitle": "Edit a repeating event",
+      "deleteTitle": "Delete a repeating event",
+      "one": "This event",
+      "oneHint": "Only this day changes.",
+      "all": "All events",
+      "allHint": "Every day in the series. Days changed on their own keep their changes."
+    },
     "detail": {
       "title": "Event",
+      "repeats": "Repeats",
       "back": "Back to the calendar",
       "for": "For",
       "taking": "Who's taking",
@@ -194,6 +224,10 @@
       "sharedHint": "Parents always see every event.",
       "delete": "Delete event",
       "deleted": "Event deleted",
+      "deleteSeriesTitle": "Delete every event in this series?",
+      "deleteSeriesBody": "Every day of {{title}} leaves the calendar for everyone in the household.",
+      "deleteSeries": "Delete all",
+      "cancel": "Cancel",
       "undo": "Undo",
       "gone": "This event isn't on the calendar any more.",
       "failed": "Couldn't change the event. Try again."

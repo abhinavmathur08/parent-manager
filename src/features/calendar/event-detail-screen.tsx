@@ -2,8 +2,10 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, StyleSheet, View } from 'react-native';
 
+import { BottomSheet } from '@/components/bottom-sheet';
 import { Button } from '@/components/button';
 import { Card } from '@/components/card';
+import { RadioOption } from '@/components/radio-option';
 import { EmptyState } from '@/components/empty-state';
 import { Screen } from '@/components/screen';
 import { Switch } from '@/components/switch';
@@ -20,10 +22,12 @@ import { startOfDay } from './agenda';
 import { kindKey } from './agenda-screen';
 import { useCalendarRows } from './data';
 import { eventPermissions } from './permissions';
-import { expandOccurrences } from './repeat';
+import { repeatFromRule } from './editor';
+import { expandOccurrences, parseRepeat, type Occurrence } from './repeat';
 import { REMINDER_OFFSETS, type EventRow } from './tables';
 import { useCalendarMembers } from './use-members';
-import { useEventActions, type EventChildren } from './writes';
+import type { EditTarget } from './use-event-editor';
+import { useEventActions, useOccurrenceWrites } from './writes';
 
 export type EventDetailProps = {
   eventId: string;
@@ -33,7 +37,8 @@ export type EventDetailProps = {
   role: MemberRole;
   userId: string | null;
   onBack: () => void;
-  onEdit: (event: EventRow, children: EventChildren) => void;
+  /** Opens the editor for the series, or for one occurrence ("this event", FR2-CAL-4). */
+  onEdit: (event: EventRow, children: EditTarget, occurrence: Occurrence | null) => void;
 };
 
 const DATE_FORMAT = { weekday: 'long', month: 'long', day: 'numeric', timeZone: 'UTC' } as const;
@@ -62,6 +67,9 @@ export function EventDetailScreen({
   const fail = () => Alert.alert(t('calendar.detail.failed'));
   const undoable = useUndoable(fail);
   const [deleted, setDeleted] = useState(false);
+  const occurrenceWrites = useOccurrenceWrites(timeZone);
+  /** Asking "this event" or "all events" before an edit or delete of a repeating event. */
+  const [scoping, setScoping] = useState<'edit' | 'delete' | null>(null);
 
   const event = rows.events.find((row) => row.id === eventId) ?? null;
   const occurrence = useMemo(() => {
@@ -111,7 +119,12 @@ export function EventDetailScreen({
   }
 
   const can = eventPermissions(event, role, userId);
-  const children = { people: rows.people, reminders: rows.reminders };
+  const children = {
+    people: rows.people,
+    reminders: rows.reminders,
+    exceptions: rows.exceptions,
+  };
+  const repeats = parseRepeat(event.repeat) !== null && occurrence !== null;
   const forNames = rows.people
     .filter((row) => row.event_id === event.id)
     .map((row) => people.find((p) => p.id === row.person_id)?.displayName)
@@ -144,13 +157,40 @@ export function EventDetailScreen({
 
   const run = (task: () => Promise<void>) => void task().catch(fail);
 
-  const remove = () => {
+  /** Hidden at once, written when the 5-second undo goes (FR2-CAL-8, NFR-REL-5). */
+  const remove = (scope: 'one' | 'all') => {
     setDeleted(true);
     undoable.hold({
       message: t('calendar.detail.deleted'),
       hidden: [event.id],
-      commit: () => actions.remove(event),
+      commit: () =>
+        scope === 'one' && occurrence
+          ? occurrenceWrites.skip(event, occurrence.originalDate, rows.exceptions)
+          : actions.remove(event),
     });
+  };
+
+  /** A whole series is deleted only after a confirmation (FR2-CAL-8). */
+  const removeSeries = () =>
+    Alert.alert(
+      t('calendar.detail.deleteSeriesTitle'),
+      t('calendar.detail.deleteSeriesBody', { title: event.title }),
+      [
+        { text: t('calendar.detail.cancel'), style: 'cancel' },
+        {
+          text: t('calendar.detail.deleteSeries'),
+          style: 'destructive',
+          onPress: () => remove('all'),
+        },
+      ],
+    );
+
+  const choose = (scope: 'one' | 'all') => {
+    const action = scoping;
+    setScoping(null);
+    if (action === 'edit') onEdit(event, children, scope === 'one' ? occurrence : null);
+    else if (scope === 'one') remove('one');
+    else removeSeries();
   };
 
   return (
@@ -207,6 +247,15 @@ export function EventDetailScreen({
               }
               testID="event-detail-reminders"
             />
+            {repeats ? (
+              <Field
+                label={t('calendar.detail.repeats')}
+                value={t(
+                  `calendar.repeat.${repeatFromRule(event.repeat, occurrence.originalDate).choice}`,
+                )}
+                testID="event-detail-repeats"
+              />
+            ) : null}
             {event.updated_by ? (
               <Text variant="caption" color="textSecondary" testID="event-detail-changed-by">
                 {t('calendar.detail.changedBy', { name: nameOf(event.updated_by) })}
@@ -247,18 +296,41 @@ export function EventDetailScreen({
             <Button
               variant="secondary"
               label={t('calendar.detail.edit')}
-              onPress={() => onEdit(event, children)}
+              onPress={() => (repeats ? setScoping('edit') : onEdit(event, children, null))}
               testID="event-edit"
             />
             <Button
               variant="destructive"
               label={t('calendar.detail.delete')}
-              onPress={remove}
+              onPress={() => (repeats ? setScoping('delete') : remove('all'))}
               testID="event-delete"
             />
           </View>
         ) : null}
       </Screen>
+      <BottomSheet
+        visible={scoping !== null}
+        onClose={() => setScoping(null)}
+        title={t(scoping === 'delete' ? 'calendar.scope.deleteTitle' : 'calendar.scope.editTitle')}
+        testID="event-scope"
+      >
+        <View style={{ gap: theme.space[3] }}>
+          <RadioOption
+            label={t('calendar.scope.one')}
+            description={t('calendar.scope.oneHint')}
+            selected={false}
+            onPress={() => choose('one')}
+            testID="event-scope-one"
+          />
+          <RadioOption
+            label={t('calendar.scope.all')}
+            description={t('calendar.scope.allHint')}
+            selected={false}
+            onPress={() => choose('all')}
+            testID="event-scope-all"
+          />
+        </View>
+      </BottomSheet>
     </View>
   );
 }
