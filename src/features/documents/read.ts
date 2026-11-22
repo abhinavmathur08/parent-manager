@@ -37,11 +37,21 @@ export async function readLinks(documentId: string): Promise<ReadLinks> {
   return { mime: data.mime, links: data.links.map(absoluteLink) };
 }
 
+const EXTENSIONS: Record<DocumentMime, string> = {
+  'application/pdf': 'pdf',
+  'image/jpeg': 'jpg',
+  'image/png': 'png',
+};
+
 /** Downloads each file into the open document's cache folder, in page order. */
-export async function downloadPages(links: readonly string[], folder: Directory) {
+export async function downloadPages(
+  links: readonly string[],
+  folder: Directory,
+  mime: DocumentMime,
+) {
   return Promise.all(
     links.map(async (link, index) => {
-      const target = new File(folder, `${index + 1}`);
+      const target = new File(folder, `${index + 1}.${EXTENSIONS[mime]}`);
       if (target.exists) target.delete();
       const file = await File.downloadFileAsync(link, target);
       return file.uri;
@@ -85,7 +95,7 @@ export function useDocumentPages(documentId: string, online: boolean, attempt = 
           ? { status: 'pdf', url: links[0] }
           : { status: 'pdf_unsupported' };
       }
-      return { status: 'images', uris: await downloadPages(links, folder) };
+      return { status: 'images', uris: await downloadPages(links, folder, mime) };
     })().then(
       (next) => {
         if (active && next.status !== 'pdf_unsupported') track('document_viewed', {});

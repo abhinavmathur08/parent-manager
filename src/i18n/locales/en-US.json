@@ -708,7 +708,17 @@
       "retry": "Try again",
       "pdf": "The document",
       "pdfUnsupported": "PDFs can't be shown in the app on this phone yet. Use Save or send to open it in another app.",
-      "page": "Page {{page}} of {{pages}}"
+      "page": "Page {{page}} of {{pages}}",
+      "events": "Appointments",
+      "sendOut": "Save or send",
+      "sendOutFailed": "We couldn't get the document ready to send. Check your connection and try again.",
+      "delete": "Delete",
+      "deleteTitle": "Delete this document?",
+      "deleteBody": "It's removed for everyone in the household, and from every appointment it's attached to.",
+      "cancel": "Cancel",
+      "deleted": "Document deleted",
+      "undo": "Undo",
+      "deleteFailed": "We couldn't delete the document. Try again."
     },
     "details": {
       "category": "Category",

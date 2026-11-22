@@ -15,6 +15,7 @@ import { validateEvent } from '@/lib/analytics/schema';
 let mockRows: Record<string, unknown[]> = {};
 jest.mock('@/lib/sync', () => ({
   useSyncedRows: (table: string) => ({ rows: mockRows[table] ?? [], loading: false }),
+  useSyncWriter: () => ({ insert: jest.fn(), update: jest.fn(), remove: jest.fn() }),
 }));
 jest.mock('@/features/people/data', () => ({
   fetchPeople: async () => [{ id: 'p1', displayName: 'Mia', ageBand: 'toddler', allergies: [] }],
@@ -162,7 +163,13 @@ describe('document details (S-42)', () => {
   const showDocument = async (online: boolean, id = 'd1') => {
     await render(
       <SafeAreaProvider initialMetrics={metrics}>
-        <DocumentScreen documentId={id} household={household} online={online} onBack={jest.fn()} />
+        <DocumentScreen
+          documentId={id}
+          household={household}
+          online={online}
+          onBack={jest.fn()}
+          isParent={false}
+        />
       </SafeAreaProvider>,
     );
     await act(async () => undefined);
