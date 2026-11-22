@@ -46,6 +46,7 @@ export const PAYWALL_TRIGGERS = [
   'template',
   'history',
   'premium_section',
+  'reminders',
 ] as const;
 const productPeriod = oneOf('monthly', 'annual');
 
@@ -132,6 +133,15 @@ export const ANALYTICS_EVENTS = {
   week_planned: { dinners_count: count(7), days_until_week_start: count(366) },
   // Phase 2, 3.1 Shared calendar
   calendar_viewed: { view: oneOf('agenda', 'day', 'week') },
+  event_created: {
+    kind: code,
+    all_day: bool,
+    repeats: bool,
+    has_people: bool,
+    has_taking: bool,
+    shared: bool,
+    reminders: count(5),
+  },
   // 3.7 Staples and pantry
   staple_added: { is_catalog_ingredient: bool },
   staple_removed: {},
