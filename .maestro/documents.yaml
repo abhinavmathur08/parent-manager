@@ -1,0 +1,40 @@
+# V-04 (FR2-DOC-1, FR2-DOC-3): a parent opens Documents from the Household tab behind the
+# vault lock and sees the empty vault. Ends signed out.
+#
+# The vault never opens on a device with no passcode (FR2-DOC-3), and CI's simulators and
+# emulators have none, so there the flow checks that refusal instead. On a device with Face ID
+# enrolled (Simulator: Features > Face ID > Enrolled) it waits for the check to be matched
+# (Features > Face ID > Matching Face) and goes on into the vault.
+# Needs the local stack; see the Testing section of README.md.
+appId: ${APP_ID || 'com.myparentmanager'}
+tags:
+  - backend
+---
+- runFlow: subflows/create-household.yaml
+- tapOn:
+    id: tab-household
+- scrollUntilVisible:
+    element:
+      id: open-documents
+- tapOn:
+    id: open-documents
+- extendedWaitUntil:
+    visible:
+      id: 'vault-(no-passcode|locked|screen)'
+    timeout: 10000
+
+- runFlow:
+    when:
+      visible:
+        id: vault-no-passcode
+    commands:
+      - assertNotVisible:
+          id: vault-screen
+
+- runFlow:
+    when:
+      notVisible:
+        id: vault-no-passcode
+    file: subflows/vault-open.yaml
+
+- runFlow: subflows/sign-out.yaml

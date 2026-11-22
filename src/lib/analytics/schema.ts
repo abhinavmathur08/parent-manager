@@ -154,6 +154,8 @@ export const ANALYTICS_EVENTS = {
   event_updated: { kind: code, scope: oneOf('one', 'all') },
   event_deleted: { kind: code, scope: oneOf('one', 'all') },
   event_shared: { shared: bool },
+  // Phase 2, 3.5 Document vault. Never a title, a category or a person (FR2-DOC-11).
+  vault_opened: { unlocked_with: oneOf('biometric', 'passcode', 'none') },
   // 3.7 Staples and pantry
   staple_added: { is_catalog_ingredient: bool },
   staple_removed: {},

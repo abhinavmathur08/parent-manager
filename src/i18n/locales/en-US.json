@@ -652,6 +652,34 @@
     "timeoutMinutes_one": "{{minutes}} minute away",
     "timeoutMinutes_other": "{{minutes}} minutes away"
   },
+  "documents": {
+    "title": "Documents",
+    "offline": "You're offline. The list still works, and opening a document needs a connection.",
+    "empty": "Keep insurance cards, birth certificates and school forms here, locked on both parents' phones.",
+    "waitingTitle": "Waiting to upload",
+    "waiting": "Waiting for a connection",
+    "uploading": "Uploading",
+    "uploadFailed": "Couldn't upload. We'll try again.",
+    "expires": "Expires {{date}}",
+    "expired": "Expired {{date}}",
+    "personAndExpiry": "{{person}} · {{expiry}}",
+    "gone": "This document was deleted or is no longer shared with you.",
+    "openOffline": "You're offline. Connect to the internet to open this document.",
+    "details": {
+      "category": "Category",
+      "person": "For",
+      "expiry": "Expires",
+      "pages": "Pages"
+    },
+    "category": {
+      "insurance": "Insurance",
+      "identity": "Identity",
+      "childcare_school": "Childcare and school",
+      "medical": "Medical",
+      "household": "Household",
+      "other": "Other"
+    }
+  },
   "sync": {
     "pending_one": "{{count}} change waiting to sync",
     "pending_other": "{{count}} changes waiting to sync",

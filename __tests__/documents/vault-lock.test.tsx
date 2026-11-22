@@ -81,9 +81,9 @@ jest.spyOn(AppState, 'addEventListener').mockImplementation((_type, listener) =>
 });
 const goTo = (state: AppStateStatus) => act(async () => appStateListeners.forEach((l) => l(state)));
 
-function vault() {
+function vault(onUnlocked?: (via: string) => void) {
   return (
-    <VaultGate>
+    <VaultGate onUnlocked={onUnlocked}>
       <Text testID="vault-content">Insurance card</Text>
     </VaultGate>
   );
@@ -159,6 +159,31 @@ describe('VaultGate (NFR2-SEC-3)', () => {
     expect(screen.queryByTestId('vault-content')).toBeNull();
     expect(screen.queryByTestId('vault-unlock')).toBeNull();
     expect(auth.authenticateAsync).not.toHaveBeenCalled();
+  });
+
+  it('reports how it was opened once, for vault_opened', async () => {
+    const opened = jest.fn();
+    await render(vault(opened));
+    await screen.findByTestId('vault-content');
+    expect(opened).toHaveBeenCalledWith('biometric');
+
+    await goTo('background');
+    await goTo('active');
+    expect(opened).toHaveBeenCalledTimes(1);
+  });
+
+  it('reports a passcode unlock, and an open with no check', async () => {
+    auth.getEnrolledLevelAsync.mockResolvedValue(1);
+    const opened = jest.fn();
+    const view = await render(vault(opened));
+    await screen.findByTestId('vault-content');
+    expect(opened).toHaveBeenLastCalledWith('passcode');
+    await act(async () => view.unmount());
+
+    writeVaultSettings({ enabled: false, timeoutMinutes: 1 });
+    await render(vault(opened));
+    await screen.findByTestId('vault-content');
+    expect(opened).toHaveBeenLastCalledWith('none');
   });
 
   it('opens without a check when the member turned the lock off', async () => {

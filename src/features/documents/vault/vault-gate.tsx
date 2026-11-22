@@ -6,13 +6,20 @@ import { AppState, Platform, StyleSheet, View, type AppStateStatus } from 'react
 import { Button } from '@/components/button';
 import { Icon } from '@/components/icon';
 import { Text } from '@/components/text';
-import { authenticate, unlockMethod } from '@/features/biometric/device-auth';
+import { authenticate, unlockMethod, type UnlockMethod } from '@/features/biometric/device-auth';
 import { useTheme } from '@/hooks/use-theme';
 import { suppressBreadcrumbs } from '@/lib/crash-reporting';
 
 import { markVaultUnlocked, vaultNeedsUnlock } from './vault-lock-store';
 
 type GateState = 'checking' | 'locked' | 'no_passcode' | 'unlocked';
+
+/** How the vault was opened, for `vault_opened`: `none` when no check was needed. */
+export type UnlockedWith = 'biometric' | 'passcode' | 'none';
+
+function unlockedWith(method: UnlockMethod): UnlockedWith {
+  return method === 'passcode' ? 'passcode' : 'biometric';
+}
 
 /**
  * Wraps every vault screen (S-40, S-41, S-42). Nothing inside renders until the vault lock is
@@ -21,12 +28,31 @@ type GateState = 'checking' | 'locked' | 'no_passcode' | 'unlocked';
  * switcher), iOS blurs the app switcher, the content is hidden while the app is away, and
  * Sentry keeps no breadcrumbs (FR2-DOC-4, NFR2-SEC-2, NFR2-SEC-3).
  */
-export function VaultGate({ children }: { children: ReactNode }) {
+export function VaultGate({
+  children,
+  onUnlocked,
+}: {
+  children: ReactNode;
+  /** Called once, the first time the content shows. */
+  onUnlocked?: (via: UnlockedWith) => void;
+}) {
   const { t } = useTranslation();
   const [state, setState] = useState<GateState>('checking');
   const [busy, setBusy] = useState(false);
   const [away, setAway] = useState(false);
   const prompted = useRef(false);
+  const method = useRef<UnlockMethod>('passcode');
+  const reported = useRef(false);
+  const report = useRef(onUnlocked);
+  useEffect(() => {
+    report.current = onUnlocked;
+  });
+  const opened = useCallback((via: UnlockedWith) => {
+    setState('unlocked');
+    if (reported.current) return;
+    reported.current = true;
+    report.current?.(via);
+  }, []);
 
   ScreenCapture.usePreventScreenCapture('vault');
 
@@ -47,7 +73,7 @@ export function VaultGate({ children }: { children: ReactNode }) {
       const result = await authenticate(t('vault.prompt'), t('vault.cancel'));
       if (result === 'unlocked') {
         markVaultUnlocked();
-        setState('unlocked');
+        opened(unlockedWith(method.current));
       } else if (result === 'unavailable') {
         setState('no_passcode');
       }
@@ -56,22 +82,23 @@ export function VaultGate({ children }: { children: ReactNode }) {
     } finally {
       setBusy(false);
     }
-  }, [t]);
+  }, [t, opened]);
 
   const check = useCallback(
     () =>
       unlockMethod()
         .catch(() => 'none' as const)
-        .then((method) => {
+        .then((found) => {
           // FR2-DOC-3 (PROPOSED): no passcode, no vault, even with the lock turned off.
-          if (method === 'none') return setState('no_passcode');
-          if (!vaultNeedsUnlock()) return setState('unlocked');
+          if (found === 'none') return setState('no_passcode');
+          method.current = found;
+          if (!vaultNeedsUnlock()) return opened('none');
           setState('locked');
           if (prompted.current) return;
           prompted.current = true;
           return unlock();
         }),
-    [unlock],
+    [unlock, opened],
   );
 
   useEffect(() => {
