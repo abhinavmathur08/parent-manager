@@ -113,9 +113,10 @@ select throws_ok(
 select is_empty(
   $$update storage.objects set name = name || 'x' where bucket_id = 'documents' returning id$$,
   'nor rename a file');
-select is_empty(
-  $$delete from storage.objects where bucket_id = 'documents' returning id$$,
-  'nor delete one');
+-- Storage refuses direct deletes from SQL for everyone; files leave only through the API.
+select throws_ok(
+  $$delete from storage.objects where bucket_id = 'documents'$$,
+  null, null, 'nor delete one');
 
 select tests.as_user('aaaaaaaa-0000-0000-0000-000000000002');
 select is(tests.readable(), '{}'::text[], 'a family member without a share reads no files');
