@@ -50,6 +50,7 @@
         "npm:expo-notifications@~58.1.9",
         "npm:expo-print@~58.0.9",
         "npm:expo-router@~58.0.32",
+        "npm:expo-screen-capture@~58.0.6",
         "npm:expo-secure-store@~58.0.3",
         "npm:expo-sharing@~58.0.23",
         "npm:expo-splash-screen@~58.0.14",

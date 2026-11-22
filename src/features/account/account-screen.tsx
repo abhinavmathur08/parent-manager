@@ -14,6 +14,7 @@ import { authErrorKey } from '@/features/auth/auth-errors';
 import { useAuth } from '@/features/auth/session';
 import { signOut } from '@/features/auth/sign-out';
 import { LockSettingsSection } from '@/features/biometric/lock-settings';
+import { VaultLockSettingsSection } from '@/features/documents/vault/vault-lock-settings';
 import { fetchDisplayName, saveDisplayName } from '@/features/onboarding/profile';
 import { useOnline } from '@/hooks/use-online';
 import { useTheme } from '@/hooks/use-theme';
@@ -126,6 +127,7 @@ export function AccountScreen() {
         <SectionHeader title={t('account.security')} variant="group" />
         <LockSettingsSection />
       </View>
+      <VaultLockSettingsSection />
       <Button
         variant="secondary"
         label={t('auth.signOut.action')}

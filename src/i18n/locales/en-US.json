@@ -562,6 +562,23 @@
     "needsPasscode": "Set up Face ID, a fingerprint or a passcode on this device to use the lock.",
     "turnedOff": "The app lock is off because this device has no Face ID, fingerprint or passcode."
   },
+  "vault": {
+    "lockedTitle": "Documents are locked",
+    "lockedBody": "Unlock to see your household's documents.",
+    "unlock": "Unlock documents",
+    "prompt": "Unlock documents",
+    "turnOffPrompt": "Confirm to stop locking documents",
+    "cancel": "Cancel",
+    "noPasscodeTitle": "Set up a passcode to use documents",
+    "noPasscodeBody": "Documents need Face ID, a fingerprint or a passcode on this device, so someone holding your phone can't open them.",
+    "settingsTitle": "Documents",
+    "setting": "Lock documents",
+    "settingDescription": "Ask for Face ID, a fingerprint or your passcode before showing documents, even when the app is unlocked.",
+    "timeoutTitle": "Lock documents again after",
+    "timeoutImmediately": "Leaving the app",
+    "timeoutMinutes_one": "{{minutes}} minute away",
+    "timeoutMinutes_other": "{{minutes}} minutes away"
+  },
   "sync": {
     "pending_one": "{{count}} change waiting to sync",
     "pending_other": "{{count}} changes waiting to sync",
