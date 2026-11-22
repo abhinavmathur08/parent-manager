@@ -87,17 +87,23 @@ describe('navigation shell', () => {
     expect(screen.queryByTestId('tab-bar')).toBeNull();
   });
 
-  it('opens on Plan and switches tabs from the floating tab bar', async () => {
+  it('opens on Plan and switches tabs from the floating tab bar, with Calendar second', async () => {
     await renderRouter(`${process.cwd()}/src/app`, { initialUrl: '/' });
     expect(await screen.findByTestId('plan-screen-title')).toHaveTextContent('Plan');
     expect(screen.getByRole('tab', { name: 'Plan' })).toBeSelected();
 
-    for (const name of ['list', 'recipes', 'household'] as const) {
+    for (const name of ['calendar', 'list', 'recipes', 'household'] as const) {
       await fireEvent.press(screen.getByTestId(`tab-${name}`));
       expect(await screen.findByTestId(`${name}-screen`)).toBeOnTheScreen();
       expect(screen.getByTestId(`tab-${name}`)).toBeSelected();
     }
-    expect(screen.getAllByRole('tab')).toHaveLength(4);
+    expect(screen.getAllByRole('tab').map((tab) => tab.props.accessibilityLabel)).toEqual([
+      'Plan',
+      'Calendar',
+      'List',
+      'Recipes',
+      'Household',
+    ]);
   });
 });
 

@@ -121,7 +121,26 @@
     "plan": "Plan",
     "list": "List",
     "recipes": "Recipes",
-    "household": "Household"
+    "household": "Household",
+    "calendar": "Calendar"
+  },
+  "calendar": {
+    "title": "Calendar",
+    "offline": "You're offline. The calendar still works, and changes sync when you're back.",
+    "empty": "Nothing on the calendar yet. Appointments and plans you add show here.",
+    "today": "Today",
+    "nothingToday": "Nothing on today.",
+    "showLater": "Show later days",
+    "allDay": "All day",
+    "timeRange": "{{start}} – {{end}}",
+    "eventLabel": "{{kind}}, {{time}}, {{title}}",
+    "kinds": {
+      "appointment": "Appointment",
+      "childcare": "Childcare",
+      "activity": "Activity",
+      "family": "Family",
+      "other": "Other"
+    }
   },
   "placeholder": {
     "comingSoon": "This part of the app is on its way."
