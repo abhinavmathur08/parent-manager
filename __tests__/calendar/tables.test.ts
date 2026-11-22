@@ -48,6 +48,7 @@ describe('calendar sync tables (C-01.1)', () => {
     expect(BUSY_TABLES.map((table) => [table.name, 'scoped' in table && table.scoped])).toEqual([
       ['busy_blocks', true],
       ['busy_day_overrides', false],
+      ['busy_days', false],
     ]);
   });
 
