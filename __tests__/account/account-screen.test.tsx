@@ -19,6 +19,9 @@ jest.mock('@/features/onboarding/profile', () => ({
 }));
 jest.mock('@/features/auth/sign-out', () => ({ signOut: () => mockSignOut() }));
 jest.mock('@/features/biometric/lock-settings', () => ({ LockSettingsSection: () => null }));
+jest.mock('@/features/documents/vault/vault-lock-settings', () => ({
+  VaultLockSettingsSection: () => null,
+}));
 jest.mock('@/hooks/use-online', () => ({ useOnline: () => true }));
 jest.mock('expo-router', () => ({
   router: { back: jest.fn(), replace: jest.fn(), canGoBack: () => true },
