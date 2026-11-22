@@ -18,6 +18,7 @@ function Calendar({ membership }: { membership: Membership }) {
   const { t } = useTranslation();
   const auth = useAuth();
   const editor = useEventEditor({
+    mode: 'add',
     householdId: membership.householdId,
     locale: membership.locale,
     timeZone: householdTimeZone(membership.timezone),

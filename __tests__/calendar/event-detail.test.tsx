@@ -56,6 +56,7 @@ const event = (over: Record<string, unknown> = {}) => ({
 });
 
 const onBack = jest.fn();
+const onEdit = jest.fn();
 const show = async (role: MemberRole, userId: string) => {
   await render(
     <SafeAreaProvider initialMetrics={metrics}>
@@ -66,6 +67,7 @@ const show = async (role: MemberRole, userId: string) => {
         role={role}
         userId={userId}
         onBack={onBack}
+        onEdit={onEdit}
       />
     </SafeAreaProvider>,
   );
@@ -112,6 +114,7 @@ describe('S-38 event detail (FR2-CAL-7)', () => {
 describe('taking and caregivers (C6, spec section 2)', () => {
   it("lets a caregiver take a parent's shared event, but not edit, delete or share it", async () => {
     await show('caregiver', 'carer');
+    expect(screen.queryByTestId('event-edit')).toBeNull();
     expect(screen.queryByTestId('event-delete')).toBeNull();
     expect(screen.queryByTestId('event-share')).toBeNull();
     await fireEvent.press(screen.getByTestId('event-take'));
@@ -134,10 +137,12 @@ describe('taking and caregivers (C6, spec section 2)', () => {
     });
   });
 
-  it('lets a caregiver delete the shared events they created', async () => {
+  it('lets a caregiver edit and delete the shared events they created', async () => {
     mockRows.events = [event({ created_by: 'carer' })];
     await show('caregiver', 'carer');
     expect(screen.getByTestId('event-delete')).toBeTruthy();
+    await fireEvent.press(screen.getByTestId('event-edit'));
+    expect(onEdit).toHaveBeenCalled();
     expect(screen.queryByTestId('event-share')).toBeNull();
   });
 

@@ -1,7 +1,7 @@
 import { renderHook } from '@testing-library/react-native';
 
-import { newDraft } from '@/features/calendar/editor';
-import { kindCode, useCreateEvent } from '@/features/calendar/writes';
+import { draftFromEvent, newDraft } from '@/features/calendar/editor';
+import { kindCode, useCreateEvent, useUpdateEvent } from '@/features/calendar/writes';
 
 let mockUuid = 0;
 jest.mock('expo-crypto', () => ({
@@ -59,5 +59,73 @@ describe('useCreateEvent (FR2-CAL-2, FR2-CAL-6)', () => {
 
   it('names kinds by their fixed code', () => {
     expect(kindCode('kind.childcare')).toBe('childcare');
+  });
+});
+
+describe('useUpdateEvent (S-37 from S-38)', () => {
+  const base = {
+    household_id: 'hh',
+    version: 1,
+    created_at: null,
+    updated_at: null,
+    deleted_at: null,
+  };
+  const event = {
+    ...base,
+    id: 'e1',
+    kind: 'kind.appointment' as const,
+    title: 'Visit',
+    all_day: false,
+    starts_at: '2026-11-24T15:00:00Z',
+    ends_at: '2026-11-24T16:30:00Z',
+    start_date: null,
+    end_date: null,
+    place: null,
+    notes: null,
+    taking_user_id: null,
+    shared: true,
+    repeat: null,
+    created_by: 'me',
+    updated_by: 'me',
+  };
+  const children = {
+    people: [{ ...base, id: 'ep1', event_id: 'e1', person_id: 'p1' }],
+    reminders: [{ ...base, id: 'r1', event_id: 'e1', offset_minutes: 1440 as const }],
+  };
+
+  it('reads an event back into the same draft', () => {
+    expect(draftFromEvent(event, ['p1'], [1440], NY)).toMatchObject({
+      title: 'Visit',
+      date: '2026-11-24',
+      startMinutes: 600,
+      lengthMinutes: 90,
+      personIds: ['p1'],
+      reminders: [1440],
+      shared: true,
+    });
+  });
+
+  it('saves the columns and swaps only the people and reminders that changed', async () => {
+    mockInsert.mockClear();
+    mockTrack.mockClear();
+    const { result } = await renderHook(() => useUpdateEvent(NY, 'me'));
+    const draft = {
+      ...draftFromEvent(event, ['p1'], [1440], NY),
+      personIds: ['p2'],
+      reminders: [1440, 60] as (0 | 15 | 60 | 1440 | 2880)[],
+    };
+    await result.current(event, draft, children);
+    expect(mockUpdate).toHaveBeenCalledWith(
+      'events',
+      'e1',
+      expect.objectContaining({ title: 'Visit', updated_by: 'me' }),
+    );
+    expect(mockRemove).toHaveBeenCalledWith('event_people', 'ep1');
+    expect(mockRemove).not.toHaveBeenCalledWith('event_reminders', 'r1');
+    expect(mockInsert.mock.calls.map(([table, , values]) => [table, values])).toEqual([
+      ['event_people', { event_id: 'e1', person_id: 'p2' }],
+      ['event_reminders', { event_id: 'e1', offset_minutes: 60 }],
+    ]);
+    expect(mockTrack).toHaveBeenCalledWith('event_updated', { kind: 'appointment', scope: 'all' });
   });
 });

@@ -3,10 +3,16 @@
  * saved on the device so it survives the app being killed (NFR-A11Y-8), and turned into an
  * `events` row on save. Times are wall times on the household's clock until then.
  */
-import { addDays, type PlanDate } from '@/features/planner/week';
+import { addDays, daysBetween, type PlanDate } from '@/features/planner/week';
 
 import { wallTime, zonedInstant } from './repeat';
-import { EVENT_LIMITS, type EventKind, type EventRow, type ReminderOffset } from './tables';
+import {
+  EVENT_LIMITS,
+  REMINDER_OFFSETS,
+  type EventKind,
+  type EventRow,
+  type ReminderOffset,
+} from './tables';
 
 export type EventDraft = {
   title: string;
@@ -142,5 +148,36 @@ export function draftValues(draft: EventDraft, timeZone: string): EventValues {
     notes: text(draft.notes, EVENT_LIMITS.notesLength),
     taking_user_id: draft.takingUserId,
     shared: draft.shared,
+  };
+}
+
+/** The draft for editing an event, with its people and reminders (S-37 from S-38). */
+export function draftFromEvent(
+  event: EventRow,
+  personIds: readonly string[],
+  reminders: readonly number[],
+  timeZone: string,
+): EventDraft {
+  const start = event.starts_at ? wallTime(Date.parse(event.starts_at), timeZone) : null;
+  const length =
+    event.starts_at && event.ends_at
+      ? Math.round((Date.parse(event.ends_at) - Date.parse(event.starts_at)) / 60_000)
+      : DEFAULT_LENGTH_MINUTES;
+  const date = (event.all_day ? event.start_date : start?.date) ?? '1970-01-01';
+  return {
+    title: event.title,
+    kind: event.kind,
+    allDay: event.all_day,
+    date,
+    startMinutes: start ? start.hour * 60 + start.minute : 9 * 60,
+    lengthMinutes: Math.min(MAX_LENGTH_MINUTES, Math.max(LENGTH_STEP_MINUTES, length)),
+    days: event.all_day && event.end_date ? daysBetween(date, event.end_date) + 1 : 1,
+    personIds: [...personIds],
+    takingUserId: event.taking_user_id,
+    place: event.place ?? '',
+    notes: event.notes ?? '',
+    reminders: REMINDER_OFFSETS.filter((offset) => reminders.includes(offset)),
+    shared: event.shared,
+    sharedChosen: true,
   };
 }

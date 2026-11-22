@@ -52,6 +52,7 @@ const metrics = {
 
 function Harness({ isParent = true }: { isParent?: boolean }) {
   const editor = useEventEditor({
+    mode: 'add',
     householdId: 'hh',
     locale: 'en-US',
     timeZone: 'America/New_York',
