@@ -1554,6 +1554,18 @@
     "eventDetails": {
       "title": "Show event details",
       "description": "Adds the event's title and place to reminders on this phone. Off, they show only the kind, time and who's taking."
+    },
+    "event": {
+      "today": "Today",
+      "tomorrow": "Tomorrow",
+      "when": "{{day}} at {{time}}",
+      "allDay": "{{day}}, all day",
+      "body": "{{when}}. {{taking}}",
+      "bodyWithPlace": "{{when}}, {{place}}. {{taking}}",
+      "taking": "{{name}} is taking.",
+      "takingYou": "You're taking.",
+      "takingNobody": "Nobody's taking yet.",
+      "takingMember": "A member is taking."
     }
   },
   "pantry": {
