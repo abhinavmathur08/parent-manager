@@ -95,6 +95,51 @@ beforeEach(() => {
 });
 afterEach(() => jest.useRealTimers());
 
+describe('editing one occurrence ("this event", FR2-CAL-4)', () => {
+  it('shows only the date, times and taking', async () => {
+    const { EventEditorSheet } = jest.requireActual<
+      typeof import('@/features/calendar/event-editor-sheet')
+    >('@/features/calendar/event-editor-sheet');
+    const { newDraft } = jest.requireActual<typeof import('@/features/calendar/editor')>(
+      '@/features/calendar/editor',
+    );
+    await render(
+      <SafeAreaProvider initialMetrics={metrics}>
+        <EventEditorSheet
+          visible
+          title="Edit this event"
+          occurrenceOnly
+          draft={{ ...newDraft(new Date(), 'America/New_York', true), title: 'Swim' }}
+          onChange={jest.fn()}
+          onSave={jest.fn()}
+          onClose={jest.fn()}
+          onPremiumRequired={jest.fn()}
+          locale="en-US"
+          timeZone="America/New_York"
+          userId="me"
+          isParent
+          reminderLimit={1}
+          people={[{ id: 'p1', displayName: 'Mia' }]}
+          members={[]}
+        />
+      </SafeAreaProvider>,
+    );
+    expect(screen.getByTestId('event-editor-one')).toHaveTextContent(/Swim/);
+    expect(screen.getByTestId('event-start-hour')).toBeTruthy();
+    expect(screen.getByTestId('event-taking-me')).toBeTruthy();
+    for (const id of [
+      'event-title',
+      'event-all-day',
+      'event-repeat',
+      'event-reminder-0',
+      'event-for-p1',
+      'event-shared',
+    ]) {
+      expect(screen.queryByTestId(id)).toBeNull();
+    }
+  });
+});
+
 describe('S-37 event editor (FR2-CAL-2)', () => {
   it('adds an appointment with a title and the default start in one tap after opening', async () => {
     const view = await show();
@@ -189,6 +234,24 @@ describe('S-37 event editor (FR2-CAL-2)', () => {
     await fireEvent.changeText(screen.getByTestId('event-title'), 'Nap');
     await save();
     expect(eventInsert()?.[2]).toMatchObject({ shared: true });
+  });
+
+  it('saves a weekly repeat from the picker and records repeats (FR2-CAL-4)', async () => {
+    await show();
+    await fireEvent.press(screen.getByTestId('open'));
+    await fireEvent.changeText(screen.getByTestId('event-title'), 'Swim');
+    await fireEvent.press(screen.getByTestId('event-repeat-weekly'));
+    // Today, Wednesday, is chosen already; add Friday.
+    await fireEvent.press(screen.getByTestId('event-repeat-day-5'));
+    await fireEvent.press(screen.getByTestId('event-repeat-end-count'));
+    await save();
+    expect(eventInsert()?.[2]).toMatchObject({
+      repeat: { freq: 'weekly', weekdays: [3, 5], count: 10 },
+    });
+    expect(mockTrack).toHaveBeenCalledWith(
+      'event_created',
+      expect.objectContaining({ repeats: true }),
+    );
   });
 
   it('keeps the open sheet and its text when the app is killed (NFR-A11Y-8)', async () => {

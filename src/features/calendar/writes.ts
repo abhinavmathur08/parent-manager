@@ -3,12 +3,16 @@ import { useCallback } from 'react';
 
 import { track } from '@/lib/analytics';
 import { useSyncWriter } from '@/lib/sync';
+import type { SyncRow } from '@/lib/sync/types';
 
 import { draftValues, type EventDraft } from './editor';
 import {
+  exceptionId,
+  EVENT_EXCEPTIONS,
   EVENT_PEOPLE,
   EVENT_REMINDERS,
   EVENTS,
+  type EventExceptionRow,
   type EventPersonRow,
   type EventReminderRow,
   type EventRow,
@@ -29,9 +33,9 @@ export function useCreateEvent(timeZone: string, userId: string | null) {
   return useCallback(
     async (draft: EventDraft): Promise<string> => {
       const id = randomUUID();
+      const values = draftValues(draft, timeZone);
       await writer.insert(EVENTS.name, id, {
-        ...draftValues(draft, timeZone),
-        repeat: null,
+        ...values,
         created_by: userId,
         updated_by: userId,
       });
@@ -48,7 +52,7 @@ export function useCreateEvent(timeZone: string, userId: string | null) {
       track('event_created', {
         kind: kindCode(draft.kind),
         all_day: draft.allDay,
-        repeats: false,
+        repeats: values.repeat !== null,
         has_people: draft.personIds.length > 0,
         has_taking: draft.takingUserId !== null,
         shared: draft.shared,
@@ -130,4 +134,66 @@ export function useUpdateEvent(timeZone: string, userId: string | null) {
     },
     [writer, timeZone, userId],
   );
+}
+
+/**
+ * One occurrence of a repeating event ("this event", FR2-CAL-4, R2-CAL-2). The exception's ID
+ * comes from the event and the occurrence's original date, so two devices write one row; a
+ * live row is updated, since clients never delete exceptions.
+ */
+export function useOccurrenceWrites(timeZone: string) {
+  const writer = useSyncWriter();
+  const write = async (
+    event: EventRow,
+    originalDate: string,
+    exceptions: readonly EventExceptionRow[],
+    values: Omit<EventExceptionRow, keyof SyncRow | 'event_id' | 'original_date'>,
+  ) => {
+    const id = exceptionId(event.id, originalDate);
+    if (exceptions.some((row) => row.id === id && !row.deleted_at)) {
+      await writer.update(EVENT_EXCEPTIONS.name, id, values);
+    } else {
+      await writer.insert(EVENT_EXCEPTIONS.name, id, {
+        event_id: event.id,
+        original_date: originalDate,
+        ...values,
+      });
+    }
+  };
+  return {
+    /** Moves one occurrence, or changes who's taking it; the series stays as it is. */
+    move: async (
+      event: EventRow,
+      originalDate: string,
+      draft: EventDraft,
+      exceptions: readonly EventExceptionRow[],
+    ) => {
+      const values = draftValues(draft, timeZone);
+      await write(event, originalDate, exceptions, {
+        status: 'moved',
+        starts_at: values.starts_at,
+        ends_at: values.ends_at,
+        start_date: values.start_date,
+        end_date: values.end_date,
+        taking_user_id: values.taking_user_id,
+      });
+      track('event_updated', { kind: kindCode(event.kind), scope: 'one' });
+    },
+    /** Deletes one occurrence from the series. */
+    skip: async (
+      event: EventRow,
+      originalDate: string,
+      exceptions: readonly EventExceptionRow[],
+    ) => {
+      await write(event, originalDate, exceptions, {
+        status: 'skipped',
+        starts_at: null,
+        ends_at: null,
+        start_date: null,
+        end_date: null,
+        taking_user_id: null,
+      });
+      track('event_deleted', { kind: kindCode(event.kind), scope: 'one' });
+    },
+  };
 }
