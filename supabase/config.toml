@@ -451,6 +451,11 @@ backend = "postgres"
 [functions.notify]
 verify_jwt = false
 
+# V-02.2: `documents` checks the caller's session itself, and its hourly purge comes from pg_cron
+# with its own shared secret (DOCUMENTS_CRON_SECRET), not a user's JWT.
+[functions.documents]
+verify_jwt = false
+
 [experimental]
 # Configures S3 bucket URL, eg. <bucket_name>.s3-<region>.amazonaws.com
 s3_host = "env(S3_HOST)"
