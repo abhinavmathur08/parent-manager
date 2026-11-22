@@ -89,7 +89,7 @@ export const BUSY_DAY_OVERRIDES = {
 } as const satisfies SyncTableDefinition;
 
 /**
- * Each day's busy state, published by parents' devices for every member (B-01.4, D-22,
+ * Each day's busy state, published by parents' devices for every member (B-01.4, D-23,
  * R2-BUSY-2): the date, busy or not, and the fixed reason, never titles, times or event IDs.
  */
 export const BUSY_DAYS = {
