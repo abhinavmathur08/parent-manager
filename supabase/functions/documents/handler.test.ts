@@ -12,6 +12,8 @@ import type { DocumentStorage } from './storage.ts';
 const H = '00000000-0000-0000-0000-00000000000a';
 const PARENT = 'aaaaaaaa-0000-0000-0000-000000000001';
 const CAREGIVER = 'aaaaaaaa-0000-0000-0000-000000000003';
+/** A parent of another household. */
+const OTHER_PARENT = 'bbbbbbbb-0000-0000-0000-000000000001';
 const SECRET = 'cron-secret';
 const MB = 1024 * 1024;
 const LIMITS: Limits = {
@@ -30,13 +32,15 @@ function world(opts: { documents?: number; bytes?: number; premium?: boolean } =
   const rows = new Map<string, NewDocument & { deleted_at: string | null }>();
   const files = new Map<string, number>();
   const queue: { id: number; prefix: string }[] = [];
-  const signed: { path: string; seconds: number; token: string }[] = [];
+  const signed: { path: string; seconds: number }[] = [];
+  const checks: { caller: string; id: string }[] = [];
   const logs: string[] = [];
-  /** Who the bucket's select policy lets read, per document. */
+  /** Who `private.can_read_document` lets read, per document. */
   const readers = new Map<string, Set<string>>();
   const roles: Record<string, UploadContext['role']> = {
     [PARENT]: 'parent',
     [CAREGIVER]: 'caregiver',
+    [OTHER_PARENT]: 'parent',
   };
 
   const storage: DocumentStorage = {
@@ -47,10 +51,10 @@ function world(opts: { documents?: number; bytes?: number; premium?: boolean } =
           .filter(([path]) => path.startsWith(`${folder}/`))
           .map(([path, size]) => ({ name: path.slice(folder.length + 1), size })),
       ),
-    signRead(path, seconds, token) {
-      const doc = path.split('/')[1];
-      if (!files.has(path) || !readers.get(doc)?.has(token)) return Promise.resolve(null);
-      signed.push({ path, seconds, token });
+    // The service role signs any stored file: the handler must check first.
+    signRead(path, seconds) {
+      if (!files.has(path)) return Promise.resolve(null);
+      signed.push({ path, seconds });
       return Promise.resolve(`/object/sign/documents/${path}?token=t`);
     },
     remove(paths) {
@@ -79,6 +83,10 @@ function world(opts: { documents?: number; bytes?: number; premium?: boolean } =
       return Promise.resolve('ok' as const);
     },
     find: (id) => Promise.resolve((rows.get(id) as StoredDocument | undefined) ?? null),
+    canRead(caller, id) {
+      checks.push({ caller, id });
+      return Promise.resolve(readers.get(id)?.has(caller) ?? false);
+    },
     markReady(id) {
       rows.get(id)!.status = 'ready';
       return Promise.resolve();
@@ -118,7 +126,7 @@ function world(opts: { documents?: number; bytes?: number; premium?: boolean } =
     queue.push({ id: queue.length + 1, prefix: `${row.household_id}/${row.id}/` });
   };
 
-  return { call, begin, upload, rows, files, signed, logs, readers, deleteDocument };
+  return { call, begin, upload, rows, files, signed, checks, logs, readers, deleteDocument };
 }
 
 async function code(res: Response) {
@@ -221,7 +229,7 @@ Deno.test(
 );
 
 Deno.test(
-  'read links expire after 60 seconds and are signed as the caller (R2-DOC-2)',
+  'a member with access gets 60-second links, signed by the server after its check (R2-DOC-2, D-22)',
   async () => {
     const w = world({ premium: true });
     const { document_id, uploads } = await (await w.begin(PARENT)).json();
@@ -234,22 +242,44 @@ Deno.test(
     const body = await res.json();
     assertEquals(body.expires_in, 60);
     assertEquals(body.links.length, 2);
-    assert(w.signed.every((s) => s.seconds === 60 && s.token === PARENT));
+    assertEquals(w.signed.length, 2);
+    assert(w.signed.every((s) => s.seconds === 60));
+    assertEquals(w.checks.at(-1), { caller: PARENT, id: document_id });
   },
 );
 
-Deno.test('a caregiver without a share gets no read link; with one they do (D-16)', async () => {
-  const w = world({ premium: true });
+async function readyDocument(w: ReturnType<typeof world>) {
   const { document_id, uploads } = await (await w.begin(PARENT)).json();
   w.upload(uploads, [300_000, 200_000]);
   await w.call(PARENT, { action: 'finish', document_id });
+  return document_id as string;
+}
 
-  const refused = await w.call(CAREGIVER, { action: 'read', document_id });
-  assertEquals(refused.status, 404);
-  assertEquals(await code(refused), 'documents.not_found');
+Deno.test(
+  'a caregiver without a share gets the not-found answer; with one they read (D-16)',
+  async () => {
+    const w = world({ premium: true });
+    const document_id = await readyDocument(w);
 
-  w.readers.get(document_id)!.add(CAREGIVER);
-  assertEquals((await w.call(CAREGIVER, { action: 'read', document_id })).status, 200);
+    const refused = await w.call(CAREGIVER, { action: 'read', document_id });
+    assertEquals(refused.status, 404);
+    assertEquals(await code(refused), 'documents.not_found');
+    assertEquals(w.signed.length, 0, 'nothing is signed for a refused caller');
+
+    w.readers.get(document_id)!.add(CAREGIVER);
+    assertEquals((await w.call(CAREGIVER, { action: 'read', document_id })).status, 200);
+  },
+);
+
+Deno.test('another household gets the same answer as a missing document (NFR2-SEC-1)', async () => {
+  const w = world({ premium: true });
+  const document_id = await readyDocument(w);
+
+  const refused = await w.call(OTHER_PARENT, { action: 'read', document_id });
+  const missing = await w.call(OTHER_PARENT, { action: 'read', document_id: newId() });
+  assertEquals([refused.status, missing.status], [404, 404]);
+  assertEquals(await refused.json(), await missing.json());
+  assertEquals(w.signed.length, 0);
 });
 
 Deno.test("a deleted document's files are gone after one purge run (R2-DOC-4)", async () => {

@@ -15,7 +15,7 @@ import { useCalendarMembers } from './use-members';
 const SETTLE_MS = 500;
 
 /**
- * Publishes each day's busy state from a parent's device (B-01.4, D-22), so family members and
+ * Publishes each day's busy state from a parent's device (B-01.4, D-23), so family members and
  * caregivers see markers for days made busy by events they can't see (R2-BUSY-2). It runs
  * when events, busy blocks, overrides, the thresholds, the parents or the day change, and
  * waits while the local copy is still loading or pulling, so it never works from half a

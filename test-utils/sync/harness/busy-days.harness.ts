@@ -1,7 +1,7 @@
 /**
  * @jest-environment node
  */
-// Published busy days on several devices (B-01.4, D-22, R2-BUSY-2), against the real tables:
+// Published busy days on several devices (B-01.4, D-23, R2-BUSY-2), against the real tables:
 // a parent's private event that makes a day busy shows as busy on a caregiver's device within
 // 60 seconds, without the event reaching that device, and two parents publishing the same
 // window write one row a day with nothing refused.

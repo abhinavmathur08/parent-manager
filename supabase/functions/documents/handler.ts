@@ -6,8 +6,9 @@
 //   creates the row as `uploading` and returns one signed upload token per file.
 // - `finish` (the parent who began it): checks the stored files match what was declared and
 //   marks the row `ready`. Until then nobody sees it (spec: "Upload fails halfway").
-// - `read` (anyone who can see the document): signed read links that expire after 60 seconds,
-//   signed as the caller so the bucket's select policy decides (R2-DOC-2).
+// - `read` (anyone who can see the document): checks `private.can_read_document` for the
+//   caller, then signs read links with the service role that expire after 60 seconds. Clients
+//   can't sign links themselves: the bucket has no client policy (R2-DOC-2, D-22).
 // - `purge` (pg_cron, with DOCUMENTS_CRON_SECRET): removes stale uploads and deletes queued
 //   folders from storage (R2-DOC-4, FR2-PRIV-2).
 //
@@ -62,6 +63,8 @@ export interface DocumentsDeps {
   /** Inserts as the service role: `exists` for a taken ID, `limit` or `invalid` from the database. */
   create(row: NewDocument): Promise<'ok' | 'exists' | 'limit' | 'invalid'>;
   find(id: string): Promise<StoredDocument | null>;
+  /** `private.can_read_document(id)` evaluated for the caller. */
+  canRead(caller: string, id: string): Promise<boolean>;
   markReady(id: string): Promise<void>;
   storage: DocumentStorage;
   removeStale(): Promise<number>;
@@ -204,17 +207,17 @@ export function createHandler(deps: DocumentsDeps): (req: Request) => Promise<Re
     return jsonResponse({ document_id: doc.id, status: 'ready' });
   }
 
-  async function read(caller: string, token: string, body: Record<string, unknown>) {
+  async function read(caller: string, body: Record<string, unknown>) {
     if (!isUuid(body.document_id)) return errorResponse('documents.invalid', 400);
     const doc = await deps.find(body.document_id);
-    if (!doc || doc.deleted_at || doc.status !== 'ready') {
+    // A refusal answers like a missing document, so nothing leaks about other households.
+    if (!doc || doc.deleted_at || doc.status !== 'ready' || !(await deps.canRead(caller, doc.id))) {
       return errorResponse('documents.not_found', 404);
     }
     const { limits } = await deps.context(caller, doc.household_id);
     const links = await Promise.all(
-      filePaths(doc).map((path) => deps.storage.signRead(path, limits.read_seconds, token)),
+      filePaths(doc).map((path) => deps.storage.signRead(path, limits.read_seconds)),
     );
-    // The bucket's policy refused: the same answer as a missing document, so nothing leaks.
     if (links.some((link) => link === null)) return errorResponse('documents.not_found', 404);
     return jsonResponse({
       document_id: doc.id,
@@ -273,11 +276,11 @@ export function createHandler(deps: DocumentsDeps): (req: Request) => Promise<Re
     }
 
     const caller = token ? await deps.authenticate(token) : null;
-    if (!caller || !token) return errorResponse('documents.unauthorized', 401);
+    if (!caller) return errorResponse('documents.unauthorized', 401);
     try {
       if (body.action === 'begin') return await begin(caller, body);
       if (body.action === 'finish') return await finish(caller, body);
-      if (body.action === 'read') return await read(caller, token, body);
+      if (body.action === 'read') return await read(caller, body);
     } catch {
       log('documents.error', {});
       return errorResponse('documents.unavailable', 503);

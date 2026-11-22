@@ -1,5 +1,5 @@
 /**
- * Published busy days (B-01.4, D-22, R2-BUSY-2).
+ * Published busy days (B-01.4, D-23, R2-BUSY-2).
  *
  * Family members' and caregivers' devices hold only shared events and their own busy blocks,
  * so they can't work out a day made busy by a parent's private event. Parents' devices run
