@@ -113,7 +113,7 @@ Deno.test('messages carry the notification ID and type only, never the payload',
 
 Deno.test('calendar pushes add the event ID and date, never the kind or change', () => {
   const event = 'eeeeeeee-0000-0000-0000-000000000001';
-  for (const type of ['event_changed'] as const) {
+  for (const type of ['event_changed', 'who_taking'] as const) {
     const [message] = buildMessages([
       push({
         type,
@@ -142,7 +142,13 @@ Deno.test(
 
 Deno.test('has copy for every type in every locale', () => {
   for (const locale of ['en-US', 'en-GB', 'en-AU']) {
-    for (const type of ['plan_week', 'list_ready', 'test', 'event_changed'] as const) {
+    for (const type of [
+      'plan_week',
+      'list_ready',
+      'test',
+      'event_changed',
+      'who_taking',
+    ] as const) {
       const text = textFor(type, locale);
       assertEquals(text.title.length > 0 && text.body.length > 0, true);
     }
