@@ -60,12 +60,28 @@ const ALLOWED_CONTEXTS = new Set([
 const ALLOWED_BREADCRUMB_DATA = new Set(['method', 'status_code', 'url', 'from', 'to', 'state']);
 const URL_KEYS = new Set(['url', 'from', 'to']);
 
+let privateScreens = 0;
+
+/**
+ * Drops every breadcrumb while a vault screen is open (NFR2-SEC-2). Returns a function that
+ * ends it; each call ends only its own.
+ */
+export function suppressBreadcrumbs(): () => void {
+  privateScreens++;
+  let ended = false;
+  return () => {
+    if (ended) return;
+    ended = true;
+    privateScreens--;
+  };
+}
+
 /**
  * Keeps a breadcrumb only with fixed data. Console breadcrumbs are dropped, because logged
  * values can be anything, and touch breadcrumbs lose their labels, which are screen text.
  */
 export function scrubBreadcrumb(breadcrumb: Sentry.Breadcrumb): Sentry.Breadcrumb | null {
-  if (breadcrumb.category === 'console') return null;
+  if (breadcrumb.category === 'console' || privateScreens > 0) return null;
   const scrubbed: Sentry.Breadcrumb = { ...breadcrumb };
   if (scrubbed.message !== undefined) {
     scrubbed.message =
