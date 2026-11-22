@@ -5,7 +5,7 @@ import { track } from '@/lib/analytics';
 import { useSyncWriter } from '@/lib/sync';
 
 import { draftValues, type EventDraft } from './editor';
-import { EVENT_PEOPLE, EVENT_REMINDERS, EVENTS } from './tables';
+import { EVENT_PEOPLE, EVENT_REMINDERS, EVENTS, type EventRow } from './tables';
 
 /** The fixed-value half of a kind's identifier, for analytics: `kind.appointment` is `appointment`. */
 export function kindCode(kind: string): string {
@@ -51,4 +51,28 @@ export function useCreateEvent(timeZone: string, userId: string | null) {
     },
     [writer, timeZone, userId],
   );
+}
+
+/**
+ * Detail actions on an event (S-38, FR2-CAL-7, FR2-CAL-8). Deleting tombstones the event; the
+ * server tombstones its people, reminders and exceptions with it.
+ */
+export function useEventActions(userId: string | null) {
+  const writer = useSyncWriter();
+  return {
+    setTaking: async (event: EventRow, takingUserId: string | null) => {
+      await writer.update(EVENTS.name, event.id, {
+        taking_user_id: takingUserId,
+        updated_by: userId,
+      });
+    },
+    setShared: async (event: EventRow, shared: boolean) => {
+      await writer.update(EVENTS.name, event.id, { shared, updated_by: userId });
+      track('event_shared', { shared });
+    },
+    remove: async (event: EventRow) => {
+      await writer.remove(EVENTS.name, event.id);
+      track('event_deleted', { kind: kindCode(event.kind), scope: 'all' });
+    },
+  };
 }

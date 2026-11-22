@@ -31,6 +31,8 @@ export type EditorMember = { userId: string; displayName: string | null };
 
 export type EventEditorSheetProps = {
   visible: boolean;
+  /** The sheet's title: a new event or an edit. */
+  title: string;
   draft: EventDraft;
   onChange: (draft: EventDraft) => void;
   onSave: () => void;
@@ -57,6 +59,7 @@ const DATE_FORMAT = { weekday: 'short', month: 'short', day: 'numeric', timeZone
  */
 export function EventEditorSheet({
   visible,
+  title,
   draft,
   onChange,
   onSave,
@@ -85,7 +88,7 @@ export function EventEditorSheet({
     <BottomSheet
       visible={visible}
       onClose={onClose}
-      title={t('calendar.editor.title')}
+      title={title}
       variant="form"
       testID="event-editor"
       footer={

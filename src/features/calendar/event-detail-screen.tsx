@@ -1,0 +1,267 @@
+import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Alert, StyleSheet, View } from 'react-native';
+
+import { Button } from '@/components/button';
+import { Card } from '@/components/card';
+import { EmptyState } from '@/components/empty-state';
+import { Screen } from '@/components/screen';
+import { Switch } from '@/components/switch';
+import { Text } from '@/components/text';
+import { Toast } from '@/components/toast';
+import type { MemberRole } from '@/features/household/invitations';
+import { usePlanPeople } from '@/features/planner/use-plan-people';
+import { useUndoable } from '@/features/planner/use-undoable';
+import { addDays, toDate, type PlanDate } from '@/features/planner/week';
+import { useTheme } from '@/hooks/use-theme';
+import { formatDate, formatList, formatTime, type AppLocale } from '@/i18n';
+
+import { startOfDay } from './agenda';
+import { kindKey } from './agenda-screen';
+import { useCalendarRows } from './data';
+import { eventPermissions } from './permissions';
+import { expandOccurrences } from './repeat';
+import { REMINDER_OFFSETS } from './tables';
+import { useCalendarMembers } from './use-members';
+import { useEventActions } from './writes';
+
+export type EventDetailProps = {
+  eventId: string;
+  /** The occurrence's original date, for a repeating event. */
+  date: PlanDate | null;
+  household: { id: string; locale: AppLocale; timeZone: string };
+  role: MemberRole;
+  userId: string | null;
+  onBack: () => void;
+};
+
+const DATE_FORMAT = { weekday: 'long', month: 'long', day: 'numeric', timeZone: 'UTC' } as const;
+
+/**
+ * S-38 event detail (FR2-CAL-7, FR2-CAL-8): kind, time, for, taking, place, notes, reminders
+ * and who last changed it. Any member who can see it can take it themselves; parents share
+ * and unshare; whoever may edit can delete it, with a 5-second undo.
+ */
+export function EventDetailScreen({
+  eventId,
+  date,
+  household,
+  role,
+  userId,
+  onBack,
+}: EventDetailProps) {
+  const { t } = useTranslation();
+  const theme = useTheme();
+  const { locale, timeZone } = household;
+  const rows = useCalendarRows();
+  const people = usePlanPeople(household.id).people;
+  const members = useCalendarMembers(household.id);
+  const actions = useEventActions(userId);
+  const fail = () => Alert.alert(t('calendar.detail.failed'));
+  const undoable = useUndoable(fail);
+  const [deleted, setDeleted] = useState(false);
+
+  const event = rows.events.find((row) => row.id === eventId) ?? null;
+  const occurrence = useMemo(() => {
+    if (!event) return null;
+    const day = date ?? event.start_date ?? null;
+    const from = day ? startOfDay(day, timeZone) : Date.parse(event.starts_at ?? '');
+    const found = expandOccurrences(event, {
+      timeZone,
+      from: new Date(from),
+      to: new Date(day ? startOfDay(addDays(day, 1), timeZone) : from + 1),
+      exceptions: rows.exceptions,
+    });
+    return found.find((o) => !date || o.originalDate === date) ?? found[0] ?? null;
+  }, [event, date, timeZone, rows.exceptions]);
+
+  const nameOf = (memberId: string | null) => {
+    if (!memberId) return t('calendar.detail.nobody');
+    if (memberId === userId) return t('calendar.detail.you');
+    return members.find((m) => m.userId === memberId)?.displayName ?? t('calendar.detail.member');
+  };
+
+  if (!event || deleted) {
+    return (
+      <View style={styles.grow}>
+        <Screen title={t('calendar.detail.title')} onBack={onBack} hasTabBar testID="event-detail">
+          {!deleted ? (
+            <EmptyState icon="calendar" message={t('calendar.detail.gone')} testID="event-gone" />
+          ) : null}
+        </Screen>
+        <Toast
+          visible={undoable.current !== null}
+          message={undoable.current?.message ?? ''}
+          variant="undo"
+          actionLabel={t('calendar.detail.undo')}
+          onAction={() => {
+            undoable.undo();
+            setDeleted(false);
+          }}
+          onDismiss={() => {
+            undoable.settle();
+            onBack();
+          }}
+          testID="event-undo"
+        />
+      </View>
+    );
+  }
+
+  const can = eventPermissions(event, role, userId);
+  const forNames = rows.people
+    .filter((row) => row.event_id === event.id)
+    .map((row) => people.find((p) => p.id === row.person_id)?.displayName)
+    .filter((name): name is string => Boolean(name));
+  const reminders = REMINDER_OFFSETS.filter((offset) =>
+    rows.reminders.some((row) => row.event_id === event.id && row.offset_minutes === offset),
+  );
+  const takingId = occurrence?.takingUserId ?? event.taking_user_id;
+
+  const when = (() => {
+    if (!occurrence) return '';
+    if (occurrence.allDay) {
+      const start = formatDate(toDate(occurrence.startDate!), locale, DATE_FORMAT);
+      return occurrence.endDate === occurrence.startDate
+        ? t('calendar.detail.allDayOn', { date: start })
+        : t('calendar.timeRange', {
+            start,
+            end: formatDate(toDate(occurrence.endDate!), locale, DATE_FORMAT),
+          });
+    }
+    const start = new Date(occurrence.startsAt!);
+    return t('calendar.detail.when', {
+      date: formatDate(start, locale, { ...DATE_FORMAT, timeZone }),
+      time: t('calendar.timeRange', {
+        start: formatTime(start, locale, timeZone),
+        end: formatTime(new Date(occurrence.endsAt!), locale, timeZone),
+      }),
+    });
+  })();
+
+  const run = (task: () => Promise<void>) => void task().catch(fail);
+
+  const remove = () => {
+    setDeleted(true);
+    undoable.hold({
+      message: t('calendar.detail.deleted'),
+      hidden: [event.id],
+      commit: () => actions.remove(event),
+    });
+  };
+
+  return (
+    <View style={styles.grow}>
+      <Screen title={event.title} onBack={onBack} testID="event-detail">
+        <Card testID="event-detail-summary">
+          <View style={{ gap: theme.space[1] }}>
+            <Text variant="label" color="textSecondary">
+              {t(kindKey(event.kind))}
+            </Text>
+            <Text variant="bodyStrong" testID="event-detail-when">
+              {when}
+            </Text>
+          </View>
+        </Card>
+
+        <Card testID="event-detail-fields">
+          <View style={{ gap: theme.space[3] }}>
+            {forNames.length > 0 ? (
+              <Field
+                label={t('calendar.detail.for')}
+                value={formatList(forNames, locale)}
+                testID="event-detail-for"
+              />
+            ) : null}
+            <Field
+              label={t('calendar.detail.taking')}
+              value={nameOf(takingId)}
+              testID="event-detail-taking"
+            />
+            {event.place ? (
+              <Field
+                label={t('calendar.detail.place')}
+                value={event.place}
+                testID="event-detail-place"
+              />
+            ) : null}
+            {event.notes ? (
+              <Field
+                label={t('calendar.detail.notes')}
+                value={event.notes}
+                testID="event-detail-notes"
+              />
+            ) : null}
+            <Field
+              label={t('calendar.detail.reminders')}
+              value={
+                reminders.length
+                  ? formatList(
+                      reminders.map((o) => t(`calendar.reminders.${o}`)),
+                      locale,
+                    )
+                  : t('calendar.detail.noReminders')
+              }
+              testID="event-detail-reminders"
+            />
+            {event.updated_by ? (
+              <Text variant="caption" color="textSecondary" testID="event-detail-changed-by">
+                {t('calendar.detail.changedBy', { name: nameOf(event.updated_by) })}
+              </Text>
+            ) : null}
+          </View>
+        </Card>
+
+        {can.canTake ? (
+          takingId === userId ? (
+            <Button
+              variant="secondary"
+              label={t('calendar.detail.stepBack')}
+              onPress={() => run(() => actions.setTaking(event, null))}
+              testID="event-step-back"
+            />
+          ) : (
+            <Button
+              label={t('calendar.detail.takeIt')}
+              onPress={() => run(() => actions.setTaking(event, userId))}
+              testID="event-take"
+            />
+          )
+        ) : null}
+
+        {can.canShare ? (
+          <Switch
+            label={t('calendar.detail.shared')}
+            description={t('calendar.detail.sharedHint')}
+            value={event.shared}
+            onValueChange={(shared) => run(() => actions.setShared(event, shared))}
+            testID="event-share"
+          />
+        ) : null}
+
+        {can.canEdit ? (
+          <Button
+            variant="destructive"
+            label={t('calendar.detail.delete')}
+            onPress={remove}
+            testID="event-delete"
+          />
+        ) : null}
+      </Screen>
+    </View>
+  );
+}
+
+function Field({ label, value, testID }: { label: string; value: string; testID: string }) {
+  const theme = useTheme();
+  return (
+    <View style={{ gap: theme.space[1] }} testID={testID}>
+      <Text variant="label" color="textSecondary">
+        {label}
+      </Text>
+      <Text>{value}</Text>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({ grow: { flex: 1 } });

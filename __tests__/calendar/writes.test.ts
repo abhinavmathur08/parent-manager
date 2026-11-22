@@ -8,7 +8,11 @@ jest.mock('expo-crypto', () => ({
   randomUUID: () => `00000000-0000-4000-8000-${String(++mockUuid).padStart(12, '0')}`,
 }));
 const mockInsert = jest.fn(async (..._args: unknown[]) => ({}));
-jest.mock('@/lib/sync', () => ({ useSyncWriter: () => ({ insert: mockInsert }) }));
+const mockUpdate = jest.fn(async (..._args: unknown[]) => ({}));
+const mockRemove = jest.fn(async (..._args: unknown[]) => ({}));
+jest.mock('@/lib/sync', () => ({
+  useSyncWriter: () => ({ insert: mockInsert, update: mockUpdate, remove: mockRemove }),
+}));
 const mockTrack = jest.fn();
 jest.mock('@/lib/analytics', () => ({ track: (...a: unknown[]) => mockTrack(...a) }));
 

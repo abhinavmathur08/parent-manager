@@ -142,6 +142,9 @@ export const ANALYTICS_EVENTS = {
     shared: bool,
     reminders: count(5),
   },
+  event_updated: { kind: code, scope: oneOf('one', 'all') },
+  event_deleted: { kind: code, scope: oneOf('one', 'all') },
+  event_shared: { shared: bool },
   // 3.7 Staples and pantry
   staple_added: { is_catalog_ingredient: bool },
   staple_removed: {},
