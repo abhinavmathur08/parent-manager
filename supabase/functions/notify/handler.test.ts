@@ -131,6 +131,19 @@ Deno.test('calendar pushes add the event ID and date, never the kind or change',
   assertEquals(Object.keys(odd.data).sort(), ['notificationId', 'type']);
 });
 
+Deno.test('an expiry push carries no category or date', () => {
+  const [message] = buildMessages([
+    push({
+      type: 'document_expiring',
+      payload: { category: 'doc.insurance', expires_on: '2026-12-22' },
+    }),
+  ]);
+  assertEquals(message.data, { notificationId: 'n1', type: 'document_expiring' });
+  assertEquals(message.categoryId, 'document_expiring');
+  assertEquals(JSON.stringify(message).includes('2026-12-22'), false);
+  assertEquals(JSON.stringify(message).includes('doc.'), false);
+});
+
 Deno.test(
   'falls back to en-US copy for an unknown locale, and the test push has no category',
   () => {
@@ -148,6 +161,7 @@ Deno.test('has copy for every type in every locale', () => {
       'test',
       'event_changed',
       'who_taking',
+      'document_expiring',
     ] as const) {
       const text = textFor(type, locale);
       assertEquals(text.title.length > 0 && text.body.length > 0, true);

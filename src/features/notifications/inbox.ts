@@ -1,10 +1,17 @@
 import type { Href } from 'expo-router';
 
+import { formatDate } from '@/i18n';
 import { getSupabase } from '@/lib/supabase';
 
 /** Types the server stores. "Defrost tonight" is local to the device and never in the inbox. */
 export type InboxType =
-  'plan_week' | 'list_ready' | 'household_changes' | 'test' | 'event_changed' | 'who_taking';
+  | 'plan_week'
+  | 'list_ready'
+  | 'household_changes'
+  | 'test'
+  | 'event_changed'
+  | 'who_taking'
+  | 'document_expiring';
 
 export type InboxItem = {
   id: string;
@@ -21,6 +28,53 @@ export const INBOX_SIZE = 50;
 const HOUSEHOLD_EVENTS = ['member_joined', 'member_left'] as const;
 const EVENT_CHANGES = ['created', 'moved', 'cancelled'] as const;
 
+/**
+ * Document categories an expiry reminder may name. `doc.medical` never reaches a notification
+ * (FR2-DOC-11), so the server leaves the category out and the entry says "a document".
+ */
+const EXPIRY_CATEGORIES = [
+  'doc.insurance',
+  'doc.identity',
+  'doc.childcare_school',
+  'doc.household',
+  'doc.other',
+] as const;
+
+const expiryCategory = (payload: Record<string, unknown>): string | null =>
+  (EXPIRY_CATEGORIES as readonly unknown[]).includes(payload.category)
+    ? (payload.category as string).slice('doc.'.length)
+    : null;
+
+const isDate = (value: unknown): value is string =>
+  typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value);
+
+/**
+ * Values for an item's text: an expiry reminder's category name and date (FR2-DOC-7). Every
+ * other message is fixed text.
+ */
+export function messageValues(
+  item: Pick<InboxItem, 'type' | 'payload'>,
+  t: (key: string) => string,
+  locale: string,
+): Record<string, string> {
+  if (item.type !== 'document_expiring') return {};
+  const category = expiryCategory(item.payload);
+  const date = item.payload.expires_on;
+  return {
+    ...(category ? { category: t(`notifications.documentCategory.${category}`) } : {}),
+    ...(isDate(date)
+      ? {
+          date: formatDate(new Date(`${date}T00:00:00Z`), locale, {
+            month: 'long',
+            day: 'numeric',
+            year: 'numeric',
+            timeZone: 'UTC',
+          }),
+        }
+      : {}),
+  };
+}
+
 /** The key under `notifications.messages` for an item's title and body. */
 export function messageKey(item: Pick<InboxItem, 'type' | 'payload'>): string {
   if (item.type === 'event_changed') {
@@ -28,6 +82,9 @@ export function messageKey(item: Pick<InboxItem, 'type' | 'payload'>): string {
     return (EVENT_CHANGES as readonly unknown[]).includes(change)
       ? `event_${change as string}`
       : 'event_changed';
+  }
+  if (item.type === 'document_expiring') {
+    return expiryCategory(item.payload) ? 'document_expiring_category' : 'document_expiring_any';
   }
   if (item.type !== 'household_changes') return item.type;
   const event = item.payload.event;
@@ -68,6 +125,9 @@ export function routeFor(
       return '/list';
     case 'household_changes':
       return '/household/members';
+    case 'document_expiring':
+      // The vault opens from the Household tab.
+      return '/household';
     case 'test':
       return '/household/notifications';
     default:

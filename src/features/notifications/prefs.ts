@@ -2,7 +2,10 @@ import Storage from 'expo-sqlite/kv-store';
 
 import { getSupabase } from '@/lib/supabase';
 
-/** The four Phase 1 types (FR-NOT-1), then Phase 2's calendar types (FR2-REM-2, 4 and 5). */
+/**
+ * The four Phase 1 types (FR-NOT-1), then Phase 2's calendar types (FR2-REM-2, 4 and 5) and
+ * document expiry reminders (FR2-DOC-7).
+ */
 export const NOTIFICATION_TYPES = [
   'plan_week',
   'list_ready',
@@ -11,6 +14,7 @@ export const NOTIFICATION_TYPES = [
   'calendar_reminders',
   'event_changes',
   'who_taking',
+  'document_expiry',
 ] as const;
 export type NotificationType = (typeof NOTIFICATION_TYPES)[number];
 
@@ -26,6 +30,7 @@ export const DEVICE_TYPES: readonly NotificationType[] = [
   'calendar_reminders',
   'event_changes',
   'who_taking',
+  'document_expiry',
 ];
 
 /**
@@ -49,6 +54,7 @@ export const DEFAULT_PREFS: NotificationPrefs = {
   calendar_reminders: true,
   event_changes: true,
   who_taking: true,
+  document_expiry: true,
   planWeekDay: null,
   planWeekMinute: 18 * 60,
   quietStartMinute: 21 * 60,
@@ -63,6 +69,7 @@ type Row = {
   calendar_reminders: boolean;
   event_changes: boolean;
   who_taking: boolean;
+  document_expiry: boolean;
   plan_week_day: number | null;
   plan_week_minute: number;
   quiet_start_minute: number;
@@ -70,7 +77,7 @@ type Row = {
 };
 
 const COLUMNS =
-  'plan_week, list_ready, defrost, household_changes, calendar_reminders, event_changes, who_taking, plan_week_day, plan_week_minute, quiet_start_minute, quiet_end_minute';
+  'plan_week, list_ready, defrost, household_changes, calendar_reminders, event_changes, who_taking, document_expiry, plan_week_day, plan_week_minute, quiet_start_minute, quiet_end_minute';
 
 const fromRow = (row: Row): NotificationPrefs => ({
   plan_week: row.plan_week,
@@ -80,6 +87,7 @@ const fromRow = (row: Row): NotificationPrefs => ({
   calendar_reminders: row.calendar_reminders,
   event_changes: row.event_changes,
   who_taking: row.who_taking,
+  document_expiry: row.document_expiry,
   planWeekDay: row.plan_week_day,
   planWeekMinute: row.plan_week_minute,
   quietStartMinute: row.quiet_start_minute,
@@ -94,6 +102,7 @@ const toRow = (prefs: NotificationPrefs): Row => ({
   calendar_reminders: prefs.calendar_reminders,
   event_changes: prefs.event_changes,
   who_taking: prefs.who_taking,
+  document_expiry: prefs.document_expiry,
   plan_week_day: prefs.planWeekDay,
   plan_week_minute: prefs.planWeekMinute,
   quiet_start_minute: prefs.quietStartMinute,

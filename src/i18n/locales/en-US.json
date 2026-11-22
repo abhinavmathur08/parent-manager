@@ -1501,6 +1501,10 @@
       "who_taking": {
         "title": "Who's taking?",
         "description": "For parents: the evening before an appointment nobody is taking yet."
+      },
+      "document_expiry": {
+        "title": "Document expiry",
+        "description": "Premium. For parents: 30 and 7 days before a document in the vault expires."
       }
     },
     "planWeek": {
@@ -1554,6 +1558,18 @@
       "who_taking": {
         "title": "Who's taking tomorrow's appointment?",
         "body": "Nobody is taking it yet. Open it to choose who goes."
+      },
+      "document_expiring": {
+        "title": "A document expires soon",
+        "body": "Open Documents in the Household tab to see which one."
+      },
+      "document_expiring_category": {
+        "title": "A document expires soon",
+        "body": "{{category}} document expires on {{date}}."
+      },
+      "document_expiring_any": {
+        "title": "A document expires soon",
+        "body": "A document expires on {{date}}."
       }
     },
     "turnOffType": "Turn off this type",
@@ -1594,6 +1610,13 @@
       "takingYou": "You're taking.",
       "takingNobody": "Nobody's taking yet.",
       "takingMember": "A member is taking."
+    },
+    "documentCategory": {
+      "insurance": "Insurance",
+      "identity": "Identity",
+      "childcare_school": "Childcare and school",
+      "household": "Household",
+      "other": "Other"
     }
   },
   "pantry": {

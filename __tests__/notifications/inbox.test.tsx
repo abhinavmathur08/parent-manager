@@ -2,7 +2,12 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react-nativ
 import type * as Notifications from 'expo-notifications';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-import { messageKey, routeFor, type InboxItem } from '@/features/notifications/inbox';
+import {
+  messageKey,
+  messageValues,
+  routeFor,
+  type InboxItem,
+} from '@/features/notifications/inbox';
 import { InboxScreen } from '@/features/notifications/inbox-screen';
 import { handleResponse, TURN_OFF_ACTION } from '@/features/notifications/notification-responses';
 import { DEFAULT_PREFS } from '@/features/notifications/prefs';
@@ -224,5 +229,50 @@ describe('calendar notifications in the inbox (C-04.2)', () => {
       params: { id: 'e1', date: '2026-11-25', prompt: 'inbox' },
     });
     expect(routeFor('event_changed', {})).toBe('/calendar');
+  });
+});
+
+describe('document expiry reminders in the inbox (V-07)', () => {
+  const t = (key: string) => `<${key}>`;
+
+  it('names the category and date, from IDs and a date only', () => {
+    const entry = item({
+      type: 'document_expiring',
+      payload: { category: 'doc.insurance', expires_on: '2026-12-22' },
+    });
+    expect(messageKey(entry)).toBe('document_expiring_category');
+    expect(messageValues(entry, t, 'en-US')).toEqual({
+      category: '<notifications.documentCategory.insurance>',
+      date: 'December 22, 2026',
+    });
+    expect(routeFor('document_expiring', entry.payload, 'inbox')).toBe('/household');
+  });
+
+  it('says "a document" when there is no category it may name (FR2-DOC-11)', () => {
+    for (const payload of [
+      { expires_on: '2026-12-22' },
+      { category: 'doc.medical', expires_on: '2026-12-22' },
+    ]) {
+      const entry = item({ type: 'document_expiring', payload });
+      expect(messageKey(entry)).toBe('document_expiring_any');
+      expect(messageValues(entry, t, 'en-US')).toEqual({ date: 'December 22, 2026' });
+    }
+  });
+
+  it('turns expiry reminders off from the push', async () => {
+    await handleResponse(
+      {
+        actionIdentifier: TURN_OFF_ACTION,
+        notification: {
+          request: { identifier: 'doc-1', content: { data: { type: 'document_expiring' } } },
+        },
+      } as unknown as Notifications.NotificationResponse,
+      'u1',
+    );
+    expect(mockSavePrefs).toHaveBeenCalledWith('u1', { ...DEFAULT_PREFS, document_expiry: false });
+  });
+
+  it('other messages have no values', () => {
+    expect(messageValues(item({ type: 'list_ready' }), t, 'en-US')).toEqual({});
   });
 });

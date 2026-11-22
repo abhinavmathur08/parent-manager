@@ -5,7 +5,8 @@
 
 import copy from './copy.json' with { type: 'json' };
 
-export type PushType = 'plan_week' | 'list_ready' | 'test' | 'event_changed' | 'who_taking';
+export type PushType =
+  'plan_week' | 'list_ready' | 'test' | 'event_changed' | 'who_taking' | 'document_expiring';
 
 /** Types whose tap opens one event occurrence: their message names it by ID and date. */
 const EVENT_TYPES: readonly PushType[] = ['event_changed', 'who_taking'];

@@ -22,6 +22,7 @@ const CATEGORIES = new Map<string, NotificationType>([
   ['calendar_reminders', 'calendar_reminders'],
   ['event_changed', 'event_changes'],
   ['who_taking', 'who_taking'],
+  ['document_expiring', 'document_expiry'],
 ]);
 
 // A response is handled once, even if the component mounts again.
