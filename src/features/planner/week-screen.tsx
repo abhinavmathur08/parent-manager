@@ -57,6 +57,7 @@ import {
 } from './plan';
 import { SLOTS, type PlanEntryRow, type Slot } from './tables';
 import { usePlanPeople } from './use-plan-people';
+import { useEasyDinner } from './use-easy-dinner';
 import { useUndoable } from './use-undoable';
 import { dinnersPlanned, useWeekPlannedEvent } from './week-planned';
 import {
@@ -317,6 +318,24 @@ export function PlanWeekScreen({
       failed();
     }
   };
+  // Easy dinners on busy days (B-01.3); free households get the Premium prompt.
+  const easyDinner = useEasyDinner({
+    householdId: household.id,
+    locale,
+    weekStart: household.weekStart,
+    today,
+    days,
+    canWrite,
+    entries: shownEntries,
+    allEntries,
+    portions: week.portions,
+    people: people.people,
+    ingredientIdsOf: week.ingredientIdsOf,
+    servings: defaultServings(people.people) ?? DEFAULT_SERVINGS,
+    hold: undoable.hold,
+    noteChange,
+    onError: failed,
+  });
   const removeEntry = (entry: PlanEntryRow) => {
     setActing(null);
     noteChange();
@@ -513,6 +532,7 @@ export function PlanWeekScreen({
                     <BusyMarkButton date={date} locale={locale} />
                   </View>
                   <BusyDayMarker date={date} locale={locale} />
+                  {easyDinner.actionFor(date)}
                   <DaySlots
                     date={date}
                     index={index}
@@ -599,6 +619,7 @@ export function PlanWeekScreen({
           onSave={saveEntry}
           onClose={() => setOpened(null)}
         />
+        {easyDinner.sheet}
         <CopyWeekSheet
           visible={choosingCopy}
           count={lastWeekCount}
