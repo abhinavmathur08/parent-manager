@@ -1,4 +1,4 @@
--- B-01.4: each day's busy state, published by parents' devices for every member (D-22,
+-- B-01.4: each day's busy state, published by parents' devices for every member (D-23,
 -- R2-BUSY-1, R2-BUSY-2, NFR2-SEC-1; architecture section 3.5).
 --
 -- Family members' and caregivers' devices hold only shared events and their own busy blocks,
