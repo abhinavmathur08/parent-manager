@@ -5,6 +5,7 @@ import { defineSyncTable } from '@/lib/sync';
 import {
   BUSY_BLOCKS,
   BUSY_DAY_OVERRIDES,
+  BUSY_DAYS,
   EVENT_EXCEPTIONS,
   EVENT_PEOPLE,
   EVENT_REMINDERS,
@@ -17,3 +18,4 @@ defineSyncTable(EVENT_REMINDERS);
 defineSyncTable(EVENT_EXCEPTIONS);
 defineSyncTable(BUSY_BLOCKS);
 defineSyncTable(BUSY_DAY_OVERRIDES);
+defineSyncTable(BUSY_DAYS);

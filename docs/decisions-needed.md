@@ -4,7 +4,7 @@ This is the decision log. Each entry names the backlog items and GitHub issues i
 
 ## Status at a glance
 
-Updated 2026-11-22. D-14 to D-22 are Phase 2 decisions ([spec-phase2.md](spec-phase2.md)).
+Updated 2026-11-22. D-14 to D-23 are Phase 2 decisions ([spec-phase2.md](spec-phase2.md)).
 
 | ID   | Decision                                   | Status                                                 | Needed by                                                                      |
 | ---- | ------------------------------------------ | ------------------------------------------------------ | ------------------------------------------------------------------------------ |
@@ -30,6 +30,7 @@ Updated 2026-11-22. D-14 to D-22 are Phase 2 decisions ([spec-phase2.md](spec-ph
 | D-20 | Phase 2: security reviewer and budget      | Open                                                   | Before the Phase 2 beta (L-06)                                                 |
 | D-21 | Phase 2: storage plan for documents        | Open                                                   | Before the Phase 2 beta; part of D-1                                           |
 | D-22 | Phase 2: who signs document read links     | Decided 2026-11-22: the `documents` function only      |                                                                                |
+| D-23 | Phase 2: busy days for members             | Decided 2026-11-22: parents' devices publish           |                                                                                |
 
 ## Decided
 
@@ -103,6 +104,10 @@ Family members and caregivers see only events a parent shares (shared by default
 ### D-18 Busy days and the plan: decided 2026-11-21
 
 A day is busy when a parent's event or busy block overlaps 16:00 to 19:00, or 3 or more hours are booked between 07:00 and 21:00, or a member marks it. The Plan tab shows the marker and reason (free) and, for Premium households, offers one-tap easy dinners (D-15). It never changes the plan without a tap. Spec section 3.4 and R2-BUSY-1.
+
+### D-23 Busy days for family members and caregivers: decided 2026-11-22, parents publish
+
+Family members' and caregivers' devices hold only shared events and their own busy blocks, so they can't work out a day made busy by a parent's private event (R2-BUSY-2). Parents' devices publish each day's result for today and the next 13 days (PROPOSED) to a synced `busy_days` table every active member reads: the date, busy or not, and the reason (`dinner`, `booked` or `marked`), with no titles, times or event IDs. Members' devices show markers from it; parents' devices keep using `busyDays()` directly. Not chosen: a server function, since the server can't expand repeats today. Issue #284, B-01.4.
 
 ### D-19 Children's records: decided 2026-11-21, files only
 

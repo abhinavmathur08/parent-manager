@@ -88,7 +88,20 @@ export const BUSY_DAY_OVERRIDES = {
   },
 } as const satisfies SyncTableDefinition;
 
-export const BUSY_TABLES = [BUSY_BLOCKS, BUSY_DAY_OVERRIDES] as const;
+/**
+ * Each day's busy state, published by parents' devices for every member (B-01.4, D-23,
+ * R2-BUSY-2): the date, busy or not, and the fixed reason, never titles, times or event IDs.
+ */
+export const BUSY_DAYS = {
+  name: 'busy_days',
+  columns: {
+    date: 'text',
+    busy: 'boolean',
+    reason: 'text',
+  },
+} as const satisfies SyncTableDefinition;
+
+export const BUSY_TABLES = [BUSY_BLOCKS, BUSY_DAY_OVERRIDES, BUSY_DAYS] as const;
 
 /** Event kinds, stored as identifiers; names come from translations (NFR2-L10N-1). */
 export const EVENT_KINDS = [
@@ -193,4 +206,20 @@ export type BusyDayOverrideRow = SyncRow & {
  */
 export function overrideId(householdId: string, date: string): string {
   return stableId('busy_day_override', householdId, date);
+}
+
+export type BusyDayRow = SyncRow & {
+  /** The day in the household's timezone, `YYYY-MM-DD`. */
+  date: string;
+  busy: boolean;
+  /** `dinner`, `booked` or `marked` when busy; null otherwise. */
+  reason: 'dinner' | 'booked' | 'marked' | null;
+};
+
+/**
+ * The ID of a day's published row, the same on every device, so two parents publishing the
+ * same day write one row (B-01.4).
+ */
+export function busyDayId(householdId: string, date: string): string {
+  return stableId('busy_day', householdId, date);
 }
