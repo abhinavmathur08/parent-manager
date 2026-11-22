@@ -1,6 +1,6 @@
 // A small client for the Storage API over fetch, with no dependencies (like _shared/admin.ts).
-// Service calls use the service key; reads are signed as the caller, so the bucket's select
-// policy decides who may read (V-02.2, R2-DOC-2).
+// Every call uses the service key: clients have no policy on the bucket, and the function
+// checks who may read before it signs a link (V-02.3, R2-DOC-2, D-22).
 
 export interface StoredFile {
   name: string;
@@ -12,8 +12,8 @@ export interface DocumentStorage {
   signUpload(path: string): Promise<string>;
   /** The files directly in a folder, as the service role. */
   list(folder: string): Promise<StoredFile[]>;
-  /** A read link path (relative to /storage/v1) signed as the caller, or null if refused. */
-  signRead(path: string, seconds: number, accessToken: string): Promise<string | null>;
+  /** A read link path (relative to /storage/v1), or null if the file isn't stored. */
+  signRead(path: string, seconds: number): Promise<string | null>;
   remove(paths: string[]): Promise<void>;
 }
 
@@ -22,7 +22,6 @@ export const BUCKET = 'documents';
 export function documentStorage(
   url: string,
   serviceKey: string,
-  publishableKey: string,
   fetcher: typeof fetch = fetch,
 ): DocumentStorage {
   const service: Record<string, string> = {
@@ -68,18 +67,14 @@ export function documentStorage(
         .filter((row) => row.id !== null)
         .map((row) => ({ name: row.name, size: row.metadata?.size ?? 0 }));
     },
-    async signRead(path, seconds, accessToken) {
+    async signRead(path, seconds) {
       const res = await fetcher(`${base}/object/sign/${BUCKET}/${encode(path)}`, {
         method: 'POST',
-        headers: {
-          apikey: publishableKey,
-          Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-        },
+        headers: service,
         body: JSON.stringify({ expiresIn: seconds }),
       });
-      // Storage answers 400 or 404 when the select policy hides the object.
-      if (res.status === 400 || res.status === 403 || res.status === 404) {
+      // Storage answers 400 or 404 for a missing object.
+      if (res.status === 400 || res.status === 404) {
         await res.body?.cancel();
         return null;
       }

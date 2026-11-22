@@ -56,7 +56,7 @@ export function useBusyDaysContext(): BusyDaysValue | null {
 /**
  * Busy days for the Plan and Calendar tabs (FR2-BUSY-1, FR2-BUSY-4, R2-BUSY-2). A parent's
  * device runs the busy-day engine on every event and parents' busy blocks; family members and
- * caregivers see what parents' devices publish (D-22), with marks applied at once. Free for
+ * caregivers see what parents' devices publish (D-23), with marks applied at once. Free for
  * every household (D-15).
  */
 export function BusyDaysProvider({

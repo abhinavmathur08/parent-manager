@@ -1,4 +1,4 @@
--- B-01.4, R2-BUSY-2, NFR2-SEC-1 (D-22): published busy days hold only the date, busy or not and
+-- B-01.4, R2-BUSY-2, NFR2-SEC-1 (D-23): published busy days hold only the date, busy or not and
 -- a fixed reason; every active member reads them, only parents write, two parents publishing the
 -- same day write one row, and no household reads or writes another's.
 begin;

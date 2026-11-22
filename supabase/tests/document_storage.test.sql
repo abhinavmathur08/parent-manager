@@ -5,7 +5,7 @@
 begin;
 create extension if not exists pgtap with schema extensions;
 
-select plan(27);
+select plan(31);
 
 create schema tests;
 grant usage on schema tests to anon, authenticated;
@@ -87,25 +87,17 @@ select is(
   array[25, 2147483648, 10485760]::bigint[], 'Free holds 25 documents, Premium 2 GB, 10 MB a file (D-15)');
 
 -- ---------------------------------------------------------------------------
--- Reading files (spec 3.5 "Caregiver isolation", NFR2-SEC-1)
+-- Reading files (spec 3.5 "Caregiver isolation", NFR2-SEC-1, D-22): clients have no policy
+-- on the bucket, so they can't read, list or sign a link (Storage signs only rows the caller
+-- can select). Only the `documents` function signs, after `document_readable`.
 -- ---------------------------------------------------------------------------
-select tests.as_user('aaaaaaaa-0000-0000-0000-000000000001');
-select is(tests.readable(), array[
-  '00000000-0000-0000-0000-00000000000a/aaaaaaaa-d0c0-0000-0000-000000000001/1.jpg',
-  '00000000-0000-0000-0000-00000000000a/aaaaaaaa-d0c0-0000-0000-000000000001/2.jpg',
-  '00000000-0000-0000-0000-00000000000a/aaaaaaaa-d0c0-0000-0000-000000000002/1.pdf'],
-  'a parent reads their household''s files, and none filed under another household');
+select is_empty(
+  $$select policyname from pg_policies where schemaname = 'storage' and tablename = 'objects'
+      and (coalesce(qual, '') || coalesce(with_check, '')) like '%documents%'$$,
+  'no storage policy lets clients touch the documents bucket');
 
-select tests.as_user('aaaaaaaa-0000-0000-0000-000000000003');
-select is(tests.readable(), array[
-  '00000000-0000-0000-0000-00000000000a/aaaaaaaa-d0c0-0000-0000-000000000001/1.jpg',
-  '00000000-0000-0000-0000-00000000000a/aaaaaaaa-d0c0-0000-0000-000000000001/2.jpg'],
-  'the caregiver reads only the shared document''s files');
-select ok(
-  not private.can_read_document_file('00000000-0000-0000-0000-00000000000a/aaaaaaaa-d0c0-0000-0000-000000000002/1.pdf'),
-  'a request for the unshared document''s path is refused');
-select ok(not private.can_read_document_file('../aaaaaaaa-d0c0-0000-0000-000000000001/1.jpg'),
-  'a malformed path is refused');
+select tests.as_user('aaaaaaaa-0000-0000-0000-000000000001');
+select is(tests.readable(), '{}'::text[], 'a parent cannot select, list or sign their own files directly');
 select throws_ok(
   $$insert into storage.objects (bucket_id, name)
     values ('documents', '00000000-0000-0000-0000-00000000000a/aaaaaaaa-d0c0-0000-0000-000000000001/3.jpg')$$,
@@ -117,22 +109,44 @@ select is_empty(
 select throws_ok(
   $$delete from storage.objects where bucket_id = 'documents'$$,
   null, null, 'nor delete one');
+select throws_ok(
+  $$select public.document_readable('aaaaaaaa-0000-0000-0000-000000000001', 'aaaaaaaa-d0c0-0000-0000-000000000001')$$,
+  '42501', null, 'clients cannot call the function''s read check');
 
-select tests.as_user('aaaaaaaa-0000-0000-0000-000000000002');
-select is(tests.readable(), '{}'::text[], 'a family member without a share reads no files');
+select tests.as_user('aaaaaaaa-0000-0000-0000-000000000003');
+select is(tests.readable(), '{}'::text[], 'a caregiver with a share cannot select files directly either');
 
 select tests.as_user('bbbbbbbb-0000-0000-0000-000000000001');
-select is(tests.readable(), array[
-  '00000000-0000-0000-0000-00000000000b/bbbbbbbb-d0c0-0000-0000-000000000001/1.pdf'],
-  'household B reads only its own files');
+select is(tests.readable(), '{}'::text[], 'nor can another household');
+
+-- The function's check, as the service role.
+select tests.as_server();
+select is(
+  array[
+    public.document_readable('aaaaaaaa-0000-0000-0000-000000000001', 'aaaaaaaa-d0c0-0000-0000-000000000001'),
+    public.document_readable('aaaaaaaa-0000-0000-0000-000000000001', 'aaaaaaaa-d0c0-0000-0000-000000000002')],
+  array[true, true], 'a parent may read their household''s documents');
+select is(
+  array[
+    public.document_readable('aaaaaaaa-0000-0000-0000-000000000003', 'aaaaaaaa-d0c0-0000-0000-000000000001'),
+    public.document_readable('aaaaaaaa-0000-0000-0000-000000000003', 'aaaaaaaa-d0c0-0000-0000-000000000002')],
+  array[true, false], 'the caregiver may read only the shared document');
+select is(
+  public.document_readable('aaaaaaaa-0000-0000-0000-000000000002', 'aaaaaaaa-d0c0-0000-0000-000000000001'),
+  false, 'a family member without a share may not');
+select is(
+  public.document_readable('bbbbbbbb-0000-0000-0000-000000000001', 'aaaaaaaa-d0c0-0000-0000-000000000001'),
+  false, 'another household may not');
+select is(
+  coalesce(current_setting('request.jwt.claims', true), ''), '',
+  'the check puts the caller''s claims back');
 
 -- A lapse pauses the caregiver's share (FR2-DOC-8).
-select tests.as_server();
 update public.household_entitlements set tier = 'free'
 where household_id = '00000000-0000-0000-0000-00000000000a';
-select tests.as_user('aaaaaaaa-0000-0000-0000-000000000003');
-select is(tests.readable(), '{}'::text[], 'after a lapse the caregiver reads no files');
-select tests.as_server();
+select is(
+  public.document_readable('aaaaaaaa-0000-0000-0000-000000000003', 'aaaaaaaa-d0c0-0000-0000-000000000001'),
+  false, 'after a lapse the caregiver may not');
 update public.household_entitlements set tier = 'premium'
 where household_id = '00000000-0000-0000-0000-00000000000a';
 
@@ -172,12 +186,11 @@ select throws_ok($$select * from private.storage_purge_queue$$, '42501', null, '
 select lives_ok(
   $$update public.documents set deleted_at = now() where id = 'aaaaaaaa-d0c0-0000-0000-000000000002'$$,
   'a parent deletes a document');
-select is(tests.readable(), array[
-  '00000000-0000-0000-0000-00000000000a/aaaaaaaa-d0c0-0000-0000-000000000001/1.jpg',
-  '00000000-0000-0000-0000-00000000000a/aaaaaaaa-d0c0-0000-0000-000000000001/2.jpg'],
-  'its files can no longer be read');
 
 select tests.as_server();
+select is(
+  public.document_readable('aaaaaaaa-0000-0000-0000-000000000001', 'aaaaaaaa-d0c0-0000-0000-000000000002'),
+  false, 'its files can no longer be read');
 select is(
   (select array_agg(prefix) from private.storage_purge_queue),
   array['00000000-0000-0000-0000-00000000000a/aaaaaaaa-d0c0-0000-0000-000000000002/'],

@@ -1,4 +1,4 @@
-// Edge Function `documents` (V-02.2): uploads, signed reads and the hourly purge. See handler.ts.
+// Edge Function `documents` (V-02.2, V-02.3): uploads, server-signed reads and the hourly purge. See handler.ts.
 //
 // Secrets, added by the product owner (never committed), once D-21 settles the hosted plan:
 // - `DOCUMENTS_CRON_SECRET`: shared with pg_cron, which reads it from Vault
@@ -7,18 +7,6 @@
 import { adminClient, serviceKey } from '../_shared/admin.ts';
 import { createHandler, type StoredDocument, type UploadContext } from './handler.ts';
 import { documentStorage } from './storage.ts';
-
-/** The publishable key the app uses, which Storage needs beside the caller's token. */
-function publishableKey(): string {
-  const keys = Deno.env.get('SUPABASE_PUBLISHABLE_KEYS');
-  if (keys) {
-    const key = Object.values(JSON.parse(keys) as Record<string, string>)[0];
-    if (key) return key;
-  }
-  const legacy = Deno.env.get('SUPABASE_ANON_KEY');
-  if (!legacy) throw new Error('No publishable key in the environment');
-  return legacy;
-}
 
 const url = Deno.env.get('SUPABASE_URL')!;
 const admin = adminClient(url);
@@ -51,6 +39,7 @@ Deno.serve(
       if (error) throw new Error('documents select failed');
       return data?.[0] ?? null;
     },
+    canRead: (caller, id) => rpc<boolean>('document_readable', { caller, target: id }),
     async markReady(id) {
       const { error } = await admin.update(
         'documents',
@@ -59,7 +48,7 @@ Deno.serve(
       );
       if (error) throw new Error('documents update failed');
     },
-    storage: documentStorage(url, serviceKey(), publishableKey()),
+    storage: documentStorage(url, serviceKey()),
     removeStale: () => rpc<number>('remove_stale_document_uploads', {}),
     claimPurge: (batch) => rpc<{ id: number; prefix: string }[]>('claim_storage_purge', { batch }),
     finishPurge: (ids) => rpc<void>('finish_storage_purge', { ids }),
