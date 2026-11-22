@@ -4,16 +4,22 @@
 // The calendar on several devices, against the real calendar tables from the migrations:
 // - C-01.2 (FR2-CAL-4, R2-CAL-2): two parents changing the same occurrence of a repeating event
 //   offline write one exception row, and both devices end up with the same one.
+// - B-01.1 (FR2-BUSY-4, FR2-DEV-5, FR2-DEV-6): two members marking the same day offline write one
+//   override, and a member's busy blocks reach parents only and leave with the member.
 // - C-01.3 (R2-ACC-2, NFR2-OFF-2): unsharing an event removes it from a caregiver's device within
 //   60 seconds of reconnecting, and a lapse or a removal clears every scoped table there.
 import { createClient } from '@supabase/supabase-js';
 
 import {
+  BUSY_BLOCKS,
+  BUSY_DAY_OVERRIDES,
+  BUSY_TABLES,
   CALENDAR_TABLES,
   EVENT_EXCEPTIONS,
   EVENT_REMINDERS,
   EVENTS,
   exceptionId,
+  overrideId,
 } from '@/features/calendar/tables';
 import { SyncEngine } from '@/lib/sync/engine';
 import { LocalStore } from '@/lib/sync/local-store';
@@ -67,7 +73,7 @@ async function createDevice(email: string): Promise<Device> {
   const { error } = await client.auth.signInWithPassword({ email, password });
   if (error) throw error;
   const engine = new SyncEngine(
-    new LocalStore(createTestDatabase(), [...CALENDAR_TABLES]),
+    new LocalStore(createTestDatabase(), [...CALENDAR_TABLES, ...BUSY_TABLES]),
     createSupabaseRemote(client),
     householdId,
   );
@@ -98,6 +104,7 @@ let B: Device;
 /** A caregiver, who sees only shared events while the household has Premium (D-16). */
 let C: Device;
 let caregiverId = '';
+let parentId = '';
 
 beforeAll(async () => {
   const emails: string[] = [];
@@ -129,6 +136,7 @@ beforeAll(async () => {
   // A caregiver seat needs Premium (FR-HH-1).
   await setTier('premium');
   caregiverId = ids[2];
+  parentId = ids[0];
   const { error: membersError } = await admin.from('household_members').insert(
     ids.map((user_id, i) => ({
       household_id: householdId,
@@ -276,6 +284,65 @@ it('removes an unshared event from a caregiver within 60 seconds of reconnecting
   expect(await C.row(EVENT_REMINDERS.name, reminder)).not.toBeNull();
 });
 
+it('writes one override when two parents mark the same day offline (FR2-BUSY-4)', async () => {
+  const id = overrideId(householdId, '2026-12-09');
+  A.goOffline();
+  B.goOffline();
+  await A.engine.insert(BUSY_DAY_OVERRIDES.name, id, {
+    date: '2026-12-09',
+    busy: true,
+    set_by: null,
+  });
+  await B.engine.insert(BUSY_DAY_OVERRIDES.name, id, {
+    date: '2026-12-09',
+    busy: false,
+    set_by: null,
+  });
+  await A.goOnline();
+  await B.goOnline();
+  await A.engine.sync();
+
+  const { data, error } = await admin
+    .from('busy_day_overrides')
+    .select('id, busy')
+    .eq('household_id', householdId);
+  expect(error).toBeNull();
+  expect(data).toEqual([{ id, busy: true }]);
+  for (const device of [A, B]) {
+    expect(device.engine.getStatus()).toMatchObject({ pending: 0, rejected: 0 });
+    expect((await device.row(BUSY_DAY_OVERRIDES.name, id))?.busy).toBe(true);
+  }
+  // The caregiver sees the mark.
+  await C.engine.sync();
+  expect((await C.row(BUSY_DAY_OVERRIDES.name, id))?.busy).toBe(true);
+});
+
+let caregiverBlock = '';
+
+it("shares a caregiver's busy blocks with parents only (FR2-DEV-6, C9)", async () => {
+  caregiverBlock = crypto.randomUUID();
+  await C.engine.insert(BUSY_BLOCKS.name, caregiverBlock, {
+    user_id: caregiverId,
+    starts_at: '2026-12-09T21:00:00.000Z',
+    ends_at: '2026-12-09T22:00:00.000Z',
+  });
+  await C.engine.sync();
+  expect(C.engine.getStatus()).toMatchObject({ pending: 0, rejected: 0 });
+  await A.engine.sync();
+  expect(await A.row(BUSY_BLOCKS.name, caregiverBlock)).toMatchObject({ user_id: caregiverId });
+
+  const parentBlock = crypto.randomUUID();
+  await A.engine.insert(BUSY_BLOCKS.name, parentBlock, {
+    user_id: parentId,
+    starts_at: '2026-12-09T13:00:00.000Z',
+    ends_at: '2026-12-09T14:00:00.000Z',
+  });
+  await A.engine.sync();
+  await C.engine.sync();
+  await C.engine.checkVisibility();
+  expect(await C.row(BUSY_BLOCKS.name, parentBlock)).toBeNull();
+});
+
 it("clears every scoped table on a caregiver's device on a lapse and on removal (NFR2-OFF-2)", async () => {
   await A.engine.insert(EVENTS.name, crypto.randomUUID(), event('Swim class', true));
   await A.engine.sync();
@@ -302,4 +369,9 @@ it("clears every scoped table on a caregiver's device on a lapse and on removal 
   expect(error).toBeNull();
   await C.engine.checkVisibility();
   expect(await calendarRows(C)).toBe(0);
+});
+
+it("deletes a removed member's busy blocks from parents' devices (FR2-DEV-5)", async () => {
+  await A.engine.sync();
+  expect(await A.row(BUSY_BLOCKS.name, caregiverBlock)).toBeNull();
 });
