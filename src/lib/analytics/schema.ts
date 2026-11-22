@@ -162,6 +162,7 @@ export const ANALYTICS_EVENTS = {
     pages_count: count(20),
     size_bucket: oneOf('under_1mb', '1_5mb', '5_20mb', 'over_20mb'),
   },
+  document_viewed: {},
   // 3.7 Staples and pantry
   staple_added: { is_catalog_ingredient: bool },
   staple_removed: {},
