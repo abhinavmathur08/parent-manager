@@ -66,6 +66,9 @@ values
   ('d0c00000-0000-0000-0000-00000000000b', '00000000-0000-0000-0000-00000000000b', 'Car insurance',
    'doc.insurance', tests.ny_date(30), 'image/jpeg', 1, 1, 'ready', null);
 
+-- Members joining queue household-change entries; start from an empty inbox.
+delete from public.notifications;
+
 select ok(
   (select p.document_expiry
    from private.notification_prefs_of('aaaaaaaa-0000-0000-0000-000000000001') p),
@@ -100,7 +103,8 @@ select is_empty(
     where payload::text ~* '(medical|insurance card|allergy|d0c00000)'$$,
   'no title, medical category or document ID in any payload');
 select ok(
-  (select bool_and(deliver_at is not null) from public.notifications),
+  (select bool_and(deliver_at is not null) from public.notifications
+   where type = 'document_expiring'),
   'each is pushed, after quiet hours');
 
 -- A parent who turned them off gets none.
