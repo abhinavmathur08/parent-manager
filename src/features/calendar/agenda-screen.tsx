@@ -18,6 +18,7 @@ import { useTheme } from '@/hooks/use-theme';
 import { formatDate, formatTime, type AppLocale } from '@/i18n';
 import { track } from '@/lib/analytics';
 
+import { BusyDayMarker, BusyMarkButton } from './busy-marker';
 import { AGENDA_DAYS, agendaDays, householdTimeZone, type AgendaItem } from './agenda';
 import { useCalendarRows } from './data';
 import type { EventRow } from './tables';
@@ -133,7 +134,9 @@ export function AgendaScreen({ household, onOpen, footer, headerActions }: Agend
                   {day.date === today ? (
                     <Tag label={t('calendar.today')} testID="calendar-today-tag" />
                   ) : null}
+                  <BusyMarkButton date={day.date} locale={locale} />
                 </View>
+                <BusyDayMarker date={day.date} locale={locale} />
                 {day.items.length === 0 ? (
                   <Text color="textSecondary" testID="calendar-nothing-today">
                     {t('calendar.nothingToday')}

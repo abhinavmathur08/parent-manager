@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { AddEventButton } from '@/features/calendar/add-event-button';
 import { householdTimeZone } from '@/features/calendar/agenda';
 import { AgendaScreen } from '@/features/calendar/agenda-screen';
+import { HouseholdBusyDays } from '@/features/calendar/busy-days';
 import { useEventEditor } from '@/features/calendar/use-event-editor';
 import { useAuth } from '@/features/auth/session';
 import { useHousehold, type Membership } from '@/features/household/membership';
@@ -26,7 +27,10 @@ function Calendar({ membership }: { membership: Membership }) {
     isParent: membership.role === 'parent',
   });
   return (
-    <>
+    <HouseholdBusyDays
+      membership={membership}
+      userId={auth.status === 'signedIn' ? auth.session.user.id : null}
+    >
       <AgendaScreen
         household={{
           id: membership.householdId,
@@ -43,6 +47,6 @@ function Calendar({ membership }: { membership: Membership }) {
         footer={<AddEventButton label={t('calendar.add')} onPress={editor.open} />}
       />
       {editor.sheet}
-    </>
+    </HouseholdBusyDays>
   );
 }

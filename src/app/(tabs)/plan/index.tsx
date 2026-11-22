@@ -1,4 +1,5 @@
 import { useAuth } from '@/features/auth/session';
+import { HouseholdBusyDays } from '@/features/calendar/busy-days';
 import { useHousehold } from '@/features/household/membership';
 import { useInboxBell } from '@/features/notifications/inbox-bell';
 import { announceListReady } from '@/features/notifications/list-ready';
@@ -15,7 +16,10 @@ export default function PlanRoute() {
   if (state.status !== 'member') return null;
   const { membership } = state;
   return (
-    <>
+    <HouseholdBusyDays
+      membership={membership}
+      userId={auth.status === 'signedIn' ? auth.session.user.id : null}
+    >
       <PlanWeekScreen
         household={{
           id: membership.householdId,
@@ -34,6 +38,6 @@ export default function PlanRoute() {
         headerActions={[bell]}
       />
       {pushPrompt.sheet}
-    </>
+    </HouseholdBusyDays>
   );
 }
