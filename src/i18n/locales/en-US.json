@@ -295,7 +295,13 @@
     "busy": {
       "section": "Share my busy times",
       "label": "Share when I'm busy",
-      "description": "Parents see when you're busy, never what's on, so busy days count it. Only start and end times are shared."
+      "description": "Parents see when you're busy, never what's on, so busy days count it. Only start and end times are shared.",
+      "calendars": "Calendars to share from",
+      "noneChosen": "None chosen",
+      "chosen_one": "{{count}} calendar",
+      "chosen_other": "{{count}} calendars",
+      "pickHint": "Busy times come from the next two weeks of these calendars. All-day events and events copied from Parent Manager are left out.",
+      "noCalendars": "There are no calendars on this phone to share from."
     },
     "permission": {
       "title": "Use your phone's calendar?",

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { AppState } from 'react-native';
 
 import { theme } from '@/constants/theme';
+import { useAuth } from '@/features/auth/session';
 import { usePlanRows } from '@/features/planner/data';
 import type { PlanEntryRow } from '@/features/planner/tables';
 import { todayIn } from '@/features/planner/week';
@@ -17,6 +18,7 @@ import { householdTimeZone } from '../agenda';
 import { kindKey } from '../agenda-screen';
 import { useCalendarRows } from '../data';
 import type { EventRow } from '../tables';
+import { BusyTimesSync } from './busy-times-sync';
 import { copyItems, dinnersByDate } from './copy';
 import { syncCopies } from './copy-sync';
 import { useDeviceSettings } from './settings';
@@ -25,20 +27,34 @@ import { useDeviceSettings } from './settings';
 const SETTLE_MS = 1000;
 
 /**
- * Keeps "Copy to my calendar" up to date (C-05.2, FR2-DEV-2): on start, when the app returns
+ * Keeps "Copy to my calendar" (C-05.2, FR2-DEV-2) and "Share my busy times" (C-05.3,
+ * FR2-DEV-4) up to date. Copies are written on start, when the app returns
  * to the foreground, and when the synced events (or dinners, with meals on) change. It waits
  * for the local copy to finish loading, so it never removes copies of events still arriving.
  * Mounted once with the tabs; renders nothing.
  */
 export function DeviceCalendarSync({ membership }: { membership: Membership }) {
   const [settings] = useDeviceSettings(membership.householdId);
-  return settings.copy ? (
-    <Copier
-      membership={membership}
-      target={settings.copyTarget}
-      includeMeals={settings.includeMeals}
-    />
-  ) : null;
+  const auth = useAuth();
+  const userId = auth.status === 'signedIn' ? auth.session.user.id : null;
+  return (
+    <>
+      {settings.copy ? (
+        <Copier
+          membership={membership}
+          target={settings.copyTarget}
+          includeMeals={settings.includeMeals}
+        />
+      ) : null}
+      {settings.busy && userId ? (
+        <BusyTimesSync
+          householdId={membership.householdId}
+          userId={userId}
+          calendarIds={settings.busyCalendars}
+        />
+      ) : null}
+    </>
+  );
 }
 
 function Copier({
