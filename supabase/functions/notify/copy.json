@@ -11,6 +11,10 @@
     "test": {
       "title": "Notifications are working",
       "body": "This is a test notification for this phone."
+    },
+    "event_changed": {
+      "title": "The calendar changed",
+      "body": "An event in the next two weeks was added, moved or cancelled. Open the calendar to see it."
     }
   },
   "en-GB": {
@@ -25,6 +29,10 @@
     "test": {
       "title": "Notifications are working",
       "body": "This is a test notification for this phone."
+    },
+    "event_changed": {
+      "title": "The calendar changed",
+      "body": "An event in the next two weeks was added, moved or cancelled. Open the calendar to see it."
     }
   },
   "en-AU": {
@@ -39,6 +47,10 @@
     "test": {
       "title": "Notifications are working",
       "body": "This is a test notification for this phone."
+    },
+    "event_changed": {
+      "title": "The calendar changed",
+      "body": "An event in the next two weeks was added, moved or cancelled. Open the calendar to see it."
     }
   }
 }

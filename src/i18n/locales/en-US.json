@@ -1526,6 +1526,10 @@
       "member_left": {
         "title": "Someone left your household",
         "body": "Open members to see who's in your household."
+      },
+      "event_changed": {
+        "title": "The calendar changed",
+        "body": "An event in the next two weeks was added, moved or cancelled. Open the calendar to see it."
       }
     },
     "turnOffType": "Turn off this type",
