@@ -1,5 +1,6 @@
 import { router } from 'expo-router';
 
+import { AddDocumentButton } from '@/features/documents/add-button';
 import { VaultGate } from '@/features/documents/vault/vault-gate';
 import { VaultScreen } from '@/features/documents/vault-screen';
 import { useHousehold } from '@/features/household/membership';
@@ -23,6 +24,11 @@ export default function VaultRoute() {
         online={online}
         onBack={() => (router.canGoBack() ? router.back() : router.replace('/household'))}
         onOpen={(id) => router.push({ pathname: '/household/documents/[id]', params: { id } })}
+        addAction={
+          membership.role === 'parent' ? (
+            <AddDocumentButton onAdd={() => router.push('/household/documents/add')} />
+          ) : undefined
+        }
       />
     </VaultGate>
   );

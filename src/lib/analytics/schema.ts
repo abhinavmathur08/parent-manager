@@ -48,6 +48,7 @@ export const PAYWALL_TRIGGERS = [
   'premium_section',
   'reminders',
   'busy_day_meals',
+  'documents',
 ] as const;
 const productPeriod = oneOf('monthly', 'annual');
 

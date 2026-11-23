@@ -10,7 +10,8 @@ export type PremiumTrigger = (typeof PAYWALL_TRIGGERS)[number];
 /** The AI import allowance per month (FR-AI-9, decided D-9). The server enforces it. */
 export const AI_IMPORTS_PER_MONTH = { free: 5, premium: 100 } as const;
 
-export type PremiumBenefit = 'seats' | 'ai' | 'templates' | 'history' | 'reminders' | 'busy_meals';
+export type PremiumBenefit =
+  'seats' | 'ai' | 'templates' | 'history' | 'reminders' | 'busy_meals' | 'documents';
 
 /** Premium's benefits, in the order the sheet lists them (FR-PAY-3, FR2-PAY-1). */
 export const PREMIUM_BENEFITS: readonly PremiumBenefit[] = [
@@ -20,6 +21,7 @@ export const PREMIUM_BENEFITS: readonly PremiumBenefit[] = [
   'history',
   'reminders',
   'busy_meals',
+  'documents',
 ];
 
 const LEAD: Record<PremiumTrigger, PremiumBenefit | null> = {
@@ -31,6 +33,7 @@ const LEAD: Record<PremiumTrigger, PremiumBenefit | null> = {
   premium_section: null,
   reminders: 'reminders',
   busy_day_meals: 'busy_meals',
+  documents: 'documents',
 };
 
 /** The benefit the trigger names first, then the others (FR-PAY-4). */

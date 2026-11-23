@@ -712,6 +712,42 @@
     "personAndExpiry": "{{person}} · {{expiry}}",
     "gone": "This document was deleted or is no longer shared with you.",
     "openOffline": "You're offline. Connect to the internet to open this document.",
+    "add": {
+      "action": "Add a document",
+      "screenTitle": "Add a document",
+      "scan": "Scan",
+      "photo": "Take a photo",
+      "file": "Choose a file",
+      "pdf": "1 PDF",
+      "pages_one": "{{formatted}} page",
+      "pages_other": "{{formatted}} pages",
+      "truncated": "Only the first {{count}} pages were kept.",
+      "replace": "Use a different file",
+      "title": "Title",
+      "titleHint": "For example \"Mia's insurance card\". Keep medical details out of the title.",
+      "category": "Category",
+      "person": "For (optional)",
+      "expires": "Has an expiry date",
+      "expiryDate": "Expiry date",
+      "save": "Save",
+      "offline": "You're offline. The document will upload when you're back online.",
+      "errors": {
+        "camera": "Turn on camera access for Parent Manager in Settings to take a photo.",
+        "capture": "That didn't work. Try again, or choose a file instead.",
+        "unsupported": "Choose a PDF, JPEG, PNG or HEIC file.",
+        "file_too_large": "That file is over 10 MB. Choose a smaller one.",
+        "too_many_pages": "That's more than 20 pages. Scan fewer pages.",
+        "forbidden": "Only parents can add documents.",
+        "invalid": "Check the title and category, then try again.",
+        "exists": "That didn't work. Try again.",
+        "not_found": "That didn't work. Try again.",
+        "upload_incomplete": "That didn't work. Try again.",
+        "unavailable": "That didn't work. Try again.",
+        "network": "That didn't work. Try again.",
+        "failed": "That didn't work. Try again.",
+        "limit": "Your household has reached its document limit."
+      }
+    },
     "details": {
       "category": "Category",
       "person": "For",
@@ -1396,6 +1432,10 @@
       "busy_meals": {
         "title": "Easy dinners on busy days",
         "body": "On days full of appointments, add or swap in an easy dinner in one tap."
+      },
+      "documents": {
+        "title": "Room for every document",
+        "body": "Keep up to 2 GB of documents instead of 25, with expiry reminders and sharing with family and caregivers."
       }
     },
     "sheet": {
