@@ -15,6 +15,7 @@ import { track } from '@/lib/analytics';
 import { openSystemNotificationSettings, requestPushPermission } from '@/lib/notifications/push';
 
 import { ChoiceSheet } from './choice-sheet';
+import { useShowEventDetails } from './event-details';
 import { sendTestNotification } from './inbox';
 import {
   dayBefore,
@@ -45,8 +46,9 @@ export type NotificationsScreenProps = {
 };
 
 /**
- * S-29 Notification settings (FR-NOT-2, FR-NOT-3, FR-NOT-6, FR-NOT-7): push status, a switch
- * per type, the "plan your week" day and time, and quiet hours, saved on the server for the
+ * S-29 Notification settings (FR-NOT-2, FR-NOT-3, FR-NOT-6, FR-NOT-7, FR2-REM-3): push
+ * status, a switch per type, "show event details" for this device, the "plan your week" day
+ * and time, and quiet hours, saved on the server for the
  * sender to check. Turning on a type that reaches the device asks for permission if the
  * system hasn't been asked yet; when it's been refused those types are "off in system
  * settings", with a link there.
@@ -57,6 +59,7 @@ export function NotificationsScreen({ userId, household }: NotificationsScreenPr
   const locale = i18n.language;
   const [permission, refresh] = usePushPermission();
   const { prefs, save } = useNotificationPrefs(userId);
+  const [eventDetails, setEventDetails] = useShowEventDetails(userId);
   const [asking, setAsking] = useState(false);
   const [picking, setPicking] = useState<Picking | null>(null);
   const denied = permission === 'denied';
@@ -172,6 +175,16 @@ export function NotificationsScreen({ userId, household }: NotificationsScreenPr
             />
           );
         })}
+        {prefs.calendar_reminders && !denied ? (
+          // FR2-REM-3: this device only, off by default.
+          <Switch
+            label={t('notifications.eventDetails.title')}
+            description={t('notifications.eventDetails.description')}
+            value={eventDetails}
+            onValueChange={setEventDetails}
+            testID="event-details-switch"
+          />
+        ) : null}
       </View>
 
       {prefs.plan_week && !denied ? (

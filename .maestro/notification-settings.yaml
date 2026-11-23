@@ -1,4 +1,4 @@
-# N-01.2 (FR-NOT-3, FR-NOT-6, FR-NOT-7): after a look at the empty inbox, a member turns "list is ready" off, moves the
+# N-01.2 (FR-NOT-3, FR-NOT-6, FR-NOT-7) and C-04.1 (FR2-REM-3): after a look at the empty inbox, a member turns "list is ready" off, moves the
 # "plan your week" reminder and the start of quiet hours, and finds the settings kept on the
 # server when they come back. Maestro grants notification permission at launch, so turning a
 # type back on doesn't ask. Ends signed out. Needs the local stack; see README.md.
@@ -36,6 +36,42 @@ tags:
     visible:
       id: notification-type-list_ready
     timeout: 10000
+
+# C-04.1 (FR2-REM-2, FR2-REM-3): event reminders start on; "show event details" is a setting
+# on this phone, off until turned on.
+- scrollUntilVisible:
+    element:
+      id: event-details-switch
+    centerElement: true
+- assertVisible:
+    id: notification-type-calendar_reminders
+    checked: true
+# C-04.2 (FR2-REM-4, FR2-REM-5): calendar changes and "who's taking?" start on.
+- assertVisible:
+    id: notification-type-event_changes
+    checked: true
+- assertVisible:
+    id: notification-type-who_taking
+    checked: true
+# V-07 (FR2-DOC-7): document expiry reminders start on.
+- scrollUntilVisible:
+    element:
+      id: notification-type-document_expiry
+- assertVisible:
+    id: notification-type-document_expiry
+    checked: true
+- assertVisible:
+    id: event-details-switch
+    checked: false
+- tapOn:
+    id: event-details-switch
+- assertVisible:
+    id: event-details-switch
+    checked: true
+- scrollUntilVisible:
+    element:
+      id: notification-type-list_ready
+    direction: UP
 
 # Every type starts on; turn "list is ready" off.
 - assertVisible:
@@ -126,6 +162,13 @@ tags:
 - assertVisible:
     id: notification-type-list_ready
     checked: false
+- scrollUntilVisible:
+    element:
+      id: event-details-switch
+    centerElement: true
+- assertVisible:
+    id: event-details-switch
+    checked: true
 - scrollUntilVisible:
     element:
       text: Friday
