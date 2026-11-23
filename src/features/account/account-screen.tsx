@@ -12,8 +12,8 @@ import { TextField } from '@/components/text-field';
 import { signInMethod } from '@/features/account/sign-in-method';
 import { authErrorKey } from '@/features/auth/auth-errors';
 import { useAuth } from '@/features/auth/session';
-import { signOut } from '@/features/auth/sign-out';
 import { LockSettingsSection } from '@/features/biometric/lock-settings';
+import { signOutAskingAboutCopies } from '@/features/calendar/device/sign-out-prompt';
 import { VaultLockSettingsSection } from '@/features/documents/vault/vault-lock-settings';
 import { fetchDisplayName, saveDisplayName } from '@/features/onboarding/profile';
 import { useOnline } from '@/hooks/use-online';
@@ -132,7 +132,8 @@ export function AccountScreen() {
         variant="secondary"
         label={t('auth.signOut.action')}
         onPress={() => {
-          signOut().catch(() => undefined);
+          // Asks first if this phone has copies in its calendar (FR2-PRIV-4).
+          signOutAskingAboutCopies(t).catch(() => undefined);
         }}
         fullWidth
         testID="sign-out"

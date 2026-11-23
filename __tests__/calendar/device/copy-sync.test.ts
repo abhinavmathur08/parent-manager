@@ -1,12 +1,19 @@
 import { signOut } from '@/features/auth/sign-out';
 import type { CopyItem } from '@/features/calendar/device/copy';
 import {
+  beforeSignOut,
+  hasCopies,
   readCopyState,
   removeCopies,
   syncCopies,
   type CopyApi,
   type CopyRun,
 } from '@/features/calendar/device/copy-sync';
+import {
+  DEFAULT_DEVICE_SETTINGS,
+  readDeviceSettings,
+  writeDeviceSettings,
+} from '@/features/calendar/device/settings';
 import type { CopyDetails } from '@/lib/device-calendar/calendars';
 
 const mockStore = new Map<string, string>();
@@ -69,7 +76,13 @@ const run = (items: CopyItem[], over: Partial<CopyRun> = {}): CopyRun => ({
   ...over,
 });
 
-beforeEach(() => mockStore.clear());
+const copyOn = (householdId = 'h1') =>
+  writeDeviceSettings(householdId, { ...DEFAULT_DEVICE_SETTINGS, copy: true });
+
+beforeEach(() => {
+  mockStore.clear();
+  copyOn();
+});
 
 describe('device copies (C-05.2, FR2-DEV-2)', () => {
   it('makes our own calendar once and writes each copy', async () => {
@@ -122,6 +135,7 @@ describe('device copies (C-05.2, FR2-DEV-2)', () => {
       run([{ key: 'a', details: details('Swim') }], { target: 'google' }),
       phone.api,
     );
+    copyOn('h2');
     await syncCopies(run([], { householdId: 'h2', target: 'google' }), phone.api);
     expect(phone.calendars.get('google')!.size).toBe(0);
     expect(readCopyState()!.householdId).toBe('h2');
@@ -155,5 +169,40 @@ describe('device copies (C-05.2, FR2-DEV-2)', () => {
     await signOut();
     expect(readCopyState()).toBeNull();
     expect(phone.calendars.get('own-1')!.size).toBe(1);
+  });
+
+  it('writes nothing once copying is turned off', async () => {
+    const phone = fakePhone();
+    writeDeviceSettings('h1', DEFAULT_DEVICE_SETTINGS);
+    await syncCopies(run([{ key: 'a', details: details('Swim') }]), phone.api);
+    expect(phone.api.createAppCalendar).not.toHaveBeenCalled();
+    expect(readCopyState()).toBeNull();
+  });
+
+  it('never writes a copy while copies are being removed', async () => {
+    const phone = fakePhone();
+    await syncCopies(run([{ key: 'a', details: details('Swim') }]), phone.api);
+    writeDeviceSettings('h1', DEFAULT_DEVICE_SETTINGS);
+    await Promise.all([
+      removeCopies(phone.api),
+      syncCopies(run([{ key: 'b', details: details('Gym') }]), phone.api),
+    ]);
+    expect(phone.calendars.size).toBe(1);
+    expect(readCopyState()).toBeNull();
+  });
+
+  it('stops copying before sign-out, and removes the copies only if asked', async () => {
+    const phone = fakePhone();
+    await syncCopies(run([{ key: 'a', details: details('Swim') }]), phone.api);
+    expect(hasCopies()).toBe(true);
+    await beforeSignOut(false, phone.api);
+    expect(readDeviceSettings('h1').copy).toBe(false);
+    expect(phone.calendars.get('own-1')!.size).toBe(1);
+
+    copyOn();
+    await syncCopies(run([{ key: 'a', details: details('Swim') }]), phone.api);
+    await beforeSignOut(true, phone.api);
+    expect(phone.calendars.has('own-1')).toBe(false);
+    expect(hasCopies()).toBe(false);
   });
 });

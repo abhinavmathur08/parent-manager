@@ -14,8 +14,18 @@ const mockRequest = jest.fn(async () => {
   return mockAnswer;
 });
 jest.mock('expo-calendar', () => ({
+  EntityTypes: { EVENT: 'event' },
   getCalendarPermissions: () => mockGet(),
   requestCalendarPermissions: () => mockRequest(),
+  getCalendars: async () => [
+    { id: 'g1', title: 'Family', allowsModifications: true, source: { name: 'sam@gmail.com' } },
+    { id: 'hol', title: 'Holidays', allowsModifications: false, source: { name: 'Subscribed' } },
+  ],
+}));
+const mockRemove = jest.fn(async () => undefined);
+jest.mock('@/features/calendar/device/copy-sync', () => ({
+  readCopyState: () => null,
+  removeCopies: () => mockRemove(),
 }));
 const mockStore = new Map<string, string>();
 jest.mock('expo-sqlite/kv-store', () => ({
@@ -108,5 +118,37 @@ describe('calendar settings (S-39)', () => {
     await fireEvent.press(screen.getByTestId('calendar-permission-continue'));
     expect(open).toHaveBeenCalled();
     expect(mockRequest).not.toHaveBeenCalled();
+  });
+
+  it('picks where copies go, and removes them when turned off (FR2-DEV-2)', async () => {
+    mockCurrent = { granted: true, canAskAgain: true };
+    await renderScreen();
+    expect(screen.queryByTestId('calendar-copy-target')).toBeNull();
+    await fireEvent.press(screen.getByTestId('calendar-copy-switch'));
+    expect(mockTrack).toHaveBeenCalledWith('device_calendar_copy_changed', {
+      enabled: true,
+      target: 'new',
+    });
+    // Our own calendar is the default; only writable calendars are offered.
+    expect(screen.getByTestId('calendar-copy-target')).toHaveTextContent(/Parent Manager/);
+    await fireEvent.press(screen.getByTestId('calendar-copy-target'));
+    await waitFor(() => expect(screen.getByTestId('calendar-target-0')).toBeTruthy());
+    expect(screen.queryByTestId('calendar-target-1')).toBeNull();
+    await fireEvent.press(screen.getByTestId('calendar-target-0'));
+    expect(readDeviceSettings('h1').copyTarget).toBe('g1');
+    expect(mockTrack).toHaveBeenCalledWith('device_calendar_copy_changed', {
+      enabled: true,
+      target: 'existing',
+    });
+    await waitFor(() =>
+      expect(screen.getByTestId('calendar-copy-target')).toHaveTextContent(/Family/),
+    );
+
+    await fireEvent.press(screen.getByTestId('calendar-copy-meals'));
+    expect(readDeviceSettings('h1').includeMeals).toBe(true);
+
+    await fireEvent.press(screen.getByTestId('calendar-copy-switch'));
+    expect(mockRemove).toHaveBeenCalled();
+    expect(screen.queryByTestId('calendar-copy-target')).toBeNull();
   });
 });
