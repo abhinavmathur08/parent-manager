@@ -1493,6 +1493,14 @@
       "calendar_reminders": {
         "title": "Event reminders",
         "description": "Reminders you set on calendar events, on this phone. They work offline."
+      },
+      "event_changes": {
+        "title": "Calendar changes",
+        "description": "Premium. When someone else adds, moves or cancels an event in the next two weeks."
+      },
+      "who_taking": {
+        "title": "Who's taking?",
+        "description": "For parents: the evening before an appointment nobody is taking yet."
       }
     },
     "planWeek": {
@@ -1530,6 +1538,18 @@
       "event_changed": {
         "title": "The calendar changed",
         "body": "An event in the next two weeks was added, moved or cancelled. Open the calendar to see it."
+      },
+      "event_created": {
+        "title": "An event was added",
+        "body": "Someone added an event in the next two weeks."
+      },
+      "event_moved": {
+        "title": "An event was moved",
+        "body": "Someone moved an event in the next two weeks."
+      },
+      "event_cancelled": {
+        "title": "An event was cancelled",
+        "body": "Someone cancelled an event in the next two weeks."
       },
       "who_taking": {
         "title": "Who's taking tomorrow's appointment?",

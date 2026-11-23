@@ -173,4 +173,56 @@ describe('notification taps (FR-NOT-7, FR-NOT-8)', () => {
     expect(mockSavePrefs).not.toHaveBeenCalled();
     expect(mockNavigate).not.toHaveBeenCalled();
   });
+
+  it('turns change notifications off from a change push (C-04.2)', async () => {
+    await handleResponse(
+      response({ notificationId: 'n9', type: 'event_changed' }, TURN_OFF_ACTION),
+      'u1',
+    );
+    expect(mockSavePrefs).toHaveBeenCalledWith('u1', { ...DEFAULT_PREFS, event_changes: false });
+  });
+
+  it('opens the event a calendar push is about, marking a prompt as answered from a push', async () => {
+    const event = 'eeeeeeee-0000-0000-0000-000000000001';
+    await handleResponse(
+      response({ notificationId: 'n9', type: 'who_taking', event_id: event, date: '2026-11-25' }),
+      'u1',
+    );
+    expect(mockNavigate).toHaveBeenCalledWith({
+      pathname: '/calendar/[id]',
+      params: { id: event, date: '2026-11-25', prompt: 'push' },
+    });
+  });
+});
+
+describe('calendar notifications in the inbox (C-04.2)', () => {
+  it('words each change, falling back for one it does not know', () => {
+    for (const change of ['created', 'moved', 'cancelled']) {
+      expect(messageKey(item({ type: 'event_changed', payload: { change } }))).toBe(
+        `event_${change}`,
+      );
+    }
+    expect(messageKey(item({ type: 'event_changed', payload: { change: 'x' } }))).toBe(
+      'event_changed',
+    );
+    expect(messageKey(item({ type: 'who_taking' }))).toBe('who_taking');
+  });
+
+  it('opens the event, and the calendar when the event is missing', () => {
+    const payload = {
+      event_id: 'e1',
+      change: 'moved',
+      kind: 'kind.appointment',
+      date: '2026-11-25',
+    };
+    expect(routeFor('event_changed', payload, 'inbox')).toEqual({
+      pathname: '/calendar/[id]',
+      params: { id: 'e1', date: '2026-11-25' },
+    });
+    expect(routeFor('who_taking', payload, 'inbox')).toEqual({
+      pathname: '/calendar/[id]',
+      params: { id: 'e1', date: '2026-11-25', prompt: 'inbox' },
+    });
+    expect(routeFor('event_changed', {})).toBe('/calendar');
+  });
 });

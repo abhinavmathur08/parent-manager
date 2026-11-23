@@ -154,6 +154,8 @@ export const ANALYTICS_EVENTS = {
   event_updated: { kind: code, scope: oneOf('one', 'all') },
   event_deleted: { kind: code, scope: oneOf('one', 'all') },
   event_shared: { shared: bool },
+  // 3.2 Reminders and calendar notifications
+  who_taking_prompt_answered: { answered_from: oneOf('push', 'inbox') },
   // 3.7 Staples and pantry
   staple_added: { is_catalog_ingredient: bool },
   staple_removed: {},

@@ -3,7 +3,8 @@ import type { Href } from 'expo-router';
 import { getSupabase } from '@/lib/supabase';
 
 /** Types the server stores. "Defrost tonight" is local to the device and never in the inbox. */
-export type InboxType = 'plan_week' | 'list_ready' | 'household_changes' | 'test';
+export type InboxType =
+  'plan_week' | 'list_ready' | 'household_changes' | 'test' | 'event_changed' | 'who_taking';
 
 export type InboxItem = {
   id: string;
@@ -18,9 +19,16 @@ export type InboxItem = {
 export const INBOX_SIZE = 50;
 
 const HOUSEHOLD_EVENTS = ['member_joined', 'member_left'] as const;
+const EVENT_CHANGES = ['created', 'moved', 'cancelled'] as const;
 
 /** The key under `notifications.messages` for an item's title and body. */
 export function messageKey(item: Pick<InboxItem, 'type' | 'payload'>): string {
+  if (item.type === 'event_changed') {
+    const change = item.payload.change;
+    return (EVENT_CHANGES as readonly unknown[]).includes(change)
+      ? `event_${change as string}`
+      : 'event_changed';
+  }
   if (item.type !== 'household_changes') return item.type;
   const event = item.payload.event;
   return (HOUSEHOLD_EVENTS as readonly unknown[]).includes(event)
@@ -30,17 +38,25 @@ export function messageKey(item: Pick<InboxItem, 'type' | 'payload'>): string {
 
 /**
  * Where tapping an item, in the inbox or as a push or local notification, goes (FR-NOT-8).
- * `data` holds IDs only, such as the event and occurrence date of an event reminder.
+ * `data` holds IDs only, such as the event and occurrence date of a calendar notification.
+ * `from` says where a "who's taking?" prompt was answered from, for its analytics.
  */
-export function routeFor(type: string, data: Record<string, unknown> = {}): Href | null {
+export function routeFor(
+  type: string,
+  data: Record<string, unknown> = {},
+  from?: 'push' | 'inbox',
+): Href | null {
   switch (type) {
     case 'calendar_reminders':
+    case 'event_changed':
+    case 'who_taking':
       return typeof data.event_id === 'string'
         ? {
             pathname: '/calendar/[id]',
             params: {
               id: data.event_id,
               ...(typeof data.date === 'string' ? { date: data.date } : {}),
+              ...(type === 'who_taking' && from ? { prompt: from } : {}),
             },
           }
         : '/calendar';

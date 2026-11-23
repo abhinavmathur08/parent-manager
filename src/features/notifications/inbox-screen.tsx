@@ -59,7 +59,7 @@ export function InboxScreen() {
       void markRead([item.id]).catch(() => undefined);
     }
     track('notification_opened', { type: item.type });
-    const route = routeFor(item.type);
+    const route = routeFor(item.type, item.payload, 'inbox');
     if (route) router.navigate(route);
   };
 
