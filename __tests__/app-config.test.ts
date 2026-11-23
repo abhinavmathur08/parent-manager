@@ -97,22 +97,22 @@ describe('over-the-air updates (F-03.3)', () => {
   });
 });
 
-describe('Apple Reminders export (G-06.2)', () => {
-  it('asks only for reminders, never the calendar, and adds no Android calendar permissions', () => {
+describe('Apple Reminders export (G-06.2) and device calendars (C-05.1)', () => {
+  it('asks for reminders and full calendar access with our own strings, and allows Android calendars', () => {
     const config = configFor('production');
     const calendar = config.plugins?.find((p) => Array.isArray(p) && p[0] === 'expo-calendar');
     expect(calendar).toEqual([
       'expo-calendar',
       {
         remindersPermission: expect.stringContaining('Reminders'),
-        calendarPermission: false,
+        calendarPermission: expect.stringContaining('never titles'),
       },
     ]);
-    expect(config.android?.blockedPermissions).toEqual(
-      expect.arrayContaining([
-        'android.permission.READ_CALENDAR',
-        'android.permission.WRITE_CALENDAR',
-      ]),
+    expect(config.android?.blockedPermissions ?? []).not.toEqual(
+      expect.arrayContaining(['android.permission.READ_CALENDAR']),
+    );
+    expect(config.android?.blockedPermissions ?? []).not.toEqual(
+      expect.arrayContaining(['android.permission.WRITE_CALENDAR']),
     );
   });
 });

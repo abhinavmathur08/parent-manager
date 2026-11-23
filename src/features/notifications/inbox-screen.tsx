@@ -11,7 +11,7 @@ import { useTheme } from '@/hooks/use-theme';
 import { formatDate } from '@/i18n';
 import { track } from '@/lib/analytics';
 
-import { fetchInbox, markRead, messageKey, routeFor, type InboxItem } from './inbox';
+import { fetchInbox, markRead, messageKey, messageValues, routeFor, type InboxItem } from './inbox';
 
 const DOT = 10;
 
@@ -59,7 +59,7 @@ export function InboxScreen() {
       void markRead([item.id]).catch(() => undefined);
     }
     track('notification_opened', { type: item.type });
-    const route = routeFor(item.type);
+    const route = routeFor(item.type, item.payload, 'inbox');
     if (route) router.navigate(route);
   };
 
@@ -101,6 +101,7 @@ export function InboxScreen() {
         <View testID="inbox-list">
           {items.map((item, index) => {
             const key = messageKey(item);
+            const values = messageValues(item, t, i18n.language);
             const when = formatDate(new Date(item.createdAt), i18n.language, {
               month: 'short',
               day: 'numeric',
@@ -110,8 +111,8 @@ export function InboxScreen() {
             return (
               <ListRow
                 key={item.id}
-                title={t(`notifications.messages.${key}.title`)}
-                subtitle={`${t(`notifications.messages.${key}.body`)}\n${when}`}
+                title={t(`notifications.messages.${key}.title`, values)}
+                subtitle={`${t(`notifications.messages.${key}.body`, values)}\n${when}`}
                 variant="navigation"
                 leading={
                   <View

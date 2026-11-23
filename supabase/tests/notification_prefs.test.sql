@@ -4,7 +4,7 @@
 begin;
 create extension if not exists pgtap with schema extensions;
 
-select plan(25);
+select plan(27);
 
 create schema tests;
 grant usage on schema tests to anon, authenticated;
@@ -33,6 +33,11 @@ select row_eq(
     from private.notification_prefs_of('aaaaaaaa-0000-0000-0000-000000000001')$$,
   row(null::smallint, 1080::smallint, 1260::smallint, 420::smallint),
   'plan your week defaults to 18:00 the day before, quiet hours to 21:00-07:00');
+-- C-04.1 (FR2-REM-2): calendar reminders are on until the member turns them off.
+select ok(
+  (select p.calendar_reminders
+   from private.notification_prefs_of('aaaaaaaa-0000-0000-0000-000000000001') p),
+  'calendar reminders are on by default');
 
 -- ---------------------------------------------------------------------------
 -- Own row only (FR-NOT-7)
@@ -49,6 +54,9 @@ select lives_ok(
   'and saves them again as an upsert');
 select is(
   (select list_ready from public.notification_prefs), true, 'they read their own settings');
+select lives_ok(
+  $$update public.notification_prefs set calendar_reminders = false$$,
+  'a member turns calendar reminders off');
 select throws_ok(
   $$insert into public.notification_prefs (user_id) values ('bbbbbbbb-0000-0000-0000-000000000001')$$,
   '42501', null, 'a member cannot create settings for someone else');
