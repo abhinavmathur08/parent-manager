@@ -1489,6 +1489,10 @@
       "household_changes": {
         "title": "Household changes",
         "description": "Members joining or leaving. In the app only."
+      },
+      "calendar_reminders": {
+        "title": "Event reminders",
+        "description": "Reminders you set on calendar events, on this phone. They work offline."
       }
     },
     "planWeek": {
@@ -1546,6 +1550,10 @@
     "defrost": {
       "title": "Defrost for tonight",
       "body": "Tonight's dinner, {{meal}}, needs defrosting."
+    },
+    "eventDetails": {
+      "title": "Show event details",
+      "description": "Adds the event's title and place to reminders on this phone. Off, they show only the kind, time and who's taking."
     }
   },
   "pantry": {

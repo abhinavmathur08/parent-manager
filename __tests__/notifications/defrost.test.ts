@@ -5,7 +5,8 @@ import {
   outsideQuietHours,
   type DefrostReminder,
 } from '@/features/notifications/defrost';
-import { reconcileDefrost } from '@/features/notifications/defrost-scheduler';
+import { defrostNotification, reconcileDefrost } from '@/features/notifications/defrost-scheduler';
+import { signatureOf } from '@/features/notifications/local-budget';
 import type { PlanEntryRow } from '@/features/planner/tables';
 import { NEEDS_DEFROSTING_TAG, type RecipeRow } from '@/features/recipes/tables';
 
@@ -102,7 +103,7 @@ describe('scheduling on the device', () => {
     ({
       identifier: reminder.id,
       content: {
-        data: { signature: `${reminder.date}|${reminder.fireAt.getTime()}|${reminder.meal}` },
+        data: { signature: signatureOf(defrostNotification(reminder, text)) },
       },
     }) as unknown as Notifications.NotificationRequest;
 

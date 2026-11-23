@@ -6,6 +6,17 @@ import { NotificationsScreen } from '@/features/notifications/notifications-scre
 import { DEFAULT_PREFS, type NotificationPrefs } from '@/features/notifications/prefs';
 import type { PushPermission } from '@/lib/notifications/push';
 
+jest.mock('expo-sqlite/kv-store', () => {
+  const store = new Map<string, string>();
+  return {
+    __esModule: true,
+    default: {
+      getItemSync: (key: string) => store.get(key) ?? null,
+      setItemSync: (key: string, value: string) => void store.set(key, value),
+    },
+  };
+});
+
 let mockPermission: PushPermission = 'granted';
 const mockRequest = jest.fn(async (..._args: unknown[]) => {
   mockPermission = 'granted';
@@ -58,7 +69,13 @@ beforeEach(() => {
 describe('notification settings (S-29)', () => {
   it('shows each type on by default, with the defaults for times', async () => {
     await renderScreen();
-    for (const type of ['plan_week', 'list_ready', 'defrost', 'household_changes']) {
+    for (const type of [
+      'plan_week',
+      'list_ready',
+      'defrost',
+      'household_changes',
+      'calendar_reminders',
+    ]) {
       expect(screen.getByTestId(`notification-type-${type}`)).toBeChecked();
     }
     // A Sunday week: the reminder is Saturday at 18:00.
@@ -121,7 +138,8 @@ describe('notification settings (S-29)', () => {
     const defrost = screen.getByTestId('notification-type-defrost');
     expect(defrost).not.toBeChecked();
     expect(defrost).toBeDisabled();
-    expect(screen.getAllByText('Off in system settings')).toHaveLength(3);
+    expect(screen.getAllByText('Off in system settings')).toHaveLength(4);
+    expect(screen.queryByTestId('event-details-switch')).toBeNull();
     expect(screen.getByTestId('notification-type-household_changes')).toBeChecked();
     expect(screen.getByTestId('push-open-settings')).toBeTruthy();
   });
@@ -150,5 +168,14 @@ describe('notification settings (S-29)', () => {
     expect(alert).toHaveBeenCalled();
     expect(screen.getByTestId('notification-type-list_ready')).toBeChecked();
     expect(mockTrack).not.toHaveBeenCalledWith('notification_type_toggled', expect.anything());
+  });
+
+  it('turns event details on for this device only, off by default (FR2-REM-3)', async () => {
+    await renderScreen();
+    const details = screen.getByTestId('event-details-switch');
+    expect(details).not.toBeChecked();
+    await fireEvent.press(details);
+    await waitFor(() => expect(screen.getByTestId('event-details-switch')).toBeChecked());
+    expect(mockSave).not.toHaveBeenCalled();
   });
 });

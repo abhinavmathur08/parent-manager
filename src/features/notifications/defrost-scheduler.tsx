@@ -1,4 +1,3 @@
-import * as Notifications from 'expo-notifications';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppState } from 'react-native';
@@ -6,54 +5,35 @@ import { AppState } from 'react-native';
 import { onSignOut } from '@/features/auth/sign-out';
 import { usePlanRows } from '@/features/planner/data';
 import { useRecipeRows } from '@/features/recipes/data';
-import { DEFAULT_CHANNEL_ID, readPushPermission } from '@/lib/notifications/push';
+import { readPushPermission } from '@/lib/notifications/push';
 
 import { DEFROST_ID_PREFIX, defrostSchedule, type DefrostReminder } from './defrost';
+import { setLocalNotifications, type LocalNotification } from './local-budget';
 import { cachedPrefs, onPrefsChanged } from './prefs';
 
 type Text = (reminder: DefrostReminder) => { title: string; body: string };
 
-const signature = (r: DefrostReminder) => `${r.date}|${r.fireAt.getTime()}|${r.meal}`;
+/** The local notification for a reminder: silent, dated, opening the plan. */
+export function defrostNotification(reminder: DefrostReminder, text: Text): LocalNotification {
+  return {
+    id: reminder.id,
+    fireAt: reminder.fireAt,
+    ...text(reminder),
+    data: { type: 'defrost', entryId: reminder.entryId, date: reminder.date },
+    categoryIdentifier: 'defrost',
+  };
+}
 
 /**
- * Makes this device's scheduled "defrost tonight" notifications match `desired`: ones for
- * entries that moved, changed or went are cancelled or replaced, and new ones scheduled.
- * Other scheduled notifications are left alone.
+ * Makes this device's scheduled "defrost tonight" notifications match `desired`, within the
+ * budget shared with event reminders: ones for entries that moved, changed or went are
+ * cancelled or replaced, and new ones scheduled. Other scheduled notifications are left alone.
  */
-export async function reconcileDefrost(desired: readonly DefrostReminder[], text: Text) {
-  const scheduled = (await Notifications.getAllScheduledNotificationsAsync()).filter((n) =>
-    n.identifier.startsWith(DEFROST_ID_PREFIX),
+export function reconcileDefrost(desired: readonly DefrostReminder[], text: Text) {
+  return setLocalNotifications(
+    DEFROST_ID_PREFIX,
+    desired.map((reminder) => defrostNotification(reminder, text)),
   );
-  const missing = new Map(desired.map((r) => [r.id, r]));
-  for (const existing of scheduled) {
-    const wanted = missing.get(existing.identifier);
-    if (wanted && existing.content.data?.signature === signature(wanted)) {
-      missing.delete(existing.identifier);
-    } else {
-      await Notifications.cancelScheduledNotificationAsync(existing.identifier);
-    }
-  }
-  for (const reminder of missing.values()) {
-    await Notifications.scheduleNotificationAsync({
-      identifier: reminder.id,
-      content: {
-        ...text(reminder),
-        data: {
-          type: 'defrost',
-          entryId: reminder.entryId,
-          date: reminder.date,
-          signature: signature(reminder),
-        },
-        categoryIdentifier: 'defrost',
-        sound: false,
-      },
-      trigger: {
-        type: Notifications.SchedulableTriggerInputTypes.DATE,
-        date: reminder.fireAt,
-        channelId: DEFAULT_CHANNEL_ID,
-      },
-    });
-  }
 }
 
 /** The device's local date, `YYYY-MM-DD`: local notifications follow the device (spec AS-7). */

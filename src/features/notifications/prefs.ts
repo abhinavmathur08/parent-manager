@@ -2,20 +2,27 @@ import Storage from 'expo-sqlite/kv-store';
 
 import { getSupabase } from '@/lib/supabase';
 
-/** The four Phase 1 types (FR-NOT-1). */
+/** The four Phase 1 types (FR-NOT-1), then Phase 2's calendar reminders (FR2-REM-2). */
 export const NOTIFICATION_TYPES = [
   'plan_week',
   'list_ready',
   'defrost',
   'household_changes',
+  'calendar_reminders',
 ] as const;
 export type NotificationType = (typeof NOTIFICATION_TYPES)[number];
 
 /**
  * Types that reach the device outside the app, so they need the system permission: two
- * pushes and the local "defrost tonight". Household changes are inbox only (FR-NOT-1).
+ * pushes and the local "defrost tonight" and event reminders. Household changes are inbox
+ * only (FR-NOT-1).
  */
-export const DEVICE_TYPES: readonly NotificationType[] = ['plan_week', 'list_ready', 'defrost'];
+export const DEVICE_TYPES: readonly NotificationType[] = [
+  'plan_week',
+  'list_ready',
+  'defrost',
+  'calendar_reminders',
+];
 
 /**
  * A member's settings (FR-NOT-3, FR-NOT-6, FR-NOT-7). Times are minutes after midnight in the
@@ -35,6 +42,7 @@ export const DEFAULT_PREFS: NotificationPrefs = {
   list_ready: true,
   defrost: true,
   household_changes: true,
+  calendar_reminders: true,
   planWeekDay: null,
   planWeekMinute: 18 * 60,
   quietStartMinute: 21 * 60,
@@ -46,6 +54,7 @@ type Row = {
   list_ready: boolean;
   defrost: boolean;
   household_changes: boolean;
+  calendar_reminders: boolean;
   plan_week_day: number | null;
   plan_week_minute: number;
   quiet_start_minute: number;
@@ -53,13 +62,14 @@ type Row = {
 };
 
 const COLUMNS =
-  'plan_week, list_ready, defrost, household_changes, plan_week_day, plan_week_minute, quiet_start_minute, quiet_end_minute';
+  'plan_week, list_ready, defrost, household_changes, calendar_reminders, plan_week_day, plan_week_minute, quiet_start_minute, quiet_end_minute';
 
 const fromRow = (row: Row): NotificationPrefs => ({
   plan_week: row.plan_week,
   list_ready: row.list_ready,
   defrost: row.defrost,
   household_changes: row.household_changes,
+  calendar_reminders: row.calendar_reminders,
   planWeekDay: row.plan_week_day,
   planWeekMinute: row.plan_week_minute,
   quietStartMinute: row.quiet_start_minute,
@@ -71,6 +81,7 @@ const toRow = (prefs: NotificationPrefs): Row => ({
   list_ready: prefs.list_ready,
   defrost: prefs.defrost,
   household_changes: prefs.household_changes,
+  calendar_reminders: prefs.calendar_reminders,
   plan_week_day: prefs.planWeekDay,
   plan_week_minute: prefs.planWeekMinute,
   quiet_start_minute: prefs.quietStartMinute,
@@ -91,7 +102,7 @@ export function onPrefsChanged(listener: () => void): () => void {
 
 /**
  * The last settings seen on this device, for what runs offline (local "defrost tonight"
- * notifications, N-02.2). Defaults when nothing was saved.
+ * notifications, N-02.2, and event reminders, C-04.1). Defaults when nothing was saved.
  */
 export function cachedPrefs(userId: string): NotificationPrefs {
   try {
