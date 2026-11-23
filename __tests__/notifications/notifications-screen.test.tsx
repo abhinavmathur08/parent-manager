@@ -77,6 +77,7 @@ describe('notification settings (S-29)', () => {
       'calendar_reminders',
       'event_changes',
       'who_taking',
+      'document_expiry',
     ]) {
       expect(screen.getByTestId(`notification-type-${type}`)).toBeChecked();
     }
@@ -140,7 +141,7 @@ describe('notification settings (S-29)', () => {
     const defrost = screen.getByTestId('notification-type-defrost');
     expect(defrost).not.toBeChecked();
     expect(defrost).toBeDisabled();
-    expect(screen.getAllByText('Off in system settings')).toHaveLength(6);
+    expect(screen.getAllByText('Off in system settings')).toHaveLength(7);
     expect(screen.queryByTestId('event-details-switch')).toBeNull();
     expect(screen.getByTestId('notification-type-household_changes')).toBeChecked();
     expect(screen.getByTestId('push-open-settings')).toBeTruthy();

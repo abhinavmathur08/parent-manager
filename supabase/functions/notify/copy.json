@@ -19,6 +19,10 @@
     "who_taking": {
       "title": "Who's taking tomorrow's appointment?",
       "body": "Nobody is taking it yet. Open it to choose who goes."
+    },
+    "document_expiring": {
+      "title": "A document expires soon",
+      "body": "Open Documents in the Household tab to see which one."
     }
   },
   "en-GB": {
@@ -41,6 +45,10 @@
     "who_taking": {
       "title": "Who's taking tomorrow's appointment?",
       "body": "Nobody is taking it yet. Open it to choose who goes."
+    },
+    "document_expiring": {
+      "title": "A document expires soon",
+      "body": "Open Documents in the Household tab to see which one."
     }
   },
   "en-AU": {
@@ -63,6 +71,10 @@
     "who_taking": {
       "title": "Who's taking tomorrow's appointment?",
       "body": "Nobody is taking it yet. Open it to choose who goes."
+    },
+    "document_expiring": {
+      "title": "A document expires soon",
+      "body": "Open Documents in the Household tab to see which one."
     }
   }
 }

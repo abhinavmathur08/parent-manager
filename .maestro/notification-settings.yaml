@@ -53,6 +53,13 @@ tags:
 - assertVisible:
     id: notification-type-who_taking
     checked: true
+# V-07 (FR2-DOC-7): document expiry reminders start on.
+- scrollUntilVisible:
+    element:
+      id: notification-type-document_expiry
+- assertVisible:
+    id: notification-type-document_expiry
+    checked: true
 - assertVisible:
     id: event-details-switch
     checked: false
