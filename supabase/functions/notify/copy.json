@@ -11,6 +11,18 @@
     "test": {
       "title": "Notifications are working",
       "body": "This is a test notification for this phone."
+    },
+    "event_changed": {
+      "title": "The calendar changed",
+      "body": "An event in the next two weeks was added, moved or cancelled. Open the calendar to see it."
+    },
+    "who_taking": {
+      "title": "Who's taking tomorrow's appointment?",
+      "body": "Nobody is taking it yet. Open it to choose who goes."
+    },
+    "document_expiring": {
+      "title": "A document expires soon",
+      "body": "Open Documents in the Household tab to see which one."
     }
   },
   "en-GB": {
@@ -25,6 +37,18 @@
     "test": {
       "title": "Notifications are working",
       "body": "This is a test notification for this phone."
+    },
+    "event_changed": {
+      "title": "The calendar changed",
+      "body": "An event in the next two weeks was added, moved or cancelled. Open the calendar to see it."
+    },
+    "who_taking": {
+      "title": "Who's taking tomorrow's appointment?",
+      "body": "Nobody is taking it yet. Open it to choose who goes."
+    },
+    "document_expiring": {
+      "title": "A document expires soon",
+      "body": "Open Documents in the Household tab to see which one."
     }
   },
   "en-AU": {
@@ -39,6 +63,18 @@
     "test": {
       "title": "Notifications are working",
       "body": "This is a test notification for this phone."
+    },
+    "event_changed": {
+      "title": "The calendar changed",
+      "body": "An event in the next two weeks was added, moved or cancelled. Open the calendar to see it."
+    },
+    "who_taking": {
+      "title": "Who's taking tomorrow's appointment?",
+      "body": "Nobody is taking it yet. Open it to choose who goes."
+    },
+    "document_expiring": {
+      "title": "A document expires soon",
+      "body": "Open Documents in the Household tab to see which one."
     }
   }
 }
