@@ -28,9 +28,22 @@ export function messageKey(item: Pick<InboxItem, 'type' | 'payload'>): string {
     : 'member_joined';
 }
 
-/** Where tapping an item, in the inbox or as a push, goes (FR-NOT-8). */
-export function routeFor(type: string): Href | null {
+/**
+ * Where tapping an item, in the inbox or as a push or local notification, goes (FR-NOT-8).
+ * `data` holds IDs only, such as the event and occurrence date of an event reminder.
+ */
+export function routeFor(type: string, data: Record<string, unknown> = {}): Href | null {
   switch (type) {
+    case 'calendar_reminders':
+      return typeof data.event_id === 'string'
+        ? {
+            pathname: '/calendar/[id]',
+            params: {
+              id: data.event_id,
+              ...(typeof data.date === 'string' ? { date: data.date } : {}),
+            },
+          }
+        : '/calendar';
     case 'plan_week':
     case 'defrost':
       // "Defrost tonight" is today's dinner, which the Plan tab scrolls into view.

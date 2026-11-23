@@ -12,7 +12,12 @@ import { fetchPrefs, NOTIFICATION_TYPES, savePrefs, type NotificationType } from
 export const TURN_OFF_ACTION = 'turn_off';
 
 /** Types whose notifications offer "turn off this type"; the push's `categoryId` names one. */
-const CATEGORY_TYPES: readonly NotificationType[] = ['plan_week', 'list_ready', 'defrost'];
+const CATEGORY_TYPES: readonly NotificationType[] = [
+  'plan_week',
+  'list_ready',
+  'defrost',
+  'calendar_reminders',
+];
 
 // A response is handled once, even if the component mounts again.
 const handled = new Set<string>();
@@ -31,7 +36,7 @@ export type ResponseRoute = (data: Record<string, unknown>) => ReturnType<typeof
 export async function handleResponse(
   response: Notifications.NotificationResponse,
   userId: string,
-  routeOf: ResponseRoute = (data) => routeFor(String(data.type)),
+  routeOf: ResponseRoute = (data) => routeFor(String(data.type), data),
 ): Promise<void> {
   const key = `${response.notification.request.identifier}:${response.actionIdentifier}`;
   if (handled.has(key)) return;
