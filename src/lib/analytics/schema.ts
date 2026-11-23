@@ -160,6 +160,8 @@ export const ANALYTICS_EVENTS = {
   calendar_permission_result: { granted: bool },
   device_calendar_copy_changed: { enabled: bool, target: oneOf('new', 'existing') },
   busy_times_changed: { enabled: bool, calendars_count: count(50) },
+  // Phase 2, 3.5 Document vault. Never a title, a category or a person (FR2-DOC-11).
+  vault_opened: { unlocked_with: oneOf('biometric', 'passcode', 'none') },
   // 3.7 Staples and pantry
   staple_added: { is_catalog_ingredient: bool },
   staple_removed: {},

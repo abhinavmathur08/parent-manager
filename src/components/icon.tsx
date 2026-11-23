@@ -38,6 +38,7 @@ const SYMBOLS = {
   copy: { ios: 'doc.on.doc', android: 'content_copy' },
   camera: { ios: 'camera', android: 'photo_camera' },
   image: { ios: 'photo', android: 'image' },
+  document: { ios: 'doc.text', android: 'description' },
 } as const;
 
 export type IconName = keyof typeof SYMBOLS;

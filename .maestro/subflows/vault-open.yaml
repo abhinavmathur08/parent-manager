@@ -1,0 +1,16 @@
+# Waits for the vault lock to be passed (the system prompt, matched on the device or in the
+# Simulator), then checks the empty vault (S-40).
+appId: ${APP_ID || 'com.myparentmanager'}
+---
+- extendedWaitUntil:
+    visible:
+      id: vault-screen
+    timeout: 60000
+- assertVisible:
+    id: vault-empty
+- tapOn:
+    id: vault-screen-title-back
+- extendedWaitUntil:
+    visible:
+      id: household-screen
+    timeout: 10000
