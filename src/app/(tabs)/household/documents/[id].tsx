@@ -1,7 +1,9 @@
 import { router, useLocalSearchParams } from 'expo-router';
 
+import { householdTimeZone } from '@/features/calendar/agenda';
 import { DocumentPages } from '@/features/documents/document-pages';
 import { DocumentScreen } from '@/features/documents/document-screen';
+import { LinkedEvents } from '@/features/documents/linked-events';
 import { VaultGate } from '@/features/documents/vault/vault-gate';
 import { useHousehold } from '@/features/household/membership';
 import { useOnline } from '@/hooks/use-online';
@@ -24,6 +26,17 @@ export default function DocumentRoute() {
         }}
         online={online}
         pages={<DocumentPages documentId={id} locale={membership.locale} online={online} />}
+        events={
+          <LinkedEvents
+            documentId={id}
+            locale={membership.locale}
+            timeZone={householdTimeZone(membership.timezone)}
+            onOpen={(eventId) =>
+              router.push({ pathname: '/calendar/[id]', params: { id: eventId } })
+            }
+          />
+        }
+        isParent={membership.role === 'parent'}
         onBack={() => (router.canGoBack() ? router.back() : router.replace('/household/documents'))}
       />
     </VaultGate>
