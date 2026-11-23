@@ -6,6 +6,7 @@ import { useEventEditor } from '@/features/calendar/use-event-editor';
 import { useAuth } from '@/features/auth/session';
 import { useHousehold, type Membership } from '@/features/household/membership';
 import { isPlanDate } from '@/features/planner/week';
+import { track } from '@/lib/analytics';
 
 /** S-38, opened from the agenda with the occurrence's original date. */
 export default function EventDetailRoute() {
@@ -15,7 +16,11 @@ export default function EventDetailRoute() {
 }
 
 function Detail({ membership }: { membership: Membership }) {
-  const { id, date } = useLocalSearchParams<{ id: string; date?: string }>();
+  const { id, date, prompt } = useLocalSearchParams<{
+    id: string;
+    date?: string;
+    prompt?: string;
+  }>();
   const auth = useAuth();
   const userId = auth.status === 'signedIn' ? auth.session.user.id : null;
   const timeZone = householdTimeZone(membership.timezone);
@@ -37,6 +42,11 @@ function Detail({ membership }: { membership: Membership }) {
         userId={userId}
         onBack={() => (router.canGoBack() ? router.back() : router.replace('/calendar'))}
         onEdit={editor.edit}
+        onTaken={
+          prompt === 'push' || prompt === 'inbox'
+            ? () => track('who_taking_prompt_answered', { answered_from: prompt })
+            : undefined
+        }
       />
       {editor.sheet}
     </>
