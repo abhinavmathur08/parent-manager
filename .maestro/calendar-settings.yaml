@@ -1,0 +1,129 @@
+# C-05.1 to C-05.3 (FR2-DEV-1, FR2-DEV-2, FR2-DEV-4, FR2-PRIV-3, NFR2-SEC-5): Calendar settings (S-39) open from the Household
+# tab and the Calendar tab. Both device features start off; turning one on explains first, and
+# "Not now" leaves it off without asking the system. With access already given, the switch
+# turns on at once. Ends signed out. Needs the local stack; see the Testing section of README.md.
+appId: ${APP_ID || 'com.myparentmanager'}
+tags:
+  - backend
+---
+- runFlow: subflows/create-household.yaml
+# Maestro grants every permission at launch; take the calendar back so the app would ask.
+- launchApp:
+    permissions:
+      calendar: deny
+- extendedWaitUntil:
+    visible:
+      id: plan-days
+    timeout: 20000
+
+- tapOn:
+    id: tab-household
+- scrollUntilVisible:
+    element:
+      id: open-calendar-settings
+- tapOn:
+    id: open-calendar-settings
+- extendedWaitUntil:
+    visible:
+      id: calendar-settings-screen
+    timeout: 10000
+- assertVisible:
+    id: calendar-copy-switch
+    checked: false
+- assertVisible:
+    id: calendar-busy-switch
+    checked: false
+
+# Turning on explains first; "Not now" leaves it off.
+- tapOn:
+    id: calendar-busy-switch
+- extendedWaitUntil:
+    visible:
+      id: calendar-permission-body
+    timeout: 10000
+- tapOn:
+    id: calendar-permission-not-now
+- extendedWaitUntil:
+    notVisible:
+      id: calendar-permission-body
+    timeout: 10000
+- assertVisible:
+    id: calendar-busy-switch
+    checked: false
+
+# With access given, from the Calendar tab's header, the switch turns on at once.
+- launchApp:
+    permissions:
+      calendar: allow
+- extendedWaitUntil:
+    visible:
+      id: plan-days
+    timeout: 20000
+- tapOn:
+    id: tab-calendar
+- tapOn:
+    id: calendar-open-settings-screen
+- extendedWaitUntil:
+    visible:
+      id: calendar-settings-screen
+    timeout: 10000
+- tapOn:
+    id: calendar-copy-switch
+- assertNotVisible:
+    id: calendar-permission-body
+- assertVisible:
+    id: calendar-copy-switch
+    checked: true
+# C-05.2: copies go to our own "Parent Manager" calendar by default; dinners are off.
+- assertVisible:
+    id: calendar-copy-target
+- assertVisible:
+    id: calendar-copy-meals
+    checked: false
+- tapOn:
+    id: calendar-copy-target
+- extendedWaitUntil:
+    visible:
+      id: calendar-target-own
+    timeout: 10000
+- tapOn:
+    id: calendar-target-own
+- extendedWaitUntil:
+    notVisible:
+      id: calendar-target-own
+    timeout: 10000
+# Turning it off removes the copies, so signing out doesn't ask about them.
+- tapOn:
+    id: calendar-copy-switch
+- assertVisible:
+    id: calendar-copy-switch
+    checked: false
+# C-05.3: turning busy times on goes straight to choosing calendars; turning it off again
+# deletes the member's blocks.
+- tapOn:
+    id: calendar-busy-switch
+- extendedWaitUntil:
+    visible:
+      id: calendar-busy-sheet-close
+    timeout: 10000
+- tapOn:
+    id: calendar-busy-sheet-close
+- extendedWaitUntil:
+    notVisible:
+      id: calendar-busy-sheet-close
+    timeout: 10000
+- assertVisible:
+    id: calendar-busy-calendars
+- tapOn:
+    id: calendar-busy-switch
+- assertVisible:
+    id: calendar-busy-switch
+    checked: false
+- tapOn:
+    id: calendar-settings-screen-title-back
+- extendedWaitUntil:
+    visible:
+      id: calendar-screen
+    timeout: 10000
+
+- runFlow: subflows/sign-out.yaml
