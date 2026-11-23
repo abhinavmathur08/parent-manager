@@ -4,7 +4,7 @@
 begin;
 create extension if not exists pgtap with schema extensions;
 
-select plan(44);
+select plan(46);
 
 create schema tests;
 grant usage on schema tests to anon, authenticated;
@@ -164,6 +164,21 @@ select is_empty(
 select throws_ok(
   $$delete from public.busy_blocks where id = 'aaaaaaaa-5555-0000-0000-000000000001'$$,
   '42501', null, 'blocks are never hard-deleted by a client');
+-- Turning busy times off or signing out tombstones every live block of the caller at once
+-- (C-05.3, FR2-DEV-5), with no ID filter: the policies keep it to their own rows. Rolled back,
+-- since later tests need the parent's block.
+savepoint stop_sharing;
+select results_eq(
+  $$update public.busy_blocks set deleted_at = now()
+    where household_id = '00000000-0000-0000-0000-00000000000a' and deleted_at is null
+    returning id$$,
+  $$values ('aaaaaaaa-5555-0000-0000-000000000001'::uuid)$$,
+  'stopping busy times deletes only the caller''s own blocks');
+select is(
+  (select count(*)::integer from public.busy_blocks where deleted_at is null),
+  2,
+  'other members'' blocks are still there for the parent to see');
+rollback to savepoint stop_sharing;
 
 select tests.as_user('aaaaaaaa-0000-0000-0000-000000000002');
 select isnt_empty(
