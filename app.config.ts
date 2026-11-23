@@ -150,8 +150,6 @@ function buildConfig(
         monochromeImage: './assets/images/android-icon-monochrome.png',
       },
       predictiveBackGestureEnabled: false,
-      // expo-calendar's plugin adds these; Reminders export is iOS only (G-06.2).
-      blockedPermissions: ['android.permission.READ_CALENDAR', 'android.permission.WRITE_CALENDAR'],
       package: id,
     },
     plugins: [
@@ -219,12 +217,15 @@ function buildConfig(
           barcodeScannerEnabled: false,
         },
       ],
-      // Apple Reminders export (G-06.2): reminders only, never the calendar.
+      // Apple Reminders export (G-06.2) and device calendars (C-05.1, D-14). Full calendar
+      // access on iOS: write-only access can't create our calendar, update copies or read busy
+      // times. The plugin adds Android's READ_CALENDAR and WRITE_CALENDAR. Both are asked only
+      // when a member turns a device feature on (NFR2-SEC-5).
       [
         'expo-calendar',
         {
           remindersPermission: enUS.list.export.remindersPermission,
-          calendarPermission: false,
+          calendarPermission: enUS.calendarSettings.permission.system,
         },
       ],
     ],

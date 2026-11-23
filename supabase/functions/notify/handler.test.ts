@@ -111,6 +111,39 @@ Deno.test('messages carry the notification ID and type only, never the payload',
   assertEquals(JSON.stringify(message).includes('2026-11-15'), false);
 });
 
+Deno.test('calendar pushes add the event ID and date, never the kind or change', () => {
+  const event = 'eeeeeeee-0000-0000-0000-000000000001';
+  for (const type of ['event_changed', 'who_taking'] as const) {
+    const [message] = buildMessages([
+      push({
+        type,
+        payload: { event_id: event, change: 'moved', kind: 'kind.appointment', date: '2026-11-25' },
+      }),
+    ]);
+    assertEquals(message.data, { notificationId: 'n1', type, event_id: event, date: '2026-11-25' });
+    assertEquals(message.categoryId, type);
+    assertEquals(JSON.stringify(message).includes('kind.'), false);
+    assertEquals(JSON.stringify(message.data).includes('moved'), false);
+  }
+  const [odd] = buildMessages([
+    push({ type: 'event_changed', payload: { event_id: 'Pediatrician', date: 'Tuesday' } }),
+  ]);
+  assertEquals(Object.keys(odd.data).sort(), ['notificationId', 'type']);
+});
+
+Deno.test('an expiry push carries no category or date', () => {
+  const [message] = buildMessages([
+    push({
+      type: 'document_expiring',
+      payload: { category: 'doc.insurance', expires_on: '2026-12-22' },
+    }),
+  ]);
+  assertEquals(message.data, { notificationId: 'n1', type: 'document_expiring' });
+  assertEquals(message.categoryId, 'document_expiring');
+  assertEquals(JSON.stringify(message).includes('2026-12-22'), false);
+  assertEquals(JSON.stringify(message).includes('doc.'), false);
+});
+
 Deno.test(
   'falls back to en-US copy for an unknown locale, and the test push has no category',
   () => {
@@ -122,7 +155,14 @@ Deno.test(
 
 Deno.test('has copy for every type in every locale', () => {
   for (const locale of ['en-US', 'en-GB', 'en-AU']) {
-    for (const type of ['plan_week', 'list_ready', 'test'] as const) {
+    for (const type of [
+      'plan_week',
+      'list_ready',
+      'test',
+      'event_changed',
+      'who_taking',
+      'document_expiring',
+    ] as const) {
       const text = textFor(type, locale);
       assertEquals(text.title.length > 0 && text.body.length > 0, true);
     }
