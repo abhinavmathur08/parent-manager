@@ -44,6 +44,10 @@ describe('notification settings (FR-NOT-3, FR-NOT-6, FR-NOT-7)', () => {
       list_ready: true,
       defrost: true,
       household_changes: true,
+      calendar_reminders: true,
+      event_changes: true,
+      who_taking: true,
+      document_expiry: true,
       planWeekDay: null,
       planWeekMinute: 1080,
       quietStartMinute: 1260,
@@ -57,13 +61,22 @@ describe('notification settings (FR-NOT-3, FR-NOT-6, FR-NOT-7)', () => {
       list_ready: true,
       defrost: false,
       household_changes: true,
+      calendar_reminders: false,
+      event_changes: false,
+      who_taking: true,
+      document_expiry: false,
       plan_week_day: 5,
       plan_week_minute: 600,
       quiet_start_minute: 1320,
       quiet_end_minute: 360,
     };
     const prefs = await fetchPrefs('u1');
-    expect(prefs).toMatchObject({ plan_week: false, defrost: false, planWeekDay: 5 });
+    expect(prefs).toMatchObject({
+      plan_week: false,
+      defrost: false,
+      calendar_reminders: false,
+      planWeekDay: 5,
+    });
     expect(cachedPrefs('u1')).toEqual(prefs);
     expect(cachedPrefs('someone-else')).toEqual(DEFAULT_PREFS);
   });
@@ -77,6 +90,10 @@ describe('notification settings (FR-NOT-3, FR-NOT-6, FR-NOT-7)', () => {
         list_ready: false,
         defrost: true,
         household_changes: true,
+        calendar_reminders: true,
+        event_changes: true,
+        who_taking: true,
+        document_expiry: true,
         plan_week_day: null,
         plan_week_minute: 1080,
         quiet_start_minute: 1200,
