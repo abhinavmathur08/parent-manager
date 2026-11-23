@@ -71,7 +71,8 @@ async function toUploadError(error: unknown): Promise<UploadError> {
   return new UploadError('documents.failed');
 }
 
-async function call<T>(body: Record<string, unknown>): Promise<T> {
+/** Calls the documents function, turning its error codes into `UploadError`s. */
+export async function callDocuments<T>(body: Record<string, unknown>): Promise<T> {
   const { data, error } = await getSupabase().functions.invoke<T>(DOCUMENTS_FUNCTION, { body });
   if (error) throw await toUploadError(error);
   if (!data) throw new UploadError('documents.failed');
@@ -96,7 +97,7 @@ export async function uploadDocument(input: {
   onBegun?: () => void;
 }): Promise<void> {
   const { householdId, documentId, details, capture } = input;
-  const begun = await call<{ uploads: { path: string; token: string }[] }>({
+  const begun = await callDocuments<{ uploads: { path: string; token: string }[] }>({
     action: 'begin',
     household_id: householdId,
     document_id: documentId,
@@ -129,7 +130,7 @@ export async function uploadDocument(input: {
 
 /** Asks the server to check the files and mark the document ready. */
 export async function finishUpload(documentId: string): Promise<void> {
-  await call({ action: 'finish', document_id: documentId });
+  await callDocuments({ action: 'finish', document_id: documentId });
 }
 
 /** The size bucket for `document_added`: never the exact size (FR2-DOC-11). */

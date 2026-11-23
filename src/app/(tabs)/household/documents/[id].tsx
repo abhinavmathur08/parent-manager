@@ -1,5 +1,6 @@
 import { router, useLocalSearchParams } from 'expo-router';
 
+import { DocumentPages } from '@/features/documents/document-pages';
 import { DocumentScreen } from '@/features/documents/document-screen';
 import { VaultGate } from '@/features/documents/vault/vault-gate';
 import { useHousehold } from '@/features/household/membership';
@@ -22,6 +23,7 @@ export default function DocumentRoute() {
           timezone: membership.timezone ?? null,
         }}
         online={online}
+        pages={<DocumentPages documentId={id} locale={membership.locale} online={online} />}
         onBack={() => (router.canGoBack() ? router.back() : router.replace('/household/documents'))}
       />
     </VaultGate>

@@ -748,6 +748,15 @@
         "limit": "Your household has reached its document limit."
       }
     },
+    "viewer": {
+      "loading": "Opening the document",
+      "notFound": "This document was deleted or is no longer shared with you.",
+      "failed": "We couldn't open this document. Check your connection and try again.",
+      "retry": "Try again",
+      "pdf": "The document",
+      "pdfUnsupported": "PDFs can't be shown in the app on this phone yet. Use Save or send to open it in another app.",
+      "page": "Page {{page}} of {{pages}}"
+    },
     "details": {
       "category": "Category",
       "person": "For",
