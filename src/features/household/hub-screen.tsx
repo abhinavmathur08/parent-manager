@@ -41,6 +41,7 @@ export function HouseholdHubScreen() {
   ];
   const you: Row[] = [
     { key: 'notifications', title: t('notifications.title'), href: '/household/notifications' },
+    { key: 'calendar-settings', title: t('calendarSettings.title'), href: '/household/calendar' },
     { key: 'privacy', title: t('privacy.title'), href: '/household/privacy' },
     { key: 'account', title: t('account.title'), href: '/household/account' },
   ];

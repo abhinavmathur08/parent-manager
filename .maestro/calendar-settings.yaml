@@ -1,0 +1,89 @@
+# C-05.1 (FR2-DEV-1, FR2-PRIV-3, NFR2-SEC-5): Calendar settings (S-39) open from the Household
+# tab and the Calendar tab. Both device features start off; turning one on explains first, and
+# "Not now" leaves it off without asking the system. With access already given, the switch
+# turns on at once. Ends signed out. Needs the local stack; see the Testing section of README.md.
+appId: ${APP_ID || 'com.myparentmanager'}
+tags:
+  - backend
+---
+- runFlow: subflows/create-household.yaml
+# Maestro grants every permission at launch; take the calendar back so the app would ask.
+- launchApp:
+    permissions:
+      calendar: deny
+- extendedWaitUntil:
+    visible:
+      id: plan-days
+    timeout: 20000
+
+- tapOn:
+    id: tab-household
+- scrollUntilVisible:
+    element:
+      id: open-calendar-settings
+- tapOn:
+    id: open-calendar-settings
+- extendedWaitUntil:
+    visible:
+      id: calendar-settings-screen
+    timeout: 10000
+- assertVisible:
+    id: calendar-copy-switch
+    checked: false
+- assertVisible:
+    id: calendar-busy-switch
+    checked: false
+
+# Turning on explains first; "Not now" leaves it off.
+- tapOn:
+    id: calendar-busy-switch
+- extendedWaitUntil:
+    visible:
+      id: calendar-permission-body
+    timeout: 10000
+- tapOn:
+    id: calendar-permission-not-now
+- extendedWaitUntil:
+    notVisible:
+      id: calendar-permission-body
+    timeout: 10000
+- assertVisible:
+    id: calendar-busy-switch
+    checked: false
+
+# With access given, from the Calendar tab's header, the switch turns on at once.
+- launchApp:
+    permissions:
+      calendar: allow
+- extendedWaitUntil:
+    visible:
+      id: plan-days
+    timeout: 20000
+- tapOn:
+    id: tab-calendar
+- tapOn:
+    id: calendar-open-settings-screen
+- extendedWaitUntil:
+    visible:
+      id: calendar-settings-screen
+    timeout: 10000
+- tapOn:
+    id: calendar-copy-switch
+- assertNotVisible:
+    id: calendar-permission-body
+- assertVisible:
+    id: calendar-copy-switch
+    checked: true
+- tapOn:
+    id: calendar-copy-switch
+- assertVisible:
+    id: calendar-copy-switch
+    checked: false
+- tapOn:
+    id: calendar-settings-screen-title-back
+- extendedWaitUntil:
+    visible:
+      id: calendar-screen
+    timeout: 10000
+
+- runFlow: subflows/sign-out.yaml
