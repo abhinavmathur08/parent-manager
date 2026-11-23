@@ -15,6 +15,10 @@
     "event_changed": {
       "title": "The calendar changed",
       "body": "An event in the next two weeks was added, moved or cancelled. Open the calendar to see it."
+    },
+    "who_taking": {
+      "title": "Who's taking tomorrow's appointment?",
+      "body": "Nobody is taking it yet. Open it to choose who goes."
     }
   },
   "en-GB": {
@@ -33,6 +37,10 @@
     "event_changed": {
       "title": "The calendar changed",
       "body": "An event in the next two weeks was added, moved or cancelled. Open the calendar to see it."
+    },
+    "who_taking": {
+      "title": "Who's taking tomorrow's appointment?",
+      "body": "Nobody is taking it yet. Open it to choose who goes."
     }
   },
   "en-AU": {
@@ -51,6 +59,10 @@
     "event_changed": {
       "title": "The calendar changed",
       "body": "An event in the next two weeks was added, moved or cancelled. Open the calendar to see it."
+    },
+    "who_taking": {
+      "title": "Who's taking tomorrow's appointment?",
+      "body": "Nobody is taking it yet. Open it to choose who goes."
     }
   }
 }

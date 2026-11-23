@@ -5,10 +5,10 @@
 
 import copy from './copy.json' with { type: 'json' };
 
-export type PushType = 'plan_week' | 'list_ready' | 'test' | 'event_changed';
+export type PushType = 'plan_week' | 'list_ready' | 'test' | 'event_changed' | 'who_taking';
 
 /** Types whose tap opens one event occurrence: their message names it by ID and date. */
-const EVENT_TYPES: readonly PushType[] = ['event_changed'];
+const EVENT_TYPES: readonly PushType[] = ['event_changed', 'who_taking'];
 
 /** A row from claim_pushes(). */
 export interface ClaimedPush {
