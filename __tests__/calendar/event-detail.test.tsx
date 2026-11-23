@@ -57,7 +57,7 @@ const event = (over: Record<string, unknown> = {}) => ({
 
 const onBack = jest.fn();
 const onEdit = jest.fn();
-const show = async (role: MemberRole, userId: string) => {
+const show = async (role: MemberRole, userId: string, onTaken?: () => void) => {
   await render(
     <SafeAreaProvider initialMetrics={metrics}>
       <EventDetailScreen
@@ -68,6 +68,7 @@ const show = async (role: MemberRole, userId: string) => {
         userId={userId}
         onBack={onBack}
         onEdit={onEdit}
+        onTaken={onTaken}
       />
     </SafeAreaProvider>,
   );
@@ -123,6 +124,14 @@ describe('taking and caregivers (C6, spec section 2)', () => {
       taking_user_id: 'carer',
       updated_by: 'carer',
     });
+  });
+
+  it('answers a "who\'s taking?" prompt once the member takes it (FR2-REM-5)', async () => {
+    const onTaken = jest.fn();
+    await show('parent', 'parent', onTaken);
+    await fireEvent.press(screen.getByTestId('event-take'));
+    await act(async () => undefined);
+    expect(onTaken).toHaveBeenCalledTimes(1);
   });
 
   it('lets the taking caregiver step back', async () => {

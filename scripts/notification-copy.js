@@ -11,7 +11,14 @@ const root = path.join(__dirname, '..');
 const LOCALES = ['en-US', 'en-GB', 'en-AU'];
 const DEFAULT_LOCALE = 'en-US';
 // The types the server pushes. Household changes are inbox only, and the app writes their text.
-const PUSH_TYPES = ['plan_week', 'list_ready', 'test'];
+const PUSH_TYPES = [
+  'plan_week',
+  'list_ready',
+  'test',
+  'event_changed',
+  'who_taking',
+  'document_expiring',
+];
 const OUTPUT = path.join(root, 'supabase/functions/notify/copy.json');
 
 function messages(locale) {
