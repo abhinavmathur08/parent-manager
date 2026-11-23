@@ -159,6 +159,7 @@ export const ANALYTICS_EVENTS = {
   // 3.3 Device calendars
   calendar_permission_result: { granted: bool },
   device_calendar_copy_changed: { enabled: bool, target: oneOf('new', 'existing') },
+  busy_times_changed: { enabled: bool, calendars_count: count(50) },
   // 3.7 Staples and pantry
   staple_added: { is_catalog_ingredient: bool },
   staple_removed: {},

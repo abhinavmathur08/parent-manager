@@ -36,6 +36,19 @@ jest.mock('expo-sqlite/kv-store', () => ({
     removeItemSync: (key: string) => mockStore.delete(key),
   },
 }));
+const mockStop = jest.fn(async (..._args: unknown[]) => undefined);
+jest.mock('@/features/calendar/device/busy-sync', () => ({
+  stopBusyTimes: (...args: unknown[]) => mockStop(...args),
+}));
+const mockMine = [{ id: 'b1' }];
+jest.mock('@/features/calendar/device/busy-times-sync', () => ({
+  useMyBlocks: () => ({ mine: mockMine, loading: false }),
+}));
+const mockWriter = { insert: jest.fn(), update: jest.fn(), remove: jest.fn() };
+jest.mock('@/lib/sync', () => ({ useSyncWriter: () => mockWriter }));
+jest.mock('@/features/auth/session', () => ({
+  useAuth: () => ({ status: 'signedIn', session: { user: { id: 'u1' } } }),
+}));
 const mockTrack = jest.fn();
 jest.mock('@/lib/analytics', () => ({ track: (...args: unknown[]) => mockTrack(...args) }));
 
@@ -150,5 +163,27 @@ describe('calendar settings (S-39)', () => {
     await fireEvent.press(screen.getByTestId('calendar-copy-switch'));
     expect(mockRemove).toHaveBeenCalled();
     expect(screen.queryByTestId('calendar-copy-target')).toBeNull();
+  });
+
+  it('picks calendars for busy times, and deletes the blocks when turned off (FR2-DEV-4, FR2-DEV-5)', async () => {
+    mockCurrent = { granted: true, canAskAgain: true };
+    await renderScreen();
+    await fireEvent.press(screen.getByTestId('calendar-busy-switch'));
+    // Turning it on goes straight to choosing calendars; any calendar can be shared from.
+    await waitFor(() => expect(screen.getByTestId('calendar-busy-option-1')).toBeTruthy());
+    await fireEvent.press(screen.getByTestId('calendar-busy-option-1'));
+    expect(readDeviceSettings('h1').busyCalendars).toEqual(['hol']);
+    expect(mockTrack).toHaveBeenCalledWith('busy_times_changed', {
+      enabled: true,
+      calendars_count: 1,
+    });
+    expect(screen.getByTestId('calendar-busy-calendars')).toHaveTextContent(/1 calendar/);
+
+    await fireEvent.press(screen.getByTestId('calendar-busy-switch'));
+    expect(mockStop).toHaveBeenCalledWith('h1', mockMine, mockWriter);
+    expect(mockTrack).toHaveBeenCalledWith('busy_times_changed', {
+      enabled: false,
+      calendars_count: 1,
+    });
   });
 });

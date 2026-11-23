@@ -11,6 +11,12 @@ import { useTheme } from '@/hooks/use-theme';
 import { track } from '@/lib/analytics';
 import { reportError } from '@/lib/crash-reporting';
 
+import { useAuth } from '@/features/auth/session';
+import { useSyncWriter } from '@/lib/sync';
+
+import { BusyOptions } from './busy-options';
+import { stopBusyTimes } from './busy-sync';
+import { useMyBlocks } from './busy-times-sync';
 import { CopyOptions } from './copy-options';
 import { removeCopies } from './copy-sync';
 import { CalendarPermissionSheet, type DeviceFeature } from './permission-sheet';
@@ -23,7 +29,7 @@ export type CalendarSettingsScreenProps = {
 };
 
 /**
- * S-39 Calendar settings (FR2-DEV-1, FR2-DEV-2, FR2-PRIV-3): "Copy to my calendar" and "Share my busy
+ * S-39 Calendar settings (FR2-DEV-1, FR2-DEV-2, FR2-DEV-4, FR2-PRIV-3): "Copy to my calendar" and "Share my busy
  * times", both off until the member turns them on. Turning one on explains first, then asks
  * for the phone's calendars (NFR2-SEC-5). Declining leaves the feature off and the rest of the
  * app working; if the permission is refused for good, the screen says so and links to the
@@ -36,6 +42,10 @@ export function CalendarSettingsScreen({ householdId, onBack }: CalendarSettings
   const { access, ask } = useCalendarAccess();
   const [pending, setPending] = useState<DeviceFeature | null>(null);
   const [asking, setAsking] = useState(false);
+  const [picking, setPicking] = useState(false);
+  const auth = useAuth();
+  const writer = useSyncWriter();
+  const { mine } = useMyBlocks(auth.status === 'signedIn' ? auth.session.user.id : null);
 
   const turn = (feature: DeviceFeature, on: boolean) => {
     change({ [feature]: on });
@@ -46,6 +56,11 @@ export function CalendarSettingsScreen({ householdId, onBack }: CalendarSettings
       });
       // Off removes the copies, so the phone's calendar never shows stale events.
       if (!on) removeCopies().catch(reportError);
+    } else {
+      track('busy_times_changed', { enabled: on, calendars_count: settings.busyCalendars.length });
+      // On: choose calendars at once. Off: the blocks leave the server at once (FR2-DEV-5).
+      if (on) setPicking(true);
+      else stopBusyTimes(householdId, mine, writer).catch(reportError);
     }
   };
 
@@ -113,6 +128,9 @@ export function CalendarSettingsScreen({ householdId, onBack }: CalendarSettings
           onValueChange={(on) => toggle('busy', on)}
           testID="calendar-busy-switch"
         />
+        {settings.busy && access === 'granted' ? (
+          <BusyOptions settings={settings} change={change} open={picking} setOpen={setPicking} />
+        ) : null}
       </View>
       <CalendarPermissionSheet
         feature={pending}
