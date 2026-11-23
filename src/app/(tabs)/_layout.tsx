@@ -13,6 +13,7 @@ import '@/features/ingredients/sync';
 import { useAuth } from '@/features/auth/session';
 import { BusyDayPublisher } from '@/features/calendar/busy-publisher';
 import { DefrostScheduler } from '@/features/notifications/defrost-scheduler';
+import { EventReminderScheduler } from '@/features/notifications/event-reminder-scheduler';
 import { NotificationResponses } from '@/features/notifications/notification-responses';
 import { PushRegistration } from '@/features/notifications/push-registration';
 import '@/features/planner/sync';
@@ -68,6 +69,7 @@ export default function TabsLayout() {
           <>
             <NotificationResponses userId={auth.session.user.id} />
             <DefrostScheduler userId={auth.session.user.id} />
+            <EventReminderScheduler userId={auth.session.user.id} membership={state.membership} />
             <BusyDayPublisher userId={auth.session.user.id} />
           </>
         ) : null}

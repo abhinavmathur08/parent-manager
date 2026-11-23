@@ -6,19 +6,30 @@ import { useTranslation } from 'react-i18next';
 import { track } from '@/lib/analytics';
 
 import { markRead, routeFor } from './inbox';
-import { fetchPrefs, NOTIFICATION_TYPES, savePrefs, type NotificationType } from './prefs';
+import { fetchPrefs, savePrefs, type NotificationType } from './prefs';
 
 /** The "turn off this type" action on a notification (FR-NOT-7). */
 export const TURN_OFF_ACTION = 'turn_off';
 
-/** Types whose notifications offer "turn off this type"; the push's `categoryId` names one. */
-const CATEGORY_TYPES: readonly NotificationType[] = ['plan_week', 'list_ready', 'defrost'];
+/**
+ * Notifications that offer "turn off this type", by category (the push's `categoryId`, which is
+ * the notification's type), and the setting each turns off.
+ */
+const CATEGORIES = new Map<string, NotificationType>([
+  ['plan_week', 'plan_week'],
+  ['list_ready', 'list_ready'],
+  ['defrost', 'defrost'],
+  ['calendar_reminders', 'calendar_reminders'],
+  ['event_changed', 'event_changes'],
+  ['who_taking', 'who_taking'],
+  ['document_expiring', 'document_expiry'],
+]);
 
 // A response is handled once, even if the component mounts again.
 const handled = new Set<string>();
 
-const isType = (value: unknown): value is NotificationType =>
-  (NOTIFICATION_TYPES as readonly unknown[]).includes(value);
+const settingOf = (value: unknown): NotificationType | null =>
+  (typeof value === 'string' && CATEGORIES.get(value)) || null;
 
 /** Where a tapped notification goes. Local ones (N-02.2) can name their own screen. */
 export type ResponseRoute = (data: Record<string, unknown>) => ReturnType<typeof routeFor>;
@@ -31,7 +42,7 @@ export type ResponseRoute = (data: Record<string, unknown>) => ReturnType<typeof
 export async function handleResponse(
   response: Notifications.NotificationResponse,
   userId: string,
-  routeOf: ResponseRoute = (data) => routeFor(String(data.type)),
+  routeOf: ResponseRoute = (data) => routeFor(String(data.type), data, 'push'),
 ): Promise<void> {
   const key = `${response.notification.request.identifier}:${response.actionIdentifier}`;
   if (handled.has(key)) return;
@@ -40,10 +51,11 @@ export async function handleResponse(
   const type = data.type;
 
   if (response.actionIdentifier === TURN_OFF_ACTION) {
-    if (!isType(type)) return;
+    const setting = settingOf(type);
+    if (!setting) return;
     const prefs = await fetchPrefs(userId);
-    await savePrefs(userId, { ...prefs, [type]: false });
-    track('notification_type_toggled', { type, enabled: false, surface: 'notification' });
+    await savePrefs(userId, { ...prefs, [setting]: false });
+    track('notification_type_toggled', { type: setting, enabled: false, surface: 'notification' });
     return;
   }
 
@@ -63,7 +75,7 @@ export function NotificationResponses({ userId }: { userId: string }) {
   const last = Notifications.useLastNotificationResponse();
 
   useEffect(() => {
-    for (const type of CATEGORY_TYPES) {
+    for (const type of CATEGORIES.keys()) {
       Notifications.setNotificationCategoryAsync(type, [
         {
           identifier: TURN_OFF_ACTION,
