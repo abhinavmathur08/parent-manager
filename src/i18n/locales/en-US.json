@@ -170,7 +170,16 @@
     "showLater": "Show later days",
     "allDay": "All day",
     "timeRange": "{{start}} – {{end}}",
-    "eventLabel": "{{kind}}, {{time}}, {{title}}",
+    "eventLabel": "{{kind}}, {{time}}, {{title}}, {{taking}}",
+    "taking": "{{name}} taking",
+    "nobodyTaking": "Nobody taking yet",
+    "kindTaking": "{{kind}} · {{taking}}",
+    "meals": {
+      "slot": "{{slot}}: {{meals}}",
+      "separator": "; ",
+      "label": "Planned meals for {{day}}: {{meals}}",
+      "hint": "Opens this day in the plan"
+    },
     "kinds": {
       "appointment": "Appointment",
       "childcare": "Childcare",

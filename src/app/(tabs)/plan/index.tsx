@@ -1,9 +1,12 @@
+import { useLocalSearchParams } from 'expo-router';
+
 import { useAuth } from '@/features/auth/session';
 import { HouseholdBusyDays } from '@/features/calendar/busy-days';
 import { useHousehold } from '@/features/household/membership';
 import { useInboxBell } from '@/features/notifications/inbox-bell';
 import { announceListReady } from '@/features/notifications/list-ready';
 import { usePushPrompt } from '@/features/notifications/push-prompt';
+import { isPlanDate } from '@/features/planner/week';
 import { PlanWeekScreen } from '@/features/planner/week-screen';
 
 export default function PlanRoute() {
@@ -13,6 +16,8 @@ export default function PlanRoute() {
   const pushPrompt = usePushPrompt(auth.status === 'signedIn' ? auth.session.user.id : null);
   // The header bell opens the inbox (S-24).
   const bell = useInboxBell();
+  // The Calendar tab's meals row opens a day here (FR2-CAL-5).
+  const { date } = useLocalSearchParams<{ date?: string }>();
   if (state.status !== 'member') return null;
   const { membership } = state;
   return (
@@ -36,6 +41,7 @@ export default function PlanRoute() {
           },
         }}
         headerActions={[bell]}
+        focusDate={isPlanDate(date) ? date : null}
       />
       {pushPrompt.sheet}
     </HouseholdBusyDays>
