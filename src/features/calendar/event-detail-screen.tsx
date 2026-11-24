@@ -43,6 +43,8 @@ export type EventDetailProps = {
   onTaken?: () => void;
   /** The documents attached to it (FR2-DOC-5), from the documents module. */
   attachments?: ReactNode;
+  /** After a parent shares or unshares it, such as offering its attachments too (FR2-DOC-6). */
+  onShared?: (shared: boolean) => void;
 };
 
 const DATE_FORMAT = { weekday: 'long', month: 'long', day: 'numeric', timeZone: 'UTC' } as const;
@@ -62,6 +64,7 @@ export function EventDetailScreen({
   onEdit,
   onTaken,
   attachments,
+  onShared,
 }: EventDetailProps) {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -299,7 +302,12 @@ export function EventDetailScreen({
             label={t('calendar.detail.shared')}
             description={t('calendar.detail.sharedHint')}
             value={event.shared}
-            onValueChange={(shared) => run(() => actions.setShared(event, shared))}
+            onValueChange={(shared) =>
+              run(async () => {
+                await actions.setShared(event, shared);
+                onShared?.(shared);
+              })
+            }
             testID="event-share"
           />
         ) : null}

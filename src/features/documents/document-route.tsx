@@ -4,6 +4,7 @@ import { useOnline } from '@/hooks/use-online';
 
 import { DocumentPages } from './document-pages';
 import { DocumentScreen } from './document-screen';
+import { DocumentSharing } from './document-sharing';
 import { LinkedEvents } from './linked-events';
 import { VaultGate } from './vault/vault-gate';
 
@@ -42,6 +43,15 @@ export function DocumentViewerRoute({
             timeZone={householdTimeZone(membership.timezone)}
             onOpen={onOpenEvent}
           />
+        }
+        sharing={
+          membership.role === 'parent' ? (
+            <DocumentSharing
+              documentId={documentId}
+              householdId={membership.householdId}
+              locale={membership.locale}
+            />
+          ) : undefined
         }
         isParent={membership.role === 'parent'}
         onBack={onBack}

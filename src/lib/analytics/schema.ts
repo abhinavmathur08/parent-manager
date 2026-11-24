@@ -49,6 +49,7 @@ export const PAYWALL_TRIGGERS = [
   'reminders',
   'busy_day_meals',
   'documents',
+  'document_share',
 ] as const;
 const productPeriod = oneOf('monthly', 'annual');
 
@@ -170,6 +171,7 @@ export const ANALYTICS_EVENTS = {
   },
   document_viewed: {},
   document_attached: {},
+  document_shared: { shared: bool, members_count: count(50) },
   document_deleted: {},
   document_sent_out: {},
   // 3.7 Staples and pantry

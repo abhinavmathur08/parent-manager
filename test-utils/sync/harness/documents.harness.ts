@@ -14,6 +14,7 @@ import {
   DOCUMENTS,
   EVENT_DOCUMENTS,
 } from '@/features/documents/tables';
+import { applyShareChanges } from '@/features/documents/shares';
 import { SyncEngine } from '@/lib/sync/engine';
 import { LocalStore } from '@/lib/sync/local-store';
 import { createSupabaseRemote } from '@/lib/sync/remote';
@@ -226,5 +227,59 @@ it('removes an unshared document and its attachment from a caregiver (R2-ACC-1, 
   expect(await C.row(EVENT_DOCUMENTS.name, attachmentId)).toBeNull();
   expect(await C.row('events', eventId)).not.toBeNull();
   // The parent keeps it.
+  expect(await A.row(DOCUMENTS.name, documentId)).not.toBeNull();
+});
+
+it("shares and unshares through the app's writes, dropping the document from the caregiver's copy (FR2-DOC-6)", async () => {
+  const documentId = crypto.randomUUID();
+  const { error } = await admin.from('documents').insert({
+    id: documentId,
+    household_id: householdId,
+    title: 'School form',
+    category: 'doc.childcare_school',
+    mime: 'application/pdf',
+    page_count: 1,
+    size_bytes: 1000,
+    status: 'ready',
+  });
+  expect(error).toBeNull();
+  await A.engine.sync();
+
+  const shares = async () =>
+    (await A.engine.store.rows(DOCUMENT_SHARES.name)) as unknown as Parameters<
+      typeof applyShareChanges
+    >[2];
+  const newId = () => crypto.randomUUID();
+
+  // The parent ticks the caregiver on S-42.
+  expect(
+    await applyShareChanges(
+      A.engine,
+      documentId,
+      await shares(),
+      new Map([[caregiverId, true]]),
+      newId,
+    ),
+  ).toEqual({ shared: 1, unshared: 0 });
+  await A.engine.sync();
+  expect(A.engine.getStatus()).toMatchObject({ pending: 0, rejected: 0 });
+  await C.engine.sync();
+  await C.engine.checkVisibility();
+  expect(await C.row(DOCUMENTS.name, documentId)).not.toBeNull();
+
+  // And unticks them: gone from the caregiver's device on its next sync.
+  expect(
+    await applyShareChanges(
+      A.engine,
+      documentId,
+      await shares(),
+      new Map([[caregiverId, false]]),
+      newId,
+    ),
+  ).toEqual({ shared: 0, unshared: 1 });
+  await A.engine.sync();
+  await C.engine.sync();
+  await C.engine.checkVisibility();
+  expect(await C.row(DOCUMENTS.name, documentId)).toBeNull();
   expect(await A.row(DOCUMENTS.name, documentId)).not.toBeNull();
 });

@@ -31,6 +31,8 @@ export type DocumentScreenProps = {
   pages?: ReactNode;
   /** The events it's attached to. */
   events?: ReactNode;
+  /** Who it's shared with, for parents (FR2-DOC-6). */
+  sharing?: ReactNode;
   /** Parents can send it out and delete it (FR2-DOC-9, FR2-DOC-10). */
   isParent: boolean;
 };
@@ -51,6 +53,7 @@ export function DocumentScreen({
   onBack,
   pages,
   events,
+  sharing,
   isParent,
 }: DocumentScreenProps) {
   const { t } = useTranslation();
@@ -181,6 +184,7 @@ export function DocumentScreen({
         </View>
       </Card>
       {events}
+      {sharing}
       {isParent ? (
         <View style={{ gap: theme.space[2] }}>
           <Button

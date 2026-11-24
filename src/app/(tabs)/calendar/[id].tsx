@@ -4,6 +4,7 @@ import { householdTimeZone } from '@/features/calendar/agenda';
 import { EventDetailScreen } from '@/features/calendar/event-detail-screen';
 import { useEventEditor } from '@/features/calendar/use-event-editor';
 import { EventAttachments } from '@/features/documents/event-attachments';
+import { useShareAttachmentsOffer } from '@/features/documents/share-attachments-offer';
 import { useAuth } from '@/features/auth/session';
 import { useHousehold, type Membership } from '@/features/household/membership';
 import { isPlanDate } from '@/features/planner/week';
@@ -33,6 +34,11 @@ function Detail({ membership }: { membership: Membership }) {
     userId,
     isParent: membership.role === 'parent',
   });
+  const shareOffer = useShareAttachmentsOffer({
+    eventId: id,
+    householdId: membership.householdId,
+    locale: membership.locale,
+  });
   return (
     <>
       <EventDetailScreen
@@ -48,6 +54,7 @@ function Detail({ membership }: { membership: Membership }) {
             ? () => track('who_taking_prompt_answered', { answered_from: prompt })
             : undefined
         }
+        onShared={(shared) => (shared ? shareOffer.offer() : undefined)}
         attachments={
           <EventAttachments
             eventId={id}
@@ -61,6 +68,7 @@ function Detail({ membership }: { membership: Membership }) {
         }
       />
       {editor.sheet}
+      {shareOffer.sheet}
     </>
   );
 }
