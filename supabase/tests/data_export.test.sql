@@ -5,7 +5,7 @@
 begin;
 create extension if not exists pgtap with schema extensions;
 
-select plan(20);
+select plan(25);
 
 -- ---------------------------------------------------------------------------
 -- Coverage, the same rules as data_deletion.test.sql
@@ -95,6 +95,43 @@ insert into public.invitations (household_id, role, invited_by, token_hash, expi
   ('00000000-0000-0000-0000-00000000000a', 'parent', 'aaaaaaaa-0000-0000-0000-000000000001',
    'not-for-export', now() + interval '1 day');
 
+-- Phase 2 (A-05): events with their parts, busy blocks from a parent and the family member,
+-- a marked and a published day, documents and an attachment, in A; an event and a document in B.
+select tests.as_user('aaaaaaaa-0000-0000-0000-000000000001');
+insert into public.events (id, household_id, title, starts_at, ends_at) values
+  ('aaaaaaaa-7777-0000-0000-000000000001', '00000000-0000-0000-0000-00000000000a', 'Swim class',
+   '2026-12-01 16:00+00', '2026-12-01 17:00+00');
+insert into public.event_exceptions (id, household_id, event_id, original_date, status) values
+  ('aaaaaaaa-7778-0000-0000-000000000001', '00000000-0000-0000-0000-00000000000a',
+   'aaaaaaaa-7777-0000-0000-000000000001', '2026-12-01', 'skipped');
+insert into public.event_reminders (id, household_id, event_id, offset_minutes) values
+  ('aaaaaaaa-777a-0000-0000-000000000001', '00000000-0000-0000-0000-00000000000a',
+   'aaaaaaaa-7777-0000-0000-000000000001', 30);
+insert into public.busy_blocks (id, household_id, user_id, starts_at, ends_at) values
+  ('aaaaaaaa-5555-0000-0000-000000000001', '00000000-0000-0000-0000-00000000000a',
+   'aaaaaaaa-0000-0000-0000-000000000001', '2026-12-02 21:00+00', '2026-12-02 22:00+00');
+insert into public.busy_day_overrides (id, household_id, date, busy) values
+  ('aaaaaaaa-4444-0000-0000-000000000001', '00000000-0000-0000-0000-00000000000a', '2026-12-02', true);
+insert into public.busy_days (id, household_id, date, busy, reason) values
+  ('aaaaaaaa-6666-0000-0000-000000000001', '00000000-0000-0000-0000-00000000000a', '2026-12-02', true, 'marked');
+select tests.as_user('aaaaaaaa-0000-0000-0000-000000000002');
+insert into public.busy_blocks (id, household_id, user_id, starts_at, ends_at) values
+  ('aaaaaaaa-5555-0000-0000-000000000002', '00000000-0000-0000-0000-00000000000a',
+   'aaaaaaaa-0000-0000-0000-000000000002', '2026-12-02 14:00+00', '2026-12-02 15:00+00');
+reset role;
+select set_config('request.jwt.claims', '', true);
+insert into public.events (id, household_id, title, starts_at, ends_at) values
+  ('bbbbbbbb-7777-0000-0000-000000000001', '00000000-0000-0000-0000-00000000000b', 'Secret visit',
+   '2026-12-01 16:00+00', '2026-12-01 17:00+00');
+insert into public.documents (id, household_id, title, category, mime, page_count, size_bytes, status) values
+  ('aaaaaaaa-d0c0-0000-0000-000000000001', '00000000-0000-0000-0000-00000000000a', 'Insurance card',
+   'doc.insurance', 'image/jpeg', 2, 2000, 'ready'),
+  ('bbbbbbbb-d0c0-0000-0000-000000000001', '00000000-0000-0000-0000-00000000000b', 'Lease',
+   'doc.household', 'application/pdf', 1, 1000, 'ready');
+insert into public.event_documents (id, household_id, event_id, document_id) values
+  ('aaaaaaaa-777b-0000-0000-000000000001', '00000000-0000-0000-0000-00000000000a',
+   'aaaaaaaa-7777-0000-0000-000000000001', 'aaaaaaaa-d0c0-0000-0000-000000000001');
+
 -- ---------------------------------------------------------------------------
 -- Household export: parents only, their own household only
 -- ---------------------------------------------------------------------------
@@ -127,6 +164,20 @@ select ok(
   'the default staples are in the export');
 select is(
   (select data ->> 'scope' from a_export), 'household', 'the export says what it covers');
+select ok(
+  (select (data -> 'tables') ?& array['events', 'event_exceptions', 'event_people',
+     'event_reminders', 'busy_day_overrides', 'busy_days', 'documents', 'document_shares',
+     'event_documents'] from a_export),
+  'the household export has every Phase 2 data type (FR2-PRIV-1)');
+select is(
+  (select array[jsonb_path_query_array(data, '$.tables.events[*].title'),
+                jsonb_path_query_array(data, '$.tables.documents[*].title'),
+                jsonb_path_query_array(data, '$.tables.event_documents[*].document_id')] from a_export),
+  array['["Swim class"]', '["Insurance card"]', '["aaaaaaaa-d0c0-0000-0000-000000000001"]']::jsonb[],
+  'with the household''s own events, documents and attachments only');
+select ok(
+  (select not (data -> 'tables' ? 'busy_blocks') from a_export),
+  'busy blocks are not in the household export: each member''s are in their own (FR2-PRIV-1)');
 
 select throws_ok(
   $$select public.export_household_data('00000000-0000-0000-0000-00000000000b')$$,
@@ -147,6 +198,13 @@ select is(
   (select jsonb_path_query_array(public.export_account_data(), '$.tables.household_members[*].role')),
   '["family"]'::jsonb,
   'and their own membership only');
+select is(
+  (select jsonb_path_query_array(public.export_account_data(), '$.tables.busy_blocks[*].id')),
+  '["aaaaaaaa-5555-0000-0000-000000000002"]'::jsonb,
+  'a member''s account export has their own busy blocks, not a parent''s (FR2-PRIV-1, D-16)');
+select ok(
+  (select not (public.export_account_data() -> 'tables' ?| array['events', 'documents'])),
+  'and no events or documents, which belong to the household');
 select ok(
   (select not (public.export_account_data() -> 'tables' ? 'recipes')),
   'the account export holds no household tables');
