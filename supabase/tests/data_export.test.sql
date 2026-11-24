@@ -98,15 +98,15 @@ insert into public.invitations (household_id, role, invited_by, token_hash, expi
 -- Phase 2 (A-05): events with their parts, busy blocks from a parent and the family member,
 -- a marked and a published day, documents and an attachment, in A; an event and a document in B.
 select tests.as_user('aaaaaaaa-0000-0000-0000-000000000001');
-insert into public.events (id, household_id, title, starts_at, ends_at) values
+insert into public.events (id, household_id, title, starts_at, ends_at, repeat) values
   ('aaaaaaaa-7777-0000-0000-000000000001', '00000000-0000-0000-0000-00000000000a', 'Swim class',
-   '2026-12-01 16:00+00', '2026-12-01 17:00+00');
+   '2026-12-01 16:00+00', '2026-12-01 17:00+00', '{"freq": "daily"}');
 insert into public.event_exceptions (id, household_id, event_id, original_date, status) values
   ('aaaaaaaa-7778-0000-0000-000000000001', '00000000-0000-0000-0000-00000000000a',
    'aaaaaaaa-7777-0000-0000-000000000001', '2026-12-01', 'skipped');
 insert into public.event_reminders (id, household_id, event_id, offset_minutes) values
   ('aaaaaaaa-777a-0000-0000-000000000001', '00000000-0000-0000-0000-00000000000a',
-   'aaaaaaaa-7777-0000-0000-000000000001', 30);
+   'aaaaaaaa-7777-0000-0000-000000000001', 15);
 insert into public.busy_blocks (id, household_id, user_id, starts_at, ends_at) values
   ('aaaaaaaa-5555-0000-0000-000000000001', '00000000-0000-0000-0000-00000000000a',
    'aaaaaaaa-0000-0000-0000-000000000001', '2026-12-02 21:00+00', '2026-12-02 22:00+00');
@@ -114,20 +114,26 @@ insert into public.busy_day_overrides (id, household_id, date, busy) values
   ('aaaaaaaa-4444-0000-0000-000000000001', '00000000-0000-0000-0000-00000000000a', '2026-12-02', true);
 insert into public.busy_days (id, household_id, date, busy, reason) values
   ('aaaaaaaa-6666-0000-0000-000000000001', '00000000-0000-0000-0000-00000000000a', '2026-12-02', true, 'marked');
+-- The family member's block is written as the server with their claims (the trigger takes the
+-- member from them): on Free a family member has no role, so RLS would refuse their own write,
+-- and A stays on Free to show Free households export too.
 select tests.as_user('aaaaaaaa-0000-0000-0000-000000000002');
+reset role;
 insert into public.busy_blocks (id, household_id, user_id, starts_at, ends_at) values
   ('aaaaaaaa-5555-0000-0000-000000000002', '00000000-0000-0000-0000-00000000000a',
    'aaaaaaaa-0000-0000-0000-000000000002', '2026-12-02 14:00+00', '2026-12-02 15:00+00');
-reset role;
-select set_config('request.jwt.claims', '', true);
+select tests.as_user('bbbbbbbb-0000-0000-0000-000000000001');
 insert into public.events (id, household_id, title, starts_at, ends_at) values
   ('bbbbbbbb-7777-0000-0000-000000000001', '00000000-0000-0000-0000-00000000000b', 'Secret visit',
    '2026-12-01 16:00+00', '2026-12-01 17:00+00');
+reset role;
+select set_config('request.jwt.claims', '', true);
 insert into public.documents (id, household_id, title, category, mime, page_count, size_bytes, status) values
   ('aaaaaaaa-d0c0-0000-0000-000000000001', '00000000-0000-0000-0000-00000000000a', 'Insurance card',
    'doc.insurance', 'image/jpeg', 2, 2000, 'ready'),
   ('bbbbbbbb-d0c0-0000-0000-000000000001', '00000000-0000-0000-0000-00000000000b', 'Lease',
    'doc.household', 'application/pdf', 1, 1000, 'ready');
+select tests.as_user('aaaaaaaa-0000-0000-0000-000000000001');
 insert into public.event_documents (id, household_id, event_id, document_id) values
   ('aaaaaaaa-777b-0000-0000-000000000001', '00000000-0000-0000-0000-00000000000a',
    'aaaaaaaa-7777-0000-0000-000000000001', 'aaaaaaaa-d0c0-0000-0000-000000000001');

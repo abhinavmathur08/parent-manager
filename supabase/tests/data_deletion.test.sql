@@ -297,7 +297,7 @@ select tests.as_user('bbbbbbbb-0000-0000-0000-000000000001');
 insert into public.events (id, household_id, kind, title, starts_at, ends_at, repeat) values
   ('bbbbbbbb-7777-0000-0000-000000000001', '00000000-0000-0000-0000-00000000000b',
    'kind.appointment', 'Check-up', '2026-12-01 10:00+00', '2026-12-01 11:00+00',
-   '{"freq": "weekly"}');
+   '{"freq": "daily"}');
 insert into public.event_exceptions (id, household_id, event_id, original_date, status, starts_at, ends_at) values
   ('bbbbbbbb-7778-0000-0000-000000000001', '00000000-0000-0000-0000-00000000000b',
    'bbbbbbbb-7777-0000-0000-000000000001', '2026-12-08', 'moved',
