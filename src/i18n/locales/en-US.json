@@ -269,7 +269,11 @@
       "gone": "This event isn't on the calendar any more.",
       "failed": "Couldn't change the event. Try again.",
       "attachments": "Documents",
-      "attach": "Attach documents"
+      "attach": "Attach documents",
+      "reminderPaused": "{{reminder}} (paused)",
+      "remindersPaused": "Without Premium, only the first reminder of each event goes off. The others are kept and come back with Premium.",
+      "sharedNeedsPremium": "Family members and caregivers see shared events with Premium.",
+      "seePremium": "See Premium"
     },
     "reminders": {
       "0": "At the time",
@@ -762,6 +766,7 @@
       "title": "Shared with",
       "nobody": "Only parents can see this document.",
       "with": "Parents and {{names}}",
+      "paused": "Sharing with {{names}} is paused. It comes back with Premium.",
       "member": "A member",
       "action": "Share",
       "sheetTitle": "Share with",

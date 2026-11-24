@@ -12,9 +12,12 @@ import { Switch } from '@/components/switch';
 import { Text } from '@/components/text';
 import { Toast } from '@/components/toast';
 import type { MemberRole } from '@/features/household/invitations';
+import { firstReminderIds } from '@/features/notifications/event-reminders';
 import { usePlanPeople } from '@/features/planner/use-plan-people';
 import { useUndoable } from '@/features/planner/use-undoable';
 import { addDays, toDate, type PlanDate } from '@/features/planner/week';
+import { useEntitlement } from '@/features/subscription/entitlement';
+import { usePremiumSheet } from '@/features/subscription/premium-sheet';
 import { useTheme } from '@/hooks/use-theme';
 import { formatDate, formatList, formatTime, type AppLocale } from '@/i18n';
 
@@ -73,6 +76,10 @@ export function EventDetailScreen({
   const people = usePlanPeople(household.id).people;
   const members = useCalendarMembers(household.id);
   const actions = useEventActions(userId);
+  const { entitlement, isPremium } = useEntitlement();
+  // Only once the tier is known, so nothing reads as paused while it loads.
+  const onFree = entitlement !== null && !isPremium;
+  const { openPremiumSheet } = usePremiumSheet();
   const fail = () => Alert.alert(t('calendar.detail.failed'));
   const undoable = useUndoable(fail);
   const [deleted, setDeleted] = useState(false);
@@ -138,9 +145,16 @@ export function EventDetailScreen({
     .filter((row) => row.event_id === event.id)
     .map((row) => people.find((p) => p.id === row.person_id)?.displayName)
     .filter((name): name is string => Boolean(name));
-  const reminders = REMINDER_OFFSETS.filter((offset) =>
-    rows.reminders.some((row) => row.event_id === event.id && row.offset_minutes === offset),
+  // On Free each event's first reminder keeps working; the others are kept, paused (FR2-REM-6).
+  const eventReminders = rows.reminders.filter(
+    (row) => row.event_id === event.id && !row.deleted_at,
   );
+  const working = firstReminderIds(eventReminders);
+  const reminders = REMINDER_OFFSETS.flatMap((offset) => {
+    const row = eventReminders.find((r) => r.offset_minutes === offset);
+    return row ? [{ offset, paused: onFree && !working.has(row.id) }] : [];
+  });
+  const anyPaused = reminders.some((r) => r.paused);
   const takingId = occurrence?.takingUserId ?? event.taking_user_id;
 
   const when = (() => {
@@ -249,13 +263,27 @@ export function EventDetailScreen({
               value={
                 reminders.length
                   ? formatList(
-                      reminders.map((o) => t(`calendar.reminders.${o}`)),
+                      reminders.map(({ offset, paused }) =>
+                        paused
+                          ? t('calendar.detail.reminderPaused', {
+                              reminder: t(`calendar.reminders.${offset}`),
+                            })
+                          : t(`calendar.reminders.${offset}`),
+                      ),
                       locale,
                     )
                   : t('calendar.detail.noReminders')
               }
               testID="event-detail-reminders"
             />
+            {anyPaused ? (
+              <Upsell
+                message={t('calendar.detail.remindersPaused')}
+                action={t('calendar.detail.seePremium')}
+                onPress={() => openPremiumSheet('reminders')}
+                testID="event-reminders-paused"
+              />
+            ) : null}
             {repeats ? (
               <Field
                 label={t('calendar.detail.repeats')}
@@ -311,6 +339,14 @@ export function EventDetailScreen({
             testID="event-share"
           />
         ) : null}
+        {can.canShare && event.shared && onFree ? (
+          <Upsell
+            message={t('calendar.detail.sharedNeedsPremium')}
+            action={t('calendar.detail.seePremium')}
+            onPress={() => openPremiumSheet('caregiver_calendar')}
+            testID="event-share-premium"
+          />
+        ) : null}
 
         {can.canEdit ? (
           <View style={{ gap: theme.space[2] }}>
@@ -364,6 +400,29 @@ function Field({ label, value, testID }: { label: string; value: string; testID:
         {label}
       </Text>
       <Text>{value}</Text>
+    </View>
+  );
+}
+
+/** A one-line Premium note with its action, shown at the moment of need (FR-PAY-4). */
+function Upsell({
+  message,
+  action,
+  onPress,
+  testID,
+}: {
+  message: string;
+  action: string;
+  onPress: () => void;
+  testID: string;
+}) {
+  const theme = useTheme();
+  return (
+    <View style={{ gap: theme.space[1] }} testID={testID}>
+      <Text variant="caption" color="textSecondary">
+        {message}
+      </Text>
+      <Button variant="ghost" label={action} onPress={onPress} testID={`${testID}-open`} />
     </View>
   );
 }

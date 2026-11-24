@@ -36,6 +36,7 @@ const LEAD: Record<PremiumTrigger, PremiumBenefit | null> = {
   busy_day_meals: 'busy_meals',
   documents: 'documents',
   document_share: 'sharing',
+  caregiver_calendar: 'sharing',
 };
 
 /** The benefit the trigger names first, then the others (FR-PAY-4). */

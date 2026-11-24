@@ -47,7 +47,7 @@ export function DocumentSharing({
 }) {
   const { t } = useTranslation();
   const theme = useTheme();
-  const { isPremium } = useEntitlement();
+  const { entitlement, isPremium } = useEntitlement();
   const { openPremiumSheet } = usePremiumSheet();
   const members = shareableMembers(useCalendarMembers(householdId));
   const shares = useDocumentShares();
@@ -92,7 +92,13 @@ export function DocumentSharing({
       <SectionHeader title={t('documents.share.title')} variant="group" />
       <Text color="textSecondary" testID="document-shared-with">
         {sharedWith.length > 0
-          ? t('documents.share.with', { names: formatList(sharedWith, locale) })
+          ? t(
+              // After a lapse shares are kept, paused, and resume with Premium (FR2-DOC-8).
+              entitlement !== null && !isPremium
+                ? 'documents.share.paused'
+                : 'documents.share.with',
+              { names: formatList(sharedWith, locale) },
+            )
           : t('documents.share.nobody')}
       </Text>
       <Button
