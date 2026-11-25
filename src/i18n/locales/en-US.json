@@ -987,9 +987,9 @@
     "export": {
       "title": "Your data",
       "household": "Export household data",
-      "householdDetail": "Everything your household keeps in the app: recipes, plans, lists, pantry, purchases and people.",
+      "householdDetail": "Everything your household keeps in the app: recipes, plans, lists, pantry, purchases, people, the calendar and documents with their files.",
       "account": "Export my data",
-      "accountDetail": "Your profile, your membership and your recipe imports.",
+      "accountDetail": "Your profile, your membership, your recipe imports and the busy times you share.",
       "preparing": "Preparing your export…",
       "offline": "You're offline. Export needs a connection.",
       "share": "Share your data export",

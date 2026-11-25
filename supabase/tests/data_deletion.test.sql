@@ -3,7 +3,7 @@
 begin;
 create extension if not exists pgtap with schema extensions;
 
-select plan(66);
+select plan(69);
 
 create schema tests;
 grant usage on schema tests to anon, authenticated;
@@ -36,6 +36,17 @@ begin
     total := total + n;
   end loop;
   return total + (select count(*) from public.households where id = hid);
+end;
+$$;
+
+-- Whether a public table has a row for a household.
+create function tests.has_rows(t text, hid uuid) returns boolean language plpgsql as $$
+declare
+  found boolean;
+begin
+  execute format('select exists (select 1 from public.%I where household_id = $1)', t)
+  into found using hid;
+  return found;
 end;
 $$;
 
@@ -279,6 +290,61 @@ select is(
    where created_by = 'aaaaaaaa-0000-0000-0000-000000000001' and (done_by is not null or deleted_at is not null)),
   2, 'the probe has a row checked by A1 and a tombstone, both created by A1');
 
+-- Phase 2 data in B (A-05, FR2-PRIV-2): an event for the child with a moved occurrence and a
+-- reminder, a busy block, a marked and a published day, two documents (one still uploading),
+-- an attachment, and their stored files plus one file no row names.
+select tests.as_user('bbbbbbbb-0000-0000-0000-000000000001');
+insert into public.events (id, household_id, kind, title, starts_at, ends_at, repeat) values
+  ('bbbbbbbb-7777-0000-0000-000000000001', '00000000-0000-0000-0000-00000000000b',
+   'kind.appointment', 'Check-up', '2026-12-01 10:00+00', '2026-12-01 11:00+00',
+   '{"freq": "daily"}');
+insert into public.event_exceptions (id, household_id, event_id, original_date, status, starts_at, ends_at) values
+  ('bbbbbbbb-7778-0000-0000-000000000001', '00000000-0000-0000-0000-00000000000b',
+   'bbbbbbbb-7777-0000-0000-000000000001', '2026-12-08', 'moved',
+   '2026-12-08 12:00+00', '2026-12-08 13:00+00');
+insert into public.event_people (id, household_id, event_id, person_id) values
+  ('bbbbbbbb-7779-0000-0000-000000000001', '00000000-0000-0000-0000-00000000000b',
+   'bbbbbbbb-7777-0000-0000-000000000001', '10000000-0000-0000-0000-00000000000b');
+insert into public.event_reminders (id, household_id, event_id, offset_minutes) values
+  ('bbbbbbbb-777a-0000-0000-000000000001', '00000000-0000-0000-0000-00000000000b',
+   'bbbbbbbb-7777-0000-0000-000000000001', 60);
+insert into public.busy_blocks (id, household_id, user_id, starts_at, ends_at) values
+  ('bbbbbbbb-5555-0000-0000-000000000001', '00000000-0000-0000-0000-00000000000b',
+   'bbbbbbbb-0000-0000-0000-000000000001', '2026-12-02 06:00+00', '2026-12-02 07:00+00');
+insert into public.busy_day_overrides (id, household_id, date, busy) values
+  ('bbbbbbbb-4444-0000-0000-000000000001', '00000000-0000-0000-0000-00000000000b', '2026-12-02', true);
+insert into public.busy_days (id, household_id, date, busy, reason) values
+  ('bbbbbbbb-6666-0000-0000-000000000001', '00000000-0000-0000-0000-00000000000b', '2026-12-02', true, 'marked');
+-- Only the documents function's service role adds documents and files.
+reset role;
+select set_config('request.jwt.claims', '', true);
+insert into public.documents (id, household_id, title, category, mime, page_count, size_bytes, status) values
+  ('bbbbbbbb-d0c0-0000-0000-000000000001', '00000000-0000-0000-0000-00000000000b', 'Lease',
+   'doc.household', 'image/jpeg', 2, 2000, 'ready'),
+  ('bbbbbbbb-d0c0-0000-0000-000000000002', '00000000-0000-0000-0000-00000000000b', 'Half sent',
+   'doc.other', 'application/pdf', 1, 1000, 'uploading');
+insert into storage.objects (bucket_id, name) values
+  ('documents', '00000000-0000-0000-0000-00000000000b/bbbbbbbb-d0c0-0000-0000-000000000001/1.jpg'),
+  ('documents', '00000000-0000-0000-0000-00000000000b/bbbbbbbb-d0c0-0000-0000-000000000001/2.jpg'),
+  ('documents', '00000000-0000-0000-0000-00000000000b/bbbbbbbb-d0c0-0000-0000-000000000002/1.pdf'),
+  ('documents', '00000000-0000-0000-0000-00000000000b/bbbbbbbb-d0c0-0000-0000-0000000000ff/1.jpg');
+select tests.as_user('bbbbbbbb-0000-0000-0000-000000000001');
+insert into public.event_documents (id, household_id, event_id, document_id) values
+  ('bbbbbbbb-777b-0000-0000-000000000001', '00000000-0000-0000-0000-00000000000b',
+   'bbbbbbbb-7777-0000-0000-000000000001', 'bbbbbbbb-d0c0-0000-0000-000000000001');
+reset role;
+select set_config('request.jwt.claims', '', true);
+
+-- Every household table from Phase 2 has a row in B, so the deletion below is tested on all of
+-- them. document_shares needs a second member and is covered with the account below.
+select is(
+  array(
+    select t from unnest(array['events', 'event_exceptions', 'event_people', 'event_reminders',
+      'busy_blocks', 'busy_day_overrides', 'busy_days', 'documents', 'event_documents']) t
+    where not tests.has_rows(t, '00000000-0000-0000-0000-00000000000b')),
+  array[]::text[],
+  'household B has Phase 2 data in every Phase 2 table');
+
 select ok(tests.household_rows('00000000-0000-0000-0000-00000000000b') > 8, 'household B has data');
 select set_config('tests.a_rows', tests.household_rows('00000000-0000-0000-0000-00000000000a')::text, true);
 select set_config('tests.x_rows', tests.household_rows('00000000-0000-0000-0000-0000000000ff')::text, true);
@@ -333,6 +399,20 @@ select is(tests.household_rows('00000000-0000-0000-0000-00000000000b'), 0::bigin
   'no row of household B remains in any registered table');
 select is(tests.recipe_and_plan_rows('00000000-0000-0000-0000-00000000000b'), 0::bigint,
   'household B''s recipes, lines, steps, ingredients, plan entries and portions are gone');
+select is(
+  array(
+    select o.name from storage.objects o
+    where o.bucket_id = 'documents' and o.name like '00000000-0000-0000-0000-00000000000b/%'
+      and not exists (
+        select 1 from private.storage_purge_queue q
+        where q.bucket = 'documents' and o.name like q.prefix || '%' and q.due_at <= now())
+    order by 1),
+  array[]::text[],
+  'every stored file of household B is queued for purging now, documents or not (FR2-PRIV-2)');
+select is(
+  (select count(*)::int from private.storage_purge_queue
+   where prefix = '00000000-0000-0000-0000-00000000000b/' and due_at > now()),
+  1, 'and the household folder is checked again once any upload token has expired');
 select is((select count(*)::int from public.ingredients
            where id = 'ingredient.h.' || replace('30000000-0000-0000-0000-00000000000b', '-', '')), 0,
   'and so is the catalog row its household ingredient made');

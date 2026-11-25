@@ -45,12 +45,24 @@ function world(opts: { documents?: number; bytes?: number; premium?: boolean } =
 
   const storage: DocumentStorage = {
     signUpload: (path) => Promise.resolve(`upload:${path}`),
+    // Like Storage: only what is directly in the folder.
     list: (folder) =>
       Promise.resolve(
         [...files]
-          .filter(([path]) => path.startsWith(`${folder}/`))
-          .map(([path, size]) => ({ name: path.slice(folder.length + 1), size })),
+          .map(([path, size]) => ({ name: path.slice(folder.length + 1), size, path }))
+          .filter(({ path, name }) => path.startsWith(`${folder}/`) && !name.includes('/'))
+          .map(({ name, size }) => ({ name, size })),
       ),
+    folders: (folder) =>
+      Promise.resolve([
+        ...new Set(
+          [...files.keys()]
+            .filter((path) => path.startsWith(`${folder}/`))
+            .map((path) => path.slice(folder.length + 1).split('/'))
+            .filter((parts) => parts.length > 1)
+            .map((parts) => parts[0]),
+        ),
+      ]),
     // The service role signs any stored file: the handler must check first.
     signRead(path, seconds) {
       if (!files.has(path)) return Promise.resolve(null);
@@ -126,7 +138,29 @@ function world(opts: { documents?: number; bytes?: number; premium?: boolean } =
     queue.push({ id: queue.length + 1, prefix: `${row.household_id}/${row.id}/` });
   };
 
-  return { call, begin, upload, rows, files, signed, checks, logs, readers, deleteDocument };
+  /** What `erase_household` does: hard-deletes the rows, each queuing its folder, then the household's. */
+  const deleteHousehold = (household: string) => {
+    for (const row of [...rows.values()]) {
+      if (row.household_id !== household) continue;
+      rows.delete(row.id);
+      if (!row.deleted_at) queue.push({ id: queue.length + 1, prefix: `${household}/${row.id}/` });
+    }
+    queue.push({ id: queue.length + 1, prefix: `${household}/` });
+  };
+
+  return {
+    call,
+    begin,
+    upload,
+    rows,
+    files,
+    signed,
+    checks,
+    logs,
+    readers,
+    deleteDocument,
+    deleteHousehold,
+  };
 }
 
 async function code(res: Response) {
@@ -301,6 +335,26 @@ Deno.test("a deleted document's files are gone after one purge run (R2-DOC-4)", 
     [],
   );
   assertEquals(w.files.size, 1, 'other documents keep their files');
+});
+
+Deno.test('a deleted household leaves no stored file behind (FR2-PRIV-2, A-05)', async () => {
+  const w = world();
+  const first = await (await w.begin(PARENT)).json();
+  w.upload(first.uploads, [300_000, 200_000]);
+  await w.call(PARENT, { action: 'finish', document_id: first.document_id });
+  const second = await (await w.begin(PARENT, { files: [{ size: 10 }] })).json();
+  w.upload(second.uploads, [10]);
+  w.deleteDocument(first.document_id);
+  // A file no row names, such as a folder an earlier purge failed on.
+  w.files.set(`${H}/${newId()}/1.jpg`, 5);
+  const elsewhere = `00000000-0000-0000-0000-00000000000b/${newId()}/1.pdf`;
+  w.files.set(elsewhere, 7);
+
+  w.deleteHousehold(H);
+  const res = await w.call(SECRET, { action: 'purge' });
+  assertEquals(res.status, 200);
+  assertEquals((await res.json()).failed, 0);
+  assertEquals([...w.files.keys()], [elsewhere], 'only the other household keeps its file');
 });
 
 Deno.test('logs carry counts only, never titles or categories (NFR2-SEC-2)', async () => {

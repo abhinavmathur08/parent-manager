@@ -53,3 +53,19 @@ Deno.test('upload tokens and listings use the service key', async () => {
   assertEquals(calls[2].init?.method, 'DELETE');
   assertEquals(JSON.parse(calls[2].init?.body as string), { prefixes: ['h/d/1.jpg'] });
 });
+
+Deno.test('listings page through a large folder and tell files from folders', async () => {
+  const page = Array.from({ length: 100 }, (_, i) => ({ name: `d${i}`, id: null }));
+  const { calls, fetcher } = recorder([
+    new Response(JSON.stringify(page)),
+    new Response('[{"name":"d100","id":null},{"name":"stray.jpg","id":"x"}]'),
+  ]);
+  const storage = documentStorage('http://api', 'sb_secret_x', fetcher);
+  const folders = await storage.folders('h');
+  assertEquals(folders.length, 101);
+  assertEquals(folders.at(-1), 'd100');
+  assertEquals(
+    calls.map((c) => JSON.parse(c.init?.body as string).offset),
+    [0, 100],
+  );
+});

@@ -12,12 +12,15 @@ export interface DocumentStorage {
   signUpload(path: string): Promise<string>;
   /** The files directly in a folder, as the service role. */
   list(folder: string): Promise<StoredFile[]>;
+  /** The names of the folders directly in a folder (a household's document folders). */
+  folders(folder: string): Promise<string[]>;
   /** A read link path (relative to /storage/v1), or null if the file isn't stored. */
   signRead(path: string, seconds: number): Promise<string | null>;
   remove(paths: string[]): Promise<void>;
 }
 
 export const BUCKET = 'documents';
+const PAGE = 100;
 
 export function documentStorage(
   url: string,
@@ -41,6 +44,23 @@ export function documentStorage(
     return (await res.json()) as T;
   }
 
+  type Entry = { name: string; id: string | null; metadata?: { size?: number } };
+
+  /** Everything directly in a folder, a page at a time. */
+  async function entries(folder: string): Promise<Entry[]> {
+    const all: Entry[] = [];
+    for (;;) {
+      const res = await fetcher(`${base}/object/list/${BUCKET}`, {
+        method: 'POST',
+        headers: service,
+        body: JSON.stringify({ prefix: folder, limit: PAGE, offset: all.length }),
+      });
+      const rows = await json<Entry[]>(res, 'list');
+      all.push(...rows);
+      if (rows.length < PAGE) return all;
+    }
+  }
+
   return {
     async signUpload(path) {
       const res = await fetcher(`${base}/object/upload/sign/${BUCKET}/${encode(path)}`, {
@@ -53,19 +73,13 @@ export function documentStorage(
       return token;
     },
     async list(folder) {
-      const res = await fetcher(`${base}/object/list/${BUCKET}`, {
-        method: 'POST',
-        headers: service,
-        body: JSON.stringify({ prefix: folder, limit: 100, offset: 0 }),
-      });
-      const rows = await json<{ name: string; id: string | null; metadata?: { size?: number } }[]>(
-        res,
-        'list',
-      );
       // Rows without an id are subfolders.
-      return rows
+      return (await entries(folder))
         .filter((row) => row.id !== null)
         .map((row) => ({ name: row.name, size: row.metadata?.size ?? 0 }));
+    },
+    async folders(folder) {
+      return (await entries(folder)).filter((row) => row.id === null).map((row) => row.name);
     },
     async signRead(path, seconds) {
       const res = await fetcher(`${base}/object/sign/${BUCKET}/${encode(path)}`, {
