@@ -1,5 +1,7 @@
+import { crc32 } from '@/lib/zip';
 import {
   csvField,
+  documentsWithFiles,
   exportCsvFiles,
   exportEntries,
   shareExport,
@@ -10,18 +12,93 @@ import {
 
 const mockRpc = jest.fn();
 jest.mock('@/lib/supabase', () => ({ getSupabase: () => ({ rpc: mockRpc }) }));
-const mockWrite = jest.fn(async () => undefined);
+
+// An in-memory cache folder: paths to bytes, plus the folders that exist.
+const mockDisk = new Map<string, Uint8Array>();
+const mockDirs = new Set<string>();
+const mockPath = (parent: unknown, name?: string) => {
+  const base = typeof parent === 'string' ? parent : (parent as { uri: string }).uri;
+  return name ? `${base}/${name}` : base;
+};
 jest.mock('expo-file-system', () => ({
   Paths: { cache: 'file:///cache' },
-  File: jest.fn().mockImplementation((dir: string, name: string) => ({
-    uri: `${dir}/${name}`,
-    exists: false,
-    create: jest.fn(),
-    delete: jest.fn(),
-    write: mockWrite,
-  })),
+  FileMode: { WriteOnly: 'w' },
+  Directory: jest.fn().mockImplementation((parent: unknown, name?: string) => {
+    const uri = mockPath(parent, name);
+    return {
+      uri,
+      get exists() {
+        return mockDirs.has(uri);
+      },
+      create: () => mockDirs.add(uri),
+      delete: () => {
+        mockDirs.forEach((d) => d.startsWith(uri) && mockDirs.delete(d));
+        mockDisk.forEach((_, f) => f.startsWith(`${uri}/`) && mockDisk.delete(f));
+      },
+    };
+  }),
+  File: jest.fn().mockImplementation((parent: unknown, name?: string) => {
+    const uri = mockPath(parent, name);
+    return {
+      uri,
+      name: uri.split('/').pop(),
+      get exists() {
+        return mockDisk.has(uri);
+      },
+      create: () => mockDisk.set(uri, new Uint8Array()),
+      delete: () => mockDisk.delete(uri),
+      bytes: async () => mockDisk.get(uri)!,
+      open: () => ({
+        writeBytes: async (bytes: Uint8Array) => {
+          const before = mockDisk.get(uri)!;
+          const next = new Uint8Array(before.length + bytes.length);
+          next.set(before);
+          next.set(bytes, before.length);
+          mockDisk.set(uri, next);
+        },
+        close: () => undefined,
+      }),
+    };
+  }),
 }));
-const mockShare = jest.fn(async (..._args: unknown[]) => undefined);
+
+// The documents function's read links, and their files in storage.
+const mockStored: Record<string, { mime: string; pages: string[] } | 'not_found' | 'down'> = {};
+jest.mock('@/features/documents/upload', () => {
+  class UploadError extends Error {
+    code: string;
+    constructor(mockCode: string) {
+      super(mockCode);
+      this.code = mockCode;
+    }
+  }
+  return { UploadError };
+});
+jest.mock('@/features/documents/read', () => {
+  const { UploadError } = jest.requireMock('@/features/documents/upload');
+  return {
+    readLinks: async (id: string) => {
+      const doc = mockStored[id];
+      if (doc === 'not_found') throw new UploadError('documents.not_found');
+      if (doc === 'down' || !doc) throw new UploadError('documents.network');
+      return { mime: doc.mime, links: doc.pages.map((_, i) => `https://x/${id}/${i}`) };
+    },
+    downloadPages: async (links: string[], folder: { uri: string }, mime: string) =>
+      links.map((link, i) => {
+        const [id, page] = link.split('/').slice(-2);
+        const ext = mime === 'application/pdf' ? 'pdf' : 'jpg';
+        const uri = `${folder.uri}/${i + 1}.${ext}`;
+        const doc = mockStored[id] as { pages: string[] };
+        mockDisk.set(uri, new TextEncoder().encode(doc.pages[Number(page)]));
+        return uri;
+      }),
+  };
+});
+jest.mock('@/features/auth/sign-out', () => ({ onSignOut: jest.fn() }));
+const mockShare = jest.fn(async (..._args: unknown[]) => {
+  mockShared = mockDisk.get(String(_args[0])) ?? null;
+});
+let mockShared: Uint8Array | null = null;
 jest.mock('expo-sharing', () => ({ shareAsync: (...args: unknown[]) => mockShare(...args) }));
 const mockTrack = jest.fn();
 jest.mock('@/lib/analytics', () => ({ track: (...args: unknown[]) => mockTrack(...args) }));
@@ -54,6 +131,28 @@ const data: ExportData = {
     purchase_events: [{ id: 'e1', item_id: 'i1' }],
   },
 };
+
+/** Reads a stored ZIP back through its central directory, checking each entry's CRC. */
+function unzip(zip: Uint8Array): Record<string, Uint8Array> {
+  const view = new DataView(zip.buffer, zip.byteOffset, zip.byteLength);
+  const end = zip.length - 22;
+  expect(view.getUint32(end, true)).toBe(0x06054b50);
+  const count = view.getUint16(end + 10, true);
+  let at = view.getUint32(end + 16, true);
+  const out: Record<string, Uint8Array> = {};
+  for (let i = 0; i < count; i++) {
+    const crc = view.getUint32(at + 16, true);
+    const size = view.getUint32(at + 20, true);
+    const nameLength = view.getUint16(at + 28, true);
+    const name = new TextDecoder().decode(zip.slice(at + 46, at + 46 + nameLength));
+    const local = view.getUint32(at + 42, true);
+    const start = local + 30 + view.getUint16(local + 26, true);
+    out[name] = zip.slice(start, start + size);
+    expect(crc32(out[name])).toBe(crc);
+    at += 46 + nameLength;
+  }
+  return out;
+}
 
 describe('CSV (FR-PRIV-2)', () => {
   it('quotes fields that need it', () => {
@@ -106,9 +205,9 @@ describe('shareExport', () => {
       now: new Date('2026-11-18T12:00:00Z'),
     });
     expect(mockRpc).toHaveBeenCalledWith('export_household_data', { target: 'hh' });
-    expect(mockWrite).toHaveBeenCalledWith(expect.any(Uint8Array));
+    expect(mockShared?.length).toBeGreaterThan(0);
     expect(mockShare).toHaveBeenCalledWith(
-      'file:///cache/parent-manager-household-2026-11-18.zip',
+      'file:///cache/data-export/parent-manager-household-2026-11-18.zip',
       expect.objectContaining({ mimeType: 'application/zip' }),
     );
     expect(mockTrack).toHaveBeenCalledWith('data_export_requested', { scope: 'household' });
@@ -128,6 +227,80 @@ describe('shareExport', () => {
       expect.stringContaining('account'),
       expect.anything(),
     );
+  });
+
+  it("puts every ready document's files in documents/ and keeps nothing after (FR2-PRIV-1)", async () => {
+    mockStored['doc-1'] = { mime: 'image/jpeg', pages: ['page one', 'page two'] };
+    mockStored['doc-2'] = { mime: 'application/pdf', pages: ['%PDF'] };
+    mockStored['doc-gone'] = 'not_found';
+    const withDocuments: ExportData = {
+      ...data,
+      tables: {
+        ...data.tables,
+        documents: [
+          { id: 'doc-2', status: 'ready' },
+          { id: 'doc-1', status: 'ready' },
+          { id: 'doc-gone', status: 'ready' },
+          { id: 'doc-half', status: 'uploading' },
+        ],
+      },
+    };
+    mockRpc.mockResolvedValueOnce({ data: withDocuments, error: null });
+    await shareExport({ scope: 'household', householdId: 'hh', dialogTitle: 'Share' });
+
+    const entries = unzip(mockShared!);
+    expect(new TextDecoder().decode(entries['documents/doc-1/1.jpg'])).toBe('page one');
+    expect(new TextDecoder().decode(entries['documents/doc-1/2.jpg'])).toBe('page two');
+    expect(new TextDecoder().decode(entries['documents/doc-2/1.pdf'])).toBe('%PDF');
+    expect(Object.keys(entries).filter((n) => n.startsWith('documents/'))).toHaveLength(3);
+    expect(entries['documents.json']).toBeDefined();
+    const manifest = JSON.parse(new TextDecoder().decode(entries['manifest.json']));
+    expect(manifest.document_files).toEqual([
+      'documents/doc-1/1.jpg',
+      'documents/doc-1/2.jpg',
+      'documents/doc-2/1.pdf',
+    ]);
+    expect(manifest.documents_without_files).toEqual(['doc-gone']);
+    // Nothing stays in the cache once the share sheet closes (FR2-DOC-4).
+    expect([...mockDisk.keys()]).toEqual([]);
+  });
+
+  it('fails rather than leave a document out when its files cannot be read', async () => {
+    mockStored['doc-down'] = 'down';
+    mockRpc.mockResolvedValueOnce({
+      data: {
+        ...data,
+        tables: { ...data.tables, documents: [{ id: 'doc-down', status: 'ready' }] },
+      },
+      error: null,
+    });
+    mockShare.mockClear();
+    await expect(
+      shareExport({ scope: 'household', householdId: 'hh', dialogTitle: 'Share' }),
+    ).rejects.toThrow('documents.network');
+    expect(mockShare).not.toHaveBeenCalled();
+    expect([...mockDisk.keys()]).toEqual([]);
+  });
+
+  it('clears exports on sign-out', () => {
+    mockDirs.add('file:///cache/data-export');
+    mockDisk.set('file:///cache/data-export/old.zip', new Uint8Array(1));
+    const { onSignOut } = jest.requireMock('@/features/auth/sign-out');
+    (onSignOut as jest.Mock).mock.calls.forEach(([cleanup]: [() => void]) => cleanup());
+    expect(mockDisk.size).toBe(0);
+  });
+
+  it('only sends files for documents that finished uploading', () => {
+    expect(
+      documentsWithFiles({
+        documents: [
+          { id: 'b', status: 'ready' },
+          { id: 'a', status: 'ready' },
+          { id: 'c', status: 'uploading' },
+        ],
+      }),
+    ).toEqual(['a', 'b']);
+    expect(documentsWithFiles({})).toEqual([]);
   });
 
   it('buckets sizes without exact numbers', () => {

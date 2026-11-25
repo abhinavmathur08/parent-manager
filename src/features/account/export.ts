@@ -1,15 +1,24 @@
-import { File, Paths } from 'expo-file-system';
+import { Directory, File, FileMode, Paths } from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 
+import { onSignOut } from '@/features/auth/sign-out';
+import { downloadPages, readLinks } from '@/features/documents/read';
+import { UploadError } from '@/features/documents/upload';
 import { track } from '@/lib/analytics';
 import { getSupabase } from '@/lib/supabase';
-import { createZip, type ZipEntry } from '@/lib/zip';
+import { ZipWriter, type ZipEntry } from '@/lib/zip';
 
 /**
  * Data export (A-04.2, FR-PRIV-2, FR-MEM-4, FR-PAY-10): the server builds the export from its
  * registry (migration 20261116130000_data_export.sql), so every registered table is in it,
  * and this turns it into a ZIP with a JSON file per data type and CSV files for recipes,
  * plans and lists, then opens the share sheet. Always free; needs a connection (NFR-OFF-2).
+ *
+ * A household export also holds each document's files in `documents/<document_id>/`
+ * (FR2-PRIV-1, A-05). They come through the documents function's 60-second read links, the
+ * only way to read them (D-22), one document at a time, and the ZIP is written straight to a
+ * file, so a large vault never has to fit in memory. The ZIP and the downloaded files are
+ * deleted once the share sheet closes, and on sign-out (FR2-DOC-4).
  */
 
 export type ExportScope = 'household' | 'account';
@@ -116,32 +125,100 @@ export function exportCsvFiles(tables: Record<string, Row[]>): Record<string, st
   return files;
 }
 
-/** The ZIP's entries: a JSON file per data type, the CSV files and a manifest. */
-export function exportEntries(data: ExportData): ZipEntry[] {
+/** What went into the ZIP's `documents/` folder. */
+export type DocumentFiles = {
+  /** The paths written, such as `documents/<document_id>/1.jpg`. */
+  files: string[];
+  /** Documents deleted while the export ran, so they have no files in it. */
+  missing: string[];
+};
+
+/** The manifest: what the export covers and the files in it. */
+export function manifestEntry(
+  data: ExportData,
+  documents: DocumentFiles = { files: [], missing: [] },
+): ZipEntry {
+  const tables = Object.keys(data.tables).sort();
+  const manifest = {
+    format: data.format,
+    version: data.version,
+    scope: data.scope,
+    exported_at: data.exported_at,
+    files: tables.map((t) => `${t}.json`),
+    ...(data.tables.documents
+      ? { document_files: documents.files, documents_without_files: documents.missing }
+      : {}),
+  };
+  return {
+    name: 'manifest.json',
+    data: new TextEncoder().encode(JSON.stringify(manifest, null, 2)),
+  };
+}
+
+/** A JSON file per data type and the CSV files. */
+export function dataEntries(data: ExportData): ZipEntry[] {
   const encoder = new TextEncoder();
   const text = (name: string, value: string): ZipEntry => ({
     name,
     data: encoder.encode(value),
   });
-  const tables = Object.keys(data.tables).sort();
   return [
-    text(
-      'manifest.json',
-      JSON.stringify(
-        {
-          format: data.format,
-          version: data.version,
-          scope: data.scope,
-          exported_at: data.exported_at,
-          files: tables.map((t) => `${t}.json`),
-        },
-        null,
-        2,
-      ),
-    ),
-    ...tables.map((t) => text(`${t}.json`, JSON.stringify(data.tables[t], null, 2))),
+    ...Object.keys(data.tables)
+      .sort()
+      .map((t) => text(`${t}.json`, JSON.stringify(data.tables[t], null, 2))),
     ...Object.entries(exportCsvFiles(data.tables)).map(([name, csv]) => text(name, csv)),
   ];
+}
+
+/** The ZIP's entries without document files: a manifest, a JSON file per data type and the CSVs. */
+export function exportEntries(data: ExportData): ZipEntry[] {
+  return [manifestEntry(data), ...dataEntries(data)];
+}
+
+/**
+ * The documents whose files go in the export: those that finished uploading. A document still
+ * uploading is never shown to anyone and has no complete files (architecture 3.5).
+ */
+export function documentsWithFiles(tables: Record<string, Row[]>): string[] {
+  return (tables.documents ?? [])
+    .filter((d) => d.status === 'ready' && typeof d.id === 'string')
+    .map((d) => d.id as string)
+    .sort();
+}
+
+/**
+ * Adds each document's files to the ZIP as `documents/<document_id>/<page>.<ext>`. Each
+ * document gets fresh read links, its files are downloaded to `folder`, added one at a time
+ * and deleted. A document deleted meanwhile is listed as missing; any other failure stops the
+ * export, so it never looks complete when it isn't.
+ */
+export async function addDocumentFiles(
+  zip: ZipWriter,
+  documentIds: readonly string[],
+  folder: Directory,
+): Promise<DocumentFiles> {
+  const result: DocumentFiles = { files: [], missing: [] };
+  for (const id of documentIds) {
+    let read;
+    try {
+      read = await readLinks(id);
+    } catch (error) {
+      if (error instanceof UploadError && error.code === 'documents.not_found') {
+        result.missing.push(id);
+        continue;
+      }
+      throw error;
+    }
+    const uris = await downloadPages(read.links, folder, read.mime);
+    for (const uri of uris) {
+      const file = new File(uri);
+      const name = `documents/${id}/${file.name}`;
+      await zip.add(name, await file.bytes());
+      file.delete();
+      result.files.push(name);
+    }
+  }
+  return result;
 }
 
 /** A coarse size, for analytics only (spec 3.12: `size_bucket`). */
@@ -152,9 +229,25 @@ export function sizeBucket(bytes: number): string {
   return 'over_10mb';
 }
 
+const EXPORT_FOLDER = 'data-export';
+
+function exportFolder(): Directory {
+  return new Directory(Paths.cache, EXPORT_FOLDER);
+}
+
+/** Removes every export and downloaded file this device still holds. */
+export function clearExports(): void {
+  try {
+    const folder = exportFolder();
+    if (folder.exists) folder.delete();
+  } catch {
+    // Already gone, or the cache was cleared by the system.
+  }
+}
+
 /**
- * Exports and opens the share sheet. The file goes in the app's cache, which the system may
- * clear; it holds the household's data, so it isn't kept anywhere else.
+ * Exports and opens the share sheet. The ZIP is written to the app's cache and deleted when the
+ * share sheet closes: it holds the household's data and documents, so it isn't kept.
  */
 export async function shareExport(input: {
   scope: ExportScope;
@@ -165,16 +258,39 @@ export async function shareExport(input: {
   track('data_export_requested', { scope: input.scope });
   const data = await fetchExport(input.scope, input.householdId);
   const now = input.now ?? new Date();
-  const zip = createZip(exportEntries(data), now);
   const day = now.toISOString().slice(0, 10);
-  const file = new File(Paths.cache, `parent-manager-${input.scope}-${day}.zip`);
-  if (file.exists) file.delete();
-  file.create();
-  await file.write(zip);
-  track('data_export_completed', { scope: input.scope, size_bucket: sizeBucket(zip.length) });
-  await Sharing.shareAsync(file.uri, {
-    mimeType: 'application/zip',
-    UTI: 'public.zip-archive',
-    dialogTitle: input.dialogTitle,
-  });
+
+  clearExports();
+  const folder = exportFolder();
+  folder.create({ intermediates: true, idempotent: true });
+  const downloads = new Directory(folder, 'files');
+  downloads.create({ intermediates: true, idempotent: true });
+  const file = new File(folder, `parent-manager-${input.scope}-${day}.zip`);
+  try {
+    file.create();
+    const handle = file.open(FileMode.WriteOnly);
+    let size: number;
+    try {
+      const zip = new ZipWriter((bytes) => handle.writeBytes(bytes), now);
+      for (const entry of dataEntries(data)) await zip.add(entry.name, entry.data);
+      const documents = await addDocumentFiles(zip, documentsWithFiles(data.tables), downloads);
+      const manifest = manifestEntry(data, documents);
+      await zip.add(manifest.name, manifest.data);
+      await zip.finish();
+      size = zip.size;
+    } finally {
+      handle.close();
+    }
+    downloads.delete();
+    track('data_export_completed', { scope: input.scope, size_bucket: sizeBucket(size) });
+    await Sharing.shareAsync(file.uri, {
+      mimeType: 'application/zip',
+      UTI: 'public.zip-archive',
+      dialogTitle: input.dialogTitle,
+    });
+  } finally {
+    clearExports();
+  }
 }
+
+onSignOut(clearExports);

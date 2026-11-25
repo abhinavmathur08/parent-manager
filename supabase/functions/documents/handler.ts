@@ -10,7 +10,8 @@
 //   caller, then signs read links with the service role that expire after 60 seconds. Clients
 //   can't sign links themselves: the bucket has no client policy (R2-DOC-2, D-22).
 // - `purge` (pg_cron, with DOCUMENTS_CRON_SECRET): removes stale uploads and deletes queued
-//   folders from storage (R2-DOC-4, FR2-PRIV-2).
+//   folders from storage: a document's, or a deleted household's whole folder (R2-DOC-4,
+//   FR2-PRIV-2, A-05).
 //
 // Responses carry IDs and fixed codes only. Nothing about a document (title, category, file
 // names or contents) is logged (NFR2-SEC-2, FR2-DOC-11).
@@ -239,9 +240,16 @@ export function createHandler(deps: DocumentsDeps): (req: Request) => Promise<Re
       for (const { id, prefix } of claimed) {
         try {
           const folder = prefix.replace(/\/$/, '');
-          const names = (await deps.storage.list(folder)).map((f) => `${folder}/${f.name}`);
-          await deps.storage.remove(names);
-          files += names.length;
+          // A household's folder (`<household>/`, queued when the household is deleted) holds
+          // one folder per document; a document's folder holds its files.
+          const inner = folder.includes('/')
+            ? []
+            : (await deps.storage.folders(folder)).map((name) => `${folder}/${name}`);
+          for (const dir of [...inner, folder]) {
+            const names = (await deps.storage.list(dir)).map((f) => `${dir}/${f.name}`);
+            await deps.storage.remove(names);
+            files += names.length;
+          }
           done.push(id);
         } catch {
           // Left claimed; claim_storage_purge offers it again after 10 minutes.
