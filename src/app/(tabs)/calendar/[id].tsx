@@ -3,6 +3,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { householdTimeZone } from '@/features/calendar/agenda';
 import { EventDetailScreen } from '@/features/calendar/event-detail-screen';
 import { useEventEditor } from '@/features/calendar/use-event-editor';
+import { EventAttachments } from '@/features/documents/event-attachments';
 import { useAuth } from '@/features/auth/session';
 import { useHousehold, type Membership } from '@/features/household/membership';
 import { isPlanDate } from '@/features/planner/week';
@@ -46,6 +47,17 @@ function Detail({ membership }: { membership: Membership }) {
           prompt === 'push' || prompt === 'inbox'
             ? () => track('who_taking_prompt_answered', { answered_from: prompt })
             : undefined
+        }
+        attachments={
+          <EventAttachments
+            eventId={id}
+            locale={membership.locale}
+            isParent={membership.role === 'parent'}
+            onOpen={(documentId) =>
+              router.push({ pathname: '/calendar/document', params: { id: documentId } })
+            }
+            onAttach={() => router.push({ pathname: '/calendar/attach', params: { eventId: id } })}
+          />
         }
       />
       {editor.sheet}

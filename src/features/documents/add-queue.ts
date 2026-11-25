@@ -29,6 +29,8 @@ type Job = {
   /** `begin` succeeded for `documentId`, so the server may hold a hidden row for it. */
   begun: boolean;
   running: boolean;
+  /** Runs once the document is stored, such as attaching it to the event it was added from. */
+  afterAdded?: (documentId: string) => Promise<void>;
 };
 
 // Memory only, like the drafts they back (pending-uploads.ts): files stay in the cache.
@@ -48,6 +50,8 @@ function pendingOf(id: string, job: Job, state: PendingUpload['state']): Pending
 
 function done(id: string, job: Job) {
   jobs.delete(id);
+  // The document stays in the vault if this fails; the parent can attach it again.
+  job.afterAdded?.(job.documentId).catch(() => undefined);
   removePendingUpload(id);
   discardCapture(job.capture);
   // Counts and fixed values only: never the title, category or person (FR2-DOC-11).
@@ -110,6 +114,7 @@ export async function addDocument(input: {
   details: DocumentDetails;
   capture: Capture;
   online: boolean;
+  afterAdded?: (documentId: string) => Promise<void>;
 }): Promise<'added' | 'waiting'> {
   const id = randomUUID();
   const job: Job = {
@@ -119,6 +124,7 @@ export async function addDocument(input: {
     documentId: id,
     begun: false,
     running: false,
+    afterAdded: input.afterAdded,
   };
   jobs.set(id, job);
   putPendingUpload(pendingOf(id, job, 'waiting'));

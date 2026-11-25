@@ -1,0 +1,84 @@
+# V-05 (FR2-DOC-5, R2-ACC-1): a parent adds an appointment, opens its detail, and goes to
+# attach documents, which opens behind the vault lock. Ends signed out.
+#
+# The vault never opens on a device with no passcode (FR2-DOC-3), and CI's simulators and
+# emulators have none, so there the flow checks that refusal instead. On a device with Face ID
+# enrolled it waits for the check to be matched and checks the attach screen (an empty vault
+# offers to add a document). Storing a file needs the system's scanner or picker, so attaching
+# and opening a stored document is covered by unit tests and the database tests.
+# Needs the local stack; see the Testing section of README.md.
+appId: ${APP_ID || 'com.myparentmanager'}
+tags:
+  - backend
+---
+- runFlow: subflows/create-household.yaml
+- tapOn:
+    id: tab-calendar
+- extendedWaitUntil:
+    visible:
+      id: calendar-empty-state
+    timeout: 10000
+- tapOn:
+    id: calendar-add
+- extendedWaitUntil:
+    visible:
+      id: event-title
+    timeout: 10000
+- inputText: Pediatrician
+- hideKeyboard
+- tapOn:
+    id: event-save
+- extendedWaitUntil:
+    notVisible:
+      id: event-title
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: calendar-event-.*
+- tapOn:
+    id: calendar-event-.*
+- extendedWaitUntil:
+    visible:
+      id: event-detail-when
+    timeout: 10000
+
+# S-38's attachments: a parent can attach documents.
+- scrollUntilVisible:
+    element:
+      id: event-attach
+- tapOn:
+    id: event-attach
+- extendedWaitUntil:
+    visible:
+      id: 'vault-(no-passcode|locked)|attach-documents'
+    timeout: 10000
+
+- runFlow:
+    when:
+      visible:
+        id: vault-no-passcode
+    commands:
+      - assertNotVisible:
+          id: attach-documents
+
+- runFlow:
+    when:
+      notVisible:
+        id: vault-no-passcode
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: attach-documents
+          timeout: 60000
+      - assertVisible:
+          id: attach-empty
+      - assertVisible:
+          id: vault-add
+      - tapOn:
+          id: attach-documents-title-back
+      - extendedWaitUntil:
+          visible:
+            id: event-detail-when
+          timeout: 10000
+
+- runFlow: subflows/sign-out.yaml

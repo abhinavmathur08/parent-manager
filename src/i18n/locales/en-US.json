@@ -288,7 +288,9 @@
       "cancel": "Cancel",
       "undo": "Undo",
       "gone": "This event isn't on the calendar any more.",
-      "failed": "Couldn't change the event. Try again."
+      "failed": "Couldn't change the event. Try again.",
+      "attachments": "Documents",
+      "attach": "Attach documents"
     },
     "reminders": {
       "0": "At the time",
@@ -768,6 +770,14 @@
         "failed": "That didn't work. Try again.",
         "limit": "Your household has reached its document limit."
       }
+    },
+    "attach": {
+      "title": "Attach documents",
+      "empty": "There's nothing in the vault yet. Add a document to attach it.",
+      "attachHint": "Attaches it to this appointment",
+      "detachHint": "Removes it from this appointment",
+      "save": "Save",
+      "failed": "We couldn't save the attachments. Try again."
     },
     "viewer": {
       "loading": "Opening the document",

@@ -174,3 +174,33 @@ describe('adding a document (FR2-DOC-2, FR2-DOC-8, FR2-DOC-11)', () => {
     expect(pendingUploads()[0].state).toBe('failed');
   });
 });
+
+describe('adding a document from an event (FR2-DOC-5)', () => {
+  it('runs afterAdded with the stored document ID once it is stored', async () => {
+    serverAccepts();
+    const afterAdded = jest.fn(async (_id: string) => undefined);
+    await addDocument({
+      householdId: 'hh',
+      details,
+      capture: capture(1),
+      online: false,
+      afterAdded,
+    });
+    expect(afterAdded).not.toHaveBeenCalled();
+    await retryPendingUploads();
+    expect(afterAdded).toHaveBeenCalledTimes(1);
+    const finished = mockInvoke.mock.calls
+      .filter(([, { body }]) => body.action === 'finish')
+      .map(([, { body }]) => body.document_id);
+    expect(finished).toContain(afterAdded.mock.calls[0][0]);
+  });
+
+  it('never runs afterAdded when the server refuses the document', async () => {
+    mockInvoke.mockResolvedValue({ data: null, error: refused('documents.limit', 403) });
+    const afterAdded = jest.fn(async () => undefined);
+    await expect(
+      addDocument({ householdId: 'hh', details, capture: capture(1), online: true, afterAdded }),
+    ).rejects.toBeInstanceOf(UploadError);
+    expect(afterAdded).not.toHaveBeenCalled();
+  });
+});

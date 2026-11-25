@@ -37,6 +37,8 @@ export type AddDocumentScreenProps = {
   online: boolean;
   /** Leaves S-41: `added` when stored, `waiting` when it'll upload later, or `cancelled`. */
   onDone: (result: 'added' | 'waiting' | 'cancelled') => void;
+  /** Runs once the document is stored, even after S-41 has closed (FR2-DOC-5). */
+  afterAdded?: (documentId: string) => Promise<void>;
 };
 
 const DATE_FORMAT = { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' } as const;
@@ -53,7 +55,12 @@ const CAPTURE_ERRORS: Partial<Record<CaptureOutcome['status'], string>> = {
  * expiry date (optional). At the limit the Premium sheet opens (FR2-DOC-8). Nothing in the
  * file is read (FR2-DOC-11). Parents only; render it inside `VaultGate`.
  */
-export function AddDocumentScreen({ household, online, onDone }: AddDocumentScreenProps) {
+export function AddDocumentScreen({
+  household,
+  online,
+  onDone,
+  afterAdded,
+}: AddDocumentScreenProps) {
   const { t } = useTranslation();
   const theme = useTheme();
   const draft = useAddDraft();
@@ -93,6 +100,7 @@ export function AddDocumentScreen({ household, online, onDone }: AddDocumentScre
         },
         capture: draft.capture,
         online,
+        afterAdded,
       });
       resetAddDraft({ keepFiles: true });
       onDone(result);

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, StyleSheet, View } from 'react-native';
 
@@ -41,13 +41,15 @@ export type EventDetailProps = {
   onEdit: (event: EventRow, children: EditTarget, occurrence: Occurrence | null) => void;
   /** After the member takes it: answers a "who's taking?" prompt when opened from one. */
   onTaken?: () => void;
+  /** The documents attached to it (FR2-DOC-5), from the documents module. */
+  attachments?: ReactNode;
 };
 
 const DATE_FORMAT = { weekday: 'long', month: 'long', day: 'numeric', timeZone: 'UTC' } as const;
 
 /**
- * S-38 event detail (FR2-CAL-7, FR2-CAL-8): kind, time, for, taking, place, notes, reminders
- * and who last changed it. Any member who can see it can take it themselves; parents share
+ * S-38 event detail (FR2-CAL-7, FR2-CAL-8): kind, time, for, taking, place, notes, reminders,
+ * attachments and who last changed it. Any member who can see it can take it themselves; parents share
  * and unshare; whoever may edit can delete it, with a 5-second undo.
  */
 export function EventDetailScreen({
@@ -59,6 +61,7 @@ export function EventDetailScreen({
   onBack,
   onEdit,
   onTaken,
+  attachments,
 }: EventDetailProps) {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -266,6 +269,8 @@ export function EventDetailScreen({
             ) : null}
           </View>
         </Card>
+
+        {attachments}
 
         {can.canTake ? (
           takingId === userId ? (
