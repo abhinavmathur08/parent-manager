@@ -117,6 +117,19 @@ describe('S-10 week view (FR-PLAN-1, FR-PLAN-2)', () => {
     expect(screen.getByTestId('plan-range')).toHaveTextContent('Nov 15 – Nov 21');
   });
 
+  it('opens on the week of a day from the Calendar tab, and moves when another is opened (FR2-CAL-5)', async () => {
+    const at = (focusDate: string) => (
+      <SafeAreaProvider initialMetrics={metrics}>
+        <PlanWeekScreen household={household} canWrite focusDate={focusDate} />
+      </SafeAreaProvider>
+    );
+    const view = await render(at('2026-11-25'));
+    expect(screen.getByTestId('plan-range')).toHaveTextContent('Nov 22 – Nov 28');
+    expect(screen.getByTestId('plan-today')).toBeTruthy();
+    await view.rerender(at('2026-11-10'));
+    expect(screen.getByTestId('plan-range')).toHaveTextContent('Nov 8 – Nov 14');
+  });
+
   it('offers add, and copy last week when last week had entries, on an empty week', async () => {
     mockRows = { plan_entries: [entry('old', '2026-11-10', 'dinner', { free_text: 'Soup' })] };
     const onAdd = jest.fn();

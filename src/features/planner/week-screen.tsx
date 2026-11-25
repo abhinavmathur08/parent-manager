@@ -153,9 +153,12 @@ export function PlanWeekScreen({
   canWrite: canWriteProp,
   actions: overrides = {},
   headerActions,
+  focusDate = null,
 }: {
   household: PlanHousehold;
   canWrite: boolean;
+  /** A day to open on, such as one tapped in the Calendar tab (FR2-CAL-5). */
+  focusDate?: PlanDate | null;
   /** Replaces the screen's own handlers, for tests and later items. */
   actions?: PlanWeekActions;
   /** Trailing header actions, such as the inbox bell (S-24). */
@@ -166,7 +169,13 @@ export function PlanWeekScreen({
   const { locale } = household;
   const today = useToday(household.timezone);
   const currentStart = startOfWeek(today, household.weekStart);
-  const [shown, setShown] = useState<PlanDate | null>(null);
+  const [shown, setShown] = useState<PlanDate | null>(focusDate);
+  // A new day to open on shows its week, even when the tab was already open.
+  const [openedOn, setOpenedOn] = useState(focusDate);
+  if (focusDate !== openedOn) {
+    setOpenedOn(focusDate);
+    if (focusDate) setShown(focusDate);
+  }
   // A changed week start regroups the display only (spec 3.6); entries keep their dates.
   const start = startOfWeek(shown ?? currentStart, household.weekStart);
   const days = useMemo(() => weekDates(start), [start]);
@@ -354,14 +363,16 @@ export function PlanWeekScreen({
     useCallback((direction: -1 | 1) => goTo(addDays(start, direction * 7)), [goTo, start]),
   );
 
-  // Today is scrolled into view (FR-PLAN-1).
+  // Today, or the day the screen was opened on, is scrolled into view (FR-PLAN-1, FR2-CAL-5).
   const scrollRef = useRef<ComponentRef<typeof ScrollView>>(null);
   const layout = useRef<{ days: number | null; today: number | null }>({ days: null, today: null });
-  const scrolled = useRef<PlanDate | null>(null);
+  const scrolled = useRef<string | null>(null);
+  const scrollTarget = focusDate && days.includes(focusDate) ? focusDate : today;
   const scrollToToday = () => {
     const { days: daysY, today: todayY } = layout.current;
-    if (daysY === null || todayY === null || scrolled.current === start) return;
-    scrolled.current = start;
+    const key = `${start}:${scrollTarget}`;
+    if (daysY === null || todayY === null || scrolled.current === key) return;
+    scrolled.current = key;
     scrollRef.current?.scrollTo({ y: Math.max(0, daysY + todayY - theme.space[4]) });
   };
 
@@ -511,7 +522,7 @@ export function PlanWeekScreen({
               <View
                 key={date}
                 onLayout={
-                  isToday
+                  date === scrollTarget
                     ? (e) => {
                         layout.current.today = e.nativeEvent.layout.y;
                         scrollToToday();

@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react-native';
+import { fireEvent, render, screen, within } from '@testing-library/react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { AgendaScreen } from '@/features/calendar/agenda-screen';
@@ -15,6 +15,9 @@ jest.mock('expo-router', () => {
   const { useEffect } = jest.requireActual('react');
   return { useFocusEffect: (effect: () => void) => useEffect(effect, [effect]) };
 });
+jest.mock('@/features/household/members', () => ({
+  fetchMembers: async () => [{ userId: 'u2', displayName: 'Sam' }],
+}));
 const mockTrack = jest.fn();
 jest.mock('@/lib/analytics', () => ({ track: (...a: unknown[]) => mockTrack(...a) }));
 
@@ -56,12 +59,26 @@ const household = (locale: 'en-US' | 'en-GB' = 'en-US') => ({
   timezone: 'America/New_York',
 });
 
+const mockOpenMeals = jest.fn();
 const show = (locale?: 'en-US' | 'en-GB') =>
   render(
     <SafeAreaProvider initialMetrics={metrics}>
-      <AgendaScreen household={household(locale)} />
+      <AgendaScreen household={household(locale)} userId="u1" onOpenMeals={mockOpenMeals} />
     </SafeAreaProvider>,
   );
+
+const entry = (id: string, over: Record<string, unknown>) => ({
+  ...base,
+  id,
+  date: '2026-11-18',
+  slot: 'dinner',
+  position: 0,
+  recipe_id: null,
+  free_text: id,
+  servings: 2,
+  leftover_of_entry_id: null,
+  ...over,
+});
 
 type Node = { props?: Record<string, unknown>; children?: (Node | string)[] | null };
 /** Every rendered node that cuts its text short. */
@@ -78,6 +95,7 @@ beforeEach(() => {
   mockRows = {};
   mockOnline = true;
   mockTrack.mockClear();
+  mockOpenMeals.mockClear();
 });
 afterEach(() => jest.useRealTimers());
 
@@ -106,7 +124,7 @@ describe('S-36 agenda (FR2-CAL-1, FR2-CAL-6)', () => {
     const row = screen.getByTestId('calendar-event-e1:2026-11-18');
     expect(row).toHaveTextContent(/10:00\sAM – 11:00\sAM/);
     expect(row.props.accessibilityLabel).toMatch(
-      /^Appointment, 10:00\sAM – 11:00\sAM, Pediatrician$/,
+      /^Appointment, 10:00\sAM – 11:00\sAM, Pediatrician, Nobody taking yet$/,
     );
     expect(screen.getByTestId('calendar-event-e2:2026-11-19')).toHaveTextContent(/All day/);
   });
@@ -157,5 +175,37 @@ describe('S-36 agenda (FR2-CAL-1, FR2-CAL-6)', () => {
       i18n.options.postProcess = false;
       await i18n.changeLanguage('en-US');
     }
+  });
+});
+
+describe('S-36 meals and taking (FR2-CAL-5, NFR2-A11Y-1)', () => {
+  it('names who is taking an event, on screen and to screen readers', async () => {
+    mockRows.events = [
+      event('e1', {
+        starts_at: '2026-11-18T15:00:00Z',
+        ends_at: '2026-11-18T16:00:00Z',
+        taking_user_id: 'u1',
+      }),
+    ];
+    await show();
+    const row = screen.getByTestId('calendar-event-e1:2026-11-18');
+    expect(row).toHaveTextContent(/Appointment · You taking/);
+    expect(row.props.accessibilityLabel).toMatch(/, Pediatrician, You taking$/);
+  });
+
+  it("shows a day's planned meals as one row that opens the plan on that day", async () => {
+    mockRows.plan_entries = [
+      entry('Lasagne', {}),
+      entry('Soup', { slot: 'lunch' }),
+      entry('Toast', { date: '2026-11-25', slot: 'breakfast' }),
+    ];
+    await show();
+    const meals = screen.getByTestId('calendar-meals-2026-11-18');
+    expect(meals).toHaveTextContent('Lunch: Soup; Dinner: Lasagne');
+    expect(meals.props.accessibilityLabel).toBe(
+      'Planned meals for Wednesday, November 18: Lunch: Soup; Dinner: Lasagne',
+    );
+    await fireEvent.press(meals);
+    expect(mockOpenMeals).toHaveBeenCalledWith('2026-11-18');
   });
 });
