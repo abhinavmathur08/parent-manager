@@ -87,3 +87,5 @@ select * from finish();
 
 delete from public.households where id = '00000000-0000-0000-0000-00000000000e';
 delete from auth.users where id = 'eeeeeeee-0000-0000-0000-000000000001';
+-- Deleting the household queues its (empty) storage folder for purging; nothing was stored.
+delete from private.storage_purge_queue where prefix = '00000000-0000-0000-0000-00000000000e/';

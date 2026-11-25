@@ -170,7 +170,28 @@
     "showLater": "Show later days",
     "allDay": "All day",
     "timeRange": "{{start}} – {{end}}",
-    "eventLabel": "{{kind}}, {{time}}, {{title}}",
+    "eventLabel": "{{kind}}, {{time}}, {{title}}, {{taking}}",
+    "taking": "{{name}} taking",
+    "nobodyTaking": "Nobody taking yet",
+    "kindTaking": "{{kind}} · {{taking}}",
+    "views": {
+      "label": "Calendar view",
+      "agenda": "Agenda",
+      "day": "Day",
+      "week": "Week",
+      "previousDay": "Previous day",
+      "nextDay": "Next day",
+      "previousWeek": "Previous week",
+      "nextWeek": "Next week",
+      "range": "{{start}} – {{end}}",
+      "openDay": "Open {{day}}"
+    },
+    "meals": {
+      "slot": "{{slot}}: {{meals}}",
+      "separator": "; ",
+      "label": "Planned meals for {{day}}: {{meals}}",
+      "hint": "Opens this day in the plan"
+    },
     "kinds": {
       "appointment": "Appointment",
       "childcare": "Childcare",
@@ -1018,9 +1039,9 @@
     "export": {
       "title": "Your data",
       "household": "Export household data",
-      "householdDetail": "Everything your household keeps in the app: recipes, plans, lists, pantry, purchases and people.",
+      "householdDetail": "Everything your household keeps in the app: recipes, plans, lists, pantry, purchases, people, the calendar and documents with their files.",
       "account": "Export my data",
-      "accountDetail": "Your profile, your membership and your recipe imports.",
+      "accountDetail": "Your profile, your membership, your recipe imports and the busy times you share.",
       "preparing": "Preparing your export…",
       "offline": "You're offline. Export needs a connection.",
       "share": "Share your data export",

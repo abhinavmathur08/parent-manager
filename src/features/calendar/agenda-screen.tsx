@@ -1,27 +1,38 @@
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppState, Pressable, StyleSheet, View } from 'react-native';
+import { AppState, StyleSheet, useWindowDimensions, View } from 'react-native';
 
 import { Banner } from '@/components/banner';
 import { Button } from '@/components/button';
 import { Card } from '@/components/card';
 import { EmptyState } from '@/components/empty-state';
-import { PRESSED_OPACITY } from '@/components/focus-ring';
 import { Screen } from '@/components/screen';
+import { SegmentedControl, STACK_AT_FONT_SCALE } from '@/components/segmented-control';
 import { Tag } from '@/components/tag';
 import { Text } from '@/components/text';
 import type { TopBarAction } from '@/components/top-bar';
 import { todayIn, toDate, type PlanDate, type WeekStart } from '@/features/planner/week';
 import { useOnline } from '@/hooks/use-online';
 import { useTheme } from '@/hooks/use-theme';
-import { formatDate, formatTime, type AppLocale } from '@/i18n';
+import { formatDate, type AppLocale } from '@/i18n';
 import { track } from '@/lib/analytics';
 
 import { BusyDayMarker, BusyMarkButton } from './busy-marker';
 import { AGENDA_DAYS, agendaDays, householdTimeZone, type AgendaItem } from './agenda';
 import { useCalendarRows } from './data';
-import type { EventRow } from './tables';
+import { DayView, WeekView } from './day-week-views';
+import {
+  EventRow,
+  kindKey,
+  MealsRow,
+  useCalendarMeals,
+  useTakingName,
+  useTimeOf,
+} from './event-row';
+import type { CalendarView } from './views';
+
+export { kindKey } from './event-row';
 
 export type CalendarHousehold = {
   id: string;
@@ -32,8 +43,12 @@ export type CalendarHousehold = {
 
 export type AgendaScreenProps = {
   household: CalendarHousehold;
+  /** The signed-in member, so the rows say "You" for what they're taking. */
+  userId?: string | null;
   /** Opens an occurrence's detail (S-38). */
   onOpen?: (item: AgendaItem) => void;
+  /** Opens the Plan tab on a day, from its meals row (FR2-CAL-5). */
+  onOpenMeals?: (date: PlanDate) => void;
   /** The screen's main action, at the bottom, such as "Add an event" (S-37). */
   footer?: ReactNode;
   headerActions?: readonly [TopBarAction] | readonly [TopBarAction, TopBarAction];
@@ -53,16 +68,21 @@ function useToday(timeZone: string): PlanDate {
 
 const DAY_FORMAT = { weekday: 'long', month: 'long', day: 'numeric', timeZone: 'UTC' } as const;
 
-/** The kind's name, from its identifier (NFR2-L10N-1). */
-export function kindKey(kind: EventRow['kind']): string {
-  return `calendar.kinds.${kind.slice('kind.'.length)}`;
-}
-
 /**
- * S-36 Calendar, agenda view (FR2-CAL-1): a list of days from today, read from the local copy
- * so it works offline (FR2-CAL-6). Times are on the household's clock, in its locale.
+ * S-36 Calendar (FR2-CAL-1): opens on today in the agenda, a list of days from today, with a
+ * switch to the day and week views. Everything reads the local copy, so it works offline
+ * (FR2-CAL-6). Times are on the household's clock, in its locale. Each day shows its planned
+ * meals (FR2-CAL-5). At the largest text sizes the week view falls back to the agenda
+ * (NFR2-A11Y-1).
  */
-export function AgendaScreen({ household, onOpen, footer, headerActions }: AgendaScreenProps) {
+export function AgendaScreen({
+  household,
+  userId = null,
+  onOpen,
+  onOpenMeals,
+  footer,
+  headerActions,
+}: AgendaScreenProps) {
   const { t } = useTranslation();
   const theme = useTheme();
   const online = useOnline();
@@ -71,6 +91,16 @@ export function AgendaScreen({ household, onOpen, footer, headerActions }: Agend
   const today = useToday(timeZone);
   const [days, setDays] = useState(AGENDA_DAYS);
   const { events, exceptions, loading } = useCalendarRows();
+  const meals = useCalendarMeals();
+  const timeOf = useTimeOf(locale, timeZone);
+  const takingOf = useTakingName(household.id, userId);
+  const { fontScale } = useWindowDimensions();
+  const largestText = fontScale * theme.fontScale >= STACK_AT_FONT_SCALE;
+  const [chosen, setChosen] = useState<CalendarView>('agenda');
+  // The day shown, or a day of the week shown; it follows today until the member moves.
+  const [picked, setPicked] = useState<PlanDate | null>(null);
+  const date = picked ?? today;
+  const view: CalendarView = chosen === 'week' && largestText ? 'agenda' : chosen;
   const agenda = useMemo(
     () =>
       agendaDays(events, exceptions, {
@@ -84,20 +114,32 @@ export function AgendaScreen({ household, onOpen, footer, headerActions }: Agend
 
   useFocusEffect(
     useCallback(() => {
-      track('calendar_viewed', { view: 'agenda' });
-    }, []),
+      track('calendar_viewed', { view });
+    }, [view]),
   );
 
-  const timeOf = (item: AgendaItem): string => {
-    const { occurrence } = item;
-    if (occurrence.allDay) return t('calendar.allDay');
-    return t('calendar.timeRange', {
-      start: formatTime(new Date(occurrence.startsAt!), locale, timeZone),
-      end: formatTime(new Date(occurrence.endsAt!), locale, timeZone),
-    });
+  const options = [
+    { value: 'agenda' as const, label: t('calendar.views.agenda') },
+    { value: 'day' as const, label: t('calendar.views.day') },
+    // The week needs room; at the largest text sizes the agenda stands in for it.
+    ...(largestText ? [] : [{ value: 'week' as const, label: t('calendar.views.week') }]),
+  ];
+  const viewProps = {
+    locale,
+    timeZone,
+    weekStart: household.weekStart,
+    today,
+    date,
+    onDateChange: (next: PlanDate) => setPicked(next === today ? null : next),
+    timeOf,
+    takingOf,
+    stacked: largestText,
+    onOpen,
+    onOpenMeals,
   };
 
-  const isEmpty = !loading && events.length === 0;
+  // Planned meals are on the calendar too (FR2-CAL-5), so they keep the agenda's days.
+  const isEmpty = !loading && events.length === 0 && meals.size === 0 && view === 'agenda';
 
   return (
     <View style={styles.grow}>
@@ -111,7 +153,24 @@ export function AgendaScreen({ household, onOpen, footer, headerActions }: Agend
         }
         testID="calendar-screen"
       >
-        {isEmpty ? (
+        <SegmentedControl
+          options={options}
+          value={view}
+          onChange={setChosen}
+          accessibilityLabel={t('calendar.views.label')}
+          testID="calendar-view"
+        />
+        {view === 'day' ? (
+          <DayView {...viewProps} />
+        ) : view === 'week' ? (
+          <WeekView
+            {...viewProps}
+            onOpenDay={(day) => {
+              viewProps.onDateChange(day);
+              setChosen('day');
+            }}
+          />
+        ) : isEmpty ? (
           <Card testID="calendar-empty">
             <EmptyState
               icon="calendar"
@@ -137,17 +196,24 @@ export function AgendaScreen({ household, onOpen, footer, headerActions }: Agend
                   <BusyMarkButton date={day.date} locale={locale} />
                 </View>
                 <BusyDayMarker date={day.date} locale={locale} />
+                <MealsRow
+                  date={day.date}
+                  meals={meals.get(day.date)}
+                  locale={locale}
+                  onOpen={onOpenMeals}
+                />
                 {day.items.length === 0 ? (
                   <Text color="textSecondary" testID="calendar-nothing-today">
                     {t('calendar.nothingToday')}
                   </Text>
                 ) : (
                   day.items.map((item) => (
-                    <AgendaRow
+                    <EventRow
                       key={item.key}
                       time={timeOf(item)}
                       kind={t(kindKey(item.event.kind))}
                       title={item.event.title}
+                      taking={takingOf(item)}
                       onPress={onOpen ? () => onOpen(item) : undefined}
                       testID={`calendar-event-${item.key}`}
                     />
@@ -168,52 +234,6 @@ export function AgendaScreen({ household, onOpen, footer, headerActions }: Agend
       </Screen>
       {footer}
     </View>
-  );
-}
-
-function AgendaRow({
-  time,
-  kind,
-  title,
-  onPress,
-  testID,
-}: {
-  time: string;
-  kind: string;
-  title: string;
-  onPress?: () => void;
-  testID: string;
-}) {
-  const { t } = useTranslation();
-  const theme = useTheme();
-  return (
-    <Pressable
-      onPress={onPress}
-      disabled={!onPress}
-      accessibilityRole={onPress ? 'button' : undefined}
-      // Announces the kind, time and title (NFR2-A11Y-1).
-      accessibilityLabel={t('calendar.eventLabel', { kind, time, title })}
-      testID={testID}
-      style={({ pressed }) => [
-        {
-          minHeight: theme.layout.minRowHeight,
-          padding: theme.space[4],
-          gap: theme.space[1],
-          borderRadius: theme.radius.card,
-          backgroundColor: theme.color.surface,
-        },
-        pressed && { opacity: PRESSED_OPACITY },
-      ]}
-    >
-      {/* Stacked, not in columns, so long text and the largest sizes wrap instead of clipping. */}
-      <Text variant="label" color="textSecondary" tabular>
-        {time}
-      </Text>
-      <Text variant="bodyStrong">{title}</Text>
-      <Text variant="caption" color="textSecondary">
-        {kind}
-      </Text>
-    </Pressable>
   );
 }
 
