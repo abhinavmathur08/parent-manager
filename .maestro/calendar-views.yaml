@@ -1,0 +1,114 @@
+# C-02.2 (FR2-CAL-1, FR2-CAL-5): a parent plans a dinner, switches the Calendar tab between
+# the agenda, day and week views, steps through days, and opens the dinner's day in the Plan
+# tab from the week's meals row. Ends signed out.
+# Needs the local stack; see the Testing section of README.md.
+appId: ${APP_ID || 'com.myparentmanager'}
+tags:
+  - backend
+---
+- runFlow: subflows/create-household.yaml
+
+# A free-text dinner on the week's first day.
+- scrollUntilVisible:
+    element:
+      id: plan-add-0-dinner
+    centerElement: true
+- tapOn:
+    id: plan-add-0-dinner
+- extendedWaitUntil:
+    visible:
+      id: add-search
+    timeout: 10000
+- tapOn:
+    id: add-search
+- inputText: Pasta night
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: add-free-text
+- tapOn:
+    id: add-free-text
+- extendedWaitUntil:
+    notVisible:
+      id: add-search
+    timeout: 10000
+
+# The Calendar tab opens on the agenda.
+- tapOn:
+    id: tab-calendar
+- extendedWaitUntil:
+    visible:
+      id: calendar-view
+    timeout: 10000
+- assertVisible:
+    id: calendar-agenda
+
+# Day view: next day, then back to today.
+- tapOn:
+    id: calendar-view-day
+- extendedWaitUntil:
+    visible:
+      id: calendar-day-view
+    timeout: 10000
+- assertNotVisible:
+    id: calendar-day-today
+- tapOn:
+    id: calendar-day-next
+- extendedWaitUntil:
+    visible:
+      id: calendar-day-today
+    timeout: 10000
+- tapOn:
+    id: calendar-day-today
+- extendedWaitUntil:
+    notVisible:
+      id: calendar-day-today
+    timeout: 10000
+
+# Week view: the dinner shows on its day, and its row opens that day in the Plan tab.
+- tapOn:
+    id: calendar-view-week
+- extendedWaitUntil:
+    visible:
+      id: calendar-week-view
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: calendar-meals-.*
+    centerElement: true
+- assertVisible:
+    text: .*Pasta night.*
+- tapOn:
+    id: calendar-meals-.*
+- extendedWaitUntil:
+    visible:
+      id: plan-days
+    timeout: 10000
+- assertVisible:
+    text: .*Pasta night.*
+
+# Back on the Calendar tab, a day's name in the week opens the day view.
+- tapOn:
+    id: tab-calendar
+- extendedWaitUntil:
+    visible:
+      id: calendar-week-view
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: calendar-week-label
+    direction: UP
+- tapOn:
+    id: calendar-week-open-.*
+- extendedWaitUntil:
+    visible:
+      id: calendar-day-view
+    timeout: 10000
+- tapOn:
+    id: calendar-view-agenda
+- extendedWaitUntil:
+    visible:
+      id: calendar-agenda
+    timeout: 10000
+
+- runFlow: subflows/sign-out.yaml

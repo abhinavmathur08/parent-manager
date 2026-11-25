@@ -18,19 +18,17 @@ export default function CalendarRoute() {
 function Calendar({ membership }: { membership: Membership }) {
   const { t } = useTranslation();
   const auth = useAuth();
+  const userId = auth.status === 'signedIn' ? auth.session.user.id : null;
   const editor = useEventEditor({
     mode: 'add',
     householdId: membership.householdId,
     locale: membership.locale,
     timeZone: householdTimeZone(membership.timezone),
-    userId: auth.status === 'signedIn' ? auth.session.user.id : null,
+    userId,
     isParent: membership.role === 'parent',
   });
   return (
-    <HouseholdBusyDays
-      membership={membership}
-      userId={auth.status === 'signedIn' ? auth.session.user.id : null}
-    >
+    <HouseholdBusyDays membership={membership} userId={userId}>
       <AgendaScreen
         household={{
           id: membership.householdId,
@@ -38,6 +36,9 @@ function Calendar({ membership }: { membership: Membership }) {
           weekStart: membership.weekStart === 1 ? 1 : 7,
           timezone: membership.timezone ?? null,
         }}
+        userId={userId}
+        // A day's meals row opens that day in the Plan tab (FR2-CAL-5).
+        onOpenMeals={(date) => router.navigate({ pathname: '/plan', params: { date } })}
         onOpen={(item) =>
           router.push({
             pathname: '/calendar/[id]',
