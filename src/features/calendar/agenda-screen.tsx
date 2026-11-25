@@ -1,13 +1,14 @@
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppState, StyleSheet, View } from 'react-native';
+import { AppState, StyleSheet, useWindowDimensions, View } from 'react-native';
 
 import { Banner } from '@/components/banner';
 import { Button } from '@/components/button';
 import { Card } from '@/components/card';
 import { EmptyState } from '@/components/empty-state';
 import { Screen } from '@/components/screen';
+import { SegmentedControl, STACK_AT_FONT_SCALE } from '@/components/segmented-control';
 import { Tag } from '@/components/tag';
 import { Text } from '@/components/text';
 import type { TopBarAction } from '@/components/top-bar';
@@ -20,6 +21,7 @@ import { track } from '@/lib/analytics';
 import { BusyDayMarker, BusyMarkButton } from './busy-marker';
 import { AGENDA_DAYS, agendaDays, householdTimeZone, type AgendaItem } from './agenda';
 import { useCalendarRows } from './data';
+import { DayView, WeekView } from './day-week-views';
 import {
   EventRow,
   kindKey,
@@ -28,6 +30,7 @@ import {
   useTakingName,
   useTimeOf,
 } from './event-row';
+import type { CalendarView } from './views';
 
 export { kindKey } from './event-row';
 
@@ -66,9 +69,11 @@ function useToday(timeZone: string): PlanDate {
 const DAY_FORMAT = { weekday: 'long', month: 'long', day: 'numeric', timeZone: 'UTC' } as const;
 
 /**
- * S-36 Calendar, agenda view (FR2-CAL-1): a list of days from today, read from the local copy
- * so it works offline (FR2-CAL-6). Times are on the household's clock, in its locale. Each day
- * shows its planned meals (FR2-CAL-5).
+ * S-36 Calendar (FR2-CAL-1): opens on today in the agenda, a list of days from today, with a
+ * switch to the day and week views. Everything reads the local copy, so it works offline
+ * (FR2-CAL-6). Times are on the household's clock, in its locale. Each day shows its planned
+ * meals (FR2-CAL-5). At the largest text sizes the week view falls back to the agenda
+ * (NFR2-A11Y-1).
  */
 export function AgendaScreen({
   household,
@@ -89,6 +94,13 @@ export function AgendaScreen({
   const meals = useCalendarMeals();
   const timeOf = useTimeOf(locale, timeZone);
   const takingOf = useTakingName(household.id, userId);
+  const { fontScale } = useWindowDimensions();
+  const largestText = fontScale * theme.fontScale >= STACK_AT_FONT_SCALE;
+  const [chosen, setChosen] = useState<CalendarView>('agenda');
+  // The day shown, or a day of the week shown; it follows today until the member moves.
+  const [picked, setPicked] = useState<PlanDate | null>(null);
+  const date = picked ?? today;
+  const view: CalendarView = chosen === 'week' && largestText ? 'agenda' : chosen;
   const agenda = useMemo(
     () =>
       agendaDays(events, exceptions, {
@@ -102,12 +114,32 @@ export function AgendaScreen({
 
   useFocusEffect(
     useCallback(() => {
-      track('calendar_viewed', { view: 'agenda' });
-    }, []),
+      track('calendar_viewed', { view });
+    }, [view]),
   );
 
+  const options = [
+    { value: 'agenda' as const, label: t('calendar.views.agenda') },
+    { value: 'day' as const, label: t('calendar.views.day') },
+    // The week needs room; at the largest text sizes the agenda stands in for it.
+    ...(largestText ? [] : [{ value: 'week' as const, label: t('calendar.views.week') }]),
+  ];
+  const viewProps = {
+    locale,
+    timeZone,
+    weekStart: household.weekStart,
+    today,
+    date,
+    onDateChange: (next: PlanDate) => setPicked(next === today ? null : next),
+    timeOf,
+    takingOf,
+    stacked: largestText,
+    onOpen,
+    onOpenMeals,
+  };
+
   // Planned meals are on the calendar too (FR2-CAL-5), so they keep the agenda's days.
-  const isEmpty = !loading && events.length === 0 && meals.size === 0;
+  const isEmpty = !loading && events.length === 0 && meals.size === 0 && view === 'agenda';
 
   return (
     <View style={styles.grow}>
@@ -121,7 +153,24 @@ export function AgendaScreen({
         }
         testID="calendar-screen"
       >
-        {isEmpty ? (
+        <SegmentedControl
+          options={options}
+          value={view}
+          onChange={setChosen}
+          accessibilityLabel={t('calendar.views.label')}
+          testID="calendar-view"
+        />
+        {view === 'day' ? (
+          <DayView {...viewProps} />
+        ) : view === 'week' ? (
+          <WeekView
+            {...viewProps}
+            onOpenDay={(day) => {
+              viewProps.onDateChange(day);
+              setChosen('day');
+            }}
+          />
+        ) : isEmpty ? (
           <Card testID="calendar-empty">
             <EmptyState
               icon="calendar"

@@ -1,4 +1,5 @@
 import { fireEvent, render, screen, within } from '@testing-library/react-native';
+import { Dimensions } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { AgendaScreen } from '@/features/calendar/agenda-screen';
@@ -178,7 +179,12 @@ describe('S-36 agenda (FR2-CAL-1, FR2-CAL-6)', () => {
   });
 });
 
-describe('S-36 meals and taking (FR2-CAL-5, NFR2-A11Y-1)', () => {
+describe('S-36 day and week views (FR2-CAL-1, FR2-CAL-5, NFR2-A11Y-1)', () => {
+  // React Native's Jest setup reports a text size of 2; these views start at the default.
+  const window = { width: 390, height: 844, scale: 3, fontScale: 1 };
+  beforeEach(() => Dimensions.set({ window, screen: window }));
+  afterEach(() => Dimensions.set({ window: { ...window, fontScale: 2 }, screen: window }));
+
   it('names who is taking an event, on screen and to screen readers', async () => {
     mockRows.events = [
       event('e1', {
@@ -207,5 +213,65 @@ describe('S-36 meals and taking (FR2-CAL-5, NFR2-A11Y-1)', () => {
     );
     await fireEvent.press(meals);
     expect(mockOpenMeals).toHaveBeenCalledWith('2026-11-18');
+  });
+
+  it('switches to the day view, steps through days and lays overlaps side by side', async () => {
+    mockRows.events = [
+      event('a', { starts_at: '2026-11-18T14:00:00Z', ends_at: '2026-11-18T15:00:00Z' }),
+      event('b', { starts_at: '2026-11-18T14:30:00Z', ends_at: '2026-11-18T16:00:00Z' }),
+      event('c', { starts_at: '2026-11-19T14:00:00Z', ends_at: '2026-11-19T15:00:00Z' }),
+    ];
+    mockRows.plan_entries = [entry('Lasagne', {})];
+    await show();
+    await fireEvent.press(screen.getByTestId('calendar-view-day'));
+    expect(mockTrack).toHaveBeenCalledWith('calendar_viewed', { view: 'day' });
+    expect(screen.getByTestId('calendar-day-label')).toHaveTextContent('Wednesday, November 18');
+    expect(screen.getByTestId('calendar-meals-2026-11-18')).toHaveTextContent('Dinner: Lasagne');
+    const overlap = screen.getByTestId('calendar-overlap-2');
+    expect(within(overlap).getByTestId('calendar-event-a:2026-11-18')).toBeTruthy();
+    expect(within(overlap).getByTestId('calendar-event-b:2026-11-18')).toBeTruthy();
+    expect(screen.queryByTestId('calendar-event-c:2026-11-19')).toBeNull();
+
+    await fireEvent.press(screen.getByTestId('calendar-day-next'));
+    expect(screen.getByTestId('calendar-day-label')).toHaveTextContent('Thursday, November 19');
+    expect(screen.getByTestId('calendar-event-c:2026-11-19')).toBeTruthy();
+    expect(screen.queryByTestId('calendar-meals-2026-11-18')).toBeNull();
+    await fireEvent.press(screen.getByTestId('calendar-day-today'));
+    expect(screen.getByTestId('calendar-day-label')).toHaveTextContent('Wednesday, November 18');
+  });
+
+  it("shows the week from the household's week start and opens a day from it", async () => {
+    mockRows.events = [
+      event('c', { starts_at: '2026-11-20T14:00:00Z', ends_at: '2026-11-20T15:00:00Z' }),
+    ];
+    await show();
+    await fireEvent.press(screen.getByTestId('calendar-view-week'));
+    expect(mockTrack).toHaveBeenCalledWith('calendar_viewed', { view: 'week' });
+    // The household's week starts on Sunday.
+    expect(screen.getByTestId('calendar-week-label')).toHaveTextContent(/Nov 15 – Nov 21/);
+    expect(screen.getByTestId('calendar-week-day-2026-11-15')).toBeTruthy();
+    expect(screen.getByTestId('calendar-week-day-2026-11-21')).toBeTruthy();
+    const friday = screen.getByTestId('calendar-week-day-2026-11-20');
+    expect(within(friday).getByTestId('calendar-event-c:2026-11-20')).toBeTruthy();
+
+    await fireEvent.press(screen.getByTestId('calendar-week-next'));
+    expect(screen.getByTestId('calendar-week-label')).toHaveTextContent(/Nov 22 – Nov 28/);
+    await fireEvent.press(screen.getByTestId('calendar-week-open-2026-11-24'));
+    expect(screen.getByTestId('calendar-day-view')).toBeTruthy();
+    expect(screen.getByTestId('calendar-day-label')).toHaveTextContent('Tuesday, November 24');
+  });
+
+  it('offers no week view at the largest text sizes, showing the agenda instead', async () => {
+    const { ThemeOverride } =
+      jest.requireActual<typeof import('@/hooks/use-theme')>('@/hooks/use-theme');
+    await render(
+      <SafeAreaProvider initialMetrics={metrics}>
+        <ThemeOverride fontScale={2}>
+          <AgendaScreen household={household()} />
+        </ThemeOverride>
+      </SafeAreaProvider>,
+    );
+    expect(screen.queryByTestId('calendar-view-week')).toBeNull();
+    expect(screen.getByTestId('calendar-view-day')).toBeTruthy();
   });
 });
