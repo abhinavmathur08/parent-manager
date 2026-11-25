@@ -779,6 +779,27 @@
       "save": "Save",
       "failed": "We couldn't save the attachments. Try again."
     },
+    "share": {
+      "title": "Shared with",
+      "nobody": "Only parents can see this document.",
+      "with": "Parents and {{names}}",
+      "member": "A member",
+      "action": "Share",
+      "sheetTitle": "Share with",
+      "noMembers": "Invite a family member or caregiver from the Household tab to share documents with them.",
+      "save": "Save",
+      "failed": "We couldn't change who it's shared with. Try again.",
+      "role": {
+        "family": "Family member",
+        "caregiver": "Caregiver"
+      }
+    },
+    "shareAttachments": {
+      "title": "Share the documents too?",
+      "body": "Family members and caregivers will see this appointment. Tick the documents they should see too.",
+      "share": "Share documents",
+      "notNow": "Not now"
+    },
     "viewer": {
       "loading": "Opening the document",
       "notFound": "This document was deleted or is no longer shared with you.",
@@ -1486,6 +1507,10 @@
       "documents": {
         "title": "Room for every document",
         "body": "Keep up to 2 GB of documents instead of 25, with expiry reminders and sharing with family and caregivers."
+      },
+      "sharing": {
+        "title": "Share with family and caregivers",
+        "body": "Share appointments and the documents you choose with grandparents, nannies and other helpers, by name."
       }
     },
     "sheet": {

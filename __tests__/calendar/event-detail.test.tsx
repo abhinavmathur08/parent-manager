@@ -57,6 +57,7 @@ const event = (over: Record<string, unknown> = {}) => ({
 
 const onBack = jest.fn();
 const onEdit = jest.fn();
+const onShared = jest.fn();
 const show = async (role: MemberRole, userId: string, onTaken?: () => void) => {
   await render(
     <SafeAreaProvider initialMetrics={metrics}>
@@ -69,6 +70,7 @@ const show = async (role: MemberRole, userId: string, onTaken?: () => void) => {
         onBack={onBack}
         onEdit={onEdit}
         onTaken={onTaken}
+        onShared={onShared}
       />
     </SafeAreaProvider>,
   );
@@ -109,6 +111,7 @@ describe('S-38 event detail (FR2-CAL-7)', () => {
       updated_by: 'parent',
     });
     expect(mockTrack).toHaveBeenCalledWith('event_shared', { shared: false });
+    expect(onShared).toHaveBeenCalledWith(false);
   });
 });
 
