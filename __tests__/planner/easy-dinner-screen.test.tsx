@@ -133,6 +133,33 @@ beforeEach(() => {
 });
 afterEach(() => jest.useRealTimers());
 
+describe('a lapse (FR2-BUSY-5, M-04)', () => {
+  it('keeps the busy marker and stops the suggestions', async () => {
+    mockPremium = true;
+    const view = await show();
+    expect(screen.getByTestId(`easy-dinner-open-${BUSY}`)).toBeOnTheScreen();
+    mockPremium = false;
+    await view.rerender(
+      <SafeAreaProvider initialMetrics={metrics}>
+        <BusyDaysProvider
+          viewer={{
+            householdId: 'hh',
+            userId: 'parent-1',
+            role: 'parent',
+            timeZone: 'UTC',
+            weekStart: 7,
+          }}
+        >
+          <PlanWeekScreen household={household} canWrite />
+        </BusyDaysProvider>
+      </SafeAreaProvider>,
+    );
+    expect(screen.getByTestId(`busy-marker-${BUSY}`)).toHaveTextContent('Marked busy');
+    expect(screen.queryByTestId(`easy-dinner-open-${BUSY}`)).toBeNull();
+    expect(mockInsert).not.toHaveBeenCalled();
+  });
+});
+
 describe('easy dinners on a free household (FR2-BUSY-5)', () => {
   beforeEach(() => {
     mockPremium = false;

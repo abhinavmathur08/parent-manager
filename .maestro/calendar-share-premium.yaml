@@ -1,0 +1,65 @@
+# M-04 (FR2-PAY-1, FR2-DOC-6): on Free, a parent shares an appointment and the detail says
+# family members and caregivers see shared events with Premium; See Premium opens the Premium
+# sheet with the sharing benefit first (trigger `caregiver_calendar`). Ends signed out.
+# Needs the local stack; see the Testing section of README.md.
+appId: ${APP_ID || 'com.myparentmanager'}
+tags:
+  - backend
+---
+- runFlow: subflows/create-household.yaml
+- tapOn:
+    id: tab-calendar
+- extendedWaitUntil:
+    visible:
+      id: calendar-empty-state
+    timeout: 10000
+- tapOn:
+    id: calendar-add
+- extendedWaitUntil:
+    visible:
+      id: event-title
+    timeout: 10000
+- inputText: Swim class
+- hideKeyboard
+- tapOn:
+    id: event-save
+- extendedWaitUntil:
+    notVisible:
+      id: event-title
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: calendar-event-.*
+- tapOn:
+    id: calendar-event-.*
+- extendedWaitUntil:
+    visible:
+      id: event-detail-when
+    timeout: 10000
+
+# An appointment isn't shared by default (FR2-CAL-2): share it.
+- scrollUntilVisible:
+    element:
+      id: event-share
+- tapOn:
+    id: event-share
+- extendedWaitUntil:
+    visible:
+      id: event-share-premium
+    timeout: 10000
+- tapOn:
+    id: event-share-premium-open
+- extendedWaitUntil:
+    visible:
+      id: premium-sheet-header
+    timeout: 10000
+- assertVisible:
+    id: premium-benefit-sharing
+- tapOn:
+    id: premium-(not-now|close)
+- extendedWaitUntil:
+    notVisible:
+      id: premium-sheet-header
+    timeout: 10000
+
+- runFlow: subflows/sign-out.yaml

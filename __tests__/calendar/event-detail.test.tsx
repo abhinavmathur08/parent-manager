@@ -21,6 +21,17 @@ jest.mock('@/features/household/members', () => ({
     { userId: 'carer', role: 'caregiver', joinedAt: '', displayName: 'Jo' },
   ],
 }));
+let mockEntitlement: { entitlement: object | null; isPremium: boolean } = {
+  entitlement: null,
+  isPremium: false,
+};
+jest.mock('@/features/subscription/entitlement', () => ({
+  useEntitlement: () => mockEntitlement,
+}));
+const mockOpenPremiumSheet = jest.fn();
+jest.mock('@/features/subscription/premium-sheet', () => ({
+  usePremiumSheet: () => ({ openPremiumSheet: mockOpenPremiumSheet }),
+}));
 const mockTrack = jest.fn();
 jest.mock('@/lib/analytics', () => ({ track: (...a: unknown[]) => mockTrack(...a) }));
 
@@ -84,9 +95,47 @@ beforeEach(() => {
     event_people: [{ ...base, id: 'ep1', event_id: 'e1', person_id: 'p1' }],
     event_reminders: [{ ...base, id: 'r1', event_id: 'e1', offset_minutes: 1440 }],
   };
+  mockEntitlement = { entitlement: null, isPremium: false };
   jest.clearAllMocks();
 });
 afterEach(() => jest.useRealTimers());
+
+describe('after a lapse (M-04, FR2-REM-6, FR2-PAY-1)', () => {
+  const reminders = [
+    { ...base, id: 'r2', event_id: 'e1', offset_minutes: 60, created_at: '2026-11-02T00:00:00Z' },
+    { ...base, id: 'r1', event_id: 'e1', offset_minutes: 1440, created_at: '2026-11-01T00:00:00Z' },
+  ];
+
+  it('marks every reminder but the first as paused, and keeps them', async () => {
+    mockEntitlement = { entitlement: {}, isPremium: false };
+    mockRows.event_reminders = reminders;
+    await show('parent', 'parent');
+    expect(screen.getByTestId('event-detail-reminders')).toHaveTextContent(
+      /1 hour before \(paused\).*1 day before/,
+    );
+    expect(screen.getByTestId('event-detail-reminders')).not.toHaveTextContent(
+      /1 day before \(paused\)/,
+    );
+    await fireEvent.press(screen.getByTestId('event-reminders-paused-open'));
+    expect(mockOpenPremiumSheet).toHaveBeenCalledWith('reminders');
+    expect(mockRemove).not.toHaveBeenCalled();
+  });
+
+  it('pauses nothing on Premium, or while the tier is loading', async () => {
+    mockRows.event_reminders = reminders;
+    mockEntitlement = { entitlement: {}, isPremium: true };
+    await show('parent', 'parent');
+    expect(screen.queryByTestId('event-reminders-paused')).toBeNull();
+    expect(screen.queryByTestId('event-share-premium')).toBeNull();
+  });
+
+  it('says a shared event needs Premium for family and caregivers (caregiver_calendar)', async () => {
+    mockEntitlement = { entitlement: {}, isPremium: false };
+    await show('parent', 'parent');
+    await fireEvent.press(screen.getByTestId('event-share-premium-open'));
+    expect(mockOpenPremiumSheet).toHaveBeenCalledWith('caregiver_calendar');
+  });
+});
 
 describe('S-38 event detail (FR2-CAL-7)', () => {
   it('shows kind, time, for, taking, place, notes, reminders and who changed it', async () => {

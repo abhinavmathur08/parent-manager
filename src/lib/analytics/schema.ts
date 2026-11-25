@@ -50,6 +50,7 @@ export const PAYWALL_TRIGGERS = [
   'busy_day_meals',
   'documents',
   'document_share',
+  'caregiver_calendar',
 ] as const;
 const productPeriod = oneOf('monthly', 'annual');
 

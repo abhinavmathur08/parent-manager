@@ -87,12 +87,30 @@ describe('S-32 Premium sheet (FR-PAY-4)', () => {
     expect(benefitsFor('busy_day_meals').lead).toBe('busy_meals');
     expect(benefitsFor('documents').lead).toBe('documents');
     expect(benefitsFor('document_share').lead).toBe('sharing');
+    expect(benefitsFor('caregiver_calendar').lead).toBe('sharing');
     expect(benefitsFor('premium_section').lead).toBeNull();
     expect(mockTrack).toHaveBeenCalledWith('paywall_viewed', {
       trigger: 'caregiver_invite',
       role: 'parent',
     });
   });
+
+  it.each([
+    ['reminders', 'reminders', /More event reminders/],
+    ['busy_day_meals', 'busy_meals', /Easy dinners on busy days/],
+    ['documents', 'documents', /Room for every document/],
+    ['document_share', 'sharing', /Share with family and caregivers/],
+    ['caregiver_calendar', 'sharing', /Share with family and caregivers/],
+  ] as const)(
+    'opens from %s with its benefit first (FR2-PAY-1)',
+    async (trigger, benefit, title) => {
+      await renderSheet(trigger);
+      const cards = screen.getAllByTestId(/^premium-benefit-/);
+      expect(cards[0].props.testID).toBe(`premium-benefit-${benefit}`);
+      expect(cards[0]).toHaveTextContent(title);
+      expect(mockTrack).toHaveBeenCalledWith('paywall_viewed', { trigger, role: 'parent' });
+    },
+  );
 
   it('says a mock purchase is a test with no charge', async () => {
     await renderSheet();

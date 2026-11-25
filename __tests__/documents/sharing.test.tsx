@@ -17,7 +17,7 @@ jest.mock('@/lib/sync', () => ({
 }));
 let mockPremium = true;
 jest.mock('@/features/subscription/entitlement', () => ({
-  useEntitlement: () => ({ isPremium: mockPremium }),
+  useEntitlement: () => ({ entitlement: {}, isPremium: mockPremium }),
 }));
 const mockOpenPremiumSheet = jest.fn();
 jest.mock('@/features/subscription/premium-sheet', () => ({
@@ -141,6 +141,16 @@ describe('S-42 sharing', () => {
     mockRows = { document_shares: [share('s1', 'd1', 'jo'), share('s2', 'd2', 'gran')] };
     await show();
     expect(screen.getByTestId('document-shared-with')).toHaveTextContent('Parents and Jo');
+  });
+
+  it('says shares are paused after a lapse, and keeps them (FR2-DOC-8)', async () => {
+    mockPremium = false;
+    mockRows = { document_shares: [share('s1', 'd1', 'jo')] };
+    await show();
+    expect(screen.getByTestId('document-shared-with')).toHaveTextContent(
+      'Sharing with Jo is paused. It comes back with Premium.',
+    );
+    expect(mockRemove).not.toHaveBeenCalled();
   });
 
   it('opens the Premium sheet on Free instead of sharing', async () => {
