@@ -4,6 +4,7 @@ import { File } from 'expo-file-system';
 import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 import * as ImagePicker from 'expo-image-picker';
 
+import { fileMatchesType } from './file-type';
 import { DOCUMENT_LIMITS, type DocumentMime } from './tables';
 
 /** FR2-DOC-2: at most 10 MB a file. The server checks it too, from `documents.limits`. */
@@ -166,8 +167,13 @@ export async function pickFile(): Promise<CaptureOutcome> {
   }
   try {
     const original = { uri: asset.uri, size: asset.size ?? fileSize(asset.uri) };
-    // PDFs and PNGs are stored as they are; JPEG and HEIC become a resized JPEG.
+    // PDFs and PNGs are stored as they are, so their bytes must be what the name says (SR2-L3);
+    // JPEG and HEIC become a resized JPEG.
     let file = original;
+    if (mime !== 'image/jpeg' && !fileMatchesType(asset.uri, mime)) {
+      discardCapture({ files: [original] });
+      return { status: 'unsupported' };
+    }
     if (mime === 'image/jpeg') {
       const { width, height } = await ImageManipulator.manipulate(asset.uri).renderAsync();
       file = await toJpeg(asset.uri, width, height);

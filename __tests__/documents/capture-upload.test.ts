@@ -14,6 +14,12 @@ import { sizeBucket, uploadDocument, UploadError } from '@/features/documents/up
 
 // Files by URI with their sizes; a missing size reads as 1 MB.
 const mockSizes = new Map<string, number>();
+// Files' first bytes; a missing entry starts like a real PDF or PNG, by extension.
+const mockHeads = new Map<string, number[]>();
+const mockSigned = (uri: string) =>
+  uri.endsWith('.png')
+    ? [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]
+    : [0x25, 0x50, 0x44, 0x46, 0x2d, 0x31, 0x2e, 0x37];
 const mockDeleted: string[] = [];
 jest.mock('expo-file-system', () => ({
   File: jest.fn().mockImplementation((uri: string) => ({
@@ -24,6 +30,11 @@ jest.mock('expo-file-system', () => ({
     exists: true,
     delete: () => mockDeleted.push(uri),
     arrayBuffer: async () => new ArrayBuffer(8),
+    open: () => ({
+      readBytesSync: (n: number) =>
+        Uint8Array.from((mockHeads.get(uri) ?? mockSigned(uri)).slice(0, n)),
+      close: () => {},
+    }),
   })),
 }));
 let mockSaved = 0;
@@ -95,6 +106,7 @@ function serverAccepts() {
 beforeEach(() => {
   jest.clearAllMocks();
   mockSizes.clear();
+  mockHeads.clear();
   mockDeleted.length = 0;
 });
 
@@ -147,6 +159,28 @@ describe('capture (FR2-DOC-2)', () => {
       assets: [{ uri: 'file:///pick/a.doc', name: 'a.doc', mimeType: 'application/msword' }],
     });
     expect(await pickFile()).toEqual({ status: 'unsupported' });
+  });
+
+  it('keeps a picked PDF or PNG only if its bytes are that type (SR2-L3)', async () => {
+    const pick = (uri: string, mimeType: string) =>
+      picker.getDocumentAsync.mockResolvedValueOnce({
+        canceled: false,
+        assets: [{ uri, name: uri.split('/').pop(), mimeType, size: 3 }],
+      });
+    pick('file:///pick/form.pdf', 'application/pdf');
+    expect((await pickFile()).status).toBe('captured');
+    pick('file:///pick/card.png', 'image/png');
+    expect((await pickFile()).status).toBe('captured');
+
+    // A web page named .pdf, and a JPEG named .png.
+    mockHeads.set('file:///pick/page.pdf', [0x3c, 0x68, 0x74, 0x6d, 0x6c, 0x3e, 0x3c, 0x73]);
+    pick('file:///pick/page.pdf', 'application/pdf');
+    expect(await pickFile()).toEqual({ status: 'unsupported' });
+    expect(mockDeleted).toContain('file:///pick/page.pdf');
+    mockHeads.set('file:///pick/photo.png', [0xff, 0xd8, 0xff, 0xe0, 0, 0x10, 0x4a, 0x46]);
+    pick('file:///pick/photo.png', 'image/png');
+    expect(await pickFile()).toEqual({ status: 'unsupported' });
+    expect(mockDeleted).toContain('file:///pick/photo.png');
   });
 });
 

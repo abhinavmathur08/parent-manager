@@ -15,7 +15,7 @@ Issue #264, NFR2-SEC-4. Reviewed 2026-11-25 against `main` at `3f50f49` (all Pha
 | SR2-M5 | Medium   | Screen-capture blocking not yet verified on devices (PDF view, scanner, app switcher)        | #318  |
 | SR2-L1 | Low      | Android Auto Backup is on by default                                                         | #319  |
 | SR2-L2 | Low      | 2 moderate advisories in build-time dependencies                                             | #320  |
-| SR2-L3 | Low      | Stored files' bytes aren't checked against their type                                        | #321  |
+| SR2-L3 | Low      | Stored files' bytes aren't checked against their type (**fixed**)                            | #321  |
 | SR2-L4 | Low      | Attachment titles on event detail sit outside the vault lock (needs a product decision)      | #322  |
 
 Severity: **critical** is a cross-household or unauthenticated breach of documents or events; **high** is a member reading or changing what D-16 forbids, or document files reaching a third party, without device access; **medium** needs access to the member's own unlocked device or container, or a configuration step, or is unverified; **low** is defence in depth.
@@ -101,7 +101,7 @@ Nothing found. What was checked, with evidence:
 
 ### SR2-L3 (low): stored files' bytes aren't checked, #321
 
-The bucket checks the declared content type and `finish` checks sizes (`handler.ts:194-205`), but not the bytes. Only a parent can upload, and the viewers can't run scripts. **Fix:** check magic numbers in `finish`.
+The bucket checks the declared content type and `finish` checks sizes (`handler.ts:194-205`), but not the bytes. Only a parent can upload, and the viewers can't run scripts. **Fixed (#321):** `finish` reads each stored file's first 8 bytes as the service role (a ranged download) and refuses with `documents.invalid` unless they start `%PDF-`, `FF D8 FF` or the PNG signature to match the declared type (`supabase/functions/documents/magic.ts`). The app also refuses a picked PDF or PNG whose bytes don't match before uploading it.
 
 ### SR2-L4 (low, product decision): attachment titles outside the vault lock, #322
 

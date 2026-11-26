@@ -1,4 +1,4 @@
-import { assertEquals } from 'jsr:@std/assert@1';
+import { assertEquals, assertRejects } from 'jsr:@std/assert@1';
 
 import { documentStorage } from './storage.ts';
 
@@ -68,4 +68,24 @@ Deno.test('listings page through a large folder and tell files from folders', as
     calls.map((c) => JSON.parse(c.init?.body as string).offset),
     [0, 100],
   );
+});
+
+Deno.test('head reads only the first bytes of a file, as the service role (SR2-L3)', async () => {
+  const { calls, fetcher } = recorder([
+    new Response(new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]), {
+      status: 200,
+    }),
+    new Response(new Uint8Array([1, 2]), { status: 206 }),
+    new Response('{"error":"not_found"}', { status: 400 }),
+    new Response('oops', { status: 500 }),
+  ]);
+  const storage = documentStorage('http://api', 'sb_secret_x', fetcher);
+  // A server that ignores the range still yields only the bytes asked for.
+  assertEquals(await storage.head('h/d/1.pdf', 8), new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8]));
+  assertEquals(calls[0].url, 'http://api/storage/v1/object/authenticated/documents/h/d/1.pdf');
+  assertEquals(headers(calls[0].init).Range, 'bytes=0-7');
+  assertEquals(headers(calls[0].init).apikey, 'sb_secret_x');
+  assertEquals(await storage.head('h/d/1.pdf', 8), new Uint8Array([1, 2]));
+  assertEquals(await storage.head('h/d/1.pdf', 8), null);
+  await assertRejects(() => storage.head('h/d/1.pdf', 8));
 });
