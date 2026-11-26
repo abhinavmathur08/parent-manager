@@ -5,3 +5,11 @@ allowBuilds:
   supabase: true # downloads the pinned Supabase CLI binary
   '@parcel/watcher': false # ships prebuilt binaries; the script only builds from source
   '@sentry/cli': false # its binary comes from the platform package (@sentry/cli-<os>); the script only re-checks it
+
+# Security overrides (SR2-L2, #320). Only the vulnerable ranges are moved, so
+# other majors (glob 7, minimatch 3) are untouched. Remove each once its
+# dependents (jest 30, test-exclude, @expo/fingerprint, @sentry/bundler-plugins)
+# ship with patched versions.
+overrides:
+  'glob@>=9.0.0 <14.0.2': ^14.0.6 # GHSA-3g3m-2fjr-6pw4
+  'minimatch@>=7.0.0 <11.0.1': ^11.0.9 # GHSA-g3hv-75wg-m249
