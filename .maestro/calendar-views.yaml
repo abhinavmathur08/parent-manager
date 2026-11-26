@@ -9,6 +9,11 @@ tags:
 - runFlow: subflows/create-household.yaml
 
 # A free-text dinner on the week's first day.
+# The Plan tab opens scrolled to today, so the first day can be above.
+- scrollUntilVisible:
+    element:
+      id: plan-range
+    direction: UP
 - scrollUntilVisible:
     element:
       id: plan-add-0-dinner

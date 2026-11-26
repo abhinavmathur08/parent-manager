@@ -32,6 +32,11 @@ tags:
     id: premium-done
 
 # Plan a dinner on the first day from the starter library.
+# The Plan tab opens scrolled to today, so the first day can be above.
+- scrollUntilVisible:
+    element:
+      id: plan-range
+    direction: UP
 - scrollUntilVisible:
     element:
       id: plan-add-0-dinner

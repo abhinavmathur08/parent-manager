@@ -1,4 +1,5 @@
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
+import { ScrollView } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { PlanWeekScreen, type PlanWeekActions } from '@/features/planner/week-screen';
@@ -115,6 +116,27 @@ describe('S-10 week view (FR-PLAN-1, FR-PLAN-2)', () => {
     expect(screen.getByTestId('plan-range')).toHaveTextContent('Nov 8 – Nov 14');
     await fireEvent.press(screen.getByTestId('plan-today'));
     expect(screen.getByTestId('plan-range')).toHaveTextContent('Nov 15 – Nov 21');
+  });
+
+  it('scrolls today into view, and keeps the position in a week without today', async () => {
+    const scrollTo = jest.spyOn(ScrollView.prototype, 'scrollTo');
+    await show();
+    // Called directly: fireEvent skips the day list, whose swipe handler declines touches.
+    const laidOut = async (testID: string, y: number) => {
+      let node = screen.getByTestId(testID);
+      while (!node.props.onLayout && node.parent) node = node.parent;
+      await act(async () => {
+        node.props.onLayout({ nativeEvent: { layout: { x: 0, y, width: 390, height: 100 } } });
+      });
+    };
+    await laidOut('plan-days', 200);
+    await laidOut('plan-day-2026-11-18', 600);
+    expect(scrollTo).toHaveBeenCalledTimes(1);
+    scrollTo.mockClear();
+    await fireEvent.press(screen.getByTestId('plan-previous'));
+    await laidOut('plan-days', 200);
+    expect(scrollTo).not.toHaveBeenCalled();
+    scrollTo.mockRestore();
   });
 
   it('opens on the week of a day from the Calendar tab, and moves when another is opened (FR2-CAL-5)', async () => {

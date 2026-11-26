@@ -371,6 +371,9 @@ export function PlanWeekScreen({
   const scrollToToday = () => {
     const { days: daysY, today: todayY } = layout.current;
     const key = `${start}:${scrollTarget}`;
+    // A week without the target day keeps its scroll position, so the week arrows stay in
+    // reach; today's position from another week would land mid-list.
+    if (!days.includes(scrollTarget)) return;
     if (daysY === null || todayY === null || scrolled.current === key) return;
     scrolled.current = key;
     scrollRef.current?.scrollTo({ y: Math.max(0, daysY + todayY - theme.space[4]) });
