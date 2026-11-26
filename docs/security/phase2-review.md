@@ -8,7 +8,7 @@ Issue #264, NFR2-SEC-4. Reviewed 2026-11-25 against `main` at `3f50f49` (all Pha
 
 | ID     | Severity | Finding                                                                                      | Issue |
 | ------ | -------- | -------------------------------------------------------------------------------------------- | ----- |
-| SR2-M1 | Medium   | Captured document files can stay in the app cache                                            | #314  |
+| SR2-M1 | Medium   | Captured document files can stay in the app cache (**fixed**)                                | #314  |
 | SR2-M2 | Medium   | Device calendar copies stay after a member is removed or paused                              | #315  |
 | SR2-M3 | Medium   | Viewed pages may persist in the iOS URL cache (needs a device check)                         | #316  |
 | SR2-M4 | Medium   | File purging needs secrets in the hosted project before real documents exist (product owner) | #317  |
@@ -73,7 +73,7 @@ Nothing found. What was checked, with evidence:
 
 ### SR2-M1 (medium): captured document files can stay in the app cache, #314
 
-`takePhoto()` (`src/features/documents/capture.ts:139`) converts the camera photo to a JPEG but never deletes the full-size original from the image picker's cache. A failed `scan()` (`capture.ts:115`) leaves the pages it already converted. Drafts live in memory (`add-queue.ts`), so a killed app leaves their files with no sweep at launch. The files are in the app sandbox, not shared storage or backups, so this needs the device. **Fix:** delete the photo original and partial scans; put capture files in `<cache>/vault-capture/` and clear it at launch and sign-out, as `viewer-cache.ts` does.
+`takePhoto()` (`src/features/documents/capture.ts:139`) converts the camera photo to a JPEG but never deletes the full-size original from the image picker's cache. A failed `scan()` (`capture.ts:115`) leaves the pages it already converted. Drafts live in memory (`add-queue.ts`), so a killed app leaves their files with no sweep at launch. The files are in the app sandbox, not shared storage or backups, so this needs the device. **Fixed (#314):** `takePhoto` deletes the camera original, a failed `scan` deletes the pages it converted, and every capture file is moved into `<cache>/vault-capture/` (`src/features/documents/capture-cache.ts`), which is deleted at launch and at sign-out, as `viewer-cache.ts` does.
 
 ### SR2-M2 (medium): device calendar copies stay after removal or a lapse, #315
 
