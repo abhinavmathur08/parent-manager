@@ -68,6 +68,11 @@ tags:
     visible:
       id: mock-store-ended
     timeout: 20000
+# The test clock is far down the screen, so the back button has scrolled away.
+- scrollUntilVisible:
+    element:
+      id: mock-store-screen-title-back
+    direction: UP
 - tapOn:
     id: mock-store-screen-title-back
 - extendedWaitUntil:

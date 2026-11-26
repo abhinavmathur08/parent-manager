@@ -83,7 +83,11 @@ tags:
       id: template-name
     timeout: 15000
 
-# Apply it to next week.
+# Apply it to next week. The week header can be just above the screen.
+- scrollUntilVisible:
+    element:
+      id: plan-next
+    direction: UP
 - tapOn:
     id: plan-next
 - scrollUntilVisible:

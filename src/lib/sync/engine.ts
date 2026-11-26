@@ -345,7 +345,10 @@ export class SyncEngine {
   }
 
   private scheduleRetry(): void {
-    if (this.stopped || this.status.pending === 0) return;
+    // A first load retries too: nothing is pending, but the device has no household data yet,
+    // and one failed pull (a slow server, a dropped request) would otherwise leave the member
+    // on the "can't load your household" screen until they tap Try again.
+    if (this.stopped || (this.status.pending === 0 && !this.status.firstLoad)) return;
     const delay = Math.min(500 * 2 ** this.failures, MAX_RETRY_MS);
     this.retryTimer = setTimeout(() => {
       this.retryTimer = null;
