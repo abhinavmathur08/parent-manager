@@ -2,6 +2,7 @@ import { randomUUID } from 'expo-crypto';
 import Storage from 'expo-sqlite/kv-store';
 
 import { onSignOut } from '@/features/auth/sign-out';
+import { onHouseholdAccessLost } from '@/features/household/access-lost';
 import { busyEvents } from '@/lib/device-calendar/calendars';
 import { getSupabase } from '@/lib/supabase';
 import type { SyncValue } from '@/lib/sync/types';
@@ -126,6 +127,10 @@ export async function stopBusyTimes(
     if (!row.deleted_at) await writer.remove(BUSY_BLOCKS.name, row.id);
   }
 }
+
+// Losing access stops busy times too (SR2-M2): the server already deleted this member's
+// blocks when their membership ended, and RLS no longer lets them write, so only forget here.
+onHouseholdAccessLost(() => writeRefreshed(null));
 
 // Signing out always stops busy times (FR2-PRIV-4), while the session can still reach the
 // server. The refresh record shows this device shared some; settings are cleared separately.

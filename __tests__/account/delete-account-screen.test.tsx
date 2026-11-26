@@ -10,6 +10,8 @@ const mockSendCode = jest.fn();
 const mockVerify = jest.fn();
 const mockSameAccount = jest.fn();
 const mockSignOut = jest.fn();
+const mockCalls: string[] = [];
+const mockRemoveCopies = jest.fn(async () => void mockCalls.push('removeCopies'));
 let mockOnline = true;
 
 jest.mock('@/features/account/deletion', () => ({
@@ -33,7 +35,15 @@ jest.mock('@/features/auth/session', () => ({
     session: { user: { id: 'u1', email: 'sam@example.com', app_metadata: { provider: 'email' } } },
   }),
 }));
-jest.mock('@/features/auth/sign-out', () => ({ signOut: () => mockSignOut() }));
+jest.mock('@/features/auth/sign-out', () => ({
+  signOut: () => {
+    mockCalls.push('signOut');
+    return mockSignOut();
+  },
+}));
+jest.mock('@/features/calendar/device/copy-sync', () => ({
+  removeCopiesAfterAccessLost: () => mockRemoveCopies(),
+}));
 jest.mock('@/hooks/use-online', () => ({ useOnline: () => mockOnline }));
 jest.mock('expo-router', () => ({
   router: { back: jest.fn(), replace: jest.fn(), push: jest.fn(), canGoBack: () => true },
@@ -100,14 +110,18 @@ describe('delete account (FR-PRIV-3)', () => {
     expect(mockSameAccount).toHaveBeenCalledWith('u1');
     expect(mockDelete).toHaveBeenCalled();
     expect(mockSignOut).toHaveBeenCalled();
+    // Device calendar copies go before the session does (SR2-M2).
+    expect(mockCalls.slice(-2)).toEqual(['removeCopies', 'signOut']);
   });
 
   it('deletes nothing when the new sign-in is a different account', async () => {
+    mockCalls.length = 0;
     mockSameAccount.mockRejectedValue(new DifferentAccountError());
     await renderScreen();
     await confirmWithCode();
     expect(mockDelete).not.toHaveBeenCalled();
     expect(mockSignOut).not.toHaveBeenCalled();
+    expect(mockCalls).toEqual([]);
     expect(screen.getByTestId('delete-account-reauth-error')).toHaveTextContent(
       /different account/,
     );

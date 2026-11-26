@@ -1,10 +1,12 @@
 import { signOut } from '@/features/auth/sign-out';
 import type { CopyItem } from '@/features/calendar/device/copy';
+import { clearHouseholdData } from '@/features/household/access-lost';
 import {
   beforeSignOut,
   hasCopies,
   readCopyState,
   removeCopies,
+  removeCopiesAfterAccessLost,
   syncCopies,
   type CopyApi,
   type CopyRun,
@@ -204,5 +206,42 @@ describe('device copies (C-05.2, FR2-DEV-2)', () => {
     await beforeSignOut(true, phone.api);
     expect(phone.calendars.has('own-1')).toBe(false);
     expect(hasCopies()).toBe(false);
+  });
+
+  it('removes every copy and stops copying when the member loses access (SR2-M2)', async () => {
+    const phone = fakePhone();
+    await syncCopies(run([{ key: 'a', details: details('Swim') }]), phone.api);
+    expect(phone.calendars.get('own-1')!.size).toBe(1);
+    await removeCopiesAfterAccessLost(phone.api);
+    expect(phone.calendars.has('own-1')).toBe(false);
+    expect(readCopyState()).toBeNull();
+    expect(readDeviceSettings('h1')).toEqual(DEFAULT_DEVICE_SETTINGS);
+    // A run that was still waiting writes nothing.
+    await syncCopies(run([{ key: 'a', details: details('Swim') }]), phone.api);
+    expect(phone.calendars.size).toBe(1);
+  });
+
+  it('deletes the copies from a picked calendar but keeps that calendar (SR2-M2)', async () => {
+    const phone = fakePhone();
+    await syncCopies(
+      run([{ key: 'a', details: details('Swim') }], { target: 'google' }),
+      phone.api,
+    );
+    expect(phone.calendars.get('google')!.size).toBe(1);
+    await removeCopiesAfterAccessLost(phone.api);
+    expect(phone.calendars.get('google')!.size).toBe(0);
+    expect(hasCopies()).toBe(false);
+  });
+
+  it('runs when the household reports access lost (SR2-M2)', async () => {
+    copyOn();
+    // The registered cleanup uses the real device calendar module, so only the state shows.
+    mockStore.set(
+      'calendar.device.copies',
+      JSON.stringify({ householdId: 'h1', calendarId: 'google', own: false, copies: {} }),
+    );
+    await clearHouseholdData();
+    expect(readCopyState()).toBeNull();
+    expect(readDeviceSettings('h1').copy).toBe(false);
   });
 });

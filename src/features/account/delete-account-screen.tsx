@@ -16,6 +16,7 @@ import {
 import { ReauthSheet } from '@/features/account/reauth-sheet';
 import { storeSubscriptionsUrl } from '@/features/account/store-subscriptions';
 import { signOut } from '@/features/auth/sign-out';
+import { removeCopiesAfterAccessLost } from '@/features/calendar/device/copy-sync';
 import { useOnline } from '@/hooks/use-online';
 import { useTheme } from '@/hooks/use-theme';
 
@@ -47,6 +48,8 @@ export function DeleteAccountScreen() {
   async function remove() {
     await deleteAccount();
     setConfirming(false);
+    // The account's household events leave the phone's calendar with it (SR2-M2).
+    await removeCopiesAfterAccessLost();
     await signOut().catch(() => undefined);
   }
 

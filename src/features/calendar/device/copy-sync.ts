@@ -1,10 +1,11 @@
 import Storage from 'expo-sqlite/kv-store';
 
 import { onSignOut } from '@/features/auth/sign-out';
+import { onHouseholdAccessLost } from '@/features/household/access-lost';
 import * as calendars from '@/lib/device-calendar/calendars';
 
 import { planCopies, type CopyItem, type CopyState } from './copy';
-import { readDeviceSettings, writeDeviceSettings } from './settings';
+import { clearDeviceSettings, readDeviceSettings, writeDeviceSettings } from './settings';
 
 /** The device calendar calls the copy needs, replaceable in tests. */
 export type CopyApi = Pick<
@@ -152,3 +153,16 @@ export async function beforeSignOut(remove: boolean, api: CopyApi = calendars): 
   }
   if (remove) await removeCopies(api).catch(() => undefined);
 }
+
+/**
+ * The member can no longer see the household's events: removed, paused by a lapse, left, or
+ * deleting their account (R2-ACC-2, D-16, SR2-M2). Turns copying and busy times off on this
+ * device, so a run still waiting its turn writes nothing, then removes every copy, from a
+ * picked calendar too. Unlike sign-out (FR2-PRIV-4), the member isn't asked.
+ */
+export async function removeCopiesAfterAccessLost(api: CopyApi = calendars): Promise<void> {
+  clearDeviceSettings();
+  await removeCopies(api).catch(() => undefined);
+}
+
+onHouseholdAccessLost(() => removeCopiesAfterAccessLost());
