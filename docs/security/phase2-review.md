@@ -9,7 +9,7 @@ Issue #264, NFR2-SEC-4. Reviewed 2026-11-25 against `main` at `3f50f49` (all Pha
 | ID     | Severity | Finding                                                                                      | Issue |
 | ------ | -------- | -------------------------------------------------------------------------------------------- | ----- |
 | SR2-M1 | Medium   | Captured document files can stay in the app cache (**fixed**)                                | #314  |
-| SR2-M2 | Medium   | Device calendar copies stay after a member is removed or paused                              | #315  |
+| SR2-M2 | Medium   | Device calendar copies stay after a member is removed or paused (**fixed**)                  | #315  |
 | SR2-M3 | Medium   | Viewed pages may persist in the iOS URL cache (needs a device check)                         | #316  |
 | SR2-M4 | Medium   | File purging needs secrets in the hosted project before real documents exist (product owner) | #317  |
 | SR2-M5 | Medium   | Screen-capture blocking not yet verified on devices (PDF view, scanner, app switcher)        | #318  |
@@ -77,7 +77,7 @@ Nothing found. What was checked, with evidence:
 
 ### SR2-M2 (medium): device calendar copies stay after removal or a lapse, #315
 
-`DeviceCalendarSync` runs only inside the tabs layout (`src/app/(tabs)/_layout.tsx:69`), and `onHouseholdAccessLost` only resets the synced copy (`src/features/household/membership.tsx:34`). A removed or paused member keeps the copies (title, time, place, kind) in their calendar, including a cloud calendar they picked, against R2-ACC-2. Unsharing an event is handled. **Fix:** `onHouseholdAccessLost(() => removeCopies())`, with a test.
+`DeviceCalendarSync` runs only inside the tabs layout (`src/app/(tabs)/_layout.tsx:69`), and `onHouseholdAccessLost` only resets the synced copy (`src/features/household/membership.tsx:34`). A removed or paused member keeps the copies (title, time, place, kind) in their calendar, including a cloud calendar they picked, against R2-ACC-2. Unsharing an event is handled. **Fixed (#315):** `onHouseholdAccessLost` runs `removeCopiesAfterAccessLost` (`copy-sync.ts`), which clears the device calendar settings (stopping copies and busy times, so a queued run writes nothing) and removes every copy; busy-time refresh state is forgotten (the server already tombstones the blocks). Account deletion does the same before signing out. Sign-out keeps its prompt (FR2-PRIV-4).
 
 ### SR2-M3 (medium, needs a device check): viewed pages may persist in the iOS URL cache, #316
 
