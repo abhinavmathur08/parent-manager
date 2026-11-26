@@ -13,7 +13,7 @@ Issue #264, NFR2-SEC-4. Reviewed 2026-11-25 against `main` at `3f50f49` (all Pha
 | SR2-M3 | Medium   | Viewed pages may persist in the iOS URL cache (needs a device check)                         | #316  |
 | SR2-M4 | Medium   | File purging needs secrets in the hosted project before real documents exist (product owner) | #317  |
 | SR2-M5 | Medium   | Screen-capture blocking not yet verified on devices (PDF view, scanner, app switcher)        | #318  |
-| SR2-L1 | Low      | Android Auto Backup is on by default                                                         | #319  |
+| SR2-L1 | Low      | Android Auto Backup is on by default (**fixed**)                                             | #319  |
 | SR2-L2 | Low      | 2 moderate advisories in build-time dependencies                                             | #320  |
 | SR2-L3 | Low      | Stored files' bytes aren't checked against their type                                        | #321  |
 | SR2-L4 | Low      | Attachment titles on event detail sit outside the vault lock (needs a product decision)      | #322  |
@@ -93,7 +93,7 @@ Nothing found. What was checked, with evidence:
 
 ### SR2-L1 (low): Android Auto Backup is on, #319
 
-`app.config.ts` leaves `android.allowBackup` at Expo's default, `true`. The synced copy and session are encrypted with Keystore keys that aren't backed up, but the plain kv-store (household ID, copy and busy-time state, vault setting) would be. **Fix:** `allowBackup: false`.
+`app.config.ts` leaves `android.allowBackup` at Expo's default, `true`. The synced copy and session are encrypted with Keystore keys that aren't backed up, but the plain kv-store (household ID, copy and busy-time state, vault setting) would be. **Fixed (#319):** `android.allowBackup: false` in `app.config.ts`, checked by `__tests__/app-config.test.ts`.
 
 ### SR2-L2 (low): build-time dependency advisories, #320
 
