@@ -178,6 +178,10 @@ describe('S-10 week view (FR-PLAN-1, FR-PLAN-2)', () => {
     expect(screen.getByTestId('plan-slot-1-dinner-entry-0')).toHaveTextContent(/Mac and cheese/);
     expect(screen.getByTestId('plan-slot-1-dinner-entry-1')).toHaveTextContent(/Salad/);
     expect(await screen.findByTestId('plan-entry-e1-allergen-milk')).toHaveTextContent(/Mia/);
+    // The row's label replaces its children for screen readers, so the warning is in it.
+    expect(screen.getByTestId('plan-entry-e1')).toHaveAccessibleName(
+      /Contains Milk\. Mia is allergic\./,
+    );
     expect(screen.queryByTestId('plan-entry-e2-allergen-milk')).toBeNull();
     expect(screen.getByTestId('plan-entry-e3')).toHaveTextContent(/Deleted recipe/);
   });
@@ -293,6 +297,15 @@ describe('entry actions (FR-PLAN-7)', () => {
     plan_entry_portions: [
       { ...base, id: 'x', entry_id: 'e1', person_id: PERSON, portions: 2, variant: 'standard' },
     ],
+  });
+
+  it('offers the long-press menu as a screen-reader action', async () => {
+    mockRows = planned();
+    await show();
+    const row = screen.getByTestId('plan-entry-e1');
+    expect(row.props.accessibilityActions).toEqual([{ name: 'longpress', label: 'More actions' }]);
+    await fireEvent(row, 'accessibilityAction', { nativeEvent: { actionName: 'longpress' } });
+    expect(screen.getByTestId('entry-actions-move')).toBeOnTheScreen();
   });
 
   it('moves an entry to another day and slot', async () => {

@@ -1240,6 +1240,7 @@
     "servings_other": "{{value}} servings",
     "entryLabel": "{{title}}, {{servings}}",
     "entryActionsHint": "Long-press for more actions",
+    "entryActions": "More actions",
     "deletedRecipe": "Deleted recipe",
     "allergiesUnavailable": "Allergen markers need one online load of your household's people.",
     "add": {
