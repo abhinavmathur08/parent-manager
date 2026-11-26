@@ -8,14 +8,14 @@ Issue #264, NFR2-SEC-4. Reviewed 2026-11-25 against `main` at `3f50f49` (all Pha
 
 | ID     | Severity | Finding                                                                                      | Issue |
 | ------ | -------- | -------------------------------------------------------------------------------------------- | ----- |
-| SR2-M1 | Medium   | Captured document files can stay in the app cache                                            | #314  |
+| SR2-M1 | Medium   | Captured document files can stay in the app cache (**fixed**)                                | #314  |
 | SR2-M2 | Medium   | Device calendar copies stay after a member is removed or paused (**fixed**)                  | #315  |
 | SR2-M3 | Medium   | Viewed pages may persist in the iOS URL cache (needs a device check)                         | #316  |
 | SR2-M4 | Medium   | File purging needs secrets in the hosted project before real documents exist (product owner) | #317  |
 | SR2-M5 | Medium   | Screen-capture blocking not yet verified on devices (PDF view, scanner, app switcher)        | #318  |
-| SR2-L1 | Low      | Android Auto Backup is on by default                                                         | #319  |
-| SR2-L2 | Low      | 2 moderate advisories in build-time dependencies                                             | #320  |
-| SR2-L3 | Low      | Stored files' bytes aren't checked against their type                                        | #321  |
+| SR2-L1 | Low      | Android Auto Backup is on by default (**fixed**)                                             | #319  |
+| SR2-L2 | Low      | 2 moderate advisories in build-time dependencies (**fixed**)                                 | #320  |
+| SR2-L3 | Low      | Stored files' bytes aren't checked against their type (**fixed**)                            | #321  |
 | SR2-L4 | Low      | Attachment titles on event detail sit outside the vault lock (needs a product decision)      | #322  |
 
 Severity: **critical** is a cross-household or unauthenticated breach of documents or events; **high** is a member reading or changing what D-16 forbids, or document files reaching a third party, without device access; **medium** needs access to the member's own unlocked device or container, or a configuration step, or is unverified; **low** is defence in depth.
@@ -73,7 +73,7 @@ Nothing found. What was checked, with evidence:
 
 ### SR2-M1 (medium): captured document files can stay in the app cache, #314
 
-`takePhoto()` (`src/features/documents/capture.ts:139`) converts the camera photo to a JPEG but never deletes the full-size original from the image picker's cache. A failed `scan()` (`capture.ts:115`) leaves the pages it already converted. Drafts live in memory (`add-queue.ts`), so a killed app leaves their files with no sweep at launch. The files are in the app sandbox, not shared storage or backups, so this needs the device. **Fix:** delete the photo original and partial scans; put capture files in `<cache>/vault-capture/` and clear it at launch and sign-out, as `viewer-cache.ts` does.
+`takePhoto()` (`src/features/documents/capture.ts:139`) converts the camera photo to a JPEG but never deletes the full-size original from the image picker's cache. A failed `scan()` (`capture.ts:115`) leaves the pages it already converted. Drafts live in memory (`add-queue.ts`), so a killed app leaves their files with no sweep at launch. The files are in the app sandbox, not shared storage or backups, so this needs the device. **Fixed (#314):** `takePhoto` deletes the camera original, a failed `scan` deletes the pages it converted, and every capture file is moved into `<cache>/vault-capture/` (`src/features/documents/capture-cache.ts`), which is deleted at launch and at sign-out, as `viewer-cache.ts` does.
 
 ### SR2-M2 (medium): device calendar copies stay after removal or a lapse, #315
 
@@ -93,15 +93,15 @@ Nothing found. What was checked, with evidence:
 
 ### SR2-L1 (low): Android Auto Backup is on, #319
 
-`app.config.ts` leaves `android.allowBackup` at Expo's default, `true`. The synced copy and session are encrypted with Keystore keys that aren't backed up, but the plain kv-store (household ID, copy and busy-time state, vault setting) would be. **Fix:** `allowBackup: false`.
+`app.config.ts` leaves `android.allowBackup` at Expo's default, `true`. The synced copy and session are encrypted with Keystore keys that aren't backed up, but the plain kv-store (household ID, copy and busy-time state, vault setting) would be. **Fixed (#319):** `android.allowBackup: false` in `app.config.ts`, checked by `__tests__/app-config.test.ts`.
 
 ### SR2-L2 (low): build-time dependency advisories, #320
 
-`pnpm audit`: `glob` (GHSA-3g3m-2fjr-6pw4, via `@sentry/bundler-plugins`) and `minimatch` (GHSA-g3hv-75wg-m249, via `@expo/fingerprint`), both moderate and build-time only. No high or critical. **Fix:** take patched versions with the next Sentry and Expo patch releases; re-run before the beta.
+`pnpm audit`: `glob` (GHSA-3g3m-2fjr-6pw4, via `@sentry/bundler-plugins`) and `minimatch` (GHSA-g3hv-75wg-m249, via `@expo/fingerprint`), both moderate and build-time only. No high or critical. **Fixed (#320):** no Sentry, Expo or Jest patch release moves off the vulnerable ranges yet, so `pnpm-workspace.yaml` overrides only those ranges (`glob` 9 to 14.0.1 → 14.0.6, `minimatch` 7 to 11.0.0 → 11.0.9). `pnpm audit` reports no known vulnerabilities. Drop the overrides once the dependents ship patched versions.
 
 ### SR2-L3 (low): stored files' bytes aren't checked, #321
 
-The bucket checks the declared content type and `finish` checks sizes (`handler.ts:194-205`), but not the bytes. Only a parent can upload, and the viewers can't run scripts. **Fix:** check magic numbers in `finish`.
+The bucket checks the declared content type and `finish` checks sizes (`handler.ts:194-205`), but not the bytes. Only a parent can upload, and the viewers can't run scripts. **Fixed (#321):** `finish` reads each stored file's first 8 bytes as the service role (a ranged download) and refuses with `documents.invalid` unless they start `%PDF-`, `FF D8 FF` or the PNG signature to match the declared type (`supabase/functions/documents/magic.ts`). The app also refuses a picked PDF or PNG whose bytes don't match before uploading it.
 
 ### SR2-L4 (low, product decision): attachment titles outside the vault lock, #322
 

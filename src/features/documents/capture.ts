@@ -4,6 +4,8 @@ import { File } from 'expo-file-system';
 import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 import * as ImagePicker from 'expo-image-picker';
 
+import { intoCaptureFolder } from './capture-cache';
+import { fileMatchesType } from './file-type';
 import { DOCUMENT_LIMITS, type DocumentMime } from './tables';
 
 /** FR2-DOC-2: at most 10 MB a file. The server checks it too, from `documents.limits`. */
@@ -88,14 +90,28 @@ export function discardCapture(capture: Pick<Capture, 'files'>): void {
   }
 }
 
-/** Resizes an image and saves it as JPEG in the cache (HEIC, photos and scanned pages). */
+/** Deletes files by URI, ignoring ones already gone. */
+function discardUris(uris: string[]): void {
+  discardCapture({ files: uris.map((uri) => ({ uri, size: 0 })) });
+}
+
+/**
+ * Resizes an image and saves it as JPEG in the capture folder (HEIC, photos and scanned
+ * pages). The image manipulator's own copy never outlives the call.
+ */
 async function toJpeg(uri: string, width: number, height: number): Promise<CapturedFile> {
   const context = ImageManipulator.manipulate(uri);
   const resize = fitPage(width, height);
   if (resize) context.resize(resize);
   const rendered = await context.renderAsync();
   const saved = await rendered.saveAsync({ format: SaveFormat.JPEG, compress: JPEG_QUALITY });
-  return { uri: saved.uri, size: fileSize(saved.uri) };
+  try {
+    const moved = intoCaptureFolder(saved.uri);
+    return { uri: moved, size: fileSize(moved) };
+  } catch (error) {
+    discardUris([saved.uri]);
+    throw error;
+  }
 }
 
 function checked(capture: Capture): CaptureOutcome {
@@ -116,8 +132,8 @@ export async function scan(): Promise<CaptureOutcome> {
   const result = await CameraView.scanDocumentAsync({ quality: 1 });
   if (!result || result.pages.length === 0) return { status: 'canceled' };
   const kept = result.pages.slice(0, DOCUMENT_LIMITS.pages);
+  const files: CapturedFile[] = [];
   try {
-    const files: CapturedFile[] = [];
     for (const page of kept) {
       const { width, height } = await ImageManipulator.manipulate(page).renderAsync();
       files.push(await toJpeg(page, width, height));
@@ -129,9 +145,11 @@ export async function scan(): Promise<CaptureOutcome> {
       truncated: result.pages.length > kept.length,
     });
   } catch {
+    // Pages converted before the failure go too (SR2-M1).
+    discardCapture({ files });
     return { status: 'failed' };
   } finally {
-    discardCapture({ files: result.pages.map((uri) => ({ uri, size: 0 })) });
+    discardUris(result.pages);
   }
 }
 
@@ -147,6 +165,9 @@ export async function takePhoto(): Promise<CaptureOutcome> {
     return checked({ source: 'photo', mime: 'image/jpeg', files: [file], truncated: false });
   } catch {
     return { status: 'failed' };
+  } finally {
+    // The camera's full-size original, in the image picker's cache (SR2-M1).
+    discardUris([asset.uri]);
   }
 }
 
@@ -165,16 +186,25 @@ export async function pickFile(): Promise<CaptureOutcome> {
     return { status: 'unsupported' };
   }
   try {
-    const original = { uri: asset.uri, size: asset.size ?? fileSize(asset.uri) };
-    // PDFs and PNGs are stored as they are; JPEG and HEIC become a resized JPEG.
-    let file = original;
+    const size = asset.size ?? fileSize(asset.uri);
+    // PDFs and PNGs are stored as they are, so their bytes must be what the name says (SR2-L3);
+    // JPEG and HEIC become a resized JPEG.
+    if (mime !== 'image/jpeg' && !fileMatchesType(asset.uri, mime)) {
+      discardUris([asset.uri]);
+      return { status: 'unsupported' };
+    }
+    let file: CapturedFile;
     if (mime === 'image/jpeg') {
       const { width, height } = await ImageManipulator.manipulate(asset.uri).renderAsync();
       file = await toJpeg(asset.uri, width, height);
-      discardCapture({ files: [original] });
+      discardUris([asset.uri]);
+    } else {
+      file = { uri: intoCaptureFolder(asset.uri), size };
     }
     return checked({ source: 'file', mime, files: [file], truncated: false });
   } catch {
+    // The picker's copy, if it wasn't moved (SR2-M1).
+    discardUris([asset.uri]);
     return { status: 'failed' };
   }
 }

@@ -5,7 +5,9 @@
 //   (25 documents on Free, 2 GB on Premium, 10 MB a file, 20 pages; FR2-DOC-8, FR2-PAY-2),
 //   creates the row as `uploading` and returns one signed upload token per file.
 // - `finish` (the parent who began it): checks the stored files match what was declared and
-//   marks the row `ready`. Until then nobody sees it (spec: "Upload fails halfway").
+//   marks the row `ready`. Until then nobody sees it (spec: "Upload fails halfway"). Each
+//   file's first bytes must match the declared type, or it answers `documents.invalid`
+//   (SR2-L3).
 // - `read` (anyone who can see the document): checks `private.can_read_document` for the
 //   caller, then signs read links with the service role that expire after 60 seconds. Clients
 //   can't sign links themselves: the bucket has no client policy (R2-DOC-2, D-22).
@@ -18,6 +20,7 @@
 
 import { bearerToken } from '../_shared/admin.ts';
 import { errorResponse, jsonResponse } from '../_shared/http.ts';
+import { MAGIC_BYTES, matchesType } from './magic.ts';
 import type { DocumentStorage } from './storage.ts';
 
 export type Mime = 'application/pdf' | 'image/jpeg' | 'image/png';
@@ -202,6 +205,16 @@ export function createHandler(deps: DocumentsDeps): (req: Request) => Promise<Re
       sizes.reduce((sum: number, size) => sum + (size ?? 0), 0) !== doc.size_bytes
     ) {
       return errorResponse('documents.upload_incomplete', 409);
+    }
+    const heads = await Promise.all(
+      filePaths(doc).map((path) => deps.storage.head(path, MAGIC_BYTES)),
+    );
+    if (heads.some((head) => head === null)) {
+      return errorResponse('documents.upload_incomplete', 409);
+    }
+    if (heads.some((head) => !matchesType(head!, doc.mime))) {
+      log('documents.wrong_type', { pages: doc.page_count });
+      return errorResponse('documents.invalid', 400);
     }
     await deps.markReady(doc.id);
     log('documents.finish', { pages: doc.page_count });

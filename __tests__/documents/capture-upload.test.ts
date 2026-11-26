@@ -1,6 +1,7 @@
 import { FunctionsHttpError } from '@supabase/supabase-js';
 import { CameraView } from 'expo-camera';
 import * as DocumentPicker from 'expo-document-picker';
+import * as ImagePicker from 'expo-image-picker';
 
 import {
   fitPage,
@@ -8,25 +9,57 @@ import {
   pickFile,
   scan,
   storedMime,
+  takePhoto,
   type Capture,
 } from '@/features/documents/capture';
 import { sizeBucket, uploadDocument, UploadError } from '@/features/documents/upload';
 
 // Files by URI with their sizes; a missing size reads as 1 MB.
 const mockSizes = new Map<string, number>();
+// Files' first bytes; a missing entry starts like a real PDF or PNG, by extension.
+const mockHeads = new Map<string, number[]>();
+const mockSigned = (uri: string) =>
+  uri.endsWith('.png')
+    ? [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]
+    : [0x25, 0x50, 0x44, 0x46, 0x2d, 0x31, 0x2e, 0x37];
 const mockDeleted: string[] = [];
+/** Files moved into the capture folder, as [from, to]. A moved file is gone from `from`. */
+const mockMoved: [string, string][] = [];
 jest.mock('expo-file-system', () => ({
-  File: jest.fn().mockImplementation((uri: string) => ({
-    uri,
-    get size() {
-      return mockSizes.get(uri) ?? 1024 * 1024;
-    },
+  Paths: { cache: 'file:///cache' },
+  Directory: jest.fn().mockImplementation((base: string, name: string) => ({
+    uri: `${base}/${name}`,
     exists: true,
-    delete: () => mockDeleted.push(uri),
-    arrayBuffer: async () => new ArrayBuffer(8),
+    create: () => {},
+    delete: () => {},
   })),
+  File: jest.fn().mockImplementation((at: string | { uri: string }, name?: string) => {
+    const uri = typeof at === 'string' ? at : `${at.uri}/${name}`;
+    return {
+      uri,
+      moveSync: (target: { uri: string }) => {
+        if (mockSizes.has(uri)) mockSizes.set(target.uri, mockSizes.get(uri)!);
+        mockMoved.push([uri, target.uri]);
+      },
+      get size() {
+        return mockSizes.get(uri) ?? 1024 * 1024;
+      },
+      exists: true,
+      delete: () => mockDeleted.push(uri),
+      arrayBuffer: async () => new ArrayBuffer(8),
+      open: () => ({
+        readBytesSync: (n: number) =>
+          Uint8Array.from((mockHeads.get(uri) ?? mockSigned(uri)).slice(0, n)),
+        close: () => {},
+      }),
+    };
+  }),
 }));
+let mockUuid = 0;
+jest.mock('expo-crypto', () => ({ randomUUID: () => `c${++mockUuid}` }));
 let mockSaved = 0;
+/** The save that fails, counted from 1; 0 for none. */
+let mockFailingSave = 0;
 jest.mock('expo-image-manipulator', () => ({
   SaveFormat: { JPEG: 'jpeg' },
   ImageManipulator: {
@@ -35,7 +68,10 @@ jest.mock('expo-image-manipulator', () => ({
       renderAsync: async () => ({
         width: 3000,
         height: 4000,
-        saveAsync: async () => ({ uri: `file:///cache/saved-${++mockSaved}.jpg` }),
+        saveAsync: async () => {
+          if (++mockSaved === mockFailingSave) throw new Error('render failed');
+          return { uri: `file:///cache/ImageManipulator/saved-${mockSaved}.jpg` };
+        },
       }),
     })),
   },
@@ -44,7 +80,10 @@ jest.mock('expo-camera', () => ({
   CameraView: { isDocumentScannerAvailable: true, scanDocumentAsync: jest.fn() },
 }));
 jest.mock('expo-document-picker', () => ({ getDocumentAsync: jest.fn() }));
-jest.mock('expo-image-picker', () => ({}));
+jest.mock('expo-image-picker', () => ({
+  requestCameraPermissionsAsync: jest.fn(async () => ({ granted: true, canAskAgain: true })),
+  launchCameraAsync: jest.fn(),
+}));
 const mockInvoke = jest.fn();
 const mockUpload = jest.fn();
 jest.mock('@/lib/supabase', () => ({
@@ -57,6 +96,11 @@ jest.mock('@/lib/supabase', () => ({
 
 const scanner = CameraView as unknown as { scanDocumentAsync: jest.Mock };
 const picker = DocumentPicker as unknown as { getDocumentAsync: jest.Mock };
+const camera = ImagePicker as unknown as { launchCameraAsync: jest.Mock };
+const CAPTURE_FOLDER = 'file:///cache/vault-capture/';
+/** Files a capture left behind: moved into the capture folder and never deleted. */
+const leftInFolder = () =>
+  mockMoved.map(([, to]) => to).filter((uri) => !mockDeleted.includes(uri));
 
 const refused = (code: string, status: number) =>
   new FunctionsHttpError(new Response(JSON.stringify({ error: { code } }), { status }));
@@ -95,7 +139,11 @@ function serverAccepts() {
 beforeEach(() => {
   jest.clearAllMocks();
   mockSizes.clear();
+  mockHeads.clear();
   mockDeleted.length = 0;
+  mockMoved.length = 0;
+  mockFailingSave = 0;
+  mockSaved = 0;
 });
 
 describe('capture (FR2-DOC-2)', () => {
@@ -132,7 +180,10 @@ describe('capture (FR2-DOC-2)', () => {
       assets: [{ uri: 'file:///pick/a.heic', name: 'a.heic', mimeType: 'image/heic', size: 3 }],
     });
     const heic = await pickFile();
-    expect(heic.status === 'captured' && heic.capture.files[0].uri).toMatch(/saved-\d+\.jpg$/);
+    expect(heic.status === 'captured' && heic.capture.files[0].uri).toMatch(
+      /^file:\/\/\/cache\/vault-capture\/c\d+\.jpg$/,
+    );
+    expect(mockDeleted).toContain('file:///pick/a.heic');
 
     mockSizes.set('file:///pick/big.pdf', MAX_FILE_BYTES + 1);
     picker.getDocumentAsync.mockResolvedValueOnce({
@@ -140,13 +191,82 @@ describe('capture (FR2-DOC-2)', () => {
       assets: [{ uri: 'file:///pick/big.pdf', name: 'big.pdf', mimeType: 'application/pdf' }],
     });
     expect(await pickFile()).toEqual({ status: 'too_large' });
-    expect(mockDeleted).toContain('file:///pick/big.pdf');
+    expect(mockMoved.at(-1)?.[0]).toBe('file:///pick/big.pdf');
+    expect(mockDeleted).toContain(mockMoved.at(-1)?.[1]);
 
     picker.getDocumentAsync.mockResolvedValueOnce({
       canceled: false,
       assets: [{ uri: 'file:///pick/a.doc', name: 'a.doc', mimeType: 'application/msword' }],
     });
     expect(await pickFile()).toEqual({ status: 'unsupported' });
+  });
+
+  it('deletes the camera original once the photo is converted (SR2-M1)', async () => {
+    camera.launchCameraAsync.mockResolvedValueOnce({
+      canceled: false,
+      assets: [{ uri: 'file:///cache/ImagePicker/photo.jpg', width: 4000, height: 3000 }],
+    });
+    const photo = await takePhoto();
+    expect(photo.status === 'captured' && photo.capture.files[0].uri).toMatch(
+      new RegExp(`^${CAPTURE_FOLDER}`),
+    );
+    expect(mockDeleted).toContain('file:///cache/ImagePicker/photo.jpg');
+
+    // And when converting it fails.
+    mockFailingSave = mockSaved + 1;
+    camera.launchCameraAsync.mockResolvedValueOnce({
+      canceled: false,
+      assets: [{ uri: 'file:///cache/ImagePicker/photo2.jpg', width: 4000, height: 3000 }],
+    });
+    expect(await takePhoto()).toEqual({ status: 'failed' });
+    expect(mockDeleted).toContain('file:///cache/ImagePicker/photo2.jpg');
+  });
+
+  it('leaves no files when a scan fails partway (SR2-M1)', async () => {
+    const pages = Array.from({ length: 5 }, (_, i) => `file:///scanner/${i}.jpg`);
+    scanner.scanDocumentAsync.mockResolvedValue({ pages });
+    mockFailingSave = 3;
+    expect(await scan()).toEqual({ status: 'failed' });
+    expect(mockMoved).toHaveLength(2);
+    expect(leftInFolder()).toEqual([]);
+    expect(mockDeleted).toEqual(expect.arrayContaining(pages));
+  });
+
+  it('keeps every capture file in the capture folder (SR2-M1)', async () => {
+    scanner.scanDocumentAsync.mockResolvedValue({ pages: ['file:///scanner/0.jpg'] });
+    await scan();
+    picker.getDocumentAsync.mockResolvedValueOnce({
+      canceled: false,
+      assets: [{ uri: 'file:///pick/form.pdf', name: 'form.pdf', mimeType: 'application/pdf' }],
+    });
+    const pdf = await pickFile();
+    expect(pdf.status === 'captured' && pdf.capture.files[0].uri).toMatch(
+      /vault-capture\/c\d+\.pdf$/,
+    );
+    expect(mockMoved.every(([, to]) => to.startsWith(CAPTURE_FOLDER))).toBe(true);
+    expect(mockMoved).toHaveLength(2);
+  });
+
+  it('keeps a picked PDF or PNG only if its bytes are that type (SR2-L3)', async () => {
+    const pick = (uri: string, mimeType: string) =>
+      picker.getDocumentAsync.mockResolvedValueOnce({
+        canceled: false,
+        assets: [{ uri, name: uri.split('/').pop(), mimeType, size: 3 }],
+      });
+    pick('file:///pick/form.pdf', 'application/pdf');
+    expect((await pickFile()).status).toBe('captured');
+    pick('file:///pick/card.png', 'image/png');
+    expect((await pickFile()).status).toBe('captured');
+
+    // A web page named .pdf, and a JPEG named .png.
+    mockHeads.set('file:///pick/page.pdf', [0x3c, 0x68, 0x74, 0x6d, 0x6c, 0x3e, 0x3c, 0x73]);
+    pick('file:///pick/page.pdf', 'application/pdf');
+    expect(await pickFile()).toEqual({ status: 'unsupported' });
+    expect(mockDeleted).toContain('file:///pick/page.pdf');
+    mockHeads.set('file:///pick/photo.png', [0xff, 0xd8, 0xff, 0xe0, 0, 0x10, 0x4a, 0x46]);
+    pick('file:///pick/photo.png', 'image/png');
+    expect(await pickFile()).toEqual({ status: 'unsupported' });
+    expect(mockDeleted).toContain('file:///pick/photo.png');
   });
 });
 

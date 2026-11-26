@@ -17,6 +17,8 @@ export interface DocumentStorage {
   /** A read link path (relative to /storage/v1), or null if the file isn't stored. */
   signRead(path: string, seconds: number): Promise<string | null>;
   remove(paths: string[]): Promise<void>;
+  /** Up to `length` bytes from the start of a file, as the service role, or null if missing. */
+  head(path: string, length: number): Promise<Uint8Array | null>;
 }
 
 export const BUCKET = 'documents';
@@ -103,6 +105,32 @@ export function documentStorage(
         body: JSON.stringify({ prefixes: paths }),
       });
       await json<unknown>(res, 'remove');
+    },
+    async head(path, length) {
+      const res = await fetcher(`${base}/object/authenticated/${BUCKET}/${encode(path)}`, {
+        headers: { ...service, Range: `bytes=0-${length - 1}` },
+      });
+      if (res.status === 400 || res.status === 404) {
+        await res.body?.cancel();
+        return null;
+      }
+      if (!res.ok || !res.body) {
+        await res.body?.cancel();
+        throw new Error(`storage head failed with ${res.status}`);
+      }
+      // Storage honours the range, but read at most `length` bytes in case it sends the file.
+      const reader = res.body.getReader();
+      const bytes = new Uint8Array(length);
+      let read = 0;
+      while (read < length) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const take = Math.min(value.length, length - read);
+        bytes.set(value.subarray(0, take), read);
+        read += take;
+      }
+      await reader.cancel();
+      return bytes.subarray(0, read);
     },
   };
 }
