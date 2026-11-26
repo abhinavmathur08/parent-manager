@@ -24,6 +24,13 @@ const LIMITS: Limits = {
   read_seconds: 60,
 };
 
+/** Real starts of each stored type, padded to 8 bytes. */
+const SIGNED = {
+  pdf: new Uint8Array([0x25, 0x50, 0x44, 0x46, 0x2d, 0x31, 0x2e, 0x37]),
+  jpg: new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46]),
+  png: new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+};
+
 let next = 0;
 const newId = () => `dddddddd-0000-0000-0000-${String(++next).padStart(12, '0')}`;
 
@@ -31,6 +38,8 @@ const newId = () => `dddddddd-0000-0000-0000-${String(++next).padStart(12, '0')}
 function world(opts: { documents?: number; bytes?: number; premium?: boolean } = {}) {
   const rows = new Map<string, NewDocument & { deleted_at: string | null }>();
   const files = new Map<string, number>();
+  /** Files' first bytes; a file without an entry starts with its extension's real signature. */
+  const heads = new Map<string, Uint8Array>();
   const queue: { id: number; prefix: string }[] = [];
   const signed: { path: string; seconds: number }[] = [];
   const checks: { caller: string; id: string }[] = [];
@@ -72,6 +81,11 @@ function world(opts: { documents?: number; bytes?: number; premium?: boolean } =
     remove(paths) {
       for (const path of paths) files.delete(path);
       return Promise.resolve();
+    },
+    head(path, length) {
+      if (!files.has(path)) return Promise.resolve(null);
+      const ext = path.split('.').pop() as keyof typeof SIGNED;
+      return Promise.resolve((heads.get(path) ?? SIGNED[ext]).subarray(0, length));
     },
   };
 
@@ -154,6 +168,7 @@ function world(opts: { documents?: number; bytes?: number; premium?: boolean } =
     upload,
     rows,
     files,
+    heads,
     signed,
     checks,
     logs,
@@ -259,6 +274,51 @@ Deno.test(
     assertEquals(w.rows.get(document_id)!.status, 'ready');
     // Only the parent who began it finishes it.
     assertEquals((await w.call(CAREGIVER, { action: 'finish', document_id })).status, 404);
+  },
+);
+
+Deno.test('finish accepts each stored type whose bytes match it (SR2-L3)', async () => {
+  for (const [mime, files] of [
+    ['application/pdf', [{ size: 300_000 }]],
+    ['image/jpeg', [{ size: 300_000 }, { size: 200_000 }]],
+    ['image/png', [{ size: 300_000 }]],
+  ] as const) {
+    const w = world();
+    const { document_id, uploads } = await (await w.begin(PARENT, { mime, files })).json();
+    w.upload(
+      uploads,
+      files.map((f) => f.size),
+    );
+    assertEquals((await w.call(PARENT, { action: 'finish', document_id })).status, 200, mime);
+    assertEquals(w.rows.get(document_id)!.status, 'ready');
+  }
+});
+
+Deno.test(
+  'finish refuses a file whose bytes are not its declared type, and logs no content (SR2-L3)',
+  async () => {
+    const w = world();
+    const { document_id, uploads } = await (await w.begin(PARENT)).json();
+    w.upload(uploads, [300_000, 200_000]);
+    // Page 2 is labelled a JPEG but holds a PNG; then HTML; then too few bytes.
+    for (const bytes of [
+      SIGNED.png,
+      new TextEncoder().encode('<html><script>'),
+      new Uint8Array([0xff, 0xd8]),
+    ]) {
+      w.heads.set(uploads[1].path, bytes);
+      const res = await w.call(PARENT, { action: 'finish', document_id });
+      assertEquals(res.status, 400);
+      assertEquals(await code(res), 'documents.invalid');
+      assertEquals(w.rows.get(document_id)!.status, 'uploading');
+    }
+    assertEquals(JSON.parse(w.logs.at(-1)!), {
+      event: 'documents.wrong_type',
+      pages: 2,
+    });
+
+    w.heads.delete(uploads[1].path);
+    assertEquals((await w.call(PARENT, { action: 'finish', document_id })).status, 200);
   },
 );
 
