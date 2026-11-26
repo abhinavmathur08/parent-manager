@@ -151,6 +151,9 @@ function buildConfig(
       },
       predictiveBackGestureEnabled: false,
       package: id,
+      // No Android Auto Backup (SR2-L1, #319): the plain kv-store holds the household ID and
+      // device calendar state, and everything the app needs is on the server.
+      allowBackup: false,
     },
     plugins: [
       'expo-router',

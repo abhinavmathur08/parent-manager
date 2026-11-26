@@ -133,3 +133,12 @@ describe('Document scanning (V-01)', () => {
     expect(picker.cameraPermission).toEqual(expect.stringContaining('scan a document'));
   });
 });
+
+describe('Android backup (SR2-L1)', () => {
+  it.each(['development', 'preview', 'production'])(
+    'turns off Auto Backup for %s, so device data never reaches Google Drive',
+    (variant) => {
+      expect(configFor(variant).android?.allowBackup).toBe(false);
+    },
+  );
+});
