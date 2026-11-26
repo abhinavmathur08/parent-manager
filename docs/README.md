@@ -11,5 +11,6 @@ Product and engineering documentation that lives alongside the code.
 - [design-system.md](design-system.md): tokens, components and accessibility rules for the chosen direction.
 - [design-directions.md](design-directions.md): three visual and UX directions, with a recommendation.
 - [decisions-needed.md](decisions-needed.md): decisions and accounts needed from the product owner.
+- [security/](security/): the Phase 2 threat model and internal security review (L-05), with findings and their issues.
 
 Change `vision.md` only with the product owner's approval. Keep `architecture.md` current in the same PR as any change that affects it.
