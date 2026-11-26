@@ -7,11 +7,13 @@ appId: ${APP_ID || 'com.myparentmanager'}
 - scrollUntilVisible:
     element:
       id: open-account
+    centerElement: true
 - tapOn:
     id: open-account
 - scrollUntilVisible:
     element:
       id: sign-out
+    centerElement: true
 - tapOn:
     id: sign-out
 - extendedWaitUntil:

@@ -178,11 +178,22 @@ jobs:
           script: |
             adb wait-for-device shell 'while [ "$(getprop sys.boot_completed)" != 1 ]; do sleep 2; done; while ! pm path android >/dev/null 2>&1; do sleep 2; done'
             adb shell settings put global hide_error_dialogs 1
+            # Pixel 6's layout (411 x 914 dp) at fewer pixels: software rendering at full size
+            # starved the local stack of CPU on the 4-core runner.
+            adb shell wm size 720x1600
+            adb shell wm density 280
             sleep 30
             adb shell am broadcast -a android.intent.action.CLOSE_SYSTEM_DIALOGS
             adb install app-release.apk
             adb reverse tcp:54321 tcp:54321
             maestro test --format junit --output maestro-report.xml ${FLOWS}
+      - name: Save the local stack's logs
+        if: failure()
+        run: |
+          for c in $(docker ps --format '{{.Names}}' | grep '^supabase_'); do
+            echo "===== ${c}"
+            docker logs --tail 400 "${c}" 2>&1
+          done > stack-logs.txt
       - name: Upload Maestro report
         if: always()
         uses: actions/upload-artifact@v7
@@ -190,6 +201,7 @@ jobs:
           name: maestro-report-android-${{ matrix.shard }}
           path: |
             maestro-report.xml
+            stack-logs.txt
             ~/.maestro/tests
           if-no-files-found: ignore
 

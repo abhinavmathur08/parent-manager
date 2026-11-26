@@ -21,6 +21,7 @@ tags:
 - scrollUntilVisible:
     element:
       id: history-see-premium
+    centerElement: true
 - tapOn:
     id: history-see-premium
 - extendedWaitUntil:
@@ -32,6 +33,7 @@ tags:
 - scrollUntilVisible:
     element:
       id: premium-not-now
+    centerElement: true
 - tapOn:
     id: premium-not-now
 - tapOn:

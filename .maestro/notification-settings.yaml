@@ -30,6 +30,7 @@ tags:
 - scrollUntilVisible:
     element:
       id: open-notifications
+    centerElement: true
 - tapOn:
     id: open-notifications
 - extendedWaitUntil:
@@ -97,6 +98,7 @@ tags:
 - scrollUntilVisible:
     element:
       id: choose-planWeekDay-5
+    centerElement: true
 - tapOn:
     id: choose-planWeekDay-5
 - extendedWaitUntil:
@@ -112,6 +114,7 @@ tags:
 - scrollUntilVisible:
     element:
       id: choose-planWeekMinute-1020
+    centerElement: true
 - tapOn:
     id: choose-planWeekMinute-1020
 - extendedWaitUntil:
@@ -133,6 +136,7 @@ tags:
 - scrollUntilVisible:
     element:
       id: choose-quietStartMinute-1320
+    centerElement: true
 - tapOn:
     id: choose-quietStartMinute-1320
 - extendedWaitUntil:
@@ -153,6 +157,7 @@ tags:
 - scrollUntilVisible:
     element:
       id: open-notifications
+    centerElement: true
 - tapOn:
     id: open-notifications
 - extendedWaitUntil:

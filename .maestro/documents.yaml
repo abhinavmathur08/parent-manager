@@ -16,6 +16,7 @@ tags:
 - scrollUntilVisible:
     element:
       id: open-documents
+    centerElement: true
 - tapOn:
     id: open-documents
 - extendedWaitUntil:

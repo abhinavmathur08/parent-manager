@@ -13,6 +13,7 @@ tags:
 - scrollUntilVisible:
     element:
       id: open-leave
+    centerElement: true
 - tapOn:
     id: open-leave
 - assertVisible: Delete household and leave
