@@ -31,7 +31,6 @@ tags:
 - scrollUntilVisible:
     element:
       id: add-free-text
-    centerElement: true
 - tapOn:
     id: add-free-text
 - extendedWaitUntil:

@@ -13,7 +13,6 @@ tags:
 - scrollUntilVisible:
     element:
       id: open-privacy
-    centerElement: true
 - tapOn:
     id: open-privacy
 - extendedWaitUntil:

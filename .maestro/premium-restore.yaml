@@ -22,7 +22,6 @@ tags:
 - scrollUntilVisible:
     element:
       id: subscription-test-store
-    centerElement: true
 - tapOn:
     id: subscription-test-store
 - extendedWaitUntil:

@@ -20,20 +20,17 @@ appId: ${APP_ID || 'com.myparentmanager'}
 - scrollUntilVisible:
     element:
       id: create-household-continue
-    centerElement: true
 - tapOn:
     id: create-household-continue
 # Onboarding's people and allergies steps (H-02.2) come after the household details.
 - scrollUntilVisible:
     element:
       id: people-skip
-    centerElement: true
 - tapOn:
     id: people-skip
 - scrollUntilVisible:
     element:
       id: allergies-skip
-    centerElement: true
 - tapOn:
     id: allergies-skip
 # The Plan tab scrolls today into view (FR-PLAN-1), which can take its title off screen, so

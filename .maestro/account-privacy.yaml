@@ -12,7 +12,6 @@ tags:
 - scrollUntilVisible:
     element:
       id: open-privacy
-    centerElement: true
 - tapOn:
     id: open-privacy
 # Data export (A-04.2) sits above usage sharing.
@@ -41,7 +40,6 @@ tags:
 - scrollUntilVisible:
     element:
       id: open-account
-    centerElement: true
 - tapOn:
     id: open-account
 - extendedWaitUntil:

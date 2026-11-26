@@ -29,7 +29,6 @@ tags:
 - scrollUntilVisible:
     element:
       id: add-starter-0
-    centerElement: true
 - tapOn:
     id: add-starter-0
 - extendedWaitUntil:
@@ -57,7 +56,6 @@ tags:
 - scrollUntilVisible:
     element:
       id: entry-save
-    centerElement: true
 - tapOn:
     id: entry-save
 - extendedWaitUntil:

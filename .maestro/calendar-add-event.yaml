@@ -46,7 +46,6 @@ tags:
 - scrollUntilVisible:
     element:
       id: event-take
-    centerElement: true
 - tapOn:
     id: event-take
 - extendedWaitUntil:

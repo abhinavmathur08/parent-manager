@@ -178,15 +178,13 @@ jobs:
           script: |
             adb wait-for-device shell 'while [ "$(getprop sys.boot_completed)" != 1 ]; do sleep 2; done; while ! pm path android >/dev/null 2>&1; do sleep 2; done'
             adb shell settings put global hide_error_dialogs 1
-            # Pixel 6's layout (411 x 914 dp) at fewer pixels: software rendering at full size
-            # starved the local stack of CPU on the 4-core runner.
-            adb shell wm size 720x1600
-            adb shell wm density 280
             sleep 30
             adb shell am broadcast -a android.intent.action.CLOSE_SYSTEM_DIALOGS
             adb install app-release.apk
             adb reverse tcp:54321 tcp:54321
             maestro test --format junit --output maestro-report.xml ${FLOWS}
+      # The server side of a failure: these logs showed first-load pulls sent without the
+      # user's session (401s from PostgREST).
       - name: Save the local stack's logs
         if: failure()
         run: |

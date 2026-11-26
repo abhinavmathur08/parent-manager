@@ -17,7 +17,6 @@ tags:
 - scrollUntilVisible:
     element:
       id: open-invite
-    centerElement: true
 - tapOn:
     id: open-invite
 - extendedWaitUntil:

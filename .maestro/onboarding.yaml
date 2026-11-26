@@ -37,7 +37,6 @@ tags:
 - scrollUntilVisible:
     element:
       id: create-household-continue
-    centerElement: true
 - tapOn:
     id: create-household-continue
 # S-07: "Expecting, or how old is your youngest?"
@@ -48,7 +47,6 @@ tags:
 - scrollUntilVisible:
     element:
       id: add-child-toddler
-    centerElement: true
 - tapOn:
     id: add-child-toddler
 - stopApp
@@ -66,7 +64,6 @@ tags:
 - scrollUntilVisible:
     element:
       id: people-continue
-    centerElement: true
 - tapOn:
     id: people-continue
 # S-08: allergies with the disclaimer.
@@ -84,7 +81,6 @@ tags:
 - scrollUntilVisible:
     element:
       id: allergies-finish
-    centerElement: true
 - tapOn:
     id: allergies-finish
 - extendedWaitUntil:

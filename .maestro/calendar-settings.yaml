@@ -21,7 +21,6 @@ tags:
 - scrollUntilVisible:
     element:
       id: open-calendar-settings
-    centerElement: true
 - tapOn:
     id: open-calendar-settings
 - extendedWaitUntil:

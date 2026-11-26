@@ -23,19 +23,16 @@ tags:
 - scrollUntilVisible:
     element:
       id: create-household-continue
-    centerElement: true
 - tapOn:
     id: create-household-continue
 - scrollUntilVisible:
     element:
       id: people-skip
-    centerElement: true
 - tapOn:
     id: people-skip
 - scrollUntilVisible:
     element:
       id: allergies-skip
-    centerElement: true
 - tapOn:
     id: allergies-skip
 - extendedWaitUntil:

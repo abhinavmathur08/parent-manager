@@ -14,7 +14,6 @@ tags:
 - scrollUntilVisible:
     element:
       id: open-delete-household
-    centerElement: true
 - tapOn:
     id: open-delete-household
 - extendedWaitUntil:
