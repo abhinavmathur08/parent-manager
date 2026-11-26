@@ -14,7 +14,7 @@ Issue #264, NFR2-SEC-4. Reviewed 2026-11-25 against `main` at `3f50f49` (all Pha
 | SR2-M4 | Medium   | File purging needs secrets in the hosted project before real documents exist (product owner) | #317  |
 | SR2-M5 | Medium   | Screen-capture blocking not yet verified on devices (PDF view, scanner, app switcher)        | #318  |
 | SR2-L1 | Low      | Android Auto Backup is on by default (**fixed**)                                             | #319  |
-| SR2-L2 | Low      | 2 moderate advisories in build-time dependencies                                             | #320  |
+| SR2-L2 | Low      | 2 moderate advisories in build-time dependencies (**fixed**)                                 | #320  |
 | SR2-L3 | Low      | Stored files' bytes aren't checked against their type                                        | #321  |
 | SR2-L4 | Low      | Attachment titles on event detail sit outside the vault lock (needs a product decision)      | #322  |
 
@@ -97,7 +97,7 @@ Nothing found. What was checked, with evidence:
 
 ### SR2-L2 (low): build-time dependency advisories, #320
 
-`pnpm audit`: `glob` (GHSA-3g3m-2fjr-6pw4, via `@sentry/bundler-plugins`) and `minimatch` (GHSA-g3hv-75wg-m249, via `@expo/fingerprint`), both moderate and build-time only. No high or critical. **Fix:** take patched versions with the next Sentry and Expo patch releases; re-run before the beta.
+`pnpm audit`: `glob` (GHSA-3g3m-2fjr-6pw4, via `@sentry/bundler-plugins`) and `minimatch` (GHSA-g3hv-75wg-m249, via `@expo/fingerprint`), both moderate and build-time only. No high or critical. **Fixed (#320):** no Sentry, Expo or Jest patch release moves off the vulnerable ranges yet, so `pnpm-workspace.yaml` overrides only those ranges (`glob` 9 to 14.0.1 → 14.0.6, `minimatch` 7 to 11.0.0 → 11.0.9). `pnpm audit` reports no known vulnerabilities. Drop the overrides once the dependents ship patched versions.
 
 ### SR2-L3 (low): stored files' bytes aren't checked, #321
 
