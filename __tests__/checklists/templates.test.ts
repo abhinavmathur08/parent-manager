@@ -15,15 +15,15 @@ import data from '@/features/checklists/starter-templates.json';
 
 const { validate, STAGES } = require('../../scripts/checklist-content.js');
 
-const US_ONLY = STARTER_TEMPLATES.flatMap((t) => t.items).filter(
-  (i) => i.regions !== undefined && !i.regions.includes('GB'),
-);
+const ALL_ITEMS = STARTER_TEMPLATES.flatMap((t) => t.items);
+const NOT_GB = ALL_ITEMS.filter((i) => i.regions !== undefined && !i.regions.includes('GB'));
+const US_ONLY = ALL_ITEMS.filter((i) => i.regions?.length === 1 && i.regions[0] === 'US');
 
 describe('starter templates by region (FR3-CHK-5, R3-CHK-1)', () => {
   it('never gives a GB household an item that is not offered in GB', () => {
     expect(US_ONLY.length).toBeGreaterThan(0);
     const gbItems = templatesForRegion('GB').flatMap((t) => t.items);
-    for (const item of US_ONLY) expect(gbItems).not.toContainEqual(item);
+    for (const item of NOT_GB) expect(gbItems).not.toContainEqual(item);
     for (const item of gbItems) expect(item.regions ?? ['GB']).toContain('GB');
   });
 
@@ -57,7 +57,7 @@ describe('starter templates by region (FR3-CHK-5, R3-CHK-1)', () => {
   });
 
   it('shows item text in the household locale with regional words', () => {
-    const item = 'checklist_item.newborn.set_up_changing_station';
+    const item = 'checklist_item.expecting.set_up_changing_station';
     expect(i18n.getFixedT('en-US')(item)).toMatch(/diaper/);
     expect(i18n.getFixedT('en-GB')(item)).toMatch(/nappy/);
     expect(i18n.getFixedT('en-AU')(item)).toMatch(/nappy/);

@@ -89,7 +89,8 @@
     "email:templates": "node scripts/email-templates.js --write",
     "notify:copy": "node scripts/notification-copy.js --write",
     "notify:copy:check": "node scripts/notification-copy.js --check",
-    "checklists:check": "node scripts/checklist-content.js --check"
+    "checklists:check": "node scripts/checklist-content.js --check",
+    "checklists:sheet": "node scripts/checklist-content.js --write"
   },
   "private": true,
   "jest": {
