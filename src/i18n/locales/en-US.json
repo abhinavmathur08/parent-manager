@@ -1964,6 +1964,7 @@
     "due": {
       "dateTime": "{{date}}, {{time}}"
     },
+    "add": "Add a task",
     "editor": {
       "title": "New task",
       "save": "Save",

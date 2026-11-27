@@ -29,7 +29,7 @@ export type TasksScreenProps = {
   userId: string | null;
   /** Trailing header actions. */
   headerActions?: TopBarProps['actions'];
-  /** The bottom-reachable add action (T-02.2), drawn after the list. */
+  /** The bottom-reachable add action (T-02.2), docked above the tab bar. */
   footer?: ReactNode;
 };
 
@@ -139,108 +139,113 @@ export function TasksScreen({ household, userId, headerActions, footer }: TasksS
     view.anytime.length;
 
   return (
-    <Screen
-      title={t('tasks.title')}
-      actions={headerActions}
-      banner={
-        !online ? (
-          <Banner variant="offline" message={t('tasks.offline')} testID="tasks-offline" />
-        ) : null
-      }
-      testID="tasks-screen"
-    >
-      <View
-        accessibilityLabel={t('tasks.filters.label')}
-        style={[styles.wrap, { gap: theme.space[2] }]}
+    <View style={styles.grow}>
+      <Screen
+        title={t('tasks.title')}
+        actions={headerActions}
+        banner={
+          !online ? (
+            <Banner variant="offline" message={t('tasks.offline')} testID="tasks-offline" />
+          ) : null
+        }
+        testID="tasks-screen"
       >
-        {filters.map((item, i) => (
-          <Chip
-            key={item.key}
-            label={item.label}
-            selected={isSelected(item.value)}
-            onPress={() => setFilter(item.value)}
-            testID={
-              item.value.kind === 'member'
-                ? `tasks-filter-member-${i - 2}`
-                : `tasks-filter-${item.key}`
-            }
-          />
-        ))}
-      </View>
-
-      {!loading && view.total === 0 ? (
-        <EmptyState
-          icon="tasks"
-          message={t(filter.kind === 'everyone' ? 'tasks.empty' : 'tasks.emptyFiltered')}
-          testID="tasks-empty"
-        />
-      ) : null}
-
-      {view.overdue.length ? (
-        <View testID="tasks-overdue">
-          <SectionHeader title={t('tasks.groups.overdue')} />
-          {view.overdue.map((item, i) => row(item, `tasks-overdue-${i}`, true))}
-        </View>
-      ) : null}
-
-      {view.today.length ? (
-        <View testID="tasks-today">
-          <SectionHeader title={t('tasks.groups.today')} />
-          {view.today.map((item, i) => row(item, `tasks-today-${i}`, false))}
-        </View>
-      ) : null}
-
-      {view.upcoming.length ? (
-        <View testID="tasks-upcoming" style={{ gap: theme.space[2] }}>
-          <SectionHeader title={t('tasks.groups.upcoming')} />
-          {view.upcoming.map((day, d) => (
-            <View key={day.date}>
-              <SectionHeader variant="group" title={dayLabel(day.date, today, locale)} />
-              {day.items.map((item, i) => row(item, `tasks-upcoming-${d}-${i}`, false))}
-            </View>
+        <View
+          accessibilityLabel={t('tasks.filters.label')}
+          style={[styles.wrap, { gap: theme.space[2] }]}
+        >
+          {filters.map((item, i) => (
+            <Chip
+              key={item.key}
+              label={item.label}
+              selected={isSelected(item.value)}
+              onPress={() => setFilter(item.value)}
+              testID={
+                item.value.kind === 'member'
+                  ? `tasks-filter-member-${i - 2}`
+                  : `tasks-filter-${item.key}`
+              }
+            />
           ))}
         </View>
-      ) : null}
 
-      {view.later.length ? (
-        <View testID="tasks-later">
-          <SectionHeader title={t('tasks.groups.later')} />
-          {view.later
-            .flatMap((day) => day.items)
-            .map((item, i) => row(item, `tasks-later-${i}`, true))}
-        </View>
-      ) : null}
-
-      {view.anytime.length ? (
-        <View testID="tasks-anytime">
-          <SectionHeader title={t('tasks.groups.anytime')} />
-          {view.anytime.map((item, i) => row(item, `tasks-anytime-${i}`, false))}
-        </View>
-      ) : null}
-
-      {view.done.length ? (
-        <View testID="tasks-done">
-          <ListRow
-            title={t(showDone ? 'tasks.groups.hideDone' : 'tasks.groups.showDone', {
-              count: view.done.length,
-            })}
-            variant="navigation"
-            onPress={() => setShowDone((shown) => !shown)}
-            testID="tasks-done-toggle"
+        {!loading && view.total === 0 ? (
+          <EmptyState
+            icon="tasks"
+            message={t(filter.kind === 'everyone' ? 'tasks.empty' : 'tasks.emptyFiltered')}
+            testID="tasks-empty"
           />
-          {showDone ? view.done.map((item, i) => row(item, `tasks-done-${i}`, true)) : null}
-        </View>
-      ) : null}
+        ) : null}
 
-      {!loading && view.total > 0 && open === 0 ? (
-        <ListRow title={t('tasks.allDone')} testID="tasks-all-done" />
-      ) : null}
+        {view.overdue.length ? (
+          <View testID="tasks-overdue">
+            <SectionHeader title={t('tasks.groups.overdue')} />
+            {view.overdue.map((item, i) => row(item, `tasks-overdue-${i}`, true))}
+          </View>
+        ) : null}
+
+        {view.today.length ? (
+          <View testID="tasks-today">
+            <SectionHeader title={t('tasks.groups.today')} />
+            {view.today.map((item, i) => row(item, `tasks-today-${i}`, false))}
+          </View>
+        ) : null}
+
+        {view.upcoming.length ? (
+          <View testID="tasks-upcoming" style={{ gap: theme.space[2] }}>
+            <SectionHeader title={t('tasks.groups.upcoming')} />
+            {view.upcoming.map((day, d) => (
+              <View key={day.date}>
+                <SectionHeader variant="group" title={dayLabel(day.date, today, locale)} />
+                {day.items.map((item, i) => row(item, `tasks-upcoming-${d}-${i}`, false))}
+              </View>
+            ))}
+          </View>
+        ) : null}
+
+        {view.later.length ? (
+          <View testID="tasks-later">
+            <SectionHeader title={t('tasks.groups.later')} />
+            {view.later
+              .flatMap((day) => day.items)
+              .map((item, i) => row(item, `tasks-later-${i}`, true))}
+          </View>
+        ) : null}
+
+        {view.anytime.length ? (
+          <View testID="tasks-anytime">
+            <SectionHeader title={t('tasks.groups.anytime')} />
+            {view.anytime.map((item, i) => row(item, `tasks-anytime-${i}`, false))}
+          </View>
+        ) : null}
+
+        {view.done.length ? (
+          <View testID="tasks-done">
+            <ListRow
+              title={t(showDone ? 'tasks.groups.hideDone' : 'tasks.groups.showDone', {
+                count: view.done.length,
+              })}
+              variant="navigation"
+              onPress={() => setShowDone((shown) => !shown)}
+              testID="tasks-done-toggle"
+            />
+            {showDone ? view.done.map((item, i) => row(item, `tasks-done-${i}`, true)) : null}
+          </View>
+        ) : null}
+
+        {!loading && view.total > 0 && open === 0 ? (
+          <ListRow title={t('tasks.allDone')} testID="tasks-all-done" />
+        ) : null}
+        {/* Room for the docked main action, so the last task isn't under it. */}
+        {footer ? <View style={{ height: theme.layout.minTarget + theme.space[4] }} /> : null}
+      </Screen>
       {footer}
-    </Screen>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  grow: { flex: 1 },
   wrap: {
     flexDirection: 'row',
     flexWrap: 'wrap',
