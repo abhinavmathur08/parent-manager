@@ -1959,7 +1959,10 @@
       "assignee": "For {{name}}",
       "done": "Done",
       "separator": " · ",
-      "assigneeYou": "For you"
+      "assigneeYou": "For you",
+      "anyone": "For anyone",
+      "open": "Not done",
+      "repeats": "Repeats"
     },
     "due": {
       "dateTime": "{{date}}, {{time}}"
@@ -1995,6 +1998,22 @@
       "shared": "Share with helpers",
       "sharedHint": "Family members and caregivers see it and can help.",
       "sharedAlways": "Your tasks are shared with the household."
+    },
+    "completed": "Task done",
+    "deleted": "Task deleted",
+    "undo": "Undo",
+    "failed": "That change couldn't be saved. Try again.",
+    "actions": {
+      "complete": "Complete",
+      "reopen": "Reopen",
+      "completeTitle": "Complete {{title}}",
+      "reopenTitle": "Reopen {{title}}",
+      "assign": "Assign",
+      "take": "I'll do it",
+      "delete": "Delete"
+    },
+    "assign": {
+      "title": "Who is it for?"
     }
   }
 }

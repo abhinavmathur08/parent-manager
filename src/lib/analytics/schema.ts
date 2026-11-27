@@ -156,6 +156,18 @@ export const ANALYTICS_EVENTS = {
     repeats: bool,
     reminder: bool,
   },
+  task_completed: {
+    source: oneOf('manual', 'plan_entry', 'grocery_item', 'event', 'document', 'checklist'),
+    was_overdue: bool,
+    by_assignee: bool,
+    recurring: bool,
+  },
+  task_reopened: { recurring: bool },
+  task_assigned: {
+    assignee_role: oneOf('none', 'self', 'parent', 'helper'),
+    via: oneOf('chip', 'detail', 'take'),
+  },
+  task_deleted: { recurring: bool, scope: oneOf('one', 'all') },
   event_created: {
     kind: code,
     all_day: bool,

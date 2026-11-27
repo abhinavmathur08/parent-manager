@@ -6,27 +6,36 @@ import { AppState, StyleSheet, View } from 'react-native';
 import { Banner } from '@/components/banner';
 import { Chip } from '@/components/chip';
 import { EmptyState } from '@/components/empty-state';
-import { Icon } from '@/components/icon';
 import { ListRow } from '@/components/list-row';
 import { Screen } from '@/components/screen';
 import { SectionHeader } from '@/components/section-header';
+import { Toast } from '@/components/toast';
 import type { TopBarProps } from '@/components/top-bar';
 import { householdTimeZone } from '@/features/calendar/agenda';
 import { useCalendarMembers } from '@/features/calendar/use-members';
 import type { Member } from '@/features/household/members';
+import { useUndoable } from '@/features/planner/use-undoable';
 import { todayIn } from '@/features/planner/week';
 import { useOnline } from '@/hooks/use-online';
 import { useTheme } from '@/hooks/use-theme';
 import { track } from '@/lib/analytics';
 
+import { AssignSheet } from './assign-sheet';
 import { useTaskRows } from './data';
 import { dayLabel, dueLabel, taskTitle } from './labels';
 import { useTaskLimits } from './limits';
+import { isChore, type TaskRow as TaskRowData } from './tables';
+import { TaskRow } from './task-row';
 import { buildTaskView, type TaskFilter, type TaskItem } from './view';
+import { useTaskWrites } from './writes';
 
 export type TasksScreenProps = {
   household: { id: string; locale: string; timezone: string | null };
   userId: string | null;
+  isParent: boolean;
+  isPremium: boolean;
+  /** Opens task detail (S-46). */
+  onOpen?: (taskId: string) => void;
   /** Trailing header actions. */
   headerActions?: TopBarProps['actions'];
   /** The bottom-reachable add action (T-02.2), docked above the tab bar. */
@@ -55,7 +64,15 @@ function useNow(): number {
  * a collapsed Done, filtered to Mine, Everyone or one member. Due dates are in the household's
  * timezone with relative words (NFR3-L10N-1).
  */
-export function TasksScreen({ household, userId, headerActions, footer }: TasksScreenProps) {
+export function TasksScreen({
+  household,
+  userId,
+  isParent,
+  isPremium,
+  onOpen,
+  headerActions,
+  footer,
+}: TasksScreenProps) {
   const { t } = useTranslation();
   const theme = useTheme();
   const online = useOnline();
@@ -68,6 +85,11 @@ export function TasksScreen({ household, userId, headerActions, footer }: TasksS
   const members = useCalendarMembers(household.id);
   const [filter, setFilter] = useState<TaskFilter>({ kind: 'everyone' });
   const [showDone, setShowDone] = useState(false);
+  const [assigning, setAssigning] = useState<TaskRowData | null>(null);
+  const [error, setError] = useState(false);
+  const failed = () => setError(true);
+  const writes = useTaskWrites(userId);
+  const undoable = useUndoable(failed);
 
   // The React Compiler memoizes this.
   const view = buildTaskView(tasks, { filter, userId, timeZone, now: new Date(now), upcomingDays });
@@ -85,34 +107,67 @@ export function TasksScreen({ household, userId, headerActions, footer }: TasksS
     return member?.displayName ?? t('tasks.assignee.member');
   };
 
+  // Parents assign anyone (helpers on Premium); helpers only themselves or a parent (D-25).
+  const assignable = others.filter((m) => m.role === 'parent' || (isParent && isPremium));
+  const canEdit = (task: TaskRowData) => isParent || task.created_by === userId;
+
+  const toggle = (item: TaskItem) => {
+    const { task } = item;
+    if (task.done) {
+      void writes.reopen(task).catch(failed);
+      return;
+    }
+    // Written at once, so the partner sees it; undo reopens it (FR3-TASK-4).
+    void writes.complete(task, item.overdue).catch(failed);
+    undoable.hold({
+      message: t('tasks.completed'),
+      hidden: [],
+      commit: async () => undefined,
+      undo: () => writes.reopen(task),
+    });
+  };
+  const take = (task: TaskRowData) =>
+    void writes.assign(task, userId, 'self', 'take').catch(failed);
+  const remove = (task: TaskRowData) =>
+    // A delete is a final tombstone, so it's held behind the undo bar (NFR-REL-5).
+    undoable.hold({
+      message: t('tasks.deleted'),
+      hidden: [task.id],
+      commit: () => writes.remove(task),
+    });
+
   const row = (item: TaskItem, testID: string, showDay: boolean) => {
-    const due = showDay ? dueLabel(item.task, item.date, { today, locale, timeZone, t }) : null;
-    const time =
-      !showDay && item.task.due_at
-        ? dueLabel(item.task, item.date, { today, locale, timeZone, t })
-        : null;
-    const assigneeId = item.task.assignee_user_id;
-    const parts = [
-      due ?? time,
+    const { task } = item;
+    if (undoable.hidden.includes(task.id)) return null;
+    const spokenDue = dueLabel(task, item.date, { today, locale, timeZone, t });
+    const due = showDay || task.due_at ? spokenDue : null;
+    const assigneeId = task.assignee_user_id;
+    const assignee =
       assigneeId === userId
         ? t('tasks.row.assigneeYou')
         : assigneeId
           ? t('tasks.row.assignee', { name: nameOf(assigneeId) })
-          : null,
-      item.task.done ? t('tasks.row.done') : null,
-    ].filter((part): part is string => part !== null);
+          : null;
+    const mayAssign = canEdit(task) || assigneeId === userId;
     return (
-      <ListRow
-        key={item.task.id}
-        title={taskTitle(item.task, t)}
-        subtitle={parts.length ? parts.join(t('tasks.row.separator')) : undefined}
-        leading={
-          <Icon
-            name={item.task.done ? 'checkCircle' : 'circle'}
-            color={item.task.done ? 'success' : 'textSecondary'}
-          />
+      <TaskRow
+        key={task.id}
+        title={taskTitle(task, t)}
+        due={due}
+        spokenDue={spokenDue}
+        assignee={assignee}
+        done={task.done}
+        repeats={isChore(task)}
+        chipLabel={assigneeId ? (nameOf(assigneeId) ?? '') : t('tasks.editor.anyone')}
+        onToggle={() => toggle(item)}
+        onOpen={onOpen ? () => onOpen(task.id) : undefined}
+        onAssign={
+          !task.done && mayAssign && !(task.shared && !assigneeId && !isParent)
+            ? () => setAssigning(task)
+            : null
         }
-        divider
+        onTake={!task.done && task.shared && !assigneeId && userId ? () => take(task) : null}
+        onDelete={canEdit(task) ? () => remove(task) : null}
         testID={testID}
       />
     );
@@ -240,6 +295,32 @@ export function TasksScreen({ household, userId, headerActions, footer }: TasksS
         {footer ? <View style={{ height: theme.layout.minTarget + theme.space[4] }} /> : null}
       </Screen>
       {footer}
+      <AssignSheet
+        visible={assigning !== null}
+        current={assigning?.assignee_user_id ?? null}
+        userId={userId}
+        assignable={assignable}
+        onPick={(id, role) => {
+          if (assigning) void writes.assign(assigning, id, role, 'chip').catch(failed);
+          setAssigning(null);
+        }}
+        onClose={() => setAssigning(null)}
+      />
+      <Toast
+        visible={undoable.current !== null}
+        message={undoable.current?.message ?? ''}
+        variant="undo"
+        actionLabel={t('tasks.undo')}
+        onAction={undoable.undo}
+        onDismiss={undoable.settle}
+        testID="tasks-undo"
+      />
+      <Toast
+        visible={error}
+        message={t('tasks.failed')}
+        onDismiss={() => setError(false)}
+        testID="tasks-failed"
+      />
     </View>
   );
 }
