@@ -1,13 +1,60 @@
 {
-  "version": 1,
+  "version": 2,
   "templates": [
     {
       "id": "checklist.expecting.prepare_home",
       "stage": "expecting",
       "regions": ["US", "GB", "AU"],
       "items": [
-        { "id": "checklist_item.expecting.fit_car_seat", "dueOffsetDays": -28 },
-        { "id": "checklist_item.expecting.set_up_sleep_space", "dueOffsetDays": -28 }
+        {
+          "id": "checklist_item.expecting.set_up_sleep_space",
+          "dueOffsetDays": -42
+        },
+        {
+          "id": "checklist_item.expecting.fit_car_seat",
+          "dueOffsetDays": -28
+        },
+        {
+          "id": "checklist_item.expecting.check_car_seat_install",
+          "regions": ["US"],
+          "dueOffsetDays": -21
+        },
+        {
+          "id": "checklist_item.expecting.assemble_stroller",
+          "dueOffsetDays": -28
+        },
+        {
+          "id": "checklist_item.expecting.wash_baby_clothes",
+          "dueOffsetDays": -28
+        },
+        {
+          "id": "checklist_item.expecting.set_up_changing_station",
+          "dueOffsetDays": -28
+        },
+        {
+          "id": "checklist_item.expecting.set_up_feeding_supplies",
+          "dueOffsetDays": -28
+        },
+        {
+          "id": "checklist_item.expecting.test_alarms",
+          "dueOffsetDays": -42
+        },
+        {
+          "id": "checklist_item.expecting.stock_household_basics",
+          "dueOffsetDays": -21
+        },
+        {
+          "id": "checklist_item.expecting.freeze_easy_meals",
+          "dueOffsetDays": -21
+        },
+        {
+          "id": "checklist_item.expecting.arrange_pet_care",
+          "dueOffsetDays": -42
+        },
+        {
+          "id": "checklist_item.expecting.line_up_helpers",
+          "dueOffsetDays": -42
+        }
       ]
     },
     {
@@ -15,8 +62,48 @@
       "stage": "expecting",
       "regions": ["US", "GB", "AU"],
       "items": [
-        { "id": "checklist_item.expecting.pack_parent_bag", "dueOffsetDays": -42 },
-        { "id": "checklist_item.expecting.pack_going_home_outfit", "dueOffsetDays": -42 }
+        {
+          "id": "checklist_item.expecting.pack_parent_bag",
+          "dueOffsetDays": -42
+        },
+        {
+          "id": "checklist_item.expecting.pack_partner_bag",
+          "dueOffsetDays": -42
+        },
+        {
+          "id": "checklist_item.expecting.pack_baby_things",
+          "dueOffsetDays": -42
+        },
+        {
+          "id": "checklist_item.expecting.pack_going_home_outfit",
+          "dueOffsetDays": -42
+        },
+        {
+          "id": "checklist_item.expecting.pack_chargers",
+          "dueOffsetDays": -42
+        },
+        {
+          "id": "checklist_item.expecting.pack_comfort_items",
+          "dueOffsetDays": -42
+        },
+        {
+          "id": "checklist_item.expecting.pack_pregnancy_records",
+          "dueOffsetDays": null,
+          "review": ["health", "legal"]
+        },
+        {
+          "id": "checklist_item.expecting.pack_birth_preferences",
+          "dueOffsetDays": null,
+          "review": ["health"]
+        },
+        {
+          "id": "checklist_item.expecting.plan_route",
+          "dueOffsetDays": -42
+        },
+        {
+          "id": "checklist_item.expecting.bags_by_door",
+          "dueOffsetDays": -35
+        }
       ]
     },
     {
@@ -26,14 +113,61 @@
       "items": [
         {
           "id": "checklist_item.expecting.plan_parental_leave",
+          "dueOffsetDays": -140,
+          "review": ["legal"]
+        },
+        {
+          "id": "checklist_item.expecting.check_leave_pay",
+          "dueOffsetDays": -112,
+          "review": ["legal"]
+        },
+        {
+          "id": "checklist_item.expecting.get_maternity_certificate",
+          "regions": ["GB"],
+          "dueOffsetDays": null,
+          "review": ["health", "legal"]
+        },
+        {
+          "id": "checklist_item.expecting.apply_maternity_exemption",
+          "regions": ["GB"],
+          "dueOffsetDays": null,
+          "review": ["health", "legal"]
+        },
+        {
+          "id": "checklist_item.expecting.choose_baby_doctor",
+          "regions": ["US", "AU"],
+          "dueOffsetDays": null,
+          "review": ["health"]
+        },
+        {
+          "id": "checklist_item.expecting.preregister_birth_place",
+          "regions": ["US", "AU"],
+          "dueOffsetDays": null,
+          "review": ["health"]
+        },
+        {
+          "id": "checklist_item.expecting.check_insurance_for_baby",
+          "regions": ["US", "AU"],
+          "dueOffsetDays": -56,
+          "review": ["legal"]
+        },
+        {
+          "id": "checklist_item.expecting.research_childcare",
+          "dueOffsetDays": -84
+        },
+        {
+          "id": "checklist_item.expecting.update_wills",
           "dueOffsetDays": -84,
           "review": ["legal"]
         },
         {
-          "id": "checklist_item.expecting.choose_pediatrician",
-          "regions": ["US"],
-          "dueOffsetDays": null,
-          "review": ["health"]
+          "id": "checklist_item.expecting.review_life_insurance",
+          "dueOffsetDays": -84,
+          "review": ["legal"]
+        },
+        {
+          "id": "checklist_item.expecting.plan_leave_budget",
+          "dueOffsetDays": -112
         }
       ]
     },
@@ -44,13 +178,71 @@
       "items": [
         {
           "id": "checklist_item.newborn.register_birth",
-          "dueOffsetDays": 14,
+          "dueOffsetDays": 7,
           "review": ["legal"]
         },
         {
           "id": "checklist_item.newborn.check_ssn_card",
           "regions": ["US"],
           "dueOffsetDays": 28,
+          "review": ["legal"]
+        },
+        {
+          "id": "checklist_item.newborn.claim_family_payments",
+          "regions": ["GB", "AU"],
+          "dueOffsetDays": 14,
+          "review": ["legal"]
+        },
+        {
+          "id": "checklist_item.newborn.enrol_in_medicare",
+          "regions": ["AU"],
+          "dueOffsetDays": null,
+          "review": ["health", "legal"]
+        },
+        {
+          "id": "checklist_item.newborn.register_with_gp",
+          "regions": ["GB"],
+          "dueOffsetDays": null,
+          "review": ["health"]
+        },
+        {
+          "id": "checklist_item.newborn.add_baby_to_insurance",
+          "regions": ["US", "AU"],
+          "dueOffsetDays": 7,
+          "review": ["legal"]
+        },
+        {
+          "id": "checklist_item.newborn.book_first_checkup",
+          "dueOffsetDays": null,
+          "review": ["health"]
+        },
+        {
+          "id": "checklist_item.newborn.keep_health_record_handy",
+          "regions": ["GB", "AU"],
+          "dueOffsetDays": null,
+          "review": ["health"]
+        },
+        {
+          "id": "checklist_item.newborn.book_parent_checkup",
+          "dueOffsetDays": null,
+          "review": ["health"]
+        },
+        {
+          "id": "checklist_item.newborn.update_employers",
+          "dueOffsetDays": 3,
+          "review": ["legal"]
+        },
+        {
+          "id": "checklist_item.newborn.agree_visitors",
+          "dueOffsetDays": 0
+        },
+        {
+          "id": "checklist_item.newborn.ask_for_help",
+          "dueOffsetDays": 0
+        },
+        {
+          "id": "checklist_item.newborn.apply_for_passport",
+          "dueOffsetDays": null,
           "review": ["legal"]
         }
       ]
@@ -60,8 +252,55 @@
       "stage": "infant_0_6m",
       "regions": ["US", "GB", "AU"],
       "items": [
-        { "id": "checklist_item.newborn.set_up_changing_station", "dueOffsetDays": 0 },
-        { "id": "checklist_item.newborn.plan_first_week_meals", "dueOffsetDays": 0 }
+        {
+          "id": "checklist_item.newborn.split_night_shifts",
+          "dueOffsetDays": 0
+        },
+        {
+          "id": "checklist_item.newborn.split_household_chores",
+          "dueOffsetDays": 0
+        },
+        {
+          "id": "checklist_item.newborn.plan_easy_meals",
+          "dueOffsetDays": 0
+        },
+        {
+          "id": "checklist_item.newborn.set_up_grocery_delivery",
+          "dueOffsetDays": 0
+        },
+        {
+          "id": "checklist_item.newborn.restock_diapers",
+          "dueOffsetDays": 0
+        },
+        {
+          "id": "checklist_item.newborn.set_up_feeding_spot",
+          "dueOffsetDays": 0
+        },
+        {
+          "id": "checklist_item.newborn.bottle_cleaning_spot",
+          "dueOffsetDays": 3
+        },
+        {
+          "id": "checklist_item.newborn.laundry_routine",
+          "dueOffsetDays": 3
+        },
+        {
+          "id": "checklist_item.newborn.pack_outing_bag",
+          "dueOffsetDays": 3
+        },
+        {
+          "id": "checklist_item.newborn.save_health_contacts",
+          "dueOffsetDays": null,
+          "review": ["health"]
+        },
+        {
+          "id": "checklist_item.newborn.plan_rest_time",
+          "dueOffsetDays": 7
+        },
+        {
+          "id": "checklist_item.newborn.shared_photo_album",
+          "dueOffsetDays": 7
+        }
       ]
     }
   ]

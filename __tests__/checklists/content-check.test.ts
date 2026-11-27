@@ -1,4 +1,4 @@
-const { validate } = require('../../scripts/checklist-content.js');
+const { validate, reviewSheet } = require('../../scripts/checklist-content.js');
 
 type Item = { id: string; regions?: string[]; dueOffsetDays: number | null; review?: string[] };
 
@@ -113,5 +113,35 @@ describe('checklist content check (K-01)', () => {
       'checklist.other.test: unknown stage pregnant',
       "checklist_item.other.b: a baby's item can't be due before the checklist starts",
     ]);
+  });
+});
+
+describe('review sheet (K-04)', () => {
+  const data = content([
+    ok,
+    {
+      id: 'checklist_item.newborn.book_checkup',
+      regions: ['GB'],
+      dueOffsetDays: null,
+      review: ['health'],
+    },
+  ]);
+  const text = locales(okText, { ...okText, book_checkup: 'Book a check-up as your GP advises' });
+  const sheet: string = reviewSheet({ version: 1, ...data }, text);
+
+  it('lists each item per locale with its due date and flags', () => {
+    expect(sheet).toContain(
+      '| `plan_meals` | Start day | — | Plan easy meals | Plan easy meals | — |',
+    );
+    expect(sheet).toContain(
+      '| `book_checkup` | Anytime | health | — | Book a check-up as your GP advises | — |',
+    );
+  });
+
+  it("lists health items only under the markets they're offered in", () => {
+    const gb = sheet.slice(sheet.indexOf('### GB'), sheet.indexOf('### AU'));
+    const us = sheet.slice(sheet.indexOf('### US'), sheet.indexOf('### GB'));
+    expect(gb).toContain('checklist_item.newborn.book_checkup');
+    expect(us).not.toContain('checklist_item.newborn.book_checkup');
   });
 });
