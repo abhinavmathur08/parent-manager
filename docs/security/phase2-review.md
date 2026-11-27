@@ -16,7 +16,7 @@ Issue #264, NFR2-SEC-4. Reviewed 2026-11-25 against `main` at `3f50f49` (all Pha
 | SR2-L1 | Low      | Android Auto Backup is on by default (**fixed**)                                             | #319  |
 | SR2-L2 | Low      | 2 moderate advisories in build-time dependencies (**fixed**)                                 | #320  |
 | SR2-L3 | Low      | Stored files' bytes aren't checked against their type (**fixed**)                            | #321  |
-| SR2-L4 | Low      | Attachment titles on event detail sit outside the vault lock (needs a product decision)      | #322  |
+| SR2-L4 | Low      | Attachment titles on event detail sit outside the vault lock (**fixed (#322)**)              | #322  |
 
 Severity: **critical** is a cross-household or unauthenticated breach of documents or events; **high** is a member reading or changing what D-16 forbids, or document files reaching a third party, without device access; **medium** needs access to the member's own unlocked device or container, or a configuration step, or is unverified; **low** is defence in depth.
 
@@ -43,7 +43,7 @@ MASVS v2 controls that apply to Phase 2. "Partly" points to a finding.
 | MASVS-NETWORK-1: traffic secured                                | Pass   | HTTPS only; cleartext allowed only for E2E builds against a local stack (`app.config.ts:49-55`). Pinning is L2.                                                                                                                                        |
 | MASVS-PLATFORM-1: IPC used safely                               | Pass   | Deep links open screens only; data still comes through RLS. Device calendar copies link back by event ID.                                                                                                                                              |
 | MASVS-PLATFORM-2: WebViews used safely                          | Pass   | One web view, for iOS PDFs: JavaScript off, `originWhitelist` and `onShouldStartLoadWithRequest` limited to the Storage origin, no multiple windows, no link previews (`document-pages.tsx:72-82`). SR2-L3 is about content, not the view.             |
-| MASVS-PLATFORM-3: UI doesn't leak data                          | Partly | `usePreventScreenCapture`, iOS app-switcher blur, content hidden while inactive (`vault-gate.tsx:57-68,106-117`). SR2-M5 (unverified on devices), SR2-L4.                                                                                              |
+| MASVS-PLATFORM-3: UI doesn't leak data                          | Partly | `usePreventScreenCapture`, iOS app-switcher blur, content hidden while inactive (`vault-gate.tsx:57-68,106-117`). SR2-M5 (unverified on devices). SR2-L4 fixed.                                                                                        |
 | MASVS-CODE-1/2: up-to-date platform, updates enforced           | Pass   | Expo SDK 58; forced updates through `app.minimum_version`.                                                                                                                                                                                             |
 | MASVS-CODE-3: no known-vulnerable dependencies                  | Pass   | No high or critical advisories; 2 moderate, build-time only (SR2-L2). `--frozen-lockfile` in CI, `deno test --frozen`.                                                                                                                                 |
 | MASVS-CODE-4: untrusted input validated                         | Pass   | `documents` validates every field (UUIDs, dates, categories, types, sizes) before SQL (`handler.ts:121-141`); SQL triggers re-check. SR2-L3.                                                                                                           |
@@ -103,9 +103,9 @@ Nothing found. What was checked, with evidence:
 
 The bucket checks the declared content type and `finish` checks sizes (`handler.ts:194-205`), but not the bytes. Only a parent can upload, and the viewers can't run scripts. **Fixed (#321):** `finish` reads each stored file's first 8 bytes as the service role (a ranged download) and refuses with `documents.invalid` unless they start `%PDF-`, `FF D8 FF` or the PNG signature to match the declared type (`supabase/functions/documents/magic.ts`). The app also refuses a picked PDF or PNG whose bytes don't match before uploading it.
 
-### SR2-L4 (low, product decision): attachment titles outside the vault lock, #322
+### SR2-L4 (low): attachment titles outside the vault lock, #322
 
-Event detail lists attached documents' titles and categories (`src/features/documents/event-attachments.tsx:46`) outside `VaultGate`, so they aren't behind the lock or capture blocking. Only members who can see both see them. **Fix:** accept and say so in the spec, or show a count that opens through the vault.
+Event detail lists attached documents' titles and categories (`src/features/documents/event-attachments.tsx:46`) outside `VaultGate`, so they aren't behind the lock or capture blocking. Only members who can see both see them. **Fixed (#322):** the product owner chose a count (2026-11-26). Event detail now shows only how many attached documents the member can see, in one "Open documents" row, and never a title or category. The row opens `/calendar/attachments`, which lists them inside `VaultGate`, behind the lock and capture blocking (`src/features/documents/event-attachments-screen.tsx`).
 
 ### Noted, no action
 
@@ -118,7 +118,7 @@ Event detail lists attached documents' titles and categories (`src/features/docu
 ## For the product owner
 
 1. **SR2-M4:** add `DOCUMENTS_CRON_SECRET` (Edge Function secret) and `documents_function_url`, `documents_cron_secret` (Vault) to the hosted project before the beta. Tied to D-21.
-2. **SR2-L4:** decide whether attachment titles on event detail need the vault lock.
+2. **SR2-L4:** decided 2026-11-26 (a count on event detail, the list behind the vault) and fixed in #322.
 3. **External review (#265, D-20)** is still open. This document and the threat model are the inputs for it.
 4. **Export compliance (not a vulnerability):** `app.config.ts` sets `ITSAppUsesNonExemptEncryption: false` while the app bundles SQLCipher and uses AES-GCM to protect user data. That's usually exempt, but whether the declaration needs anything more is a store question for L-07 (#266).
 

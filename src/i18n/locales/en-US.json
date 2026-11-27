@@ -291,6 +291,9 @@
       "failed": "Couldn't change the event. Try again.",
       "attachments": "Documents",
       "attach": "Attach documents",
+      "openDocuments": "Open documents",
+      "documentCount_one": "{{count}} document",
+      "documentCount_other": "{{count}} documents",
       "reminderPaused": "{{reminder}} (paused)",
       "remindersPaused": "Without Premium, only the first reminder of each event goes off. The others are kept and come back with Premium.",
       "sharedNeedsPremium": "Family members and caregivers see shared events with Premium.",
@@ -774,6 +777,10 @@
         "failed": "That didn't work. Try again.",
         "limit": "Your household has reached its document limit."
       }
+    },
+    "eventAttachments": {
+      "title": "Attached documents",
+      "empty": "No documents are attached to this appointment."
     },
     "attach": {
       "title": "Attach documents",

@@ -4,7 +4,7 @@ This is the decision log. Each entry names the backlog items and GitHub issues i
 
 ## Status at a glance
 
-Updated 2026-11-22. D-14 to D-23 are Phase 2 decisions ([spec-phase2.md](spec-phase2.md)).
+Updated 2026-11-27. D-14 to D-23 are Phase 2 decisions ([spec-phase2.md](spec-phase2.md)). D-24 to D-30 are Phase 3 decisions ([spec-phase3.md](spec-phase3.md)), all decided on 2026-11-27; Phase 3 is planning only, so none blocks current work.
 
 | ID   | Decision                                   | Status                                                 | Needed by                                                                      |
 | ---- | ------------------------------------------ | ------------------------------------------------------ | ------------------------------------------------------------------------------ |
@@ -31,6 +31,13 @@ Updated 2026-11-22. D-14 to D-23 are Phase 2 decisions ([spec-phase2.md](spec-ph
 | D-21 | Phase 2: storage plan for documents        | Open                                                   | Before the Phase 2 beta; part of D-1                                           |
 | D-22 | Phase 2: who signs document read links     | Decided 2026-11-22: the `documents` function only      |                                                                                |
 | D-23 | Phase 2: busy days for members             | Decided 2026-11-22: parents' devices publish           |                                                                                |
+| D-24 | Phase 3: free and Premium split            | Decided 2026-11-27: 3 free recurring chores            |                                                                                |
+| D-25 | Phase 3: what helpers do with tasks        | Decided 2026-11-27: assigned, shared or rotation       |                                                                                |
+| D-26 | Phase 3: chore rotation                    | Decided 2026-11-27: simple turn-taking                 |                                                                                |
+| D-27 | Phase 3: starter checklist content         | Decided 2026-11-27: Claude drafts, health review       | Arrange the health reviewers before K-04 and the Phase 3 beta                  |
+| D-28 | Phase 3: points and rewards                | Decided 2026-11-27: out of scope                       |                                                                                |
+| D-29 | Phase 3: where Tasks sits in the tab bar   | Decided 2026-11-27: Tasks takes the Recipes slot       |                                                                                |
+| D-30 | Phase 3: voice and widget capture          | Decided 2026-11-27: deferred to after Phase 3          |                                                                                |
 
 ## Decided
 
@@ -116,6 +123,46 @@ The vault holds files a parent chooses, with a category and an optional person t
 ### D-22 Document read links: decided 2026-11-22, signed on the server only
 
 Only the `documents` Edge Function issues read links, after its own `private.can_read_document` check for the caller, signed with the service role for 60 seconds. Clients have no storage policy on the `documents` bucket, so no member can read, list or sign a file directly, or mint a link that lasts longer (V-02.3, R2-DOC-1, NFR2-SEC-1).
+
+### D-24 Phase 3 free and Premium split: decided 2026-11-27, 3 free recurring chores
+
+The product owner chose the vision's table plus a few recurring chores on Free (the option that needed a vision change).
+
+- **Free:** unlimited one-off tasks between the two parents, every built-in starter checklist, tasks from other modules, due dates, 1 reminder per task, this week's and last week's "who's carrying what" counts, 4 weeks of done history, and up to 3 recurring chores.
+- **Premium:** unlimited recurring chores, rotation (turn-taking), saved household templates, trends over time, full done history, and tasks for caregivers and family members.
+- **Always free:** export, deletion and privacy controls.
+- **Free-chore cap:** a server setting (`app_config`, default 3), tuned without a release, including to 0. Adding a 4th recurring chore opens a specific upgrade prompt naming unlimited recurring chores (trigger `recurring_chore`), and the server refuses it too.
+- **Lapse:** chores beyond the cap pause rather than being deleted (vision paywall principle 7), as Phase 2 kept each event's first reminder and paused the rest. The 3 earliest-created chores keep running without rotation; each paused chore's open occurrence stays as an ordinary task; Premium returning resumes them all.
+- **Vision:** the product owner approved changing the "What sits where" table's Tasks and chores row to match.
+- **Unblocks:** T-01.1, K-03, T-05, M-05. Spec section 3.8, FR3-CHORE-6 and FR3-CHORE-7; resolves conflicts C3-2 and C3-3.
+
+### D-25 What family members and caregivers do with tasks: decided 2026-11-27, assigned, shared or rotation
+
+Helpers see a task assigned to them, a task shared with helpers ("anyone can help"), or a chore they rotate on, following D-16. They can complete, take and add tasks; what they add is always shared, and they can assign only to themselves or a parent. Only parents share, assign to helpers or create chores. Not chosen: complete-only helpers (they couldn't flag "we're out of nappy cream"), and helpers seeing every task. Spec section 2 and R3-ACC-1; unblocks T-01.2.
+
+### D-26 Chore rotation: decided 2026-11-27, simple turn-taking
+
+A parent picks an ordered list of members; each new occurrence goes to the next one after whoever did the last, and one occurrence can be reassigned. No automatic balancing. Rotation is Premium (D-24). Not chosen: fixed assignees only, and automatic balancing (opaque, and it scores members, against D-28). Spec FR3-CHORE-4; unblocks T-03.2.
+
+### D-27 Starter checklist content: decided 2026-11-27, Claude drafts with health review
+
+- **Content:** Claude drafts original, practical logistics items for each region (US, UK and Australia) in five checklists: expecting (prepare the home, hospital bag, paperwork) and newborn (first weeks, home routines). Items name actions, never clinical timings or medical advice.
+- **Review:** the product owner reviews every item, and a qualified health reviewer in each market (such as a midwife, health visitor or pediatric nurse) checks the items that touch health services.
+- **Expecting checklists ship in Phase 3,** since the app is stage-aware from pregnancy (spec conflict C3-4).
+- **Still open (you):** arrange the health reviewers in each market before K-04 and the Phase 3 beta. Claude won't engage a vendor or reviewer.
+- **Unblocks:** K-04 (content drafting can start; sign-off waits for the reviewers). Development uses K-01's placeholder content.
+
+### D-28 Points, rewards and streaks: decided 2026-11-27, out of scope
+
+No points, streaks, badges or rankings. "Who's carrying what" shows neutral counts only. Spec FR3-LOAD-3; unblocks T-05.
+
+### D-29 Where Tasks sits in the tab bar: decided 2026-11-27, the Recipes slot
+
+Tasks takes the Recipes tab's slot: Plan, Calendar, List, Tasks, Household. Recipes moves to a button in the Plan tab's header, and stays in the add-to-slot sheet (S-11). T-02.1 updates design-system.md's tab bar row and the Maestro flows that open Recipes when it's built. Not chosen: a sixth tab (cramped at large text sizes), or Tasks inside the Household tab (two taps away). Spec FR3-TASK-1 and conflict C3-6; unblocks T-02.1.
+
+### D-30 Voice and widget capture: decided 2026-11-27, deferred to after Phase 3
+
+Widgets, lock-screen shortcuts, and Siri and Google Assistant shortcuts are built once, after Phase 3, as one fast-capture item covering tasks and the grocery list together. Phase 3 has a bottom-reachable two-tap add, and keyboard dictation works in the title field. No vision change: the vision's Phase 3 row doesn't list quick capture (spec conflict C3-1).
 
 ## Deferred until the beta or launch
 

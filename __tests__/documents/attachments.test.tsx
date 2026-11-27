@@ -1,5 +1,8 @@
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
+import type { ReactNode } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+
+import EventAttachmentsRoute from '@/app/(tabs)/calendar/attachments';
 
 import { AttachDocumentsScreen } from '@/features/documents/attach-screen';
 import {
@@ -8,6 +11,7 @@ import {
   attachedDocuments,
 } from '@/features/documents/attachments';
 import { EventAttachments } from '@/features/documents/event-attachments';
+import { EventAttachmentsScreen } from '@/features/documents/event-attachments-screen';
 import type { DocumentRow, EventDocumentRow } from '@/features/documents/tables';
 import { validateEvent } from '@/lib/analytics/schema';
 
@@ -24,6 +28,20 @@ jest.mock('@/features/subscription/entitlement', () => ({
 const mockOpenPremiumSheet = jest.fn();
 jest.mock('@/features/subscription/premium-sheet', () => ({
   usePremiumSheet: () => ({ openPremiumSheet: mockOpenPremiumSheet }),
+}));
+// The route's lock is VaultGate's own tests' job; here it only marks what it wraps.
+jest.mock('@/features/documents/vault/vault-gate', () => ({
+  VaultGate: ({ children }: { children: ReactNode }) => {
+    const { View: MockView } = jest.requireActual('react-native');
+    return <MockView testID="vault-gate">{children}</MockView>;
+  },
+}));
+jest.mock('expo-router', () => ({
+  router: { push: jest.fn(), back: jest.fn(), replace: jest.fn(), canGoBack: () => true },
+  useLocalSearchParams: () => ({ eventId: 'e1' }),
+}));
+jest.mock('@/features/household/membership', () => ({
+  useHousehold: () => ({ state: { status: 'member', membership: { locale: 'en-US' } } }),
 }));
 let mockUuid = 0;
 jest.mock('expo-crypto', () => ({ randomUUID: () => `link-${++mockUuid}` }));
@@ -129,7 +147,7 @@ describe('saving attachments (FR2-DOC-5)', () => {
   });
 });
 
-describe('event detail attachments (S-38)', () => {
+describe('event detail attachments (S-38, SR2-L4)', () => {
   const show = async (isParent: boolean) => {
     const onOpen = jest.fn();
     const onAttach = jest.fn();
@@ -147,18 +165,31 @@ describe('event detail attachments (S-38)', () => {
     return { onOpen, onAttach };
   };
 
-  it('lets a parent open an attachment and attach more', async () => {
+  it('shows a count with no title or category, outside the vault lock', async () => {
     mockRows = {
-      documents: [doc('d1', 'Insurance card')],
-      event_documents: [link('l1', 'e1', 'd1')],
+      documents: [
+        doc('d1', 'Insurance card'),
+        doc('d2', 'Allergy plan', { category: 'doc.medical' }),
+        doc('d3', 'Not attached'),
+      ],
+      event_documents: [link('l1', 'e1', 'd1'), link('l2', 'e1', 'd2')],
     };
     const { onOpen, onAttach } = await show(true);
-    expect(screen.getByText('Insurance card')).toBeTruthy();
-    expect(screen.getByText('Insurance')).toBeTruthy();
-    await fireEvent.press(screen.getByTestId('event-attachment-d1'));
-    expect(onOpen).toHaveBeenCalledWith('d1');
+    expect(screen.getByText('2 documents')).toBeTruthy();
+    for (const text of ['Insurance card', 'Allergy plan', 'Insurance', 'Medical']) {
+      expect(screen.queryByText(text, { exact: false })).toBeNull();
+    }
+    expect(screen.queryByTestId('event-attachment-d1')).toBeNull();
+    await fireEvent.press(screen.getByTestId('event-attachments-open'));
+    expect(onOpen).toHaveBeenCalledTimes(1);
     await fireEvent.press(screen.getByTestId('event-attach'));
     expect(onAttach).toHaveBeenCalled();
+  });
+
+  it('gives a parent with nothing attached only the attach action', async () => {
+    await show(true);
+    expect(screen.queryByTestId('event-attachments-open')).toBeNull();
+    expect(screen.getByTestId('event-attach')).toBeTruthy();
   });
 
   it('shows a caregiver without a share nothing at all', async () => {
@@ -169,14 +200,53 @@ describe('event detail attachments (S-38)', () => {
     expect(screen.queryByTestId('event-attach')).toBeNull();
   });
 
-  it('shows a caregiver a shared attachment, with no attach action', async () => {
+  it('shows a caregiver the count of shared attachments, with no attach action', async () => {
+    mockRows = {
+      documents: [doc('d1', 'Insurance card')],
+      event_documents: [link('l1', 'e1', 'd1'), link('l2', 'e1', 'd2')],
+    };
+    await show(false);
+    expect(screen.getByText('1 document')).toBeTruthy();
+    expect(screen.queryByText('Insurance card')).toBeNull();
+    expect(screen.queryByTestId('event-attach')).toBeNull();
+  });
+});
+
+describe('event attachments list (SR2-L4)', () => {
+  it('lists titles and categories and opens the viewer', async () => {
+    mockRows = {
+      documents: [
+        doc('d1', 'Insurance card'),
+        doc('d2', 'Allergy plan', { category: 'doc.medical' }),
+      ],
+      event_documents: [link('l1', 'e1', 'd1'), link('l2', 'e1', 'd2')],
+    };
+    const onOpen = jest.fn();
+    await render(
+      <SafeAreaProvider initialMetrics={metrics}>
+        <EventAttachmentsScreen eventId="e1" locale="en-US" onBack={jest.fn()} onOpen={onOpen} />
+      </SafeAreaProvider>,
+    );
+    expect(screen.getByText('Insurance card')).toBeTruthy();
+    expect(screen.getByText('Medical')).toBeTruthy();
+    await fireEvent.press(screen.getByTestId('event-attachment-d2'));
+    expect(onOpen).toHaveBeenCalledWith('d2');
+  });
+
+  it('sits behind VaultGate in the Calendar stack', async () => {
     mockRows = {
       documents: [doc('d1', 'Insurance card')],
       event_documents: [link('l1', 'e1', 'd1')],
     };
-    await show(false);
-    expect(screen.getByTestId('event-attachment-d1')).toBeTruthy();
-    expect(screen.queryByTestId('event-attach')).toBeNull();
+    await render(
+      <SafeAreaProvider initialMetrics={metrics}>
+        <EventAttachmentsRoute />
+      </SafeAreaProvider>,
+    );
+    expect(screen.getByTestId('vault-gate')).toBeTruthy();
+    expect(screen.getByTestId('vault-gate')).toContainElement(
+      screen.getByTestId('event-attachment-d1'),
+    );
   });
 });
 

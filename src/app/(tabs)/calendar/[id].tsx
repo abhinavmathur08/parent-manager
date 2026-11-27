@@ -60,8 +60,8 @@ function Detail({ membership }: { membership: Membership }) {
             eventId={id}
             locale={membership.locale}
             isParent={membership.role === 'parent'}
-            onOpen={(documentId) =>
-              router.push({ pathname: '/calendar/document', params: { id: documentId } })
+            onOpen={() =>
+              router.push({ pathname: '/calendar/attachments', params: { eventId: id } })
             }
             onAttach={() => router.push({ pathname: '/calendar/attach', params: { eventId: id } })}
           />

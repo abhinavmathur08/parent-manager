@@ -134,13 +134,12 @@ describe('createEncryptedStorage (F-08)', () => {
   it('treats tampered data as signed out and clears it', async () => {
     const data = memoryData();
     const keys = memoryKeys();
-    const storage = createEncryptedStorage(data, keys);
-    await storage.setItem(STORAGE_KEY, SESSION);
+    await createEncryptedStorage(data, keys).setItem(STORAGE_KEY, SESSION);
     const bytes = atob(data.items.get(STORAGE_KEY)!);
     const flipped = String.fromCharCode(bytes.charCodeAt(bytes.length - 1) ^ 0xff);
     data.items.set(STORAGE_KEY, btoa(bytes.slice(0, -1) + flipped));
 
-    await expect(storage.getItem(STORAGE_KEY)).resolves.toBeNull();
+    await expect(createEncryptedStorage(data, keys).getItem(STORAGE_KEY)).resolves.toBeNull();
     expect(data.items.has(STORAGE_KEY)).toBe(false);
     expect(keys.items.size).toBe(0);
   });
@@ -157,12 +156,64 @@ describe('createEncryptedStorage (F-08)', () => {
   it('keeps the session when SecureStore fails, rather than signing out', async () => {
     const data = memoryData();
     const keys = memoryKeys();
+    await createEncryptedStorage(data, keys).setItem(STORAGE_KEY, SESSION);
     const storage = createEncryptedStorage(data, keys);
-    await storage.setItem(STORAGE_KEY, SESSION);
     jest.mocked(keys.getItemAsync).mockRejectedValueOnce(new Error('Keychain unavailable'));
 
     await expect(storage.getItem(STORAGE_KEY)).rejects.toThrow('Keychain unavailable');
     expect(data.items.has(STORAGE_KEY)).toBe(true);
+    await expect(storage.getItem(STORAGE_KEY)).resolves.toBe(SESSION);
+  });
+
+  // #336: Supabase reads the session before every request, so the first sync's parallel
+  // pulls read it all at once. A Keystore read that failed under that load deleted the
+  // session, and every later request went out as anon.
+  it('shares one SecureStore read between parallel reads at launch', async () => {
+    const data = memoryData();
+    const keys = memoryKeys();
+    await createEncryptedStorage(data, keys).setItem(STORAGE_KEY, SESSION);
+    // A key store that finds nothing when another read is already in flight.
+    let inFlight = 0;
+    const stored = keys.items.get(keyStoreName(STORAGE_KEY))!;
+    jest.mocked(keys.getItemAsync).mockClear();
+    jest.mocked(keys.getItemAsync).mockImplementation(async () => {
+      inFlight += 1;
+      await new Promise((resolve) => setTimeout(resolve, 5));
+      inFlight -= 1;
+      return inFlight > 0 ? null : stored;
+    });
+
+    const afterLaunch = createEncryptedStorage(data, keys);
+    const reads = await Promise.all(
+      Array.from({ length: 22 }, () => afterLaunch.getItem(STORAGE_KEY)),
+    );
+
+    expect(reads.every((read) => read === SESSION)).toBe(true);
+    expect(data.items.has(STORAGE_KEY)).toBe(true);
+    expect(keys.getItemAsync).toHaveBeenCalledTimes(1);
+  });
+
+  it('answers reads after a write from memory, without SecureStore', async () => {
+    const keys = memoryKeys();
+    const storage = createEncryptedStorage(memoryData(), keys);
+    await storage.setItem(STORAGE_KEY, SESSION);
+    jest.mocked(keys.getItemAsync).mockRejectedValue(new Error('Keychain busy'));
+
+    await expect(storage.getItem(STORAGE_KEY)).resolves.toBe(SESSION);
+    await storage.setItem(STORAGE_KEY, 'refreshed');
+    await expect(storage.getItem(STORAGE_KEY)).resolves.toBe('refreshed');
+  });
+
+  it("doesn't bring back an older value read while a newer one was written", async () => {
+    const data = memoryData();
+    const keys = memoryKeys();
+    await createEncryptedStorage(data, keys).setItem(STORAGE_KEY, 'old session');
+    const storage = createEncryptedStorage(data, keys);
+
+    const read = storage.getItem(STORAGE_KEY);
+    await storage.setItem(STORAGE_KEY, SESSION);
+
+    await expect(read).resolves.toBe('old session');
     await expect(storage.getItem(STORAGE_KEY)).resolves.toBe(SESSION);
   });
 
