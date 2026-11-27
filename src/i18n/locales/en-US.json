@@ -1926,5 +1926,32 @@
       "preparing": "Preparing the image…",
       "imageFailed": "We couldn't use that image. Try another one."
     }
+  },
+  "checklist": {
+    "expecting": {
+      "prepare_home": "Prepare the home",
+      "hospital_bag": "Hospital bag",
+      "paperwork": "Paperwork"
+    },
+    "newborn": {
+      "first_weeks": "First weeks",
+      "home_routines": "Home routines"
+    }
+  },
+  "checklist_item": {
+    "expecting": {
+      "fit_car_seat": "Install the car seat",
+      "set_up_sleep_space": "Set up the baby’s sleep space",
+      "pack_parent_bag": "Pack a bag for the birthing parent",
+      "pack_going_home_outfit": "Pack the baby’s going-home outfit",
+      "plan_parental_leave": "Plan parental leave with your employers",
+      "choose_pediatrician": "Choose a pediatrician"
+    },
+    "newborn": {
+      "register_birth": "Check the birth certificate paperwork is filed",
+      "check_ssn_card": "Check the baby’s Social Security card arrives",
+      "set_up_changing_station": "Set up a diaper-changing station",
+      "plan_first_week_meals": "Plan easy meals for the first week"
+    }
   }
 }

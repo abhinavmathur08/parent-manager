@@ -76,7 +76,7 @@
     "test:watch": "jest --watch",
     "test:ci": "jest --ci",
     "test:e2e": "maestro test .maestro",
-    "check": "pnpm run lint && pnpm run lint:rules && pnpm run catalog:check && pnpm run email:check && pnpm run notify:copy:check && pnpm run format:check && pnpm run typecheck && pnpm run test:ci",
+    "check": "pnpm run lint && pnpm run lint:rules && pnpm run catalog:check && pnpm run email:check && pnpm run notify:copy:check && pnpm run checklists:check && pnpm run format:check && pnpm run typecheck && pnpm run test:ci",
     "lint:rules": "node scripts/check-lint-rules.js",
     "catalog:check": "node scripts/catalog-seed.js --check",
     "catalog:seed": "node scripts/catalog-seed.js --new",
@@ -88,7 +88,8 @@
     "email:check": "node scripts/email-templates.js --check",
     "email:templates": "node scripts/email-templates.js --write",
     "notify:copy": "node scripts/notification-copy.js --write",
-    "notify:copy:check": "node scripts/notification-copy.js --check"
+    "notify:copy:check": "node scripts/notification-copy.js --check",
+    "checklists:check": "node scripts/checklist-content.js --check"
   },
   "private": true,
   "jest": {

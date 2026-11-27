@@ -1,0 +1,68 @@
+{
+  "version": 1,
+  "templates": [
+    {
+      "id": "checklist.expecting.prepare_home",
+      "stage": "expecting",
+      "regions": ["US", "GB", "AU"],
+      "items": [
+        { "id": "checklist_item.expecting.fit_car_seat", "dueOffsetDays": -28 },
+        { "id": "checklist_item.expecting.set_up_sleep_space", "dueOffsetDays": -28 }
+      ]
+    },
+    {
+      "id": "checklist.expecting.hospital_bag",
+      "stage": "expecting",
+      "regions": ["US", "GB", "AU"],
+      "items": [
+        { "id": "checklist_item.expecting.pack_parent_bag", "dueOffsetDays": -42 },
+        { "id": "checklist_item.expecting.pack_going_home_outfit", "dueOffsetDays": -42 }
+      ]
+    },
+    {
+      "id": "checklist.expecting.paperwork",
+      "stage": "expecting",
+      "regions": ["US", "GB", "AU"],
+      "items": [
+        {
+          "id": "checklist_item.expecting.plan_parental_leave",
+          "dueOffsetDays": -84,
+          "review": ["legal"]
+        },
+        {
+          "id": "checklist_item.expecting.choose_pediatrician",
+          "regions": ["US"],
+          "dueOffsetDays": null,
+          "review": ["health"]
+        }
+      ]
+    },
+    {
+      "id": "checklist.newborn.first_weeks",
+      "stage": "infant_0_6m",
+      "regions": ["US", "GB", "AU"],
+      "items": [
+        {
+          "id": "checklist_item.newborn.register_birth",
+          "dueOffsetDays": 14,
+          "review": ["legal"]
+        },
+        {
+          "id": "checklist_item.newborn.check_ssn_card",
+          "regions": ["US"],
+          "dueOffsetDays": 28,
+          "review": ["legal"]
+        }
+      ]
+    },
+    {
+      "id": "checklist.newborn.home_routines",
+      "stage": "infant_0_6m",
+      "regions": ["US", "GB", "AU"],
+      "items": [
+        { "id": "checklist_item.newborn.set_up_changing_station", "dueOffsetDays": 0 },
+        { "id": "checklist_item.newborn.plan_first_week_meals", "dueOffsetDays": 0 }
+      ]
+    }
+  ]
+}

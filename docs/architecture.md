@@ -642,6 +642,7 @@ Supabase Auth, with:
 - **Lint rule:** ESLint rejects text written directly in JSX (`react/jsx-no-literals` with an allowlist).
 - **Pseudo-locale:** a pseudo-locale in development builds lengthens text and adds accents, to catch layout and hard-coded strings.
 - **Server copy:** notifications, emails, store listings, legal documents and the starter library are versioned per locale.
+- **Starter checklists (K-01, R3-CHK-1):** the templates ship in the app as data in `src/features/checklists/starter-templates.json` (template ID, stage, regions, and items with ID, regions, due offset and review flags), so no table holds them. Their text is in the locale files under the template and item IDs. Unlike other copy, each text is written out in every locale its regions use, with no fallback to en-US, because each market's text is reviewed separately (D-27). `pnpm run checklists:check` fails on missing or stray text, unknown regions or stages, and wording that reads as medical advice or a clinical schedule.
 
 ### Design system
 
