@@ -4,7 +4,7 @@ This is the decision log. Each entry names the backlog items and GitHub issues i
 
 ## Status at a glance
 
-Updated 2026-11-22. D-14 to D-23 are Phase 2 decisions ([spec-phase2.md](spec-phase2.md)).
+Updated 2026-11-27. D-14 to D-23 are Phase 2 decisions ([spec-phase2.md](spec-phase2.md)). D-24 to D-30 are Phase 3 decisions ([spec-phase3.md](spec-phase3.md)); Phase 3 is planning only, so none blocks current work.
 
 | ID   | Decision                                   | Status                                                 | Needed by                                                                      |
 | ---- | ------------------------------------------ | ------------------------------------------------------ | ------------------------------------------------------------------------------ |
@@ -31,6 +31,13 @@ Updated 2026-11-22. D-14 to D-23 are Phase 2 decisions ([spec-phase2.md](spec-ph
 | D-21 | Phase 2: storage plan for documents        | Open                                                   | Before the Phase 2 beta; part of D-1                                           |
 | D-22 | Phase 2: who signs document read links     | Decided 2026-11-22: the `documents` function only      |                                                                                |
 | D-23 | Phase 2: busy days for members             | Decided 2026-11-22: parents' devices publish           |                                                                                |
+| D-24 | Phase 3: free and Premium split            | Open                                                   | Before Phase 3 starts (T-01.1)                                                 |
+| D-25 | Phase 3: what helpers do with tasks        | Open                                                   | Before T-01.2                                                                  |
+| D-26 | Phase 3: chore rotation                    | Open                                                   | Before T-03.2                                                                  |
+| D-27 | Phase 3: starter checklist content         | Open                                                   | Before K-04, and the Phase 3 beta                                              |
+| D-28 | Phase 3: points and rewards                | Open                                                   | Before T-05                                                                    |
+| D-29 | Phase 3: where Tasks sits in the tab bar   | Open                                                   | Before T-02.1                                                                  |
+| D-30 | Phase 3: voice and widget capture          | Open                                                   | Before Phase 3 starts; blocks no item as recommended                           |
 
 ## Decided
 
@@ -218,6 +225,83 @@ It blocks nothing.
 - **Why:** the Supabase Free plan includes 1 GB of file storage for the whole project, and a 50 MB file limit. Premium allows 2 GB per household.
 - **Recommendation:** decide together with D-1: Supabase Pro includes 100 GB, then pay as you go. Development and staging use test files only until then.
 - **Blocks:** nothing in development.
+
+## Open: Phase 3, Tasks and Chores
+
+Phase 3 is drafted as planning on 2026-11-27 ([spec-phase3.md](spec-phase3.md), [backlog-phase3.md](backlog-phase3.md)); building waits until after the Phase 1 beta. The spec follows each recommendation below, so choosing it changes nothing; choosing another option changes the requirements named.
+
+### D-24 Phase 3 free and Premium split: needed before Phase 3 starts
+
+The vision's table gives Free "shared to-dos assigned between the two parents" and Premium "recurring chores, templates, load-balance insights, and tasks assigned to caregivers". Three points need reading:
+
+- **Starter checklists or "templates"?** The Phase 3 row includes newborn starter checklists, and the table makes templates Premium.
+- **"Who is carrying what":** the module section has "a simple view of who is carrying what" with no tier; the table has "load-balance insights" in Premium.
+- **Done history:** D-9's 4-week window covers plans and lists. Tasks aren't named.
+
+Options:
+
+1. **As the vision's table, read narrowly (recommended).** Free: unlimited one-off tasks between the parents, due dates, 1 reminder, notifications, every starter checklist, tasks from other modules, who's carrying what for this week and last, and done history for 4 weeks. Premium: recurring chores and rotation, saved household templates, trends over 12 weeks, helpers, full done history. No vision change.
+2. **Option 1 plus a few free chores,** such as 3 recurring chores. Free households would reach the weekly habit more easily (spec AS3-1), but it changes the vision's table, so it needs your approval to edit vision.md.
+3. **Starter checklists Premium too.** Reads "templates" broadly. Not recommended: the checklists are the new-parent hook and cost nothing to serve.
+
+- **Tuning:** every number is a server setting.
+- **Unblocks:** T-01.1, K-03, T-05, M-05. Spec section 3.8 and conflicts C3-2, C3-3.
+
+### D-25 What family members and caregivers do with tasks: needed before T-01.2
+
+D-16 decided that helpers see only what a parent shares. Tasks need the same for doing, not just seeing.
+
+1. **Assigned, shared or in their rotation (recommended).** A helper sees a task assigned to them, a task shared with helpers ("anyone can help"), or a chore they rotate on. They can complete, take and add tasks; what they add is always shared, and they can assign only to themselves or to a parent. Only parents share, assign to helpers or make chores.
+2. **See only, complete only.** Helpers can't add tasks. Simpler, but a nanny can't flag "we're out of nappy cream" without a message.
+3. **Helpers see every task.** Not recommended: tasks may hold the parents' private to-dos, and it breaks D-16's pattern.
+
+- **Unblocks:** T-01.2. Spec section 2 and R3-ACC-1.
+
+### D-26 Chore rotation: needed before T-03.2
+
+1. **Simple turn-taking (recommended).** A parent picks an ordered list of members; each new occurrence goes to the next one after whoever did the last. One occurrence can be reassigned. No automatic balancing.
+2. **No rotation.** A chore has one fixed assignee. Simplest, but "take turns" is the usual way partners split chores fairly.
+3. **Automatic balancing.** The app assigns each occurrence to whoever has done least. Opaque, and it scores members, which D-28 recommends against.
+
+- **Unblocks:** T-03.2. Spec FR3-CHORE-4.
+
+### D-27 Starter checklist content: needed before K-04 and the Phase 3 beta
+
+Five checklists (expecting: prepare the home, hospital bag, paperwork; newborn: first weeks, home routines) in US, UK and Australian English. Some items touch health services or legal admin (registering the birth, adding the baby to insurance), which differ by region and must not become medical advice (vision non-goals).
+
+1. **Claude drafts, a qualified reviewer checks (recommended).** Claude drafts original, practical logistics items for each region; you review them, and a midwife, health visitor or pediatric nurse in each market checks any item that touches health services, as the vision asks for health schedules. Items name actions ("book the baby's first check-up as your provider advises"), never clinical timings.
+2. **Commission a parenting writer.** Like D-8 for recipes. Better voice, more cost and lead time; still needs the health review.
+3. **License existing checklists.** Fastest, but ties content to a publisher's terms and voice, and may not cover all three regions.
+
+- **Also decide:** whether expecting checklists ship in Phase 3 (the vision's row says "newborn"; spec conflict C3-4). Recommended yes, since the app is stage-aware from pregnancy.
+- **Unblocks:** K-04 and L-11. Development uses placeholder content from K-01.
+
+### D-28 Points, rewards and streaks: needed before T-05
+
+1. **Out of scope (recommended).** No points, streaks, badges or rankings. "Who's carrying what" shows neutral counts. Scoring partners against each other can turn the mental-load tool into a source of conflict, and the design system allows one celebration only (the list-complete screen).
+2. **Light streaks for the household as a whole.** Encourages the weekly habit, without comparing partners. Adds copy and design work, and more for helpers.
+3. **Points per member with optional rewards.** Common in chore apps for older children. Not for this audience: the household's children are under 5.
+
+- **Unblocks:** T-05. Spec FR3-LOAD-3.
+
+### D-29 Where Tasks sits in the tab bar: needed before T-02.1
+
+The floating tab bar holds 5 tabs (Plan, Calendar, List, Recipes, Household), all used since Phase 2, and weekly use needs Tasks one tap away.
+
+1. **Tasks takes the Recipes slot (recommended).** Recipes moves to a button in the Plan tab's header and stays in the add-to-slot sheet (S-11), where most recipe use starts. Updates design-system.md's tab bar row and the Maestro flows that open Recipes.
+2. **A sixth tab.** No navigation change elsewhere, but the floating bar gets cramped at large text sizes and on small phones.
+3. **Inside the Household tab, with today's tasks on the Plan tab.** No tab change, but Tasks is two taps away and easy to miss, which risks the "done when".
+
+- **Unblocks:** T-02.1. Spec FR3-TASK-1 and conflict C3-6.
+
+### D-30 Voice and widget capture: needed before Phase 3 starts
+
+The vision's Tasks and Chores section includes "quick capture by voice or widget", but its Phase 3 row doesn't, and Phase 1 left widgets and assistant shortcuts out (spec.md C-2).
+
+1. **Defer to one fast-capture item after Phase 3 (recommended).** Widgets, lock-screen shortcuts and Siri and Google Assistant shortcuts, built once for tasks and the grocery list together. They need native extension targets on both platforms. Phase 3 has a bottom-reachable two-tap add, and keyboard dictation works in the title field.
+2. **Build them in Phase 3 for tasks only.** Closer to the vision's module description, but about 4 to 6 more backlog items, a native target spike, and the list would get them separately later.
+
+- **Unblocks:** nothing as recommended. Spec conflict C3-1.
 
 ## Not blocking Phase 1 (decide later)
 
