@@ -1931,6 +1931,10 @@
   },
   "tasks": {
     "title": "Tasks",
-    "empty": "Nothing to do yet. Tasks you and your partner add show here."
+    "empty": "Nothing to do yet. Tasks you and your partner add show here.",
+    "untitled": "Task",
+    "due": {
+      "dateTime": "{{date}}, {{time}}"
+    }
   }
 }
