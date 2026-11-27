@@ -1,6 +1,6 @@
 # Parent Manager: Phase 3 product specification
 
-Status: draft for the product owner's review, 2026-11-27. Phase 3 is **Tasks and Chores**. This is planning only: building it waits until after the Phase 1 beta, per the vision's phase gates.
+Status: approved for building, 2026-11-27. Phase 3 is **Tasks and Chores**. Building starts now: the product owner decided on 2026-11-27 that Phases 1 to 3 launch together in one first beta (vision, Roadmap).
 
 How this relates to the other docs:
 
