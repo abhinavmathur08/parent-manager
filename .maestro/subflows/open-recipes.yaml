@@ -1,0 +1,16 @@
+# Shared steps: opens Recipes from the Plan tab's header (D-29: Tasks took the Recipes tab's
+# slot). Not run on its own (config.yaml runs top-level flows only).
+appId: ${APP_ID || 'com.myparentmanager'}
+---
+- tapOn:
+    id: tab-plan
+- scrollUntilVisible:
+    element:
+      id: plan-recipes
+    direction: UP
+- tapOn:
+    id: plan-recipes
+- extendedWaitUntil:
+    visible:
+      id: recipes-screen
+    timeout: 10000

@@ -1,0 +1,13 @@
+# Shared steps: goes back from Recipes to the Plan tab. Not run on its own.
+appId: ${APP_ID || 'com.myparentmanager'}
+---
+- scrollUntilVisible:
+    element:
+      id: recipes-screen-title-back
+    direction: UP
+- tapOn:
+    id: recipes-screen-title-back
+- extendedWaitUntil:
+    visible:
+      id: plan-screen-title
+    timeout: 10000

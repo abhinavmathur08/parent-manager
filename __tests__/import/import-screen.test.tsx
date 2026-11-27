@@ -104,7 +104,7 @@ describe('S-19 and S-20 import (FR-AI-1 to FR-AI-3, FR-AI-11)', () => {
 
     await act(async () => finish({ draft: DRAFT, source: 'parser' }));
     expect(mockReplace).toHaveBeenCalledWith({
-      pathname: '/recipes/import/review',
+      pathname: '/plan/recipes/import/review',
       params: { job: 'job-1' },
     });
   });
@@ -131,7 +131,7 @@ describe('S-19 and S-20 import (FR-AI-1 to FR-AI-3, FR-AI-11)', () => {
     expect(mockFetchJob).toHaveBeenCalledWith('job-9');
     expect(mockStart).not.toHaveBeenCalled();
     expect(mockReplace).toHaveBeenCalledWith({
-      pathname: '/recipes/import/review',
+      pathname: '/plan/recipes/import/review',
       params: { job: 'job-9' },
     });
   });
@@ -153,7 +153,7 @@ describe('S-19 and S-20 import (FR-AI-1 to FR-AI-3, FR-AI-11)', () => {
     await fireEvent.press(screen.getByTestId('import-enter-manually'));
     expect(takeManualPrefill()).toEqual({ sourceUrl: 'https://example.com/r' });
     expect(mockReplace).toHaveBeenCalledWith({
-      pathname: '/recipes/edit',
+      pathname: '/plan/recipes/edit',
       params: { from: 'import' },
     });
   });

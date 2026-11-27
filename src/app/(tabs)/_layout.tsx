@@ -25,18 +25,19 @@ import { FirstLoadGate, PendingChangesBanner, SyncProvider } from '@/lib/sync';
 
 const TABS: readonly {
   name: string;
-  href: '/plan' | '/calendar' | '/list' | '/recipes' | '/household';
+  href: '/plan' | '/calendar' | '/list' | '/tasks' | '/household';
   icon: IconName;
 }[] = [
   { name: 'plan', href: '/plan', icon: 'plan' },
   // Second, as FR2-CAL-1 says.
   { name: 'calendar', href: '/calendar', icon: 'calendar' },
   { name: 'list', href: '/list', icon: 'list' },
-  { name: 'recipes', href: '/recipes', icon: 'recipes' },
+  // Tasks took the Recipes slot; Recipes opens from the Plan tab's header (D-29).
+  { name: 'tasks', href: '/tasks', icon: 'tasks' },
   { name: 'household', href: '/household', icon: 'household' },
 ];
 
-/** The main app: Plan, Calendar, List, Recipes and Household, under the floating tab bar (architecture section 2). */
+/** The main app: Plan, Calendar, List, Tasks and Household, under the floating tab bar (architecture section 2). */
 export default function TabsLayout() {
   const { t } = useTranslation();
   const { state } = useHousehold();

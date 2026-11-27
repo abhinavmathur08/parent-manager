@@ -1,4 +1,5 @@
-import { useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 
 import { useAuth } from '@/features/auth/session';
 import { HouseholdBusyDays } from '@/features/calendar/busy-days';
@@ -10,6 +11,7 @@ import { isPlanDate } from '@/features/planner/week';
 import { PlanWeekScreen } from '@/features/planner/week-screen';
 
 export default function PlanRoute() {
+  const { t } = useTranslation();
   const { state } = useHousehold();
   const auth = useAuth();
   // The first planned week offers push notifications, in context (FR-NOT-2).
@@ -40,7 +42,16 @@ export default function PlanRoute() {
             void announceListReady(start, 'week_planned').catch(() => undefined);
           },
         }}
-        headerActions={[bell]}
+        // Recipes moved from the tab bar to the Plan tab's header (D-29, FR3-TASK-1).
+        headerActions={[
+          {
+            icon: 'recipes',
+            label: t('plan.openRecipes'),
+            onPress: () => router.push('/plan/recipes'),
+            testID: 'plan-recipes',
+          },
+          bell,
+        ]}
         focusDate={isPlanDate(date) ? date : null}
       />
       {pushPrompt.sheet}

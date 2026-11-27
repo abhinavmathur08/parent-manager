@@ -49,7 +49,7 @@ export default function StarterRecipeRoute() {
           origin: { sourceType: 'library', libraryRecipeId: starter.key },
         }),
       );
-      router.replace({ pathname: '/recipes/[id]', params: { id: recipeId } });
+      router.replace({ pathname: '/plan/recipes/[id]', params: { id: recipeId } });
     } catch {
       Alert.alert(t('recipes.starter.copyFailed'));
     }

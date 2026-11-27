@@ -10,6 +10,6 @@ export default function RecipeImportRoute() {
   const enabled = useFeatureEnabled('ai_import');
   // Caregivers can't import (FR-AI-16).
   if (state.status !== 'member' || state.membership.role === 'caregiver') return null;
-  if (!enabled) return <Redirect href="/recipes/edit" />;
+  if (!enabled) return <Redirect href="/plan/recipes/edit" />;
   return <ImportScreen />;
 }

@@ -92,7 +92,7 @@ describe('navigation shell', () => {
     expect(await screen.findByTestId('plan-screen-title')).toHaveTextContent('Plan');
     expect(screen.getByRole('tab', { name: 'Plan' })).toBeSelected();
 
-    for (const name of ['calendar', 'list', 'recipes', 'household'] as const) {
+    for (const name of ['calendar', 'list', 'tasks', 'household'] as const) {
       await fireEvent.press(screen.getByTestId(`tab-${name}`));
       expect(await screen.findByTestId(`${name}-screen`)).toBeOnTheScreen();
       expect(screen.getByTestId(`tab-${name}`)).toBeSelected();
@@ -101,9 +101,18 @@ describe('navigation shell', () => {
       'Plan',
       'Calendar',
       'List',
-      'Recipes',
+      'Tasks',
       'Household',
     ]);
+  });
+
+  it("opens Recipes from the Plan tab's header, now that Tasks has its slot (D-29)", async () => {
+    await renderRouter(`${process.cwd()}/src/app`, { initialUrl: '/' });
+    await fireEvent.press(await screen.findByTestId('plan-recipes'));
+    expect(await screen.findByTestId('recipes-screen')).toBeOnTheScreen();
+    expect(screen.getByTestId('tab-plan')).toBeSelected();
+    await fireEvent.press(screen.getByTestId('recipes-screen-title-back'));
+    expect(await screen.findByTestId('plan-screen-title')).toBeOnTheScreen();
   });
 });
 

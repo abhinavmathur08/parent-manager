@@ -1,10 +1,10 @@
 import { act, fireEvent, screen } from '@testing-library/react-native';
 import { renderRouter } from 'expo-router/testing-library';
 
-import RecipeDetailRoute from '@/app/(tabs)/recipes/[id]';
-import RecipesLayout from '@/app/(tabs)/recipes/_layout';
-import RecipeEditRoute from '@/app/(tabs)/recipes/edit';
-import RecipesRoute from '@/app/(tabs)/recipes/index';
+import RecipeDetailRoute from '@/app/(tabs)/plan/recipes/[id]';
+import PlanLayout from '@/app/(tabs)/plan/_layout';
+import RecipeEditRoute from '@/app/(tabs)/plan/recipes/edit';
+import RecipesRoute from '@/app/(tabs)/plan/recipes/index';
 
 // An in-memory sync layer: writes show at once and notify readers, like the local copy.
 const mockTables: Record<string, Record<string, Record<string, unknown>>> = {};
@@ -70,12 +70,12 @@ beforeEach(() => {
 it('opens the new recipe after saving it from the Recipes tab (R-02.2, R-03.2)', async () => {
   await renderRouter(
     {
-      'recipes/_layout': RecipesLayout,
-      'recipes/index': RecipesRoute,
-      'recipes/edit': RecipeEditRoute,
-      'recipes/[id]': RecipeDetailRoute,
+      'plan/_layout': PlanLayout,
+      'plan/recipes/index': RecipesRoute,
+      'plan/recipes/edit': RecipeEditRoute,
+      'plan/recipes/[id]': RecipeDetailRoute,
     },
-    { initialUrl: '/recipes' },
+    { initialUrl: '/plan/recipes' },
   );
   await fireEvent.press(screen.getByTestId('recipes-add'));
   await fireEvent.changeText(await screen.findByTestId('recipe-title'), 'Weeknight flatbread');
@@ -84,5 +84,5 @@ it('opens the new recipe after saving it from the Recipes tab (R-02.2, R-03.2)',
   await act(async () => fireEvent.press(screen.getByTestId('recipe-save')));
 
   expect(await screen.findByTestId('recipe-detail-edit')).toBeOnTheScreen();
-  expect(screen).toHavePathname(`/recipes/${Object.keys(mockTables.recipes)[0]}`);
+  expect(screen).toHavePathname(`/plan/recipes/${Object.keys(mockTables.recipes)[0]}`);
 });

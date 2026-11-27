@@ -6,8 +6,7 @@ tags:
   - backend
 ---
 - runFlow: subflows/create-household.yaml
-- tapOn:
-    id: tab-recipes
+- runFlow: subflows/open-recipes.yaml
 # S-16's top bar always offers "Add", above the search, filters and starter library.
 - tapOn:
     id: recipes-add

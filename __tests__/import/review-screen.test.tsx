@@ -164,7 +164,7 @@ describe('S-21 import review (FR-AI-4 to FR-AI-7)', () => {
       expect.objectContaining({ input_type: 'text', lines_edited_count: 0 }),
     );
     expect(mockReplace).toHaveBeenCalledWith({
-      pathname: '/recipes/[id]',
+      pathname: '/plan/recipes/[id]',
       params: { id: expect.any(String) },
     });
     expect(mockStore.has(`draft:${PENDING_IMPORT_KEY}`)).toBe(false);
@@ -177,7 +177,7 @@ describe('S-21 import review (FR-AI-4 to FR-AI-7)', () => {
     const buttons = alert.mock.calls[0][2]!;
     expect(mockReplace).not.toHaveBeenCalled();
     await act(async () => buttons.find((b) => b.style === 'destructive')!.onPress!());
-    expect(mockReplace).toHaveBeenCalledWith('/recipes');
+    expect(mockReplace).toHaveBeenCalledWith('/plan/recipes');
     expect(mockInsert).not.toHaveBeenCalled();
     expect(mockTrack).toHaveBeenCalledWith(
       'ai_import_discarded',
@@ -189,7 +189,7 @@ describe('S-21 import review (FR-AI-4 to FR-AI-7)', () => {
     await show();
     await fireEvent.press(screen.getByTestId('import-review-manual'));
     expect(mockReplace).toHaveBeenCalledWith({
-      pathname: '/recipes/edit',
+      pathname: '/plan/recipes/edit',
       params: { from: 'import' },
     });
     const { takeManualPrefill } = jest.requireActual('@/features/import/manual');

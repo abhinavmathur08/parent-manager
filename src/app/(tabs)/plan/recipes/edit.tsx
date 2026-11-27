@@ -10,8 +10,8 @@ import { RecipeEditor } from '@/features/recipes/recipe-editor';
 import { useDraftState } from '@/hooks/use-draft-state';
 
 /**
- * S-18: `/recipes/edit` adds a recipe; `/recipes/edit?id=<id>` edits one.
- * `/recipes/edit?from=import` is "enter manually instead" from an import (FR-AI-13), prefilled
+ * S-18: `/plan/recipes/edit` adds a recipe; `/plan/recipes/edit?id=<id>` edits one.
+ * `/plan/recipes/edit?from=import` is "enter manually instead" from an import (FR-AI-13), prefilled
  * with what the import had, and kept as its own draft.
  */
 export default function RecipeEditRoute() {
@@ -43,7 +43,7 @@ export default function RecipeEditRoute() {
           return;
         }
         clearNewId();
-        router.replace({ pathname: '/recipes/[id]', params: { id: savedId } });
+        router.replace({ pathname: '/plan/recipes/[id]', params: { id: savedId } });
       }}
     />
   );
