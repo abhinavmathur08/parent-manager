@@ -797,6 +797,23 @@ function EntryRow({
     count: entry.servings,
     value: formatNumber(entry.servings, locale),
   });
+  const allergens = matches.map((match) => ({
+    key: match.allergen.slice('allergen.'.length),
+    allergen: t(`allergens.${match.allergen.slice('allergen.'.length)}`),
+    person: formatList(match.people, locale),
+  }));
+  // The row's label replaces its children for screen readers, so it must carry the tags and
+  // the allergen warnings too (NFR-A11Y-3, FR-PLAN-11).
+  const label = [
+    t('plan.entryLabel', { title, servings }),
+    leftovers ? t('plan.leftovers.tag') : null,
+    babyPlate ? t('plan.entry.babyPlate') : null,
+    ...allergens.map(({ allergen, person }) =>
+      t('components.allergenNotice.message', { allergen, person }),
+    ),
+  ]
+    .filter(Boolean)
+    .join(', ');
   return (
     <Pressable
       testID={`plan-entry-${entry.id}`}
@@ -804,8 +821,15 @@ function EntryRow({
       onLongPress={onLongPress ? () => onLongPress(entry) : undefined}
       disabled={!onPress && !onLongPress}
       accessibilityRole={onPress ? 'button' : undefined}
-      accessibilityLabel={t('plan.entryLabel', { title, servings })}
+      accessibilityLabel={label}
       accessibilityHint={onLongPress ? t('plan.entryActionsHint') : undefined}
+      // Long-press is hard to find with a screen reader, so its menu is also an action.
+      accessibilityActions={
+        onLongPress ? [{ name: 'longpress', label: t('plan.entryActions') }] : undefined
+      }
+      onAccessibilityAction={(event) => {
+        if (event.nativeEvent.actionName === 'longpress') onLongPress?.(entry);
+      }}
       style={({ pressed }) => [
         {
           minHeight: theme.layout.minTarget,
@@ -829,13 +853,13 @@ function EntryRow({
       {babyPlate ? (
         <Tag label={t('plan.entry.babyPlate')} testID={`plan-entry-${entry.id}-baby-plate`} />
       ) : null}
-      {matches.map((match) => (
+      {allergens.map(({ key, allergen, person }) => (
         <AllergenNotice
-          key={match.allergen}
+          key={key}
           variant="inline"
-          allergen={t(`allergens.${match.allergen.slice('allergen.'.length)}`)}
-          person={formatList(match.people, locale)}
-          testID={`plan-entry-${entry.id}-allergen-${match.allergen.slice('allergen.'.length)}`}
+          allergen={allergen}
+          person={person}
+          testID={`plan-entry-${entry.id}-allergen-${key}`}
         />
       ))}
     </Pressable>

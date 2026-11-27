@@ -145,11 +145,11 @@ How recipes are stored (R-02.1):
 
 #### Planner
 
-| Table                                     | Key columns                                                                                                                                               | Notes                                                       |
-| ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
-| `plan_entries`                            | `id`, `household_id`, `date`, `slot` (`breakfast`, `lunch`, `dinner`, `snack` or `drink`), `recipe_id` or `free_text`, `servings`, `leftover_of_entry_id` | A week is a date range, so it needs no separate week table. |
-| `plan_entry_portions`                     | `entry_id`, `person_id`, `portions`, `variant` (`standard` or `baby_plate`)                                                                               |                                                             |
-| `plan_templates`, `plan_template_entries` | `weekday`, `slot`, `recipe_id`, `servings`                                                                                                                | Premium feature.                                            |
+| Table                 | Key columns                                                                                                                                               | Notes                                                       |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| `plan_entries`        | `id`, `household_id`, `date`, `slot` (`breakfast`, `lunch`, `dinner`, `snack` or `drink`), `recipe_id` or `free_text`, `servings`, `leftover_of_entry_id` | A week is a date range, so it needs no separate week table. |
+| `plan_entry_portions` | `entry_id`, `person_id`, `portions`, `variant` (`standard` or `baby_plate`)                                                                               |                                                             |
+| `week_templates`      | `name`, `entries` (JSON: day, slot, recipe or text, servings, portions), `created_by`                                                                     | Premium feature.                                            |
 
 How the plan is stored (P-01.1):
 
