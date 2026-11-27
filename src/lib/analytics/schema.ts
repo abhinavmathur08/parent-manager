@@ -147,6 +147,15 @@ export const ANALYTICS_EVENTS = {
   calendar_viewed: { view: oneOf('agenda', 'day', 'week') },
   // Phase 3, spec-phase3 section 3.1.
   tasks_viewed: { filter: oneOf('mine', 'everyone', 'member') },
+  task_created: {
+    source: oneOf('manual', 'plan_entry', 'grocery_item', 'event', 'document', 'checklist'),
+    has_due: bool,
+    has_time: bool,
+    assignee_role: oneOf('none', 'self', 'parent', 'helper'),
+    shared: bool,
+    repeats: bool,
+    reminder: bool,
+  },
   event_created: {
     kind: code,
     all_day: bool,
