@@ -58,6 +58,27 @@ export function createEncryptedStorage(
   // One in-flight lookup per storage key, so overlapping writes share one AES key
   // instead of racing to create two.
   const keyCache = new Map<string, Promise<AESEncryptionKey>>();
+  // Supabase reads the session before every request, so the first sync's burst of
+  // parallel pulls would mean as many parallel Keystore reads, and one that fails would
+  // delete the session without Supabase noticing (#336). So each value is read from
+  // SecureStore at most once per launch (overlapping reads share it), then served from
+  // memory, which every write and removal keeps current. `versions` stops a read that
+  // started before a write from caching the older value.
+  const values = new Map<string, string | null>();
+  const reads = new Map<string, Promise<string | null>>();
+  const versions = new Map<string, number>();
+
+  function changed(key: string): number {
+    const version = (versions.get(key) ?? 0) + 1;
+    versions.set(key, version);
+    values.delete(key);
+    reads.delete(key);
+    return version;
+  }
+
+  function remember(key: string, version: number | undefined, value: string | null) {
+    if (versions.get(key) === version) values.set(key, value);
+  }
 
   function loadOrCreateKey(key: string): Promise<AESEncryptionKey> {
     let pending = keyCache.get(key);
@@ -79,40 +100,64 @@ export function createEncryptedStorage(
   }
 
   async function removeItem(key: string): Promise<void> {
+    const version = changed(key);
     keyCache.delete(key);
     data.removeItem(key);
     await keys.deleteItemAsync(keyStoreName(key), KEY_OPTIONS);
+    remember(key, version, null);
+  }
+
+  async function readStored(key: string): Promise<string | null> {
+    const sealed = data.getItem(key);
+    if (sealed === null) {
+      return null;
+    }
+    // If SecureStore itself fails, this throws and leaves everything in place, so a
+    // temporary keychain error doesn't sign the user out.
+    const storedKey = await keys.getItemAsync(keyStoreName(key), KEY_OPTIONS);
+    if (!storedKey) {
+      await removeItem(key);
+      return null;
+    }
+    try {
+      const aesKey = await AESEncryptionKey.import(storedKey, 'hex');
+      const plain = await aesDecryptAsync(AESSealedData.fromCombined(sealed), aesKey, {
+        output: 'base64',
+      });
+      return fromBase64(plain);
+    } catch {
+      await removeItem(key);
+      return null;
+    }
   }
 
   return {
     async getItem(key) {
-      const sealed = data.getItem(key);
-      if (sealed === null) {
-        return null;
-      }
-      // If SecureStore itself fails, this throws and leaves everything in place, so a
-      // temporary keychain error doesn't sign the user out.
-      const storedKey = await keys.getItemAsync(keyStoreName(key), KEY_OPTIONS);
-      if (!storedKey) {
-        await removeItem(key);
-        return null;
-      }
-      try {
-        const aesKey = await AESEncryptionKey.import(storedKey, 'hex');
-        const plain = await aesDecryptAsync(AESSealedData.fromCombined(sealed), aesKey, {
-          output: 'base64',
+      if (values.has(key)) return values.get(key) ?? null;
+      let pending = reads.get(key);
+      if (!pending) {
+        const version = versions.get(key);
+        const read = readStored(key).then((value) => {
+          remember(key, version, value);
+          return value;
         });
-        return fromBase64(plain);
-      } catch {
-        await removeItem(key);
-        return null;
+        pending = read;
+        reads.set(key, read);
+        // A failed read isn't remembered, so the next one tries SecureStore again.
+        void read.then(
+          () => reads.get(key) === read && reads.delete(key),
+          () => reads.get(key) === read && reads.delete(key),
+        );
       }
+      return pending;
     },
 
     async setItem(key, value) {
+      const version = changed(key);
       const aesKey = await loadOrCreateKey(key);
       const sealed = await aesEncryptAsync(toBase64(value), aesKey);
       data.setItem(key, await sealed.combined('base64'));
+      remember(key, version, value);
     },
 
     removeItem,

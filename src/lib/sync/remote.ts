@@ -68,32 +68,65 @@ const ID_PAGE = 100;
 // PostgREST filter values with punctuation (timestamps have `:` and `+`) must be quoted.
 const literal = (value: string) => `"${value.replace(/"/g, '\\"')}"`;
 
+type Reply<T> = { data: T | null; error: Failure; status: number };
+
+/** Thrown instead of sending a request when there's no session on the device. */
+export const NO_SESSION = 'no_session';
+
 /** The Supabase-backed remote. RLS limits every request to the caller's households. */
 export function createSupabaseRemote(client: SupabaseClient): SyncRemote {
+  let refreshing: Promise<boolean> | null = null;
+
+  // One refresh at a time, shared by the parallel pulls that got a 401 together.
+  function refreshOnce(): Promise<boolean> {
+    refreshing ??= client.auth.refreshSession().then(
+      ({ error }) => !error,
+      () => false,
+    );
+    const shared = refreshing;
+    void shared.finally(() => {
+      if (refreshing === shared) refreshing = null;
+    });
+    return shared;
+  }
+
+  /**
+   * Sends a request as the member (#336). supabase-js reads the session for each request
+   * and, without one, sends the publishable key, so the request runs as `anon` and every
+   * table answers 401. So a request goes only once there's a session, and a 401 refreshes
+   * the session once and tries again, rather than retrying as `anon`.
+   */
+  async function send<T>(request: () => PromiseLike<Reply<T>>): Promise<T | null> {
+    const { data } = await client.auth.getSession();
+    if (!data.session) throw new RemoteError('Not signed in', 401, NO_SESSION);
+    let reply = await request();
+    if (reply.status === 401 && (await refreshOnce())) reply = await request();
+    if (reply.error) throw toRemoteError(reply.error, reply.status);
+    return reply.data;
+  }
+
   return {
     async fetchPage(table, householdId, { since, after, includeDeleted, limit }) {
-      let query = client.from(table).select('*').eq('household_id', householdId);
-      if (since) query = query.gte('updated_at', since);
-      if (!includeDeleted) query = query.is('deleted_at', null);
-      if (after) {
-        const at = literal(after.updatedAt);
-        query = query.or(`updated_at.gt.${at},and(updated_at.eq.${at},id.gt.${literal(after.id)})`);
-      }
-      const { data, error, status } = await query
-        .order('updated_at', { ascending: true })
-        .order('id', { ascending: true })
-        .limit(limit);
-      if (error) throw toRemoteError(error, status);
+      const data = await send(() => {
+        let query = client.from(table).select('*').eq('household_id', householdId);
+        if (since) query = query.gte('updated_at', since);
+        if (!includeDeleted) query = query.is('deleted_at', null);
+        if (after) {
+          const at = literal(after.updatedAt);
+          query = query.or(
+            `updated_at.gt.${at},and(updated_at.eq.${at},id.gt.${literal(after.id)})`,
+          );
+        }
+        return query
+          .order('updated_at', { ascending: true })
+          .order('id', { ascending: true })
+          .limit(limit);
+      });
       return (data ?? []) as SyncRow[];
     },
 
     async fetchRow(table, id) {
-      const { data, error, status } = await client
-        .from(table)
-        .select('*')
-        .eq('id', id)
-        .maybeSingle();
-      if (error) throw toRemoteError(error, status);
+      const data = await send(() => client.from(table).select('*').eq('id', id).maybeSingle());
       return (data ?? null) as SyncRow | null;
     },
 
@@ -101,39 +134,28 @@ export function createSupabaseRemote(client: SupabaseClient): SyncRemote {
       const rows: SyncRow[] = [];
       // Short pages, so the ID list fits in the request URL.
       for (let i = 0; i < ids.length; i += ID_PAGE) {
-        const { data, error, status } = await client
-          .from(table)
-          .select('*')
-          .in('id', ids.slice(i, i + ID_PAGE));
-        if (error) throw toRemoteError(error, status);
+        const page = ids.slice(i, i + ID_PAGE);
+        const data = await send(() => client.from(table).select('*').in('id', page));
         rows.push(...((data ?? []) as SyncRow[]));
       }
       return rows;
     },
 
     async visibleIds(table, householdId) {
-      const { data, error, status } = await client.rpc('visible_ids', {
-        target: table,
-        household: householdId,
-      });
-      if (error) throw toRemoteError(error, status);
+      const data = await send(() =>
+        client.rpc('visible_ids', { target: table, household: householdId }),
+      );
       return (data ?? []) as string[];
     },
 
     async insert(table, rows) {
-      const { data, error, status } = await client.from(table).insert(rows).select('*');
-      if (error) throw toRemoteError(error, status);
+      const data = await send(() => client.from(table).insert(rows).select('*'));
       return (data ?? []) as SyncRow[];
     },
 
     async update(table, id, values) {
-      const { data, error, status } = await client
-        .from(table)
-        .update(values)
-        .eq('id', id)
-        .select('*');
-      if (error) throw toRemoteError(error, status);
-      return ((data ?? [])[0] ?? null) as SyncRow | null;
+      const data = await send(() => client.from(table).update(values).eq('id', id).select('*'));
+      return (((data ?? []) as SyncRow[])[0] ?? null) as SyncRow | null;
     },
 
     subscribe(householdId, tables, listener) {

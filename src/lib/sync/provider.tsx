@@ -10,6 +10,7 @@ import {
 } from 'react';
 import { AppState, type AppStateStatus } from 'react-native';
 
+import { useAuth } from '@/features/auth/session';
 import { onSignOut } from '@/features/auth/sign-out';
 import { useOnline } from '@/hooks/use-online';
 import { getSupabase } from '@/lib/supabase';
@@ -68,6 +69,8 @@ export function SyncProvider({
   // The household whose local copy finished opening, or failed to.
   const [opened, setOpened] = useState<string | null>(null);
   const online = useOnline();
+  // Sync talks to the server only with a session (#336); the local copy opens without one.
+  const signedIn = useAuth().status === 'signedIn';
 
   useEffect(() => {
     let active = true;
@@ -87,10 +90,15 @@ export function SyncProvider({
     };
   }, [householdId]);
 
-  // Online and in the foreground: listen for changes live (H-06.4) and sync. Joining
-  // Realtime pulls once to catch up. Offline or in the background: stop listening.
+  // Online, signed in and in the foreground: listen for changes live (H-06.4) and sync.
+  // Joining Realtime pulls once to catch up. Offline, in the background or before the
+  // session arrives: don't. A sync started without a session would run as `anon`.
   useEffect(() => {
     if (!engine) return;
+    if (!signedIn) {
+      engine.stopRealtime();
+      return;
+    }
     const update = (state: AppStateStatus) => {
       if (online && state === 'active') {
         engine.startRealtime();
@@ -102,7 +110,7 @@ export function SyncProvider({
     update((AppState.currentState ?? 'active') as AppStateStatus);
     const subscription = AppState.addEventListener('change', update);
     return () => subscription.remove();
-  }, [engine, online]);
+  }, [engine, online, signedIn]);
 
   return (
     <SyncOpeningContext.Provider value={opened !== householdId}>
