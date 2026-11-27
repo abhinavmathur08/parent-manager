@@ -12,7 +12,7 @@ How this relates to the other docs:
 
 - Requirements are numbered `FR3-<area>-<n>` (functional), `NFR3-<area>-<n>` (non-functional) and `R3-<area>-<n>` (data and business rules), apart from Phase 1's and Phase 2's IDs. Phase 3 uses no AI, so there are no `AI3-` requirements.
 - **PROPOSED**, **ASSUMPTION** and user-facing text work as in spec.md: copy is named by purpose and lives in the locale files.
-- Decision IDs `D-24` to `D-30` are in [decisions-needed.md](decisions-needed.md). D-24 (the free and Premium split) is decided; where a requirement depends on an open decision, it follows the recommended option and says so. Screen IDs continue from spec-phase2.md (`S-44` onwards).
+- Decision IDs `D-24` to `D-30` are in [decisions-needed.md](decisions-needed.md). All seven were decided on 2026-11-27. Screen IDs continue from spec-phase2.md (`S-44` onwards).
 
 ## 1. Overview and scope
 
@@ -62,7 +62,7 @@ Phase 3 gives the two partners one shared to-do list for the household, so the u
 
 ## 2. Roles and permissions
 
-Phase 1's roles and seat rules stand. Helpers are Premium seats and lose access when Premium lapses (FR-PAY-9). Following D-16 and the recommendation in D-25, helpers see only tasks assigned to them, shared with helpers, or in a rotation they're part of.
+Phase 1's roles and seat rules stand. Helpers are Premium seats and lose access when Premium lapses (FR-PAY-9). Following D-16 and D-25, helpers see only tasks assigned to them, shared with helpers, or in a rotation they're part of.
 
 | #              | Action                                                      | Parent | Family member    | Caregiver        | Tier            |
 | -------------- | ----------------------------------------------------------- | ------ | ---------------- | ---------------- | --------------- |
@@ -76,7 +76,7 @@ Phase 1's roles and seat rules stand. Helpers are Premium seats and lose access 
 | T7             | Edit or delete any task                                     | ✓      | ✗                | ✗                | Free            |
 | T8             | Edit or delete tasks they created                           | ✓      | ✓                | ✓                | Free            |
 | **Chores**     |                                                             |        |                  |                  |                 |
-| T9             | Create or edit a recurring chore                            | ✓      | ✗ (PROPOSED)     | ✗                | Free up to 3    |
+| T9             | Create or edit a recurring chore                            | ✓      | ✗                | ✗                | Free up to 3    |
 | T10            | Skip or reassign one occurrence they can see                | ✓      | ✓ (their own)    | ✓ (their own)    | Free            |
 | T10a           | Set a chore's rotation                                      | ✓      | ✗                | ✗                | Premium         |
 | **Checklists** |                                                             |        |                  |                  |                 |
@@ -110,7 +110,7 @@ Analytics and offline conventions are spec.md section 3.0. Event properties neve
 
 **Requirements**
 
-- **FR3-TASK-1:** A Tasks tab (S-44) holds the household's tasks, placed by D-29 (recommended: in the Recipes slot, with Recipes reached from the Plan tab). It groups open tasks as Overdue, Today, Upcoming (next 14 days, by day) and Anytime (no due date), with Done collapsed at the end. A filter switches between Mine, Everyone, and each member (PROPOSED).
+- **FR3-TASK-1:** A Tasks tab (S-44) holds the household's tasks, in the Recipes tab's former slot (D-29): the tabs are Plan, Calendar, List, Tasks and Household. Recipes moves to a button in the Plan tab's header, and stays in the add-to-slot sheet (S-11). It groups open tasks as Overdue, Today, Upcoming (next 14 days, by day) and Anytime (no due date), with Done collapsed at the end. A filter switches between Mine, Everyone, and each member (PROPOSED).
 - **FR3-TASK-2:** Adding a task (S-45) needs only a title. The add action is bottom-reachable, and the sheet opens with the keyboard up and the title focused. Defaults: no due date, assigned to the member adding it if a helper, otherwise to anyone (PROPOSED). Optional fields: due date, due time, assignee, reminder, notes, repeat (Premium) and "share with helpers" (Premium).
 - **FR3-TASK-3:** A due date alone is stored as a date in the household's timezone, like all-day events, so a timezone change never moves it. A due date with a time is stored as an instant and shown in the household's timezone (R3-TASK-1).
 - **FR3-TASK-4:** One tap on a task's checkbox completes it, with a 5-second undo, and moves it to Done. Done tasks record who completed them and when. Reopening is possible from Done.
@@ -156,7 +156,7 @@ Decided in D-24: Free households get up to 3 recurring chores, and Premium gets 
 - **FR3-CHORE-1:** A task becomes a chore by setting a repeat (S-45). Two modes: **on a schedule**, using the calendar's repeat rule (daily, weekly on chosen weekdays, every 2 weeks, monthly on the same date, ending never, on a date or after a count, FR2-CAL-4), or **after it's done**, every N days from the last completion (PROPOSED, N from 1 to 90).
 - **FR3-CHORE-2:** The Tasks tab shows each chore's next open occurrence only, never a stack of missed ones. If an occurrence's date passes undone it shows once as overdue; completing or skipping it brings up the next (PROPOSED).
 - **FR3-CHORE-3:** Each occurrence is completed or skipped on its own, recording who and when, and the chore's history shows them in task detail.
-- **FR3-CHORE-4:** **Rotation (Premium; D-26, recommended):** a parent can pick an ordered list of 2 or more members (parents, and helpers on Premium) to take turns. Each new occurrence goes to the next member in the list after whoever did the last one. Reassigning one occurrence changes only that one. There's no automatic balancing.
+- **FR3-CHORE-4:** **Rotation (Premium; D-26):** a parent can pick an ordered list of 2 or more members (parents, and helpers on Premium) to take turns. Each new occurrence goes to the next member in the list after whoever did the last one. Reassigning one occurrence changes only that one. There's no automatic balancing.
 - **FR3-CHORE-5:** Editing a chore asks "this occurrence" or "all future". Changing the rule keeps the history of done and skipped occurrences.
 - **FR3-CHORE-6:** **Lapse:** the household's 3 earliest-created live chores (the free cap, R3-PAY-1) keep running with rotation stopped, each keeping its current assignee. Chores beyond the cap pause: the open occurrence stays as an ordinary task, no new occurrences appear, and nothing is deleted (vision paywall principle 7, as FR2-REM-6 keeps each event's first reminder). Deleting a running chore lets the earliest paused one resume. Premium returning resumes every chore from today, with rotation.
 - **FR3-CHORE-7:** **Free cap:** a free household can have up to 3 live recurring chores, a server setting (`app_config`, default 3, can be 0) tuned without a release. Setting a repeat on a 4th opens the Premium sheet naming unlimited recurring chores (trigger `recurring_chore`), and the server refuses a direct insert or update past the cap. Paused chores don't count toward the cap.
@@ -175,7 +175,7 @@ Decided in D-24: Free households get up to 3 recurring chores, and Premium gets 
 
 ### 3.3 Starter checklists (CHK)
 
-Content source and review follow D-27. Stages follow D-6.
+Content source and review follow D-27: Claude drafts the items, the product owner reviews them, and a qualified health reviewer in each market checks items that touch health services. Stages follow D-6.
 
 **User stories**
 
@@ -191,7 +191,7 @@ Content source and review follow D-27. Stages follow D-6.
 - **FR3-CHK-5:** Items are template item IDs, such as `checklist_item.newborn.add_baby_to_insurance`. Their text comes from the locale files in the household's locale, and an item only appears in the regions its template lists (R3-CHK-1). A started item keeps its ID until a member edits the title, which then stores the edited text.
 - **FR3-CHK-6:** A checklist (S-48) shows its tasks grouped by due, and progress as "n of m done" in text and a ProgressBar. Its tasks also appear in the Tasks tab like any other.
 - **FR3-CHK-7:** **Saved templates (Premium):** a parent can save a checklist, or any selection of tasks, as a household template with its titles and relative due offsets, and apply it later as a new checklist. Templates are hidden on a lapse and kept in export (FR-PAY-9).
-- **FR3-CHK-8:** Checklist content is practical household logistics. It never gives medical advice (vision non-goals). Items that involve a health service say to book or check with the family's provider, and never state a clinical schedule. Content is reviewed per D-27 before the beta.
+- **FR3-CHK-8:** Checklist content is practical household logistics. It never gives medical advice (vision non-goals). Items that involve a health service say to book or check with the family's provider, and never state a clinical schedule. Content is reviewed per D-27 before the beta; the health reviewers are still to be arranged.
 
 **Acceptance criteria**
 
@@ -278,15 +278,15 @@ Decided in D-24 (2026-11-27). The product owner approved changing the vision's t
 
 ## 4. Screens
 
-| ID   | Screen                   | Purpose                                                         | Navigation                       |
-| ---- | ------------------------ | --------------------------------------------------------------- | -------------------------------- |
-| S-44 | Tasks                    | Overdue, Today, Upcoming, Anytime and Done; filters; add        | Tab (D-29); to S-45 to S-49      |
-| S-45 | Task editor (sheet)      | Title, due, assignee, reminder, notes, repeat, rotation, share  | From S-44, S-46 and every source |
-| S-46 | Task detail              | Details, source chip, chore history, complete, skip, delete     | From S-44, S-48; to S-45         |
-| S-47 | Starter checklists       | Suggested and all templates, saved templates, preview and start | From S-44                        |
-| S-48 | Checklist                | Progress and items; save as template                            | From S-44, S-47                  |
-| S-49 | Who's carrying what      | Counts per member; trends on Premium                            | From S-44's header               |
-| S-50 | Tasks from notes (sheet) | Notes split into lines to keep or untick                        | From S-38                        |
+| ID   | Screen                   | Purpose                                                         | Navigation                         |
+| ---- | ------------------------ | --------------------------------------------------------------- | ---------------------------------- |
+| S-44 | Tasks                    | Overdue, Today, Upcoming, Anytime and Done; filters; add        | Fourth tab (D-29); to S-45 to S-49 |
+| S-45 | Task editor (sheet)      | Title, due, assignee, reminder, notes, repeat, rotation, share  | From S-44, S-46 and every source   |
+| S-46 | Task detail              | Details, source chip, chore history, complete, skip, delete     | From S-44, S-48; to S-45           |
+| S-47 | Starter checklists       | Suggested and all templates, saved templates, preview and start | From S-44                          |
+| S-48 | Checklist                | Progress and items; save as template                            | From S-44, S-47                    |
+| S-49 | Who's carrying what      | Counts per member; trends on Premium                            | From S-44's header                 |
+| S-50 | Tasks from notes (sheet) | Notes split into lines to keep or untick                        | From S-38                          |
 
 Flows to cover with Maestro: add and assign a task and see it on the partner's device (two-device harness), start a newborn checklist, make tasks from appointment notes, complete a rotating chore.
 
@@ -345,13 +345,13 @@ Phase 3 goes to the earlier phases' beta households first, behind a feature flag
 
 ### 8.2 Open questions
 
-D-24 is decided. Open decisions are D-25 to D-30 in decisions-needed.md. Every PROPOSED value above is the product owner's to confirm.
+D-24 to D-30 are decided. The one open follow-up is arranging D-27's health reviewers before K-04 and the beta. Every PROPOSED value above is still the product owner's to confirm.
 
 ### 8.3 Conflicts and gaps with other docs
 
-- **C3-1, quick capture.** The vision's Tasks and Chores section lists "quick capture by voice or widget", but the Phase 3 roadmap row doesn't, and Phase 1 left widgets and assistant shortcuts out (spec.md C-2). This spec leaves them out pending D-30.
+- **C3-1, quick capture.** The vision's Tasks and Chores section lists "quick capture by voice or widget", but the Phase 3 roadmap row doesn't, and Phase 1 left widgets and assistant shortcuts out (spec.md C-2). Decided reading (D-30): they're deferred to one fast-capture item after Phase 3, for tasks and the grocery list together. No vision change, since the Phase 3 row doesn't list them.
 - **C3-2, starter checklists and templates.** The vision's table puts "templates" in Premium, and its Phase 3 row includes "newborn starter checklists". Resolved by D-24: built-in starter checklists are free and a household's saved templates are Premium, and the product owner approved changing the vision's table to say so (2026-11-27).
 - **C3-3, who's carrying what.** The vision's module section describes "a simple view of who is carrying what" with no tier, and its table makes "load-balance insights" Premium. Resolved by D-24: the current counts are free and trends Premium.
-- **C3-4, expecting checklists.** The vision's Phase 3 row says "newborn starter checklists"; this spec adds expecting checklists, since the vision is "stage-aware from pregnancy" and D-6 stores the due month. Confirm in D-27.
+- **C3-4, expecting checklists.** The vision's Phase 3 row says "newborn starter checklists"; Decided reading (D-27): expecting checklists ship in Phase 3, since the vision is "stage-aware from pregnancy" and D-6 stores the due month. No vision change.
 - **C3-5, "anything to tasks".** The vision says any item can spawn a task. This spec covers plan entries, grocery items, events and documents, the modules that exist; recipes, people and settings aren't sources. Supplies join in Phase 4.
-- **C3-6, tab bar.** The design system's floating tab bar holds 5 tabs, all used since Phase 2. A Tasks tab needs D-29, and a change to design-system.md's tab bar row if it moves Recipes.
+- **C3-6, tab bar.** The design system's floating tab bar holds 5 tabs, all used since Phase 2. Resolved by D-29: Tasks takes the Recipes slot, and T-02.1 updates design-system.md's tab bar row when it's built.

@@ -35,23 +35,24 @@ The helper read and write rules (assigned, shared or in the rotation; helpers' o
 - **Area:** Sync
 - **Size:** S
 - **Spec:** R3-ACC-1, R3-ACC-3, NFR3-OFF-3, NFR3-SEC-1
-- **Depends on:** T-01.1; decision D-25
+- **Depends on:** T-01.1; decision D-25 (decided)
 - **Acceptance:**
   - pgTAP: a caregiver sees only tasks matching R3-ACC-1 and can't change `shared` or assign another helper
   - Harness: unsharing, reassigning away, removing from a rotation and a lapse each remove the task from the helper's device within 60 seconds of reconnecting
 
 ### 3. T-02.1 Tasks tab
 
-S-44 in the tab bar slot D-29 chooses: Overdue, Today, Upcoming, Anytime and Done groups from the local copy, the Mine, Everyone and member filters, and empty and offline states. Updates design-system.md's tab bar row.
+S-44 as the fourth tab, in the Recipes slot (D-29), with a Recipes button in the Plan tab's header: Overdue, Today, Upcoming, Anytime and Done groups from the local copy, the Mine, Everyone and member filters, and empty and offline states. Updates design-system.md's tab bar row and the Maestro flows that open Recipes.
 
 - **Area:** Tasks
 - **Size:** S
 - **Spec:** FR3-TASK-1, FR3-TASK-6, NFR3-PERF-1, NFR3-L10N-1
-- **Depends on:** T-01.1; decision D-29
+- **Depends on:** T-01.1; decision D-29 (decided)
 - **Acceptance:**
   - Due dates show in the household's timezone with relative words from the `Intl` helpers
   - Pseudo-locale and largest text size show no clipping
   - `tasks_viewed` recorded with `filter`
+  - Recipes opens from the Plan tab's header and from S-11, and the Maestro flows that opened the Recipes tab pass
 
 ### 4. T-02.2 Task editor
 
@@ -98,7 +99,7 @@ Repeat picker in S-45 (Free up to the cap) and rotation picker (Premium), "this 
 - **Area:** Tasks
 - **Size:** S
 - **Spec:** FR3-CHORE-1, FR3-CHORE-3, FR3-CHORE-4, FR3-CHORE-5, FR3-CHORE-7, FR3-TASK-8
-- **Depends on:** T-03.1, T-02.3; decision D-26
+- **Depends on:** T-03.1, T-02.3; decision D-26 (decided)
 - **Acceptance:**
   - Maestro: complete a rotating chore and see the next occurrence assigned to the other parent
   - Changing the rule keeps done and skipped history
@@ -180,12 +181,12 @@ S-48 with progress in text and a ProgressBar, and suggestions on the empty Tasks
 
 ### 14. K-04 Starter checklist content and review
 
-Final content for the five templates in three locales, written or commissioned per D-27, and the reviewer's sign-off.
+Final content for the five templates in three locales, drafted by Claude per D-27, the product owner's review, and each market's health reviewer's sign-off on items touching health services.
 
 - **Area:** Content
 - **Size:** S
 - **Spec:** FR3-CHK-8
-- **Depends on:** K-01; decision D-27
+- **Depends on:** K-01; decision D-27 (decided; the health reviewers are still to be arranged)
 - **Acceptance:**
   - No item gives medical advice or a clinical schedule
   - Sign-off for each locale kept with the release notes
@@ -314,9 +315,9 @@ Release Phase 3 behind a feature flag to the earlier beta households for 4 weeks
 
 ## Deliberately after Phase 3
 
-- Widgets, lock-screen shortcuts, and Siri and Google Assistant shortcuts for tasks and the list together (D-30)
+- Widgets, lock-screen shortcuts, and Siri and Google Assistant shortcuts for tasks and the list together (D-30: one fast-capture item after Phase 3)
 - Checklists for 6 to 12 months, toddler and preschool
 - Automatic tasks without a tap, such as renewal tasks for expiring documents
 - Tasks from supplies (Phase 4) and the meal train (Phase 5)
 - Subtasks, priorities, comments and attachments on tasks
-- Points, rewards or streaks (D-28: out of scope)
+- Points, rewards or streaks (D-28: decided out of scope)
