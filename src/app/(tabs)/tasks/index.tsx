@@ -1,14 +1,20 @@
-import { useTranslation } from 'react-i18next';
+import { useAuth } from '@/features/auth/session';
+import { useHousehold } from '@/features/household/membership';
+import { TasksScreen } from '@/features/tasks/tasks-screen';
 
-import { EmptyState } from '@/components/empty-state';
-import { Screen } from '@/components/screen';
-
-/** S-44 Tasks (FR3-TASK-1), in the Recipes tab's former slot (D-29). T-02.1 part 2 fills it in. */
 export default function TasksRoute() {
-  const { t } = useTranslation();
+  const { state } = useHousehold();
+  const auth = useAuth();
+  if (state.status !== 'member') return null;
+  const { membership } = state;
   return (
-    <Screen title={t('tasks.title')} testID="tasks-screen">
-      <EmptyState icon="tasks" message={t('tasks.empty')} testID="tasks-empty" />
-    </Screen>
+    <TasksScreen
+      household={{
+        id: membership.householdId,
+        locale: membership.locale,
+        timezone: membership.timezone ?? null,
+      }}
+      userId={auth.status === 'signedIn' ? auth.session.user.id : null}
+    />
   );
 }

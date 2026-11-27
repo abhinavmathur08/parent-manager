@@ -1,5 +1,5 @@
 # T-02.1 (S-44, FR3-TASK-1, D-29): Tasks is the fourth tab, in Recipes' old slot, and opens on
-# its empty state; Recipes opens from the Plan tab's header instead.
+# its empty state; the filters switch; Recipes opens from the Plan tab's header instead.
 appId: ${APP_ID || 'com.myparentmanager'}
 ---
 - runFlow: subflows/create-household.yaml
@@ -11,6 +11,12 @@ appId: ${APP_ID || 'com.myparentmanager'}
     timeout: 10000
 - assertVisible:
     id: tasks-empty
+- tapOn:
+    id: tasks-filter-mine
+- assertVisible:
+    id: tasks-empty
+- tapOn:
+    id: tasks-filter-everyone
 - runFlow: subflows/open-recipes.yaml
 - runFlow: subflows/close-recipes.yaml
 - runFlow: subflows/sign-out.yaml
