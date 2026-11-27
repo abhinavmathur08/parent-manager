@@ -25,5 +25,30 @@
     "unitNames": {
       "l": "litre"
     }
+  },
+  "checklist": {
+    "expecting": {
+      "prepare_home": "Prepare the home",
+      "hospital_bag": "Hospital bag",
+      "paperwork": "Paperwork"
+    },
+    "newborn": {
+      "first_weeks": "First weeks",
+      "home_routines": "Home routines"
+    }
+  },
+  "checklist_item": {
+    "expecting": {
+      "fit_car_seat": "Fit the car seat",
+      "set_up_sleep_space": "Set up the baby’s sleep space",
+      "pack_parent_bag": "Pack a bag for the birthing parent",
+      "pack_going_home_outfit": "Pack the baby’s going-home outfit",
+      "plan_parental_leave": "Plan parental leave with your employers"
+    },
+    "newborn": {
+      "register_birth": "Register the birth with your state registry",
+      "set_up_changing_station": "Set up a nappy-changing station",
+      "plan_first_week_meals": "Plan easy meals for the first week"
+    }
   }
 }
