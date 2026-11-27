@@ -31,7 +31,7 @@ Updated 2026-11-27. D-14 to D-23 are Phase 2 decisions ([spec-phase2.md](spec-ph
 | D-21 | Phase 2: storage plan for documents        | Open                                                   | Before the Phase 2 beta; part of D-1                                           |
 | D-22 | Phase 2: who signs document read links     | Decided 2026-11-22: the `documents` function only      |                                                                                |
 | D-23 | Phase 2: busy days for members             | Decided 2026-11-22: parents' devices publish           |                                                                                |
-| D-24 | Phase 3: free and Premium split            | Open                                                   | Before Phase 3 starts (T-01.1)                                                 |
+| D-24 | Phase 3: free and Premium split            | Decided 2026-11-27: 3 free recurring chores            |                                                                                |
 | D-25 | Phase 3: what helpers do with tasks        | Open                                                   | Before T-01.2                                                                  |
 | D-26 | Phase 3: chore rotation                    | Open                                                   | Before T-03.2                                                                  |
 | D-27 | Phase 3: starter checklist content         | Open                                                   | Before K-04, and the Phase 3 beta                                              |
@@ -123,6 +123,18 @@ The vault holds files a parent chooses, with a category and an optional person t
 ### D-22 Document read links: decided 2026-11-22, signed on the server only
 
 Only the `documents` Edge Function issues read links, after its own `private.can_read_document` check for the caller, signed with the service role for 60 seconds. Clients have no storage policy on the `documents` bucket, so no member can read, list or sign a file directly, or mint a link that lasts longer (V-02.3, R2-DOC-1, NFR2-SEC-1).
+
+### D-24 Phase 3 free and Premium split: decided 2026-11-27, 3 free recurring chores
+
+The product owner chose option B: the vision's table, plus a few recurring chores on Free.
+
+- **Free:** unlimited one-off tasks between the two parents, every built-in starter checklist, tasks from other modules, due dates, 1 reminder per task, this week's and last week's "who's carrying what" counts, 4 weeks of done history, and up to 3 recurring chores.
+- **Premium:** unlimited recurring chores, rotation (turn-taking), saved household templates, trends over time, full done history, and tasks for caregivers and family members.
+- **Always free:** export, deletion and privacy controls.
+- **Free-chore cap:** a server setting (`app_config`, default 3), tuned without a release, including to 0. Adding a 4th recurring chore opens a specific upgrade prompt naming unlimited recurring chores (trigger `recurring_chore`), and the server refuses it too.
+- **Lapse:** chores beyond the cap pause rather than being deleted (vision paywall principle 7), as Phase 2 kept each event's first reminder and paused the rest. The 3 earliest-created chores keep running without rotation; each paused chore's open occurrence stays as an ordinary task; Premium returning resumes them all.
+- **Vision:** the product owner approved changing the "What sits where" table's Tasks and chores row to match.
+- **Unblocks:** T-01.1, K-03, T-05, M-05. Spec section 3.8, FR3-CHORE-6 and FR3-CHORE-7; resolves conflicts C3-2 and C3-3.
 
 ## Deferred until the beta or launch
 
@@ -228,24 +240,7 @@ It blocks nothing.
 
 ## Open: Phase 3, Tasks and Chores
 
-Phase 3 is drafted as planning on 2026-11-27 ([spec-phase3.md](spec-phase3.md), [backlog-phase3.md](backlog-phase3.md)); building waits until after the Phase 1 beta. The spec follows each recommendation below, so choosing it changes nothing; choosing another option changes the requirements named.
-
-### D-24 Phase 3 free and Premium split: needed before Phase 3 starts
-
-The vision's table gives Free "shared to-dos assigned between the two parents" and Premium "recurring chores, templates, load-balance insights, and tasks assigned to caregivers". Three points need reading:
-
-- **Starter checklists or "templates"?** The Phase 3 row includes newborn starter checklists, and the table makes templates Premium.
-- **"Who is carrying what":** the module section has "a simple view of who is carrying what" with no tier; the table has "load-balance insights" in Premium.
-- **Done history:** D-9's 4-week window covers plans and lists. Tasks aren't named.
-
-Options:
-
-1. **As the vision's table, read narrowly (recommended).** Free: unlimited one-off tasks between the parents, due dates, 1 reminder, notifications, every starter checklist, tasks from other modules, who's carrying what for this week and last, and done history for 4 weeks. Premium: recurring chores and rotation, saved household templates, trends over 12 weeks, helpers, full done history. No vision change.
-2. **Option 1 plus a few free chores,** such as 3 recurring chores. Free households would reach the weekly habit more easily (spec AS3-1), but it changes the vision's table, so it needs your approval to edit vision.md.
-3. **Starter checklists Premium too.** Reads "templates" broadly. Not recommended: the checklists are the new-parent hook and cost nothing to serve.
-
-- **Tuning:** every number is a server setting.
-- **Unblocks:** T-01.1, K-03, T-05, M-05. Spec section 3.8 and conflicts C3-2, C3-3.
+Phase 3 is drafted as planning on 2026-11-27 ([spec-phase3.md](spec-phase3.md), [backlog-phase3.md](backlog-phase3.md)); building waits until after the Phase 1 beta. D-24 is decided (above). The spec follows each recommendation below, so choosing it changes nothing; choosing another option changes the requirements named.
 
 ### D-25 What family members and caregivers do with tasks: needed before T-01.2
 
@@ -263,7 +258,7 @@ D-16 decided that helpers see only what a parent shares. Tasks need the same for
 2. **No rotation.** A chore has one fixed assignee. Simplest, but "take turns" is the usual way partners split chores fairly.
 3. **Automatic balancing.** The app assigns each occurrence to whoever has done least. Opaque, and it scores members, which D-28 recommends against.
 
-- **Unblocks:** T-03.2. Spec FR3-CHORE-4.
+- **Unblocks:** T-03.2. Spec FR3-CHORE-4. Rotation is Premium either way (D-24).
 
 ### D-27 Starter checklist content: needed before K-04 and the Phase 3 beta
 

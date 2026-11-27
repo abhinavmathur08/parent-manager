@@ -10,13 +10,13 @@ Status: draft, 2026-11-27, reconciled with [spec-phase3.md](spec-phase3.md). Pha
 
 ## Coverage
 
-Every `FR3-` requirement (43 in total) is covered by at least one item. `NFR3-` requirements are cited where an item delivers them; the rest are checked in L-09 and the definition of done.
+Every `FR3-` requirement (44 in total) is covered by at least one item. `NFR3-` requirements are cited where an item delivers them; the rest are checked in L-09 and the definition of done.
 
 ## Items
 
 ### 1. T-01.1 Tasks schema, RLS and sync
 
-`tasks` and `task_occurrences` with RLS for parents, the `done` check column, the server gate that refuses a repeat or rotation on a Free household, export and deletion registration, and sync registration. Writes architecture section 3.6 for Phase 3.
+`tasks` and `task_occurrences` with RLS for parents, the `done` check column, the server gate that refuses a chore past the free cap (`app_config`, default 3) or a rotation on a Free household, export and deletion registration, and sync registration. Writes architecture section 3.6 for Phase 3.
 
 - **Area:** Tasks
 - **Size:** S
@@ -24,7 +24,7 @@ Every `FR3-` requirement (43 in total) is covered by at least one item. `NFR3-` 
 - **Depends on:** none (Phase 1 sync and households, Phase 2 C-01.3 scoped sync)
 - **Acceptance:**
   - pgTAP: another household can't read or write any row
-  - A task with a repeat on a Free household is refused by the server
+  - A 4th recurring chore, or any rotation, on a Free household is refused by the server; with the cap set to 0, the first is
   - Harness: two devices completing one task offline end with one completion, and a stale reopen doesn't undo it
   - Export and deletion registry tests pass
 
@@ -93,11 +93,11 @@ Pure functions for chore occurrences: the schedule mode through `expandOccurrenc
 
 ### 7. T-03.2 Chores in the editor and detail
 
-Repeat and rotation pickers in S-45 (Premium), "this occurrence" or "all future" for edits and deletes, skip and reassign one occurrence, and the chore's history in S-46.
+Repeat picker in S-45 (Free up to the cap) and rotation picker (Premium), "this occurrence" or "all future" for edits and deletes, skip and reassign one occurrence, and the chore's history in S-46.
 
 - **Area:** Tasks
 - **Size:** S
-- **Spec:** FR3-CHORE-1, FR3-CHORE-3, FR3-CHORE-4, FR3-CHORE-5, FR3-TASK-8
+- **Spec:** FR3-CHORE-1, FR3-CHORE-3, FR3-CHORE-4, FR3-CHORE-5, FR3-CHORE-7, FR3-TASK-8
 - **Depends on:** T-03.1, T-02.3; decision D-26
 - **Acceptance:**
   - Maestro: complete a rotating chore and see the next occurrence assigned to the other parent
@@ -253,15 +253,15 @@ S-49: counts per member for this week and last (free), trends over 12 weeks (Pre
 
 ### 20. M-05 Phase 3 Premium triggers and lapse
 
-Premium sheet triggers `recurring_chore`, `task_template`, `task_insights` and `helper_tasks` with each benefit's copy, and lapse behavior for chores, rotation, templates, insights and helpers.
+Premium sheet triggers `recurring_chore` (a 4th chore on Free), `chore_rotation`, `task_template`, `task_insights` and `helper_tasks` with each benefit's copy, and lapse behavior for chores, rotation, templates, insights and helpers.
 
 - **Area:** Subscriptions
 - **Size:** S
-- **Spec:** FR3-PAY-1, FR3-PAY-2, FR3-CHORE-6, FR3-CHK-7
+- **Spec:** FR3-PAY-1, FR3-PAY-2, FR3-CHORE-6, FR3-CHORE-7, FR3-CHK-7
 - **Depends on:** T-05, K-03
 - **Acceptance:**
   - Each trigger opens the sheet with its benefit first
-  - After a lapse, a chore's open occurrence stays as a task, no new ones appear, templates are hidden, and nothing is deleted
+  - After a lapse, the 3 earliest chores keep running without rotation; the rest pause with their open occurrence kept as a task; templates are hidden; nothing is deleted
   - Restarting Premium resumes chores from today
 
 ### 21. A-06 Export, deletion and leaving for Phase 3
