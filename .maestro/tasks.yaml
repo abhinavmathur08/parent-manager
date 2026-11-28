@@ -62,6 +62,27 @@ tags:
 - assertVisible:
     id: tasks-done-0
     text: .*Book the car service.*
+# S-46 shows who completed it, and deleting it there gives the list's undo bar (FR3-TASK-7, FR3-TASK-8).
+- tapOn:
+    id: tasks-done-0
+- extendedWaitUntil:
+    visible:
+      id: task-detail-completed
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: task-detail-delete
+    centerElement: true
+- tapOn:
+    id: task-detail-delete
+- extendedWaitUntil:
+    visible:
+      id: tasks-undo
+    timeout: 10000
+- extendedWaitUntil:
+    visible:
+      id: tasks-empty
+    timeout: 15000
 - runFlow: subflows/open-recipes.yaml
 - runFlow: subflows/close-recipes.yaml
 - runFlow: subflows/sign-out.yaml
