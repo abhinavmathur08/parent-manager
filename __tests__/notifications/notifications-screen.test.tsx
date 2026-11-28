@@ -141,7 +141,7 @@ describe('notification settings (S-29)', () => {
     const defrost = screen.getByTestId('notification-type-defrost');
     expect(defrost).not.toBeChecked();
     expect(defrost).toBeDisabled();
-    expect(screen.getAllByText('Off in system settings')).toHaveLength(9);
+    expect(screen.getAllByText('Off in system settings')).toHaveLength(10);
     expect(screen.queryByTestId('event-details-switch')).toBeNull();
     expect(screen.getByTestId('notification-type-household_changes')).toBeChecked();
     expect(screen.getByTestId('push-open-settings')).toBeTruthy();

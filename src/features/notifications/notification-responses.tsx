@@ -24,6 +24,7 @@ const CATEGORIES = new Map<string, NotificationType>([
   ['who_taking', 'who_taking'],
   ['document_expiring', 'document_expiry'],
   ['task_reminder', 'task_reminders'],
+  ['task_assigned', 'task_assigned'],
   ['tasks_today', 'tasks_today'],
 ]);
 

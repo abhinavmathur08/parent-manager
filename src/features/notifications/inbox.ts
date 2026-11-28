@@ -11,7 +11,8 @@ export type InboxType =
   | 'test'
   | 'event_changed'
   | 'who_taking'
-  | 'document_expiring';
+  | 'document_expiring'
+  | 'task_assigned';
 
 export type InboxItem = {
   id: string;
@@ -132,6 +133,13 @@ export function routeFor(
       return typeof data.task_id === 'string'
         ? { pathname: '/tasks/[id]', params: { id: data.task_id } }
         : '/tasks';
+    case 'task_assigned': {
+      // A batch names its tasks; one task opens itself, more open the list.
+      const ids = Array.isArray(data.task_ids) ? data.task_ids : [data.task_id];
+      return ids.length === 1 && typeof ids[0] === 'string'
+        ? { pathname: '/tasks/[id]', params: { id: ids[0] } }
+        : '/tasks';
+    }
     case 'tasks_today':
       return '/tasks';
     case 'test':

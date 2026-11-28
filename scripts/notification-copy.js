@@ -18,6 +18,7 @@ const PUSH_TYPES = [
   'event_changed',
   'who_taking',
   'document_expiring',
+  'task_assigned',
 ];
 const OUTPUT = path.join(root, 'supabase/functions/notify/copy.json');
 

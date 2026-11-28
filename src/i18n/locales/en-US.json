@@ -1715,6 +1715,10 @@
         "title": "Task reminders",
         "description": "Reminders you set on tasks that are yours, or unassigned for parents, on this phone. They work offline."
       },
+      "task_assigned": {
+        "title": "Assigned to you",
+        "description": "When another member gives you a task. At most one an hour."
+      },
       "tasks_today": {
         "title": "Today's tasks",
         "description": "At 8:00 in the morning, how many of your tasks are due today. Nothing on days with none."
@@ -1783,6 +1787,10 @@
       "document_expiring_any": {
         "title": "A document expires soon",
         "body": "A document expires on {{date}}."
+      },
+      "task_assigned": {
+        "title": "New tasks for you",
+        "body": "A member assigned you something to do. Open Tasks to see what's yours."
       }
     },
     "turnOffType": "Turn off this type",
