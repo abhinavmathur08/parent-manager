@@ -111,7 +111,7 @@ Every color comes from these tokens. Light and dark values are switched automati
 
 - **Margins:** screen side margins are `space.4` (16).
 - **Gaps:** sections are separated by `space.6` (24), and items in a group by `space.2` (8).
-- **Bottom of screen:** the primary action sits `space.3` (12) above the floating tab bar. Scrollable content gets bottom padding equal to the tab bar height plus its offset (`layout.tabBarClearance` = 92), so nothing sits under the bar.
+- **Bottom of screen:** the primary action sits `space.3` (12) above the floating tab bar. On tab screens the scrolling area ends at the tab bar's top edge (`layout.tabBarClearance` = 92, plus the bottom safe area, through `useTabBarClearance`), so no row passes under the bar, even mid-scroll, where it couldn't be tapped.
 - **Wide screens:** tablets and landscape cap readable content at `layout.maxContentWidth` = 640 (PROPOSED).
 
 **Radii:**
