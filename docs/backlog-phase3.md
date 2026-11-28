@@ -1,12 +1,12 @@
 # Parent Manager: Phase 3 backlog
 
-Status: draft, 2026-11-27, reconciled with [spec-phase3.md](spec-phase3.md). Phase 3 is **Tasks and Chores**. It's planning only: building starts after the Phase 1 beta, per the vision's phase gates. Each item is one GitHub issue, one branch and one PR of about 400 lines or less (see [CLAUDE.md](../CLAUDE.md)).
+Status: draft, 2026-11-27, reconciled with [spec-phase3.md](spec-phase3.md). Phase 3 is **Tasks and Chores**. Building starts now: Phases 1 to 3 launch together in one first beta (vision, Roadmap, decided 2026-11-27). Each item is one GitHub issue, one branch and one PR of about 400 lines or less (see [CLAUDE.md](../CLAUDE.md)).
 
 **Done when** partners use tasks weekly without leaving the app for a second tool (spec-phase3 section 7.1).
 
 **Sizes, order and IDs** work as in [backlog.md](backlog.md): XS is half a day or less, S about a day, and every item comes after what it depends on. New groups use letters earlier phases don't: **T** tasks and chores, **K** checklists, **X** tasks from other modules. Phase 3 items in existing groups continue their numbers (A-06, M-05, L-09 onwards). Decision IDs refer to [decisions-needed.md](decisions-needed.md); an item with an open decision can't start until it's made.
 
-**Issues:** none are created yet. They're created once the spec is merged and the product owner approves, in a "Phase 3" milestone with a `phase-3` label and a new `area:tasks` label.
+**Issues:** one per item, in the "Phase 3" milestone with a `phase-3` label and an `area:` label, created 2026-11-27 after the product owner approved building.
 
 ## Coverage
 
