@@ -145,6 +145,8 @@ export const ANALYTICS_EVENTS = {
     source: oneOf('leftovers', 'household', 'starter'),
   },
   calendar_viewed: { view: oneOf('agenda', 'day', 'week') },
+  // Phase 3, spec-phase3 section 3.1.
+  tasks_viewed: { filter: oneOf('mine', 'everyone', 'member') },
   event_created: {
     kind: code,
     all_day: bool,

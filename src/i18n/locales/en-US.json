@@ -1931,8 +1931,36 @@
   },
   "tasks": {
     "title": "Tasks",
-    "empty": "Nothing to do yet. Tasks you and your partner add show here.",
+    "offline": "You're offline. Changes sync when you're back.",
     "untitled": "Task",
+    "empty": "Nothing to do yet. Tasks you and your partner add show here.",
+    "emptyFiltered": "No tasks here.",
+    "allDone": "Everything is done.",
+    "filters": {
+      "label": "Show tasks for",
+      "mine": "Mine",
+      "everyone": "Everyone"
+    },
+    "groups": {
+      "overdue": "Overdue",
+      "today": "Today",
+      "upcoming": "Upcoming",
+      "later": "Later",
+      "anytime": "Anytime",
+      "showDone_one": "Show {{count}} done task",
+      "showDone_other": "Show {{count}} done tasks",
+      "hideDone_one": "Hide {{count}} done task",
+      "hideDone_other": "Hide {{count}} done tasks"
+    },
+    "assignee": {
+      "member": "A member"
+    },
+    "row": {
+      "assignee": "For {{name}}",
+      "done": "Done",
+      "separator": " · ",
+      "assigneeYou": "For you"
+    },
     "due": {
       "dateTime": "{{date}}, {{time}}"
     }
