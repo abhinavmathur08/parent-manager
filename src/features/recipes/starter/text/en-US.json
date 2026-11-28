@@ -317,5 +317,417 @@
       "4": "sliced",
       "5": "a few sprigs, chopped"
     }
+  },
+  "starter.slow_cooker_pulled_pork": {
+    "title": "Slow-cooker pulled pork",
+    "steps": [
+      "Mix the paprika, cumin, sugar and salt, and rub it all over the pork.",
+      "Put the onions and garlic in the slow cooker and sit the pork on top. Whisk the vinegar and tomato paste with a splash of water and pour it around the pork.",
+      "Cover and cook on low for 8 hours, until the pork is very tender, pulls apart easily and has reached at least {temp:90}.",
+      "Lift out the pork and shred it with two forks. Skim the fat from the juices, then stir the barbecue sauce and enough of the juices into the meat to keep it moist.",
+      "Serve in the buns."
+    ],
+    "notes": "Freeze in portions with some of the juices for up to three months. Also good in wraps or over rice.",
+    "lineNotes": {
+      "0": "boneless, trimmed of excess fat",
+      "1": "sliced",
+      "2": "crushed",
+      "10": "to serve"
+    }
+  },
+  "starter.chicken_noodle_soup": {
+    "title": "Chicken noodle soup",
+    "steps": [
+      "Warm the oil in a large pot and cook the onion, carrot and celery gently for 8 minutes.",
+      "Add the garlic for a minute, then the stock, thyme and bay leaf, and bring to a boil.",
+      "Add the chicken breasts whole, lower the heat and simmer gently for 15 to 20 minutes, until the chicken reaches {temp:74} in the thickest part.",
+      "Lift out the chicken, shred it with two forks and return it to the pot.",
+      "Add the noodles and simmer for 5 minutes, until tender. Take out the bay leaf, season with salt and pepper and stir in the parsley."
+    ],
+    "notes": "To freeze, leave out the noodles and cook fresh ones when you reheat, so they don't go soft. Keeps frozen for three months.",
+    "lineNotes": {
+      "1": "chopped",
+      "2": "sliced",
+      "3": "sliced",
+      "4": "crushed",
+      "10": "a handful, chopped"
+    }
+  },
+  "starter.red_lentil_dal": {
+    "title": "Creamy red lentil dal",
+    "steps": [
+      "Warm the oil in a large pan and cook the onion gently for 8 minutes, until soft.",
+      "Stir in the garlic, ginger and spices for a minute.",
+      "Add the lentils, tomatoes, coconut milk and water. Bring to a boil, then simmer for 20 to 25 minutes, stirring often, until the lentils have broken down and the dal is thick.",
+      "Stir in the spinach until it wilts, then the lemon juice.",
+      "For babies, serve it thick on a preloaded spoon, or with strips of soft flatbread or toast to dip. Grown-ups can stir salt and chili into their own bowls."
+    ],
+    "notes": "Made without salt or stock, so it suits babies from around six months. Freeze in small portions, such as in an ice cube tray, for up to three months.",
+    "lineNotes": {
+      "1": "finely chopped",
+      "2": "crushed",
+      "3": "grated",
+      "7": "red, rinsed",
+      "12": "juiced"
+    }
+  },
+  "starter.fish_tacos": {
+    "title": "Quick fish tacos with lime slaw",
+    "steps": [
+      "Rub the fish with the paprika, cumin, a little salt and the oil.",
+      "Toss the cabbage with half the lime juice and a pinch of salt. Stir the rest of the lime juice into the sour cream.",
+      "Cook the fish in a hot frying pan for 3 to 4 minutes on each side, until it is opaque all the way through and flakes easily.",
+      "Warm the tortillas. Flake the fish into them and top with the slaw, avocado, lime sour cream and cilantro, with lime wedges to squeeze."
+    ],
+    "lineNotes": {
+      "0": "skinless fillets",
+      "5": "finely shredded",
+      "6": "one juiced, one in wedges",
+      "9": "sliced",
+      "10": "a handful"
+    }
+  },
+  "starter.pesto_chicken_pasta": {
+    "title": "Pesto chicken pasta",
+    "steps": [
+      "Cook the pasta in a large pan of salted boiling water until just tender. Save a mugful of the cooking water, then drain.",
+      "Meanwhile, warm the oil in a large frying pan and cook the chicken over medium-high heat for 6 to 8 minutes, turning, until golden with no pink inside and it reaches {temp:74}.",
+      "Add the tomatoes for 2 minutes, then the spinach until it wilts.",
+      "Toss in the pasta, pesto and a splash of the cooking water until glossy. Serve with Parmesan."
+    ],
+    "notes": "Most pesto contains nuts and cheese, so check the jar if anyone has an allergy.",
+    "lineNotes": {
+      "2": "in bite-sized pieces",
+      "3": "halved",
+      "6": "grated"
+    }
+  },
+  "starter.zucchini_feta_frittata": {
+    "title": "Zucchini and feta frittata",
+    "steps": [
+      "Heat the broiler to high.",
+      "Warm the oil in an ovenproof frying pan over medium heat and cook the zucchini and onion for 8 minutes, until soft. Stir in the spinach until it wilts.",
+      "Whisk the eggs with the milk, mint and pepper and pour over the vegetables. Scatter with the feta.",
+      "Cook over low heat for 6 to 8 minutes, until the edges are set.",
+      "Slide the pan under the broiler for 2 to 3 minutes, until the top is set and golden. Cool a little, then cut into wedges."
+    ],
+    "notes": "Eat warm or cold. Wedges keep in the fridge for three days and make an easy one-handed lunch.",
+    "lineNotes": {
+      "1": "thinly sliced",
+      "2": "thinly sliced",
+      "6": "crumbled",
+      "7": "a few leaves, chopped"
+    }
+  },
+  "starter.ginger_pork_stir_fry": {
+    "title": "Ginger pork and broccoli stir-fry",
+    "steps": [
+      "Toss the pork with the cornstarch and a third of the soy sauce.",
+      "Mix the rest of the soy sauce with the honey, garlic, ginger and a splash of water.",
+      "Heat half the oil in a wok or large frying pan over high heat. Stir-fry the pork for 3 to 4 minutes, until browned and it reaches {temp:63}, then tip it onto a plate.",
+      "Add the rest of the oil and stir-fry the broccoli and bell pepper for 4 minutes, adding a splash of water to help the broccoli steam.",
+      "Return the pork with the sauce and scallions and toss for a minute, until glossy. Serve with rice."
+    ],
+    "lineNotes": {
+      "0": "thinly sliced",
+      "4": "crushed",
+      "5": "grated",
+      "7": "in small florets",
+      "8": "sliced",
+      "9": "sliced",
+      "10": "to serve"
+    }
+  },
+  "starter.cauliflower_mac_cheese": {
+    "title": "Cauliflower mac and cheese",
+    "steps": [
+      "Cook the pasta in a large pan of boiling water, adding the cauliflower for the last 5 minutes, until both are tender. Drain.",
+      "Meanwhile, melt the butter in a pan, stir in the flour and cook for a minute.",
+      "Whisk in the milk a little at a time and keep stirring over medium heat until the sauce is smooth and thick.",
+      "Take it off the heat and stir in most of the cheese, the mustard and the nutmeg, then fold in the pasta and cauliflower.",
+      "Eat straight away, or tip it into a baking dish, scatter with the rest of the cheese and brown under the broiler."
+    ],
+    "notes": "Freeze in portions for up to two months. Reheat with a splash of milk until piping hot.",
+    "lineNotes": {
+      "0": "macaroni or small shapes",
+      "1": "in small florets",
+      "5": "grated"
+    }
+  },
+  "starter.beef_vegetable_stew": {
+    "title": "Oven beef and vegetable stew",
+    "steps": [
+      "Heat the oven to {oven:160}.",
+      "Toss the beef in the flour with a little salt and pepper. Brown it in batches in the oil in a large Dutch oven, then set it aside.",
+      "Lower the heat, add the onion, carrot and celery and cook for 8 minutes, then stir in the garlic and tomato paste.",
+      "Return the beef, add the stock, thyme and bay leaves, and bring to a simmer. Cover and cook in the oven for 1 hour.",
+      "Add the potatoes and cook for 1 hour more, until the beef is falling apart and has reached at least {temp:71}. Take out the bay leaves."
+    ],
+    "notes": "Or cook it on low in a slow cooker for 8 hours. Freeze in portions for up to three months.",
+    "lineNotes": {
+      "0": "in large chunks",
+      "5": "chopped",
+      "6": "in chunks",
+      "7": "sliced",
+      "8": "crushed",
+      "13": "in chunks"
+    }
+  },
+  "starter.shepherds_pie": {
+    "title": "Shepherd's pie",
+    "steps": [
+      "Warm the oil in a large pan and cook the onion and carrot for 8 minutes. Add the lamb and cook, breaking it up, until browned with no pink left and it reaches {temp:71}. Spoon off any excess fat.",
+      "Stir in the tomato paste and flour for a minute, then add the stock, Worcestershire sauce and thyme. Simmer for 20 minutes, until thick, then stir in the peas and season with salt and pepper.",
+      "Meanwhile, boil the potatoes for 15 to 20 minutes, until tender. Drain and mash with the butter and milk, and season.",
+      "Heat the oven to {oven:200}. Spoon the lamb into a baking dish, top with the mash and rough up the surface with a fork.",
+      "Bake for 25 minutes, until golden and bubbling at the edges."
+    ],
+    "notes": "To freeze, cool the assembled pie, cover and freeze for up to three months. Thaw overnight in the fridge, then bake for 40 minutes, until piping hot in the middle.",
+    "lineNotes": {
+      "1": "chopped",
+      "2": "diced",
+      "9": "frozen",
+      "10": "peeled, in chunks"
+    }
+  },
+  "starter.sweet_potato_wedges": {
+    "title": "Soft sweet potato wedges",
+    "steps": [
+      "Heat the oven to {oven:200} and line a baking sheet with parchment paper.",
+      "Cut the sweet potatoes into wedges about the size of an adult finger, and toss them with the oil and paprika.",
+      "Spread them out on the baking sheet and roast for 25 to 30 minutes, turning halfway, until soft enough to squash easily between your finger and thumb.",
+      "Cool until just warm before serving. Babies can hold a whole wedge. Peel off the skin if it is tough."
+    ],
+    "notes": "A good first finger food from around six months, and a side for the rest of the family.",
+    "lineNotes": {
+      "0": "scrubbed",
+      "2": "mild"
+    }
+  },
+  "starter.salmon_fishcakes": {
+    "title": "Salmon and pea fishcakes",
+    "steps": [
+      "Boil the potatoes for 15 minutes, until tender, then drain well and mash.",
+      "Mix in the salmon, peas, lemon zest, dill and egg until combined. Shape into eight small patties.",
+      "Press the patties into the breadcrumbs to coat. Chill them for 15 minutes if you have time, so they hold together.",
+      "Fry in the oil over medium heat for 4 minutes on each side, until golden, firm and cooked through.",
+      "For babies, cut into fingers, and check again for small bones."
+    ],
+    "notes": "Freeze uncooked patties on a tray, then bag them, for up to three months. Cook from frozen for a few minutes longer on each side, until hot all the way through.",
+    "lineNotes": {
+      "0": "peeled, in chunks",
+      "1": "drained, skin and bones removed",
+      "2": "frozen, thawed",
+      "3": "zested",
+      "4": "a few sprigs, chopped"
+    }
+  },
+  "starter.broccoli_cheese_bites": {
+    "title": "Broccoli and cheese bites",
+    "steps": [
+      "Heat the oven to {oven:200} and line a baking sheet with parchment paper.",
+      "Steam or boil the broccoli for 5 minutes, until tender. Drain well, cool a little and chop it finely.",
+      "Mix the broccoli with the eggs, cheese, breadcrumbs and scallion. Shape into small logs or patties, about the size of a baby's palm.",
+      "Bake for 18 to 20 minutes, turning halfway, until golden and firm.",
+      "Cool before serving."
+    ],
+    "notes": "Keep in the fridge for two days, or freeze for up to two months.",
+    "lineNotes": {
+      "0": "in small florets",
+      "2": "grated",
+      "4": "finely sliced"
+    }
+  },
+  "starter.apple_cinnamon_oatmeal": {
+    "title": "Apple and cinnamon oatmeal",
+    "steps": [
+      "Put the oats, milk, apple and cinnamon in a pan over medium heat.",
+      "Bring to a gentle simmer and cook for 5 minutes, stirring often, until thick and creamy. Add a splash more milk if it gets too thick.",
+      "Cool a little before serving. For babies, make it thick enough to stay on a preloaded spoon."
+    ],
+    "notes": "The apple sweetens it, so there is no added sugar. Grown-ups can sweeten their own bowls.",
+    "lineNotes": {
+      "2": "peeled and grated"
+    }
+  },
+  "starter.lamb_koftas": {
+    "title": "Lamb and zucchini koftas",
+    "steps": [
+      "Heat the oven to {oven:200} and line a baking sheet with parchment paper.",
+      "Mix the lamb, zucchini, onion, garlic, spices and half the mint with your hands.",
+      "Shape into twelve finger-sized logs that a baby can hold, set them on the baking sheet and brush with the oil.",
+      "Bake for 15 to 18 minutes, turning once, until browned all over, with no pink in the middle, and they reach {temp:71}.",
+      "Stir the cucumber and the rest of the mint into the yogurt to dip. Serve with warm pita."
+    ],
+    "notes": "Freeze cooked koftas for up to three months and reheat until piping hot.",
+    "lineNotes": {
+      "1": "grated and squeezed dry",
+      "2": "very finely chopped",
+      "3": "crushed",
+      "6": "a small handful, chopped",
+      "8": "to dip",
+      "9": "grated",
+      "10": "to serve"
+    }
+  },
+  "starter.hidden_veg_tomato_sauce": {
+    "title": "Hidden vegetable tomato sauce",
+    "steps": [
+      "Warm the oil in a large pan and cook the onion, carrot, zucchini and bell pepper gently for 15 minutes, until very soft.",
+      "Add the garlic for a minute, then the tomatoes. Rinse each can with a splash of water and add that too.",
+      "Simmer for 20 minutes, stirring now and then, then stir in the basil.",
+      "Blend until smooth.",
+      "Use it on pasta, as a pizza topping or for dipping. For babies, stir it through soft pasta shapes they can pick up."
+    ],
+    "notes": "Made without salt or sugar, for babies. Freeze in portions, or in an ice cube tray for small helpings, for up to three months.",
+    "lineNotes": {
+      "1": "chopped",
+      "2": "grated",
+      "3": "grated",
+      "4": "red, chopped",
+      "5": "crushed",
+      "7": "a handful of leaves"
+    }
+  },
+  "starter.avocado_toast_fingers": {
+    "title": "Avocado toast fingers",
+    "steps": [
+      "Toast the bread lightly, so it is firm enough to hold but not hard.",
+      "Mash the avocado with the lemon juice and spread it thickly over the toast.",
+      "Cut into fingers about as wide as two adult fingers, and trim off any very crisp crusts."
+    ],
+    "notes": "A thick layer of avocado helps babies grip the toast. For older children and adults, top it with an egg cooked until the yolk is firm.",
+    "lineNotes": {
+      "0": "one slice",
+      "1": "ripe"
+    }
+  },
+  "starter.banana_oat_cookies": {
+    "title": "Banana oat cookies",
+    "steps": [
+      "Heat the oven to {oven:180} and line a baking sheet with parchment paper.",
+      "Mash the bananas well, then stir in the oats, peanut butter and cinnamon. Leave for 5 minutes so the oats soften.",
+      "Drop spoonfuls onto the baking sheet and flatten each one.",
+      "Bake for 12 to 15 minutes, until golden at the edges and firm to the touch.",
+      "Let them cool on the baking sheet, where they firm up further."
+    ],
+    "notes": "No added sugar. Keep in an airtight box for three days.",
+    "lineNotes": {
+      "0": "very ripe",
+      "2": "smooth"
+    }
+  },
+  "starter.yogurt_berry_pops": {
+    "title": "Frozen yogurt and berry popsicles",
+    "steps": [
+      "Blend the yogurt, berries and banana until smooth.",
+      "Pour into popsicle molds, add sticks and freeze for at least six hours, until solid.",
+      "To get them out, hold the molds under warm water for a few seconds."
+    ],
+    "notes": "Keep for up to a month in the freezer. A cooling snack on hot days.",
+    "lineNotes": {
+      "1": "thawed",
+      "2": "ripe"
+    }
+  },
+  "starter.corn_zucchini_fritters": {
+    "title": "Corn and zucchini fritters",
+    "steps": [
+      "Whisk the eggs, milk, flour and baking powder into a thick batter.",
+      "Stir in the corn, zucchini, scallions and cheese.",
+      "Heat a little oil in a frying pan over medium heat. Drop in spoonfuls of batter and flatten them slightly.",
+      "Cook for 3 minutes on each side, until golden and cooked through in the middle. Keep them warm while you cook the rest, adding oil as needed."
+    ],
+    "notes": "Freeze cooled fritters with parchment paper between them for up to two months. Reheat in a hot oven until hot all the way through.",
+    "lineNotes": {
+      "4": "thawed",
+      "5": "grated and squeezed dry",
+      "6": "sliced",
+      "7": "grated"
+    }
+  },
+  "starter.sticky_chicken_drumsticks": {
+    "title": "Sticky soy and honey drumsticks",
+    "steps": [
+      "Heat the oven to {oven:200} and line a roasting pan with foil.",
+      "Mix the soy sauce, honey, garlic and ginger, and toss the drumsticks in it.",
+      "Roast for 40 to 45 minutes, turning and basting twice, until sticky and dark and the meat reaches {temp:74} near the bone.",
+      "Scatter with the sesame seeds and scallions."
+    ],
+    "notes": "Roast a double batch: cold drumsticks keep in the fridge for three days and travel well. Not for babies under one, because of the honey.",
+    "lineNotes": {
+      "0": "about eight",
+      "3": "crushed",
+      "4": "grated",
+      "6": "sliced"
+    }
+  },
+  "starter.sausage_bean_casserole": {
+    "title": "Sausage and bean casserole",
+    "steps": [
+      "Brown the sausages in the oil in a large pan over medium heat for 8 minutes, turning, then lift them out and cut each into three.",
+      "Cook the onion and bell pepper in the same pan for 8 minutes, until soft. Add the garlic and paprika for a minute.",
+      "Add the tomatoes, beans, stock, thyme and sausages. Simmer, partly covered, for 15 to 20 minutes, until thick and the sausages reach {temp:71}."
+    ],
+    "notes": "Serve with mashed potato or crusty bread. Freeze for up to three months.",
+    "lineNotes": {
+      "0": "about six",
+      "2": "sliced",
+      "3": "sliced",
+      "4": "crushed",
+      "7": "drained and rinsed",
+      "8": "drained and rinsed"
+    }
+  },
+  "starter.peanut_noodles": {
+    "title": "Peanut noodles with crunchy vegetables",
+    "steps": [
+      "Cook the noodles as the package says, adding the edamame for the last 2 minutes. Drain and rinse under cold water.",
+      "Whisk the peanut butter, soy sauce, lime juice, sesame oil and honey with a splash of hot water until smooth and pourable.",
+      "Toss the noodles and edamame with the sauce, carrot, cucumber and scallions.",
+      "Top with cilantro, and red pepper flakes for anyone who likes heat."
+    ],
+    "notes": "Good cold, so it packs well for the next day's lunch.",
+    "lineNotes": {
+      "1": "frozen, shelled",
+      "2": "smooth",
+      "4": "juiced",
+      "7": "in thin strips",
+      "8": "in thin strips",
+      "9": "sliced",
+      "10": "a handful, to serve",
+      "11": "optional"
+    }
+  },
+  "starter.garlic_shrimp_linguine": {
+    "title": "Garlic and lemon shrimp linguine",
+    "steps": [
+      "Cook the linguine in a large pan of salted boiling water until just tender. Save a mugful of the cooking water, then drain.",
+      "Meanwhile, warm the oil and butter in a large frying pan over medium heat and cook the garlic and red pepper flakes for a minute, without letting the garlic brown.",
+      "Add the shrimp and cook for 2 to 3 minutes, turning once, until pink and opaque all the way through.",
+      "Toss in the linguine, lemon zest and juice, parsley and a splash of the cooking water. Season with salt."
+    ],
+    "lineNotes": {
+      "3": "thinly sliced",
+      "5": "raw, peeled",
+      "6": "zested and juiced",
+      "7": "a handful, chopped"
+    }
+  },
+  "starter.homemade_fish_sticks": {
+    "title": "Homemade fish sticks",
+    "steps": [
+      "Heat the oven to {oven:220} and line a baking sheet with parchment paper.",
+      "Cut the fish into finger-sized strips. Mix the breadcrumbs with the lemon zest.",
+      "Dip each strip in the flour, then the egg, then the breadcrumbs, pressing them on. Lay them on the baking sheet and drizzle with the oil.",
+      "Bake for 12 to 15 minutes, turning once, until the coating is golden, crisp and cooked through and the fish is opaque all the way through and flakes easily.",
+      "Cool a little, and check for bones before serving to babies."
+    ],
+    "notes": "Freeze uncooked fish sticks on a tray, then bag them, for up to two months. Bake from frozen for a few minutes longer.",
+    "lineNotes": {
+      "0": "skinless, boneless fillets",
+      "2": "beaten",
+      "4": "zested"
+    }
   }
 }
