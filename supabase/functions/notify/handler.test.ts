@@ -144,6 +144,23 @@ Deno.test('an expiry push carries no category or date', () => {
   assertEquals(JSON.stringify(message).includes('doc.'), false);
 });
 
+Deno.test('an "assigned to you" push names its task only when it is one (FR3-NOT-3)', () => {
+  const task = 'aaaaaaaa-0000-0000-0000-00000000000f';
+  const [one] = buildMessages([push({ type: 'task_assigned', payload: { task_ids: [task] } })]);
+  assertEquals(one.data, { notificationId: 'n1', type: 'task_assigned', task_id: task });
+  assertEquals(one.categoryId, 'task_assigned');
+  assertEquals(one.body.includes('{{'), false);
+  const [many] = buildMessages([
+    push({
+      type: 'task_assigned',
+      payload: { task_ids: [task, 'bbbbbbbb-0000-0000-0000-00000000000f'] },
+    }),
+  ]);
+  assertEquals(many.data, { notificationId: 'n1', type: 'task_assigned' });
+  const [odd] = buildMessages([push({ type: 'task_assigned', payload: { task_ids: ['Bins'] } })]);
+  assertEquals(odd.data, { notificationId: 'n1', type: 'task_assigned' });
+});
+
 Deno.test(
   'falls back to en-US copy for an unknown locale, and the test push has no category',
   () => {
@@ -162,6 +179,7 @@ Deno.test('has copy for every type in every locale', () => {
       'event_changed',
       'who_taking',
       'document_expiring',
+      'task_assigned',
     ] as const) {
       const text = textFor(type, locale);
       assertEquals(text.title.length > 0 && text.body.length > 0, true);

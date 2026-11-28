@@ -4,8 +4,8 @@ import { getSupabase } from '@/lib/supabase';
 
 /**
  * The four Phase 1 types (FR-NOT-1), then Phase 2's calendar types (FR2-REM-2, 4 and 5) and
- * document expiry reminders (FR2-DOC-7), then Phase 3's local task reminders and today's tasks
- * (FR3-NOT-5).
+ * document expiry reminders (FR2-DOC-7), then Phase 3's local task reminders, the "assigned to you"
+ * push and local today's tasks (FR3-NOT-5).
  */
 export const NOTIFICATION_TYPES = [
   'plan_week',
@@ -17,6 +17,7 @@ export const NOTIFICATION_TYPES = [
   'who_taking',
   'document_expiry',
   'task_reminders',
+  'task_assigned',
   'tasks_today',
 ] as const;
 export type NotificationType = (typeof NOTIFICATION_TYPES)[number];
@@ -35,6 +36,7 @@ export const DEVICE_TYPES: readonly NotificationType[] = [
   'who_taking',
   'document_expiry',
   'task_reminders',
+  'task_assigned',
   'tasks_today',
 ];
 
@@ -61,6 +63,7 @@ export const DEFAULT_PREFS: NotificationPrefs = {
   who_taking: true,
   document_expiry: true,
   task_reminders: true,
+  task_assigned: true,
   tasks_today: true,
   planWeekDay: null,
   planWeekMinute: 18 * 60,
@@ -78,6 +81,7 @@ type Row = {
   who_taking: boolean;
   document_expiry: boolean;
   task_reminders: boolean;
+  task_assigned: boolean;
   tasks_today: boolean;
   plan_week_day: number | null;
   plan_week_minute: number;
@@ -86,7 +90,7 @@ type Row = {
 };
 
 const COLUMNS =
-  'plan_week, list_ready, defrost, household_changes, calendar_reminders, event_changes, who_taking, document_expiry, task_reminders, tasks_today, plan_week_day, plan_week_minute, quiet_start_minute, quiet_end_minute';
+  'plan_week, list_ready, defrost, household_changes, calendar_reminders, event_changes, who_taking, document_expiry, task_reminders, task_assigned, tasks_today, plan_week_day, plan_week_minute, quiet_start_minute, quiet_end_minute';
 
 const fromRow = (row: Row): NotificationPrefs => ({
   plan_week: row.plan_week,
@@ -98,6 +102,7 @@ const fromRow = (row: Row): NotificationPrefs => ({
   who_taking: row.who_taking,
   document_expiry: row.document_expiry,
   task_reminders: row.task_reminders,
+  task_assigned: row.task_assigned,
   tasks_today: row.tasks_today,
   planWeekDay: row.plan_week_day,
   planWeekMinute: row.plan_week_minute,
@@ -115,6 +120,7 @@ const toRow = (prefs: NotificationPrefs): Row => ({
   who_taking: prefs.who_taking,
   document_expiry: prefs.document_expiry,
   task_reminders: prefs.task_reminders,
+  task_assigned: prefs.task_assigned,
   tasks_today: prefs.tasks_today,
   plan_week_day: prefs.planWeekDay,
   plan_week_minute: prefs.planWeekMinute,

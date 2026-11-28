@@ -68,6 +68,10 @@ tags:
 - assertVisible:
     id: notification-type-task_reminders
     checked: true
+# T-04.2 (FR3-NOT-3): "assigned to you" starts on.
+- assertVisible:
+    id: notification-type-task_assigned
+    checked: true
 - assertVisible:
     id: notification-type-tasks_today
     checked: true
