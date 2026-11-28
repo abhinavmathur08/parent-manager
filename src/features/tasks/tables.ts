@@ -8,6 +8,8 @@ import type { SyncRow, SyncTableDefinition } from '@/lib/sync/types';
  */
 export const TASKS = {
   name: 'tasks',
+  // Parents see every task; helpers only theirs, shared ones and rotations (R3-ACC-1, T-01.2).
+  scoped: true,
   columns: {
     title: 'text',
     template_item_id: 'text',
@@ -33,6 +35,7 @@ export const TASKS = {
 /** A chore's done, skipped or reassigned occurrence (R3-CHORE-1, R3-CHORE-2). */
 export const TASK_OCCURRENCES = {
   name: 'task_occurrences',
+  scoped: true,
   columns: {
     task_id: 'text',
     original_date: 'text',
