@@ -1963,6 +1963,37 @@
     },
     "due": {
       "dateTime": "{{date}}, {{time}}"
+    },
+    "editor": {
+      "title": "New task",
+      "save": "Save",
+      "failed": "The task couldn't be saved. Try again.",
+      "titleLabel": "Task",
+      "titleHint": "What needs doing?",
+      "privacyHint": "Your partner and anyone it's shared with can see this. Leave out health details.",
+      "due": "Due",
+      "dues": {
+        "none": "No date",
+        "date": "Date",
+        "time": "Date and time"
+      },
+      "date": "Due date",
+      "hour": "Hour",
+      "minute": "Minute",
+      "assignee": "For",
+      "anyone": "Anyone",
+      "me": "Me",
+      "reminder": "Reminder",
+      "reminders": {
+        "none": "None",
+        "at_time": "At the time",
+        "morning": "{{time}} that day",
+        "day_before": "{{time}} the day before"
+      },
+      "notes": "Notes",
+      "shared": "Share with helpers",
+      "sharedHint": "Family members and caregivers see it and can help.",
+      "sharedAlways": "Your tasks are shared with the household."
     }
   },
   "checklist": {
