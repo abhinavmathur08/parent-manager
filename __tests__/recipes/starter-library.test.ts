@@ -5,6 +5,8 @@ import {
   NEW_PARENT_TAGS,
   STARTER_LIBRARY_VERSION,
   STARTER_RECIPES,
+  findStarter,
+  renderTemperatures,
   starterText,
 } from '@/features/recipes/starter/library';
 import { copyStarter, starterEntry, starterView } from '@/features/recipes/starter/view';
@@ -41,10 +43,39 @@ describe('starter library seed data (R-04.1, FR-REC-2)', () => {
     },
   );
 
-  it('falls back to en-US text and uses the locale where there is one', () => {
-    const oats = STARTER_RECIPES.find((r) => r.key === 'starter.overnight_oats')!;
+  it('uses the locale where it has its own text, field by field, and en-US otherwise', () => {
+    const oats = findStarter('starter.overnight_oats')!;
     expect(starterText(oats, 'en-GB').steps[0]).toMatch(/yoghurt/);
-    expect(starterText(oats, 'en-AU').steps[0]).toMatch(/yogurt/);
+    expect(starterText(oats, 'en-US').steps[0]).toMatch(/yogurt/);
+    // en-GB has no title of its own, so it falls back to en-US.
+    expect(starterText(oats, 'en-GB').title).toBe(starterText(oats, 'en-US').title);
+  });
+
+  it("writes temperatures in each region's scale", () => {
+    expect(renderTemperatures('Heat to {oven:200}.', 'en-US')).toBe('Heat to 400°F.');
+    expect(renderTemperatures('Heat to {oven:180}.', 'en-GB')).toBe('Heat to 180°C (160°C fan).');
+    expect(renderTemperatures('Heat to {oven:220}.', 'en-AU')).toBe(
+      'Heat to 220°C (200°C fan-forced).',
+    );
+    expect(renderTemperatures('until it reads {temp:74}', 'en-US')).toBe(
+      'until it reads 165°F (74°C)',
+    );
+    expect(renderTemperatures('until it reads {temp:71}', 'en-US')).toBe(
+      'until it reads 160°F (71°C)',
+    );
+    expect(renderTemperatures('until it reads {temp:63}', 'en-GB')).toBe('until it reads 63°C');
+  });
+
+  it.each(['en-US', 'en-GB', 'en-AU'])('saves a valid copy of every recipe in %s', (locale) => {
+    let n = 0;
+    for (const recipe of STARTER_RECIPES) {
+      const text = starterText(recipe, locale);
+      for (const s of [text.title, ...text.steps, text.notes ?? '']) expect(s).not.toMatch(/[{}]/);
+      const draft = copyStarter(recipe, locale, () => `id-${++n}`);
+      expect(validateDraft(draft)).toEqual({});
+      expect(draft.steps.length).toBeLessThanOrEqual(RECIPE_LIMITS.maxSteps);
+      expect(draft.lines.length).toBeLessThanOrEqual(RECIPE_LIMITS.maxLines);
+    }
   });
 
   it('shows on S-16 and S-17 with catalog names, read-only', () => {
@@ -57,10 +88,19 @@ describe('starter library seed data (R-04.1, FR-REC-2)', () => {
     expect(view).toMatchObject({ id: recipe.key, sourceType: 'library', title: 'Overnight oats' });
     expect(view.lines).toHaveLength(recipe.lines.length);
   });
+
+  it('shows line notes in the locale, and copies them', () => {
+    const soup = findStarter('starter.lentil_tomato_soup')!;
+    const onion = soup.lines.findIndex((l) => l.ingredientId === 'ingredient.onion');
+    const note = starterText(soup, 'en-US').lineNotes?.[String(onion)];
+    expect(note).toBeTruthy();
+    expect(starterView(soup, 'en-US').lines[onion].note).toBe(note);
+    expect(copyStarter(soup, 'en-US', () => 'x').lines[onion].note).toBe(note);
+  });
 });
 
 describe('save a copy (FR-REC-3)', () => {
-  const recipe = STARTER_RECIPES[1];
+  const recipe = findStarter('starter.lentil_tomato_soup')!;
   let n = 0;
   const newId = () => `id-${++n}`;
 

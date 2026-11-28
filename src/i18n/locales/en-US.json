@@ -1477,7 +1477,9 @@
     "starterLibrary": "Starter library",
     "starter": {
       "saveCopy": "Save a copy to edit",
-      "copyFailed": "Couldn't save a copy. Try again."
+      "copyFailed": "Couldn't save a copy. Try again.",
+      "ovenTemp": "{{fahrenheit}}°F",
+      "foodTemp": "{{fahrenheit}}°F ({{celsius}}°C)"
     },
     "delete": {
       "action": "Delete recipe",

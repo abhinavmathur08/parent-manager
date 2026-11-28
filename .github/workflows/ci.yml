@@ -34,6 +34,7 @@ jobs:
       - run: pnpm run catalog:check
       - run: pnpm run email:check
       - run: pnpm run notify:copy:check
+      - run: pnpm run recipes:check
       - run: pnpm run format:check
       - run: pnpm run typecheck
       - run: pnpm run test:ci
