@@ -34,6 +34,7 @@ function Tasks({ membership }: { membership: Membership }) {
           id: membership.householdId,
           locale: membership.locale,
           timezone: membership.timezone ?? null,
+          weekStart: membership.weekStart === 1 ? 1 : 7,
         }}
         userId={userId}
         isParent={membership.role === 'parent'}
