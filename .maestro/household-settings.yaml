@@ -18,9 +18,11 @@ tags:
 - assertVisible:
     id: settings-units-metric
     checked: true
+# Centered, so the floating tab bar doesn't cover it.
 - scrollUntilVisible:
     element:
       id: settings-save
+    centerElement: true
 - tapOn:
     id: settings-save
 - extendedWaitUntil:

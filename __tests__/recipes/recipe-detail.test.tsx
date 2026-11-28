@@ -116,9 +116,7 @@ describe('S-17 recipe detail (FR-REC-8, FR-REC-9, FR-AI-15)', () => {
 
   it('leaves room for the floating tab bar', async () => {
     await show();
-    const content = StyleSheet.flatten(
-      screen.getByTestId('recipe-detail-scroll').props.contentContainerStyle,
-    );
-    expect(content.paddingBottom).toBeGreaterThanOrEqual(theme.layout.tabBarClearance);
+    const scroll = StyleSheet.flatten(screen.getByTestId('recipe-detail-scroll').props.style);
+    expect(scroll.marginBottom).toBeGreaterThanOrEqual(theme.layout.tabBarClearance);
   });
 });
