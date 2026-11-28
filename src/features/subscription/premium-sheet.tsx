@@ -244,6 +244,7 @@ export function PremiumSheet({ visible, trigger, onClose }: PremiumSheetProps) {
       onClose={close}
       title={t('premium.sheet.title')}
       footer={footer}
+      scrollKey={status}
       testID="premium-sheet"
     >
       <View style={{ gap: theme.space[4] }}>
