@@ -45,20 +45,20 @@ Phase 3 gives the two partners one shared to-do list for the household, so the u
 
 ### 1.4 Glossary
 
-| Term             | Meaning                                                                                                                                       |
-| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| Task             | One thing to do, with a title, an optional due date or time, an optional assignee and a done state.                                           |
-| Chore            | A task with a repeat rule. Each occurrence is done, skipped or open on its own.                                                               |
-| Occurrence       | One due date of a chore, identified by the chore and its original date (R3-CHORE-2).                                                          |
-| Assignee         | The member a task or occurrence is assigned to, or nobody ("anyone").                                                                         |
-| Helper           | A family member or caregiver: the Premium seats of spec.md section 2.1.                                                                       |
-| Shared task      | A task visible to every helper in the household, such as "anyone can help". Parents always see every task.                                    |
-| Rotation         | An ordered list of members a chore's occurrences are assigned to in turn (D-26).                                                              |
-| Starter template | A checklist shipped with the app, such as `checklist.newborn.first_weeks`, whose items are template item IDs with translated text.            |
-| Checklist        | A household's started copy of a starter template or a saved template: a group of tasks with progress.                                         |
-| Saved template   | A household's own checklist saved for reuse (Premium).                                                                                        |
-| Source           | The item a task was made from: a plan entry, grocery item, event, document or checklist.                                                      |
-| Stage            | The household's youngest age band or expecting status from onboarding (D-6): `expecting`, `0_6m`, `6_12m`, `toddler`, `preschool` or `older`. |
+| Term             | Meaning                                                                                                                                                           |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Task             | One thing to do, with a title, an optional due date or time, an optional assignee and a done state.                                                               |
+| Chore            | A task with a repeat rule. Each occurrence is done, skipped or open on its own.                                                                                   |
+| Occurrence       | One due date of a chore, identified by the chore and its original date (R3-CHORE-2).                                                                              |
+| Assignee         | The member a task or occurrence is assigned to, or nobody ("anyone").                                                                                             |
+| Helper           | A family member or caregiver: the Premium seats of spec.md section 2.1.                                                                                           |
+| Shared task      | A task visible to every helper in the household, such as "anyone can help". Parents always see every task.                                                        |
+| Rotation         | An ordered list of members a chore's occurrences are assigned to in turn (D-26).                                                                                  |
+| Starter template | A checklist shipped with the app, such as `checklist.newborn.first_weeks`, whose items are template item IDs with translated text.                                |
+| Checklist        | A household's started copy of a starter template or a saved template: a group of tasks with progress.                                                             |
+| Saved template   | A household's own checklist saved for reuse (Premium).                                                                                                            |
+| Source           | The item a task was made from: a plan entry, grocery item, event, document or checklist.                                                                          |
+| Stage            | The household's youngest age band or expecting status from onboarding (D-6): `expecting`, `infant_0_6m`, `infant_6_12m`, `toddler`, `preschool` or `older_child`. |
 
 ## 2. Roles and permissions
 
@@ -184,14 +184,14 @@ Content source and review follow D-27: Claude drafts the items, the product owne
 
 **Requirements**
 
-- **FR3-CHK-1:** Starter checklists (S-47) are offered by stage: `expecting` gets `checklist.expecting.prepare_home`, `checklist.expecting.hospital_bag` and `checklist.expecting.paperwork`; `0_6m` gets `checklist.newborn.first_weeks` and `checklist.newborn.home_routines` (PROPOSED names and set). Every template is listed for browsing; the household's stage only picks what's suggested first.
+- **FR3-CHK-1:** Starter checklists (S-47) are offered by stage: `expecting` gets `checklist.expecting.prepare_home`, `checklist.expecting.hospital_bag` and `checklist.expecting.paperwork`; `infant_0_6m` gets `checklist.newborn.first_weeks` and `checklist.newborn.home_routines` (PROPOSED names and set). Every template is listed for browsing; the household's stage only picks what's suggested first.
 - **FR3-CHK-2:** The empty Tasks tab, and the Tasks tab after the household's stage changes (an age band edited on S-28), suggest the matching checklists once each (PROPOSED). Dismissing hides the suggestion.
 - **FR3-CHK-3:** Starting a checklist shows a preview of its items with every item ticked. The parent can untick items, then start. Each kept item becomes a task in the household, with the checklist as its source, unassigned and with a suggested due date (FR3-CHK-4).
-- **FR3-CHK-4:** Suggested due dates are offsets from an anchor: for `expecting`, the first day of the due month (the only date stored, D-6), such as "8 weeks before"; for `0_6m`, the day the checklist starts (no birth date is stored). Items with no sensible date stay Anytime (PROPOSED).
+- **FR3-CHK-4:** Suggested due dates are offsets from an anchor: for `expecting`, the first day of the due month (the only date stored, D-6), such as "8 weeks before"; for `infant_0_6m`, the day the checklist starts (no birth date is stored). Items with no sensible date stay Anytime (PROPOSED). Items flagged for health review never get a suggested date and always stay Anytime (decided 2026-11-27, FR3-CHK-8).
 - **FR3-CHK-5:** Items are template item IDs, such as `checklist_item.newborn.add_baby_to_insurance`. Their text comes from the locale files in the household's locale, and an item only appears in the regions its template lists (R3-CHK-1). A started item keeps its ID until a member edits the title, which then stores the edited text.
 - **FR3-CHK-6:** A checklist (S-48) shows its tasks grouped by due, and progress as "n of m done" in text and a ProgressBar. Its tasks also appear in the Tasks tab like any other.
 - **FR3-CHK-7:** **Saved templates (Premium):** a parent can save a checklist, or any selection of tasks, as a household template with its titles and relative due offsets, and apply it later as a new checklist. Templates are hidden on a lapse and kept in export (FR-PAY-9).
-- **FR3-CHK-8:** Checklist content is practical household logistics. It never gives medical advice (vision non-goals). Items that involve a health service say to book or check with the family's provider, and never state a clinical schedule. Content is reviewed per D-27 before the beta; the health reviewers are still to be arranged.
+- **FR3-CHK-8:** Checklist content is practical household logistics. It never gives medical advice (vision non-goals). Items that involve a health service say to book or check with the family's provider, and never state a clinical schedule. Items that touch a health service are flagged for health review and never get a suggested due date, since any date could read as a clinical schedule (decided 2026-11-27: the safe side of "no medical advice"; `pnpm run checklists:check` enforces it). Content is reviewed per D-27 before the beta; the health reviewers are still to be arranged.
 
 **Acceptance criteria**
 
