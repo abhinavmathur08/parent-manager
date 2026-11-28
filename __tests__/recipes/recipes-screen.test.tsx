@@ -2,6 +2,7 @@ import { fireEvent, render, screen } from '@testing-library/react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { RecipesScreen } from '@/features/recipes/recipes-screen';
+import { STARTER_RECIPES } from '@/features/recipes/starter/library';
 
 const mockPush = jest.fn();
 let mockRows: Record<string, unknown[]> = {};
@@ -98,8 +99,10 @@ describe('S-16 Recipes tab (FR-REC-1, FR-REC-10)', () => {
     await fireEvent.changeText(screen.getByTestId('recipes-search'), '');
     await fireEvent.press(screen.getByTestId('recipes-filter-freezer_friendly'));
     expect(screen.getByTestId('recipe-card-0')).toHaveTextContent(/Batch chili/);
-    // One household recipe and one starter (the soup) are freezer-friendly.
-    expect(screen.getAllByText('1 recipe')).toHaveLength(2);
+    // One household recipe is freezer-friendly, and so are these starters, the soup first.
+    const frozen = STARTER_RECIPES.filter((r) => r.tags.includes('tag.freezer_friendly'));
+    expect(screen.getByText('1 recipe')).toBeOnTheScreen();
+    expect(screen.getByText(`${frozen.length} recipes`)).toBeOnTheScreen();
     expect(screen.getByTestId('starter-card-0')).toHaveTextContent(/Lentil and tomato soup/);
 
     await fireEvent.press(screen.getByTestId('recipes-filter-no_cook'));

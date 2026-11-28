@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "recipes": [
     {
       "key": "starter.overnight_oats",
@@ -8,12 +8,36 @@
       "cookMinutes": null,
       "tags": ["tag.no_cook", "tag.one_handed", "tag.quick"],
       "lines": [
-        { "ingredientId": "ingredient.rolled_oats", "quantity": 100, "unitId": "unit.g" },
-        { "ingredientId": "ingredient.milk", "quantity": 250, "unitId": "unit.ml" },
-        { "ingredientId": "ingredient.greek_yogurt", "quantity": 120, "unitId": "unit.ml" },
-        { "ingredientId": "ingredient.chia_seeds", "quantity": 10, "unitId": "unit.g" },
-        { "ingredientId": "ingredient.banana", "quantity": 1, "unitId": "unit.each" },
-        { "ingredientId": "ingredient.honey", "quantity": 2, "unitId": "unit.tsp_metric" }
+        {
+          "ingredientId": "ingredient.rolled_oats",
+          "quantity": 100,
+          "unitId": "unit.g"
+        },
+        {
+          "ingredientId": "ingredient.milk",
+          "quantity": 250,
+          "unitId": "unit.ml"
+        },
+        {
+          "ingredientId": "ingredient.greek_yogurt",
+          "quantity": 120,
+          "unitId": "unit.ml"
+        },
+        {
+          "ingredientId": "ingredient.chia_seeds",
+          "quantity": 10,
+          "unitId": "unit.g"
+        },
+        {
+          "ingredientId": "ingredient.banana",
+          "quantity": 1,
+          "unitId": "unit.each"
+        },
+        {
+          "ingredientId": "ingredient.honey",
+          "quantity": 2,
+          "unitId": "unit.tsp_metric"
+        }
       ]
     },
     {
@@ -23,15 +47,51 @@
       "cookMinutes": 30,
       "tags": ["tag.freezer_friendly", "tag.batch_prep"],
       "lines": [
-        { "ingredientId": "ingredient.olive_oil", "quantity": 15, "unitId": "unit.ml" },
-        { "ingredientId": "ingredient.onion", "quantity": 1, "unitId": "unit.each" },
-        { "ingredientId": "ingredient.carrot", "quantity": 2, "unitId": "unit.each" },
-        { "ingredientId": "ingredient.garlic", "quantity": 2, "unitId": "unit.each" },
-        { "ingredientId": "ingredient.cumin", "quantity": 1, "unitId": "unit.tsp_metric" },
-        { "ingredientId": "ingredient.dried_lentils", "quantity": 200, "unitId": "unit.g" },
-        { "ingredientId": "ingredient.canned_tomatoes", "quantity": 1, "unitId": "unit.each" },
-        { "ingredientId": "ingredient.vegetable_stock", "quantity": 1000, "unitId": "unit.ml" },
-        { "ingredientId": "ingredient.salt", "quantity": null, "unitId": null }
+        {
+          "ingredientId": "ingredient.olive_oil",
+          "quantity": 15,
+          "unitId": "unit.ml"
+        },
+        {
+          "ingredientId": "ingredient.onion",
+          "quantity": 1,
+          "unitId": "unit.each"
+        },
+        {
+          "ingredientId": "ingredient.carrot",
+          "quantity": 2,
+          "unitId": "unit.each"
+        },
+        {
+          "ingredientId": "ingredient.garlic",
+          "quantity": 2,
+          "unitId": "unit.each"
+        },
+        {
+          "ingredientId": "ingredient.cumin",
+          "quantity": 1,
+          "unitId": "unit.tsp_metric"
+        },
+        {
+          "ingredientId": "ingredient.dried_lentils",
+          "quantity": 200,
+          "unitId": "unit.g"
+        },
+        {
+          "ingredientId": "ingredient.canned_tomatoes",
+          "quantity": 1,
+          "unitId": "unit.each"
+        },
+        {
+          "ingredientId": "ingredient.vegetable_stock",
+          "quantity": 1000,
+          "unitId": "unit.ml"
+        },
+        {
+          "ingredientId": "ingredient.salt",
+          "quantity": null,
+          "unitId": null
+        }
       ]
     },
     {
@@ -41,14 +101,46 @@
       "cookMinutes": 40,
       "tags": ["tag.batch_prep", "tag.kid_friendly"],
       "lines": [
-        { "ingredientId": "ingredient.chicken_thigh", "quantity": 600, "unitId": "unit.g" },
-        { "ingredientId": "ingredient.sweet_potato", "quantity": 2, "unitId": "unit.each" },
-        { "ingredientId": "ingredient.broccoli", "quantity": 1, "unitId": "unit.each" },
-        { "ingredientId": "ingredient.red_onion", "quantity": 1, "unitId": "unit.each" },
-        { "ingredientId": "ingredient.olive_oil", "quantity": 30, "unitId": "unit.ml" },
-        { "ingredientId": "ingredient.smoked_paprika", "quantity": 1, "unitId": "unit.tsp_metric" },
-        { "ingredientId": "ingredient.salt", "quantity": null, "unitId": null },
-        { "ingredientId": "ingredient.black_pepper", "quantity": null, "unitId": null }
+        {
+          "ingredientId": "ingredient.chicken_thigh",
+          "quantity": 600,
+          "unitId": "unit.g"
+        },
+        {
+          "ingredientId": "ingredient.sweet_potato",
+          "quantity": 2,
+          "unitId": "unit.each"
+        },
+        {
+          "ingredientId": "ingredient.broccoli",
+          "quantity": 1,
+          "unitId": "unit.each"
+        },
+        {
+          "ingredientId": "ingredient.red_onion",
+          "quantity": 1,
+          "unitId": "unit.each"
+        },
+        {
+          "ingredientId": "ingredient.olive_oil",
+          "quantity": 30,
+          "unitId": "unit.ml"
+        },
+        {
+          "ingredientId": "ingredient.smoked_paprika",
+          "quantity": 1,
+          "unitId": "unit.tsp_metric"
+        },
+        {
+          "ingredientId": "ingredient.salt",
+          "quantity": null,
+          "unitId": null
+        },
+        {
+          "ingredientId": "ingredient.black_pepper",
+          "quantity": null,
+          "unitId": null
+        }
       ]
     },
     {
@@ -58,15 +150,31 @@
       "cookMinutes": 10,
       "tags": ["tag.baby_led_weaning", "tag.toddler", "tag.quick"],
       "lines": [
-        { "ingredientId": "ingredient.banana", "quantity": 1, "unitId": "unit.each" },
-        { "ingredientId": "ingredient.egg", "quantity": 2, "unitId": "unit.each" },
-        { "ingredientId": "ingredient.flour", "quantity": 30, "unitId": "unit.g" },
+        {
+          "ingredientId": "ingredient.banana",
+          "quantity": 1,
+          "unitId": "unit.each"
+        },
+        {
+          "ingredientId": "ingredient.egg",
+          "quantity": 2,
+          "unitId": "unit.each"
+        },
+        {
+          "ingredientId": "ingredient.flour",
+          "quantity": 30,
+          "unitId": "unit.g"
+        },
         {
           "ingredientId": "ingredient.baking_powder",
           "quantity": 0.5,
           "unitId": "unit.tsp_metric"
         },
-        { "ingredientId": "ingredient.butter", "quantity": 10, "unitId": "unit.g" }
+        {
+          "ingredientId": "ingredient.butter",
+          "quantity": 10,
+          "unitId": "unit.g"
+        }
       ]
     },
     {
@@ -76,11 +184,871 @@
       "cookMinutes": 12,
       "tags": ["tag.kid_friendly", "tag.toddler", "tag.quick"],
       "lines": [
-        { "ingredientId": "ingredient.pasta", "quantity": 300, "unitId": "unit.g" },
-        { "ingredientId": "ingredient.pea", "quantity": 150, "unitId": "unit.g" },
-        { "ingredientId": "ingredient.butter", "quantity": 15, "unitId": "unit.g" },
-        { "ingredientId": "ingredient.milk", "quantity": 100, "unitId": "unit.ml" },
-        { "ingredientId": "ingredient.cheddar", "quantity": 100, "unitId": "unit.g" }
+        {
+          "ingredientId": "ingredient.pasta",
+          "quantity": 300,
+          "unitId": "unit.g"
+        },
+        {
+          "ingredientId": "ingredient.pea",
+          "quantity": 150,
+          "unitId": "unit.g"
+        },
+        {
+          "ingredientId": "ingredient.butter",
+          "quantity": 15,
+          "unitId": "unit.g"
+        },
+        {
+          "ingredientId": "ingredient.milk",
+          "quantity": 100,
+          "unitId": "unit.ml"
+        },
+        {
+          "ingredientId": "ingredient.cheddar",
+          "quantity": 100,
+          "unitId": "unit.g"
+        }
+      ]
+    },
+    {
+      "key": "starter.spinach_egg_muffins",
+      "servings": 6,
+      "prepMinutes": 10,
+      "cookMinutes": 20,
+      "tags": ["tag.freezer_friendly", "tag.batch_prep", "tag.one_handed"],
+      "lines": [
+        {
+          "ingredientId": "ingredient.egg",
+          "quantity": 8,
+          "unitId": "unit.each"
+        },
+        {
+          "ingredientId": "ingredient.milk",
+          "quantity": 60,
+          "unitId": "unit.ml"
+        },
+        {
+          "ingredientId": "ingredient.spinach",
+          "quantity": 60,
+          "unitId": "unit.g"
+        },
+        {
+          "ingredientId": "ingredient.bell_pepper",
+          "quantity": 1,
+          "unitId": "unit.each"
+        },
+        {
+          "ingredientId": "ingredient.scallion",
+          "quantity": 2,
+          "unitId": "unit.each"
+        },
+        {
+          "ingredientId": "ingredient.cheddar",
+          "quantity": 80,
+          "unitId": "unit.g"
+        },
+        {
+          "ingredientId": "ingredient.black_pepper",
+          "quantity": null,
+          "unitId": null
+        },
+        {
+          "ingredientId": "ingredient.olive_oil",
+          "quantity": 5,
+          "unitId": "unit.ml"
+        }
+      ]
+    },
+    {
+      "key": "starter.peanut_butter_banana_toast",
+      "servings": 1,
+      "prepMinutes": 3,
+      "cookMinutes": 3,
+      "tags": ["tag.quick", "tag.one_handed"],
+      "lines": [
+        {
+          "ingredientId": "ingredient.whole_wheat_bread",
+          "quantity": null,
+          "unitId": null
+        },
+        {
+          "ingredientId": "ingredient.peanut_butter",
+          "quantity": 30,
+          "unitId": "unit.g"
+        },
+        {
+          "ingredientId": "ingredient.banana",
+          "quantity": 1,
+          "unitId": "unit.each"
+        },
+        {
+          "ingredientId": "ingredient.cinnamon",
+          "quantity": null,
+          "unitId": "unit.pinch"
+        }
+      ]
+    },
+    {
+      "key": "starter.breakfast_burritos",
+      "servings": 6,
+      "prepMinutes": 15,
+      "cookMinutes": 15,
+      "tags": ["tag.freezer_friendly", "tag.batch_prep", "tag.one_handed"],
+      "lines": [
+        {
+          "ingredientId": "ingredient.egg",
+          "quantity": 8,
+          "unitId": "unit.each"
+        },
+        {
+          "ingredientId": "ingredient.milk",
+          "quantity": 30,
+          "unitId": "unit.ml"
+        },
+        {
+          "ingredientId": "ingredient.black_beans",
+          "quantity": 1,
+          "unitId": "unit.each"
+        },
+        {
+          "ingredientId": "ingredient.mexican_cheese",
+          "quantity": 120,
+          "unitId": "unit.g"
+        },
+        {
+          "ingredientId": "ingredient.salsa",
+          "quantity": 120,
+          "unitId": "unit.ml"
+        },
+        {
+          "ingredientId": "ingredient.flour_tortilla",
+          "quantity": 6,
+          "unitId": "unit.each"
+        },
+        {
+          "ingredientId": "ingredient.vegetable_oil",
+          "quantity": 10,
+          "unitId": "unit.ml"
+        },
+        {
+          "ingredientId": "ingredient.scallion",
+          "quantity": 3,
+          "unitId": "unit.each"
+        }
+      ]
+    },
+    {
+      "key": "starter.banana_oat_muffins",
+      "servings": 12,
+      "prepMinutes": 10,
+      "cookMinutes": 20,
+      "tags": ["tag.baby_led_weaning", "tag.toddler", "tag.freezer_friendly", "tag.one_handed"],
+      "lines": [
+        {
+          "ingredientId": "ingredient.banana",
+          "quantity": 3,
+          "unitId": "unit.each"
+        },
+        {
+          "ingredientId": "ingredient.egg",
+          "quantity": 2,
+          "unitId": "unit.each"
+        },
+        {
+          "ingredientId": "ingredient.milk",
+          "quantity": 120,
+          "unitId": "unit.ml"
+        },
+        {
+          "ingredientId": "ingredient.vegetable_oil",
+          "quantity": 45,
+          "unitId": "unit.ml"
+        },
+        {
+          "ingredientId": "ingredient.rolled_oats",
+          "quantity": 120,
+          "unitId": "unit.g"
+        },
+        {
+          "ingredientId": "ingredient.flour",
+          "quantity": 100,
+          "unitId": "unit.g"
+        },
+        {
+          "ingredientId": "ingredient.baking_powder",
+          "quantity": 2,
+          "unitId": "unit.tsp_metric"
+        },
+        {
+          "ingredientId": "ingredient.cinnamon",
+          "quantity": 1,
+          "unitId": "unit.tsp_metric"
+        },
+        {
+          "ingredientId": "ingredient.blueberry",
+          "quantity": 100,
+          "unitId": "unit.g"
+        }
+      ]
+    },
+    {
+      "key": "starter.hummus_veggie_wraps",
+      "servings": 2,
+      "prepMinutes": 10,
+      "cookMinutes": null,
+      "tags": ["tag.no_cook", "tag.quick", "tag.one_handed"],
+      "lines": [
+        {
+          "ingredientId": "ingredient.flour_tortilla",
+          "quantity": 2,
+          "unitId": "unit.each"
+        },
+        {
+          "ingredientId": "ingredient.hummus",
+          "quantity": 120,
+          "unitId": "unit.g"
+        },
+        {
+          "ingredientId": "ingredient.carrot",
+          "quantity": 1,
+          "unitId": "unit.each"
+        },
+        {
+          "ingredientId": "ingredient.cucumber",
+          "quantity": 0.5,
+          "unitId": "unit.each"
+        },
+        {
+          "ingredientId": "ingredient.spinach",
+          "quantity": 40,
+          "unitId": "unit.g"
+        },
+        {
+          "ingredientId": "ingredient.feta",
+          "quantity": 50,
+          "unitId": "unit.g"
+        },
+        {
+          "ingredientId": "ingredient.lemon_juice",
+          "quantity": 1,
+          "unitId": "unit.tsp_metric"
+        }
+      ]
+    },
+    {
+      "key": "starter.tuna_white_bean_salad",
+      "servings": 2,
+      "prepMinutes": 10,
+      "cookMinutes": null,
+      "tags": ["tag.no_cook", "tag.quick"],
+      "lines": [
+        {
+          "ingredientId": "ingredient.canned_tuna",
+          "quantity": 1,
+          "unitId": "unit.each"
+        },
+        {
+          "ingredientId": "ingredient.cannellini_beans",
+          "quantity": 1,
+          "unitId": "unit.each"
+        },
+        {
+          "ingredientId": "ingredient.cherry_tomato",
+          "quantity": 150,
+          "unitId": "unit.g"
+        },
+        {
+          "ingredientId": "ingredient.red_onion",
+          "quantity": 0.25,
+          "unitId": "unit.each"
+        },
+        {
+          "ingredientId": "ingredient.parsley",
+          "quantity": null,
+          "unitId": null
+        },
+        {
+          "ingredientId": "ingredient.lemon",
+          "quantity": 1,
+          "unitId": "unit.each"
+        },
+        {
+          "ingredientId": "ingredient.olive_oil",
+          "quantity": 30,
+          "unitId": "unit.ml"
+        },
+        {
+          "ingredientId": "ingredient.salt",
+          "quantity": null,
+          "unitId": null
+        },
+        {
+          "ingredientId": "ingredient.black_pepper",
+          "quantity": null,
+          "unitId": null
+        }
+      ]
+    },
+    {
+      "key": "starter.chickpea_salad_sandwich",
+      "servings": 2,
+      "prepMinutes": 10,
+      "cookMinutes": null,
+      "tags": ["tag.no_cook", "tag.quick", "tag.one_handed"],
+      "lines": [
+        {
+          "ingredientId": "ingredient.chickpeas",
+          "quantity": 1,
+          "unitId": "unit.each"
+        },
+        {
+          "ingredientId": "ingredient.mayonnaise",
+          "quantity": 45,
+          "unitId": "unit.ml"
+        },
+        {
+          "ingredientId": "ingredient.dijon_mustard",
+          "quantity": 1,
+          "unitId": "unit.tsp_metric"
+        },
+        {
+          "ingredientId": "ingredient.lemon_juice",
+          "quantity": 1,
+          "unitId": "unit.tsp_metric"
+        },
+        {
+          "ingredientId": "ingredient.celery",
+          "quantity": 1,
+          "unitId": "unit.each"
+        },
+        {
+          "ingredientId": "ingredient.chives",
+          "quantity": null,
+          "unitId": null
+        },
+        {
+          "ingredientId": "ingredient.bread",
+          "quantity": null,
+          "unitId": null
+        },
+        {
+          "ingredientId": "ingredient.black_pepper",
+          "quantity": null,
+          "unitId": null
+        }
+      ]
+    },
+    {
+      "key": "starter.veggie_fried_rice",
+      "servings": 4,
+      "prepMinutes": 10,
+      "cookMinutes": 12,
+      "tags": ["tag.quick", "tag.kid_friendly"],
+      "lines": [
+        {
+          "ingredientId": "ingredient.white_rice",
+          "quantity": 300,
+          "unitId": "unit.g"
+        },
+        {
+          "ingredientId": "ingredient.egg",
+          "quantity": 3,
+          "unitId": "unit.each"
+        },
+        {
+          "ingredientId": "ingredient.frozen_mixed_veg",
+          "quantity": 250,
+          "unitId": "unit.g"
+        },
+        {
+          "ingredientId": "ingredient.scallion",
+          "quantity": 3,
+          "unitId": "unit.each"
+        },
+        {
+          "ingredientId": "ingredient.garlic",
+          "quantity": 2,
+          "unitId": "unit.each"
+        },
+        {
+          "ingredientId": "ingredient.soy_sauce",
+          "quantity": 30,
+          "unitId": "unit.ml"
+        },
+        {
+          "ingredientId": "ingredient.sesame_oil",
+          "quantity": 1,
+          "unitId": "unit.tsp_metric"
+        },
+        {
+          "ingredientId": "ingredient.vegetable_oil",
+          "quantity": 30,
+          "unitId": "unit.ml"
+        }
+      ]
+    },
+    {
+      "key": "starter.black_bean_quesadillas",
+      "servings": 4,
+      "prepMinutes": 10,
+      "cookMinutes": 15,
+      "tags": ["tag.quick", "tag.kid_friendly", "tag.one_handed"],
+      "lines": [
+        {
+          "ingredientId": "ingredient.flour_tortilla",
+          "quantity": 4,
+          "unitId": "unit.each"
+        },
+        {
+          "ingredientId": "ingredient.black_beans",
+          "quantity": 1,
+          "unitId": "unit.each"
+        },
+        {
+          "ingredientId": "ingredient.frozen_corn",
+          "quantity": 100,
+          "unitId": "unit.g"
+        },
+        {
+          "ingredientId": "ingredient.mexican_cheese",
+          "quantity": 150,
+          "unitId": "unit.g"
+        },
+        {
+          "ingredientId": "ingredient.cumin",
+          "quantity": 1,
+          "unitId": "unit.tsp_metric"
+        },
+        {
+          "ingredientId": "ingredient.vegetable_oil",
+          "quantity": 5,
+          "unitId": "unit.ml"
+        },
+        {
+          "ingredientId": "ingredient.salsa",
+          "quantity": 120,
+          "unitId": "unit.ml"
+        },
+        {
+          "ingredientId": "ingredient.sour_cream",
+          "quantity": 120,
+          "unitId": "unit.ml"
+        }
+      ]
+    },
+    {
+      "key": "starter.minestrone",
+      "servings": 6,
+      "prepMinutes": 15,
+      "cookMinutes": 35,
+      "tags": ["tag.freezer_friendly", "tag.batch_prep"],
+      "lines": [
+        {
+          "ingredientId": "ingredient.olive_oil",
+          "quantity": 30,
+          "unitId": "unit.ml"
+        },
+        {
+          "ingredientId": "ingredient.onion",
+          "quantity": 1,
+          "unitId": "unit.each"
+        },
+        {
+          "ingredientId": "ingredient.carrot",
+          "quantity": 2,
+          "unitId": "unit.each"
+        },
+        {
+          "ingredientId": "ingredient.celery",
+          "quantity": 2,
+          "unitId": "unit.each"
+        },
+        {
+          "ingredientId": "ingredient.garlic",
+          "quantity": 2,
+          "unitId": "unit.each"
+        },
+        {
+          "ingredientId": "ingredient.zucchini",
+          "quantity": 1,
+          "unitId": "unit.each"
+        },
+        {
+          "ingredientId": "ingredient.italian_seasoning",
+          "quantity": 1,
+          "unitId": "unit.tsp_metric"
+        },
+        {
+          "ingredientId": "ingredient.canned_tomatoes",
+          "quantity": 1,
+          "unitId": "unit.each"
+        },
+        {
+          "ingredientId": "ingredient.cannellini_beans",
+          "quantity": 1,
+          "unitId": "unit.each"
+        },
+        {
+          "ingredientId": "ingredient.vegetable_stock",
+          "quantity": 1500,
+          "unitId": "unit.ml"
+        },
+        {
+          "ingredientId": "ingredient.pasta",
+          "quantity": 100,
+          "unitId": "unit.g"
+        },
+        {
+          "ingredientId": "ingredient.spinach",
+          "quantity": 80,
+          "unitId": "unit.g"
+        },
+        {
+          "ingredientId": "ingredient.salt",
+          "quantity": null,
+          "unitId": null
+        },
+        {
+          "ingredientId": "ingredient.black_pepper",
+          "quantity": null,
+          "unitId": null
+        },
+        {
+          "ingredientId": "ingredient.parmesan",
+          "quantity": 40,
+          "unitId": "unit.g"
+        }
+      ]
+    },
+    {
+      "key": "starter.beef_bolognese",
+      "servings": 8,
+      "prepMinutes": 15,
+      "cookMinutes": 60,
+      "tags": ["tag.freezer_friendly", "tag.batch_prep", "tag.kid_friendly"],
+      "lines": [
+        {
+          "ingredientId": "ingredient.olive_oil",
+          "quantity": 15,
+          "unitId": "unit.ml"
+        },
+        {
+          "ingredientId": "ingredient.onion",
+          "quantity": 1,
+          "unitId": "unit.each"
+        },
+        {
+          "ingredientId": "ingredient.carrot",
+          "quantity": 2,
+          "unitId": "unit.each"
+        },
+        {
+          "ingredientId": "ingredient.celery",
+          "quantity": 2,
+          "unitId": "unit.each"
+        },
+        {
+          "ingredientId": "ingredient.garlic",
+          "quantity": 3,
+          "unitId": "unit.each"
+        },
+        {
+          "ingredientId": "ingredient.ground_beef",
+          "quantity": 1000,
+          "unitId": "unit.g"
+        },
+        {
+          "ingredientId": "ingredient.tomato_paste",
+          "quantity": 30,
+          "unitId": "unit.ml"
+        },
+        {
+          "ingredientId": "ingredient.canned_tomatoes",
+          "quantity": 2,
+          "unitId": "unit.each"
+        },
+        {
+          "ingredientId": "ingredient.beef_stock",
+          "quantity": 250,
+          "unitId": "unit.ml"
+        },
+        {
+          "ingredientId": "ingredient.oregano",
+          "quantity": 2,
+          "unitId": "unit.tsp_metric"
+        },
+        {
+          "ingredientId": "ingredient.bay_leaf",
+          "quantity": 2,
+          "unitId": "unit.each"
+        },
+        {
+          "ingredientId": "ingredient.salt",
+          "quantity": null,
+          "unitId": null
+        },
+        {
+          "ingredientId": "ingredient.black_pepper",
+          "quantity": null,
+          "unitId": null
+        },
+        {
+          "ingredientId": "ingredient.spaghetti",
+          "quantity": 500,
+          "unitId": "unit.g"
+        }
+      ]
+    },
+    {
+      "key": "starter.turkey_meatballs",
+      "servings": 4,
+      "prepMinutes": 15,
+      "cookMinutes": 25,
+      "tags": ["tag.toddler", "tag.freezer_friendly", "tag.batch_prep", "tag.kid_friendly"],
+      "lines": [
+        {
+          "ingredientId": "ingredient.ground_turkey",
+          "quantity": 500,
+          "unitId": "unit.g"
+        },
+        {
+          "ingredientId": "ingredient.breadcrumbs",
+          "quantity": 40,
+          "unitId": "unit.g"
+        },
+        {
+          "ingredientId": "ingredient.egg",
+          "quantity": 1,
+          "unitId": "unit.each"
+        },
+        {
+          "ingredientId": "ingredient.parmesan",
+          "quantity": 30,
+          "unitId": "unit.g"
+        },
+        {
+          "ingredientId": "ingredient.zucchini",
+          "quantity": 1,
+          "unitId": "unit.each"
+        },
+        {
+          "ingredientId": "ingredient.garlic",
+          "quantity": 1,
+          "unitId": "unit.each"
+        },
+        {
+          "ingredientId": "ingredient.oregano",
+          "quantity": 1,
+          "unitId": "unit.tsp_metric"
+        },
+        {
+          "ingredientId": "ingredient.olive_oil",
+          "quantity": 15,
+          "unitId": "unit.ml"
+        },
+        {
+          "ingredientId": "ingredient.canned_tomatoes",
+          "quantity": 2,
+          "unitId": "unit.each"
+        },
+        {
+          "ingredientId": "ingredient.basil",
+          "quantity": null,
+          "unitId": null
+        }
+      ]
+    },
+    {
+      "key": "starter.chicken_coconut_curry",
+      "servings": 6,
+      "prepMinutes": 15,
+      "cookMinutes": 30,
+      "tags": ["tag.freezer_friendly", "tag.batch_prep"],
+      "lines": [
+        {
+          "ingredientId": "ingredient.vegetable_oil",
+          "quantity": 15,
+          "unitId": "unit.ml"
+        },
+        {
+          "ingredientId": "ingredient.onion",
+          "quantity": 1,
+          "unitId": "unit.each"
+        },
+        {
+          "ingredientId": "ingredient.garlic",
+          "quantity": 3,
+          "unitId": "unit.each"
+        },
+        {
+          "ingredientId": "ingredient.ginger",
+          "quantity": 15,
+          "unitId": "unit.g"
+        },
+        {
+          "ingredientId": "ingredient.curry_powder",
+          "quantity": 3,
+          "unitId": "unit.tsp_metric"
+        },
+        {
+          "ingredientId": "ingredient.chicken_thigh",
+          "quantity": 800,
+          "unitId": "unit.g"
+        },
+        {
+          "ingredientId": "ingredient.canned_tomatoes",
+          "quantity": 1,
+          "unitId": "unit.each"
+        },
+        {
+          "ingredientId": "ingredient.coconut_milk",
+          "quantity": 400,
+          "unitId": "unit.ml"
+        },
+        {
+          "ingredientId": "ingredient.spinach",
+          "quantity": 100,
+          "unitId": "unit.g"
+        },
+        {
+          "ingredientId": "ingredient.salt",
+          "quantity": null,
+          "unitId": null
+        },
+        {
+          "ingredientId": "ingredient.basmati_rice",
+          "quantity": 300,
+          "unitId": "unit.g"
+        },
+        {
+          "ingredientId": "ingredient.cilantro",
+          "quantity": null,
+          "unitId": null
+        }
+      ]
+    },
+    {
+      "key": "starter.beef_bean_chili",
+      "servings": 6,
+      "prepMinutes": 15,
+      "cookMinutes": 45,
+      "tags": ["tag.freezer_friendly", "tag.batch_prep"],
+      "lines": [
+        {
+          "ingredientId": "ingredient.vegetable_oil",
+          "quantity": 15,
+          "unitId": "unit.ml"
+        },
+        {
+          "ingredientId": "ingredient.onion",
+          "quantity": 1,
+          "unitId": "unit.each"
+        },
+        {
+          "ingredientId": "ingredient.bell_pepper",
+          "quantity": 1,
+          "unitId": "unit.each"
+        },
+        {
+          "ingredientId": "ingredient.garlic",
+          "quantity": 3,
+          "unitId": "unit.each"
+        },
+        {
+          "ingredientId": "ingredient.ground_beef",
+          "quantity": 500,
+          "unitId": "unit.g"
+        },
+        {
+          "ingredientId": "ingredient.chili_powder",
+          "quantity": 2,
+          "unitId": "unit.tsp_metric"
+        },
+        {
+          "ingredientId": "ingredient.cumin",
+          "quantity": 2,
+          "unitId": "unit.tsp_metric"
+        },
+        {
+          "ingredientId": "ingredient.smoked_paprika",
+          "quantity": 1,
+          "unitId": "unit.tsp_metric"
+        },
+        {
+          "ingredientId": "ingredient.tomato_paste",
+          "quantity": 30,
+          "unitId": "unit.ml"
+        },
+        {
+          "ingredientId": "ingredient.canned_tomatoes",
+          "quantity": 2,
+          "unitId": "unit.each"
+        },
+        {
+          "ingredientId": "ingredient.kidney_beans",
+          "quantity": 2,
+          "unitId": "unit.each"
+        },
+        {
+          "ingredientId": "ingredient.beef_stock",
+          "quantity": 250,
+          "unitId": "unit.ml"
+        },
+        {
+          "ingredientId": "ingredient.salt",
+          "quantity": null,
+          "unitId": null
+        },
+        {
+          "ingredientId": "ingredient.sour_cream",
+          "quantity": 120,
+          "unitId": "unit.ml"
+        },
+        {
+          "ingredientId": "ingredient.cheddar",
+          "quantity": 80,
+          "unitId": "unit.g"
+        }
+      ]
+    },
+    {
+      "key": "starter.salmon_potato_traybake",
+      "servings": 4,
+      "prepMinutes": 10,
+      "cookMinutes": 30,
+      "tags": ["tag.toddler", "tag.kid_friendly"],
+      "lines": [
+        {
+          "ingredientId": "ingredient.baby_potato",
+          "quantity": 600,
+          "unitId": "unit.g"
+        },
+        {
+          "ingredientId": "ingredient.olive_oil",
+          "quantity": 30,
+          "unitId": "unit.ml"
+        },
+        {
+          "ingredientId": "ingredient.green_bean",
+          "quantity": 250,
+          "unitId": "unit.g"
+        },
+        {
+          "ingredientId": "ingredient.salmon",
+          "quantity": 500,
+          "unitId": "unit.g"
+        },
+        {
+          "ingredientId": "ingredient.lemon",
+          "quantity": 1,
+          "unitId": "unit.each"
+        },
+        {
+          "ingredientId": "ingredient.dill",
+          "quantity": null,
+          "unitId": null
+        }
       ]
     }
   ]

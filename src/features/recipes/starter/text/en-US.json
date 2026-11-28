@@ -6,27 +6,38 @@
       "Cover and chill overnight, or for at least four hours.",
       "Slice the banana on top and drizzle with honey to serve."
     ],
-    "notes": "Leave out the honey for children under one."
+    "notes": "Leave out the honey for children under one. Keeps in the fridge for two days, so make a double batch."
   },
   "starter.lentil_tomato_soup": {
     "title": "Lentil and tomato soup",
     "steps": [
       "Warm the oil in a large pan and cook the onion and carrot gently for about 8 minutes.",
       "Add the garlic and cumin and cook for a minute more.",
-      "Add the lentils, tomatoes and stock, then simmer for 25 minutes until the lentils are soft.",
-      "Blend if you like it smooth, and season to taste."
+      "Add the lentils, tomatoes and stock, then simmer for 25 minutes, until the lentils are soft.",
+      "Blend if you like it smooth, and season with salt to taste."
     ],
     "notes": "Cool, then freeze in single portions for up to three months.",
-    "lineNotes": { "1": "chopped", "2": "chopped" }
+    "lineNotes": {
+      "1": "chopped",
+      "2": "chopped",
+      "3": "crushed",
+      "5": "red, rinsed"
+    }
   },
   "starter.chicken_traybake": {
     "title": "One-tray chicken and sweet potato",
     "steps": [
       "Heat the oven to {oven:200}.",
-      "Toss the chicken, sweet potato and onion with the oil, paprika, salt and pepper on a large tray.",
+      "Toss the chicken, sweet potato and onion with the oil, paprika, salt and pepper on a large baking sheet.",
       "Roast for 25 minutes, add the broccoli, then roast for 15 minutes more, until the chicken reaches {temp:74} in the thickest part."
     ],
-    "lineNotes": { "1": "cubed", "2": "in florets", "3": "in wedges" }
+    "notes": "Leftovers keep in the fridge for three days and make a quick lunch.",
+    "lineNotes": {
+      "0": "boneless",
+      "1": "cubed",
+      "2": "in florets",
+      "3": "in wedges"
+    }
   },
   "starter.banana_pancakes": {
     "title": "Banana pancakes",
@@ -34,16 +45,277 @@
       "Mash the banana well, then whisk in the eggs, flour and baking powder.",
       "Melt a little butter in a frying pan over medium heat.",
       "Cook small spoonfuls for about 2 minutes on each side, until golden and cooked through.",
-      "Let them cool before serving to little ones."
+      "Let them cool before serving to little ones. Babies can hold a whole small pancake or a strip."
     ],
-    "lineNotes": { "0": "ripe" }
+    "lineNotes": {
+      "0": "ripe"
+    }
   },
   "starter.cheesy_pasta_peas": {
     "title": "Cheesy pasta with peas",
     "steps": [
       "Cook the pasta in a large pan of boiling water, adding the peas for the last 3 minutes.",
-      "Drain, then stir in the butter, milk and cheese over low heat until creamy."
+      "Drain, then stir in the butter, milk and cheese over low heat until creamy.",
+      "For toddlers, squash the peas a little with a fork."
     ],
-    "lineNotes": { "1": "frozen", "4": "grated" }
+    "lineNotes": {
+      "0": "small shapes",
+      "1": "frozen",
+      "4": "grated"
+    }
+  },
+  "starter.spinach_egg_muffins": {
+    "title": "Spinach and cheese egg muffins",
+    "steps": [
+      "Heat the oven to {oven:180} and brush the holes of a 12-hole muffin tin with oil.",
+      "Divide the spinach, bell pepper, scallions and cheese between the holes.",
+      "Whisk the eggs with the milk and a little black pepper, then pour over the vegetables.",
+      "Bake for 18 to 20 minutes, until puffed and set in the middle and a knife pushed in comes out clean.",
+      "Cool in the tin for 5 minutes before lifting them out."
+    ],
+    "notes": "Freeze cooled muffins in a freezer bag for up to two months. Reheat from frozen in the microwave for about a minute, until hot all the way through.",
+    "lineNotes": {
+      "2": "chopped",
+      "3": "finely diced",
+      "4": "thinly sliced",
+      "5": "grated",
+      "7": "for the tin"
+    }
+  },
+  "starter.peanut_butter_banana_toast": {
+    "title": "Peanut butter and banana toast",
+    "steps": [
+      "Toast the bread.",
+      "Spread the peanut butter over the toast while it is still warm.",
+      "Slice the banana over the top and dust with cinnamon."
+    ],
+    "notes": "For a baby or toddler, spread the peanut butter thinly and cut the toast into fingers.",
+    "lineNotes": {
+      "0": "two slices"
+    }
+  },
+  "starter.breakfast_burritos": {
+    "title": "Freezer breakfast burritos",
+    "steps": [
+      "Whisk the eggs with the milk.",
+      "Warm the oil in a large frying pan over medium-low heat. Add the eggs and stir slowly until they are fully set, with no runny egg left, then take the pan off the heat.",
+      "Warm the tortillas briefly so they fold without cracking.",
+      "Spoon beans, egg, cheese, scallions and a little salsa down the middle of each tortilla. Fold in the sides and roll up tightly.",
+      "Eat straight away, or cool completely, wrap each one in foil and freeze."
+    ],
+    "notes": "Freeze for up to two months. To reheat, unwrap, wrap in a damp paper towel and microwave for 2 to 3 minutes, turning halfway, until steaming hot in the middle.",
+    "lineNotes": {
+      "2": "drained and rinsed",
+      "5": "large",
+      "7": "sliced"
+    }
+  },
+  "starter.banana_oat_muffins": {
+    "title": "Banana and blueberry oat muffins",
+    "steps": [
+      "Heat the oven to {oven:180} and line a 12-hole muffin tin with muffin liners, or grease it well.",
+      "Mash the bananas until smooth, then whisk in the eggs, milk and oil.",
+      "Stir in the oats, flour, baking powder and cinnamon until just combined, then fold in the blueberries.",
+      "Fill the holes about three-quarters full and bake for 18 to 20 minutes, until risen and a skewer pushed into the middle comes out clean.",
+      "Cool on a rack. For babies, break into strips or pieces they can hold."
+    ],
+    "notes": "No added sugar: the bananas sweeten them. Freeze for up to three months and thaw at room temperature.",
+    "lineNotes": {
+      "0": "very ripe",
+      "8": "halved"
+    }
+  },
+  "starter.hummus_veggie_wraps": {
+    "title": "Hummus and crunchy vegetable wraps",
+    "steps": [
+      "Spread the hummus over each tortilla, leaving a border.",
+      "Scatter over the spinach, carrot, cucumber and feta, and squeeze over a little lemon juice.",
+      "Roll up tightly, then cut in half on an angle."
+    ],
+    "notes": "Wrapped tightly, these keep in the fridge until the next day.",
+    "lineNotes": {
+      "2": "grated",
+      "3": "in thin sticks",
+      "5": "crumbled"
+    }
+  },
+  "starter.tuna_white_bean_salad": {
+    "title": "Tuna and white bean salad",
+    "steps": [
+      "Whisk the lemon juice and oil with a little salt and pepper in a bowl.",
+      "Add the beans, tomatoes and onion and toss to coat.",
+      "Flake in the tuna, scatter with parsley and fold through gently."
+    ],
+    "notes": "Good with crusty bread or over salad leaves. Keeps in the fridge for a day.",
+    "lineNotes": {
+      "0": "drained",
+      "1": "drained and rinsed",
+      "2": "halved",
+      "3": "finely chopped",
+      "4": "a handful, chopped",
+      "5": "juiced"
+    }
+  },
+  "starter.chickpea_salad_sandwich": {
+    "title": "Smashed chickpea sandwiches",
+    "steps": [
+      "Mash the chickpeas roughly with a fork, leaving some texture.",
+      "Stir in the mayonnaise, mustard, lemon juice, celery and chives, and add black pepper to taste.",
+      "Spread between slices of bread."
+    ],
+    "notes": "The filling keeps in the fridge for up to three days.",
+    "lineNotes": {
+      "0": "drained and rinsed",
+      "4": "finely chopped",
+      "5": "a small handful, snipped",
+      "6": "four slices"
+    }
+  },
+  "starter.veggie_fried_rice": {
+    "title": "Vegetable fried rice",
+    "steps": [
+      "Heat half the oil in a large frying pan or wok over high heat. Add the eggs and stir until set, then tip them onto a plate.",
+      "Add the rest of the oil, then the garlic and the white parts of the scallions, and stir for 30 seconds.",
+      "Add the frozen vegetables and stir-fry for 3 minutes, until hot.",
+      "Break up the rice, add it to the pan and stir-fry for 4 to 5 minutes, until steaming hot all the way through.",
+      "Stir in the soy sauce, sesame oil, egg and scallion greens."
+    ],
+    "notes": "Cool cooked rice quickly and keep it in the fridge for no more than a day before frying. Reheat rice only once.",
+    "lineNotes": {
+      "0": "cooked a day ahead and chilled",
+      "1": "beaten",
+      "3": "sliced, whites and greens apart",
+      "4": "crushed"
+    }
+  },
+  "starter.black_bean_quesadillas": {
+    "title": "Black bean and cheese quesadillas",
+    "steps": [
+      "Mash half the beans with the cumin, then stir in the rest of the beans and the corn.",
+      "Spread the bean mix over half of each tortilla, scatter with cheese and fold over.",
+      "Cook in a lightly oiled frying pan over medium heat for 2 to 3 minutes on each side, until crisp and the cheese has melted.",
+      "Cut into wedges and serve with salsa and sour cream."
+    ],
+    "lineNotes": {
+      "1": "drained and rinsed",
+      "2": "thawed",
+      "6": "to serve",
+      "7": "to serve"
+    }
+  },
+  "starter.minestrone": {
+    "title": "Big-batch minestrone",
+    "steps": [
+      "Warm the oil in a large pot and cook the onion, carrot and celery gently for 10 minutes, until soft.",
+      "Add the garlic, zucchini and Italian seasoning and cook for 2 minutes.",
+      "Add the tomatoes, beans and stock, bring to a boil, then simmer for 15 minutes.",
+      "Add the pasta and cook for 8 to 10 minutes, until tender, stirring now and then. Stir in the spinach until it wilts.",
+      "Season with salt and pepper and serve with Parmesan."
+    ],
+    "notes": "Cool and freeze without the Parmesan for up to three months. The pasta softens when reheated, which most children don't mind.",
+    "lineNotes": {
+      "1": "chopped",
+      "2": "diced",
+      "3": "diced",
+      "4": "crushed",
+      "5": "diced",
+      "8": "drained and rinsed",
+      "10": "small shapes",
+      "14": "grated, to serve"
+    }
+  },
+  "starter.beef_bolognese": {
+    "title": "Freezer-friendly bolognese",
+    "steps": [
+      "Warm the oil in a large heavy pan and cook the onion, carrot and celery over medium heat for 10 minutes, until soft.",
+      "Add the garlic and cook for a minute, then add the beef. Break it up and cook until browned all over with no pink left, and it reaches {temp:71}.",
+      "Stir in the tomato paste and cook for 2 minutes, then add the tomatoes, stock, oregano and bay leaves.",
+      "Simmer gently, partly covered, for 45 minutes, stirring now and then, until thick.",
+      "Take out the bay leaves, season with salt and pepper, and serve over spaghetti."
+    ],
+    "notes": "Freeze cooled sauce in portions for up to three months. Thaw overnight in the fridge and reheat until piping hot.",
+    "lineNotes": {
+      "1": "finely chopped",
+      "2": "finely grated",
+      "3": "finely chopped",
+      "4": "crushed",
+      "13": "to serve"
+    }
+  },
+  "starter.turkey_meatballs": {
+    "title": "Baked turkey and zucchini meatballs",
+    "steps": [
+      "Heat the oven to {oven:200} and line a baking sheet with parchment paper.",
+      "Mix the turkey, breadcrumbs, egg, Parmesan, zucchini, garlic and oregano with your hands until just combined.",
+      "Roll into balls about the size of a ping-pong ball, set them on the baking sheet and brush with the oil.",
+      "Bake for 18 to 20 minutes, until browned, with no pink in the middle, and they reach {temp:74}.",
+      "Meanwhile, simmer the tomatoes with the basil for 10 minutes. Add the meatballs and turn them in the sauce.",
+      "For toddlers, cut the meatballs into quarters."
+    ],
+    "notes": "Freeze baked meatballs on a tray, then bag them, for up to three months. Reheat in the sauce until piping hot.",
+    "lineNotes": {
+      "3": "finely grated",
+      "4": "finely grated and squeezed dry",
+      "5": "crushed",
+      "9": "a few leaves"
+    }
+  },
+  "starter.chicken_coconut_curry": {
+    "title": "Mild chicken and coconut curry",
+    "steps": [
+      "Warm the oil in a large pan and cook the onion over medium heat for 8 minutes, until soft and golden.",
+      "Add the garlic, ginger and curry powder and stir for a minute, until fragrant.",
+      "Add the chicken and stir to coat it in the spices, then add the tomatoes and coconut milk.",
+      "Simmer, partly covered, for 20 minutes, stirring now and then, until the chicken is tender and reaches {temp:74}.",
+      "Stir in the spinach until it wilts, season with salt, and serve with rice and cilantro."
+    ],
+    "notes": "Mild enough for most children. Freeze for up to three months, thaw in the fridge overnight and reheat until piping hot.",
+    "lineNotes": {
+      "1": "chopped",
+      "2": "crushed",
+      "3": "grated",
+      "4": "mild",
+      "5": "boneless, in bite-sized pieces",
+      "10": "to serve",
+      "11": "to serve"
+    }
+  },
+  "starter.beef_bean_chili": {
+    "title": "Beef and bean chili",
+    "steps": [
+      "Warm the oil in a large pan and cook the onion and bell pepper over medium heat for 8 minutes.",
+      "Add the garlic and beef and cook, breaking the meat up, until browned with no pink left and it reaches {temp:71}.",
+      "Stir in the chili powder, cumin, paprika and tomato paste and cook for a minute.",
+      "Add the tomatoes, beans and stock. Simmer, partly covered, for 30 minutes, stirring now and then, until thick.",
+      "Season with salt and serve with sour cream and cheese."
+    ],
+    "notes": "Freeze for up to three months. For children, use less chili powder and add heat to adult bowls at the table.",
+    "lineNotes": {
+      "1": "chopped",
+      "2": "chopped",
+      "3": "crushed",
+      "5": "mild",
+      "10": "drained and rinsed",
+      "13": "to serve",
+      "14": "grated, to serve"
+    }
+  },
+  "starter.salmon_potato_traybake": {
+    "title": "Salmon, potato and green bean traybake",
+    "steps": [
+      "Heat the oven to {oven:200}.",
+      "Toss the potatoes with half the oil on a large baking sheet and roast for 15 minutes.",
+      "Push the potatoes to the sides, add the green beans and salmon, drizzle with the rest of the oil and lay the lemon slices on the salmon.",
+      "Roast for 12 to 15 minutes more, until the salmon flakes easily and reaches {temp:63} in the thickest part.",
+      "Scatter with dill. For toddlers, flake the salmon and check carefully for bones."
+    ],
+    "notes": "Made without salt so the whole family can share it. Adults can salt their own plates.",
+    "lineNotes": {
+      "0": "halved",
+      "2": "trimmed",
+      "3": "four skinless fillets",
+      "4": "sliced",
+      "5": "a few sprigs, chopped"
+    }
   }
 }
