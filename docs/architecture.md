@@ -35,12 +35,11 @@ src/
     (auth)/                 sign-in, verify code
     (onboarding)/           create or join a household, region, people
     (tabs)/                 main app
-      plan/                 weekly planner (default tab)
+      plan/                 weekly planner (default tab); recipes/ (library, detail, edit, import) opens from its header
       list/                 grocery list
-      recipes/              library, detail, edit
+      tasks/                tasks and chores (Phase 3)
       household/            members, settings, subscription, privacy
       calendar/             agenda, day and week views, event detail (Phase 2)
-    import/                 recipe import flow (modal stack)
     invite/[token].tsx      invitation deep link
     paywall.tsx             modal
   features/<module>/        components, hooks and data access per module
@@ -56,10 +55,10 @@ supabase/
 
 ### Navigation
 
-- **Bottom tabs,** in the order Plan, Calendar, List, Recipes, Household (Calendar is Phase 2, FR2-CAL-1). Bottom tabs keep the main actions in thumb reach.
+- **Bottom tabs,** in the order Plan, Calendar, List, Tasks, Household (Calendar is Phase 2, FR2-CAL-1; Tasks took the Recipes slot in Phase 3, D-29, FR3-TASK-1). Bottom tabs keep the main actions in thumb reach. Recipes is a button in the Plan tab's header, and its screens (`/plan/recipes/...`) are in the Plan stack, so back returns to the plan; S-11 still searches every recipe.
 - **One main action per screen,** placed at the bottom: add a meal, add an item or import.
 - **Bottom sheets for secondary flows** instead of full-screen pushes, so a parent who gets interrupted keeps their place.
-- **Tab shell:** `src/app/(tabs)/_layout.tsx` uses Expo Router's headless tabs (`expo-router/ui`) with the design system's `FloatingTabBar`, so the bar is drawn from tokens rather than styled on top of a native tab bar. Each tab is a folder (`plan/`, `calendar/`, `list/`, `recipes/`, `household/`), so a feature can add its own stack later. Tab screens use `Screen`, which pads scrolling content by `layout.tabBarClearance` plus the bottom safe area. `/` redirects to `/plan`.
+- **Tab shell:** `src/app/(tabs)/_layout.tsx` uses Expo Router's headless tabs (`expo-router/ui`) with the design system's `FloatingTabBar`, so the bar is drawn from tokens rather than styled on top of a native tab bar. Each tab is a folder (`plan/`, `calendar/`, `list/`, `tasks/`, `household/`), so a feature can add its own stack later. Tab screens use `Screen`, which pads scrolling content by `layout.tabBarClearance` plus the bottom safe area. `/` redirects to `/plan`.
 - **Component gallery:** `/gallery` shows every shared component, with switches for light, dark and the largest text size. It's a protected route that exists only in development builds, opened from the Household tab.
 
 ### Deep links

@@ -146,7 +146,7 @@ export function ReviewScreen({ job, household }: { job: string; household: House
             seconds_in_review: meta ? Math.round((Date.now() - meta.openedAt) / 1000) : 0,
           });
           finish();
-          router.replace('/recipes');
+          router.replace('/plan/recipes');
         },
       },
     ]);
@@ -164,7 +164,7 @@ export function ReviewScreen({ job, household }: { job: string; household: House
       sourceUrl: draft.sourceUrl,
     });
     finish();
-    router.replace({ pathname: '/recipes/edit', params: { from: 'import' } });
+    router.replace({ pathname: '/plan/recipes/edit', params: { from: 'import' } });
   }
 
   if (!meta) {
@@ -188,7 +188,7 @@ export function ReviewScreen({ job, household }: { job: string; household: House
           seconds_in_review: Math.round((Date.now() - meta.openedAt) / 1000),
         });
         finish();
-        router.replace({ pathname: '/recipes/[id]', params: { id: recipeId } });
+        router.replace({ pathname: '/plan/recipes/[id]', params: { id: recipeId } });
       }}
       onDiscard={discard}
       onEnterManually={enterManually}
@@ -212,7 +212,7 @@ function ReviewLoading({ missing }: { missing: boolean }) {
           <Text accessibilityRole="alert">{t('importRecipe.review.gone')}</Text>
           <Button
             label={t('importRecipe.startOver')}
-            onPress={() => router.replace('/recipes/import')}
+            onPress={() => router.replace('/plan/recipes/import')}
             testID="import-review-start-over"
           />
         </>

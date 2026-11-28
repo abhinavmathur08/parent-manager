@@ -7,8 +7,7 @@ tags:
   - backend
 ---
 - runFlow: subflows/create-household.yaml
-- tapOn:
-    id: tab-recipes
+- runFlow: subflows/open-recipes.yaml
 - tapOn:
     id: recipes-add
 - extendedWaitUntil:
@@ -77,8 +76,7 @@ tags:
     text: .*Freezer chili.*
 
 # Plan it for the first dinner of this week.
-- tapOn:
-    id: tab-plan
+- runFlow: subflows/close-recipes.yaml
 - scrollUntilVisible:
     element:
       id: plan-range
@@ -113,8 +111,7 @@ tags:
     text: .*Freezer chili.*
 
 # Delete it from recipe detail.
-- tapOn:
-    id: tab-recipes
+- runFlow: subflows/open-recipes.yaml
 - extendedWaitUntil:
     visible:
       id: recipes-screen
@@ -152,8 +149,7 @@ tags:
     id: recipe-card-0
 
 # The planned dinner keeps the title as text.
-- tapOn:
-    id: tab-plan
+- runFlow: subflows/close-recipes.yaml
 - scrollUntilVisible:
     element:
       id: plan-range

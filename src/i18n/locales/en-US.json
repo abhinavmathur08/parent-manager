@@ -122,7 +122,8 @@
     "list": "List",
     "recipes": "Recipes",
     "household": "Household",
-    "calendar": "Calendar"
+    "calendar": "Calendar",
+    "tasks": "Tasks"
   },
   "busy": {
     "marker": "Busy day: {{reason}}",
@@ -1338,7 +1339,8 @@
       "noList": "No list that week",
       "olderTitle": "Older weeks",
       "olderBody": "Free keeps the current week and the 4 before it. Premium shows every past week, and nothing older is deleted."
-    }
+    },
+    "openRecipes": "Recipes"
   },
   "recipes": {
     "title": "Recipes",
@@ -1926,6 +1928,10 @@
       "preparing": "Preparing the image…",
       "imageFailed": "We couldn't use that image. Try another one."
     }
+  },
+  "tasks": {
+    "title": "Tasks",
+    "empty": "Nothing to do yet. Tasks you and your partner add show here."
   },
   "checklist": {
     "expecting": {

@@ -79,21 +79,23 @@ export function RecipesScreen({ locale, canWrite }: { locale: AppLocale; canWrit
   );
   const filtering = query.trim() !== '' || tags.length > 0;
 
-  const add = () => router.push('/recipes/edit');
-  const open = (id: string) => router.push({ pathname: '/recipes/[id]', params: { id } });
+  const add = () => router.push('/plan/recipes/edit');
+  const open = (id: string) => router.push({ pathname: '/plan/recipes/[id]', params: { id } });
   const openStarter = (key: string) =>
-    router.push({ pathname: '/recipes/starter/[key]', params: { key } });
+    router.push({ pathname: '/plan/recipes/starter/[key]', params: { key } });
 
   const addAction = { label: t('recipes.addShort'), onPress: add, testID: 'recipes-add' };
   const importAction = {
     label: t('recipes.importShort'),
-    onPress: () => router.push('/recipes/import'),
+    onPress: () => router.push('/plan/recipes/import'),
     testID: 'recipes-import-action',
   };
 
   return (
     <Screen
       title={t('recipes.title')}
+      // Recipes opens from the Plan tab's header (D-29, FR3-TASK-1).
+      onBack={() => (router.canGoBack() ? router.back() : router.replace('/plan'))}
       actions={!canWrite ? undefined : importEnabled ? [importAction, addAction] : [addAction]}
       testID="recipes-screen"
     >
@@ -141,7 +143,7 @@ export function RecipesScreen({ locale, canWrite }: { locale: AppLocale; canWrit
               variant="secondary"
               icon="share"
               label={t('recipes.import')}
-              onPress={() => router.push('/recipes/import')}
+              onPress={() => router.push('/plan/recipes/import')}
               testID="recipes-import"
             />
           ) : null}

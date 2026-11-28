@@ -6,8 +6,7 @@ tags:
   - backend
 ---
 - runFlow: subflows/create-household.yaml
-- tapOn:
-    id: tab-recipes
+- runFlow: subflows/open-recipes.yaml
 - scrollUntilVisible:
     element:
       id: starter-card-0

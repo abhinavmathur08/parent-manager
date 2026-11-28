@@ -65,7 +65,10 @@ export default function RecipeDetailRoute() {
                 {
                   label: t('recipes.detail.edit'),
                   onPress: () =>
-                    router.push({ pathname: '/recipes/edit', params: { id: saved.recipe.id } }),
+                    router.push({
+                      pathname: '/plan/recipes/edit',
+                      params: { id: saved.recipe.id },
+                    }),
                   testID: 'recipe-detail-edit',
                 },
               ]

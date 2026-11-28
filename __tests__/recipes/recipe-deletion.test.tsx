@@ -1,9 +1,9 @@
 import { act, fireEvent, screen } from '@testing-library/react-native';
 import { renderRouter } from 'expo-router/testing-library';
 
-import RecipeDetailRoute from '@/app/(tabs)/recipes/[id]';
-import RecipesLayout from '@/app/(tabs)/recipes/_layout';
-import RecipesRoute from '@/app/(tabs)/recipes/index';
+import RecipeDetailRoute from '@/app/(tabs)/plan/recipes/[id]';
+import PlanLayout from '@/app/(tabs)/plan/_layout';
+import RecipesRoute from '@/app/(tabs)/plan/recipes/index';
 import { addDays, startOfWeek, todayIn } from '@/features/planner/week';
 import { track } from '@/lib/analytics';
 
@@ -115,11 +115,11 @@ function seed() {
 const show = () =>
   renderRouter(
     {
-      'recipes/_layout': RecipesLayout,
-      'recipes/index': RecipesRoute,
-      'recipes/[id]': RecipeDetailRoute,
+      'plan/_layout': PlanLayout,
+      'plan/recipes/index': RecipesRoute,
+      'plan/recipes/[id]': RecipeDetailRoute,
     },
-    { initialUrl: '/recipes/chili' },
+    { initialUrl: '/plan/recipes/chili' },
   );
 
 beforeEach(() => {

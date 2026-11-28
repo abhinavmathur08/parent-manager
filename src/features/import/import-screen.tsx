@@ -49,7 +49,10 @@ export function ImportScreen() {
     if (run.phase === 'succeeded') {
       clearLink();
       clearText();
-      router.replace({ pathname: '/recipes/import/review', params: { job: run.pending.jobId } });
+      router.replace({
+        pathname: '/plan/recipes/import/review',
+        params: { job: run.pending.jobId },
+      });
     } else if (run.phase === 'failed' && reported.current !== run.pending.jobId) {
       reported.current = run.pending.jobId;
       setRefresh((n) => n + 1);
@@ -93,7 +96,7 @@ export function ImportScreen() {
           : {},
     );
     reset();
-    router.replace({ pathname: '/recipes/edit', params: { from: 'import' } });
+    router.replace({ pathname: '/plan/recipes/edit', params: { from: 'import' } });
   }
 
   if (run.phase === 'running' || run.phase === 'succeeded') {
@@ -282,7 +285,7 @@ export function ImportScreen() {
       <Button
         variant="ghost"
         label={t('importRecipe.addByHand')}
-        onPress={() => router.replace('/recipes/edit')}
+        onPress={() => router.replace('/plan/recipes/edit')}
         testID="import-manual"
       />
     </Screen>

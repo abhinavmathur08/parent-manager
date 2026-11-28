@@ -44,9 +44,9 @@ describe('S-16 Recipes tab (FR-REC-1, FR-REC-10)', () => {
     await show();
     expect(screen.getByTestId('recipes-empty')).toBeOnTheScreen();
     await fireEvent.press(screen.getByTestId('recipes-empty-action'));
-    expect(mockPush).toHaveBeenCalledWith('/recipes/edit');
+    expect(mockPush).toHaveBeenCalledWith('/plan/recipes/edit');
     await fireEvent.press(screen.getByTestId('recipes-import'));
-    expect(mockPush).toHaveBeenCalledWith('/recipes/import');
+    expect(mockPush).toHaveBeenCalledWith('/plan/recipes/import');
   });
 
   it('shows the starter library to every household, even with no recipes of its own (R-04.1)', async () => {
@@ -57,7 +57,7 @@ describe('S-16 Recipes tab (FR-REC-1, FR-REC-10)', () => {
     expect(screen.getByTestId('starter-card-0')).toHaveTextContent(/Lentil and tomato soup/);
     await fireEvent.press(screen.getByTestId('starter-card-0'));
     expect(mockPush).toHaveBeenCalledWith({
-      pathname: '/recipes/starter/[key]',
+      pathname: '/plan/recipes/starter/[key]',
       params: { key: 'starter.lentil_tomato_soup' },
     });
   });

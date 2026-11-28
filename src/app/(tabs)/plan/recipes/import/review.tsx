@@ -3,7 +3,7 @@ import { useLocalSearchParams } from 'expo-router';
 import { useHousehold } from '@/features/household/membership';
 import { ReviewScreen } from '@/features/import/review-screen';
 
-/** S-21: `/recipes/import/review?job=<id>` reviews an import's draft before it's saved. */
+/** S-21: `/plan/recipes/import/review?job=<id>` reviews an import's draft before it's saved. */
 export default function ImportReviewRoute() {
   const { job } = useLocalSearchParams<{ job?: string }>();
   const { state } = useHousehold();
