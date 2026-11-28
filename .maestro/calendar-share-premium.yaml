@@ -47,6 +47,11 @@ tags:
     visible:
       id: event-share-premium
     timeout: 10000
+# Centered, so the floating tab bar doesn't cover it.
+- scrollUntilVisible:
+    element:
+      id: event-share-premium-open
+    centerElement: true
 - tapOn:
     id: event-share-premium-open
 - extendedWaitUntil:

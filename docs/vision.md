@@ -81,7 +81,7 @@ Five principles decide what gets built and what gets cut.
 
 Six modules sit on one shared household layer, and they ship in phases starting with Meals and Groceries.
 
-- **Phase 1 (MVP):** Meals and Groceries
+- **Phase 1 (MVP, launching with Phases 2 and 3):** Meals and Groceries
 - **Phase 2:** Shared Calendar and Appointments, with Documents and Records
 - **Phase 3:** Tasks and Chores
 - **Phase 4:** Household Supplies
@@ -241,11 +241,11 @@ These capabilities serve every module and are built once.
 
 ## Roadmap and MVP scope
 
-The MVP is Phase 1 plus the household foundation, built and released on iOS and Android together. Later phases follow the product owner's priorities (reordered 2026-11-21): the family calendar and its documents first, then tasks, supplies and smarter groceries, with the UK and Australia launch last. The phases are not dated yet, and the "done when" criteria are proposals to confirm.
+The MVP is Phases 1 to 3 (meals and groceries, the calendar and documents, and tasks and chores) plus the household foundation, built on iOS and Android together and released as one first beta (decided 2026-11-27). Phase 1 was planned as the MVP alone; holding the beta until Phase 3 trades earlier feedback on the core loop for a fuller first release. Later phases follow the product owner's priorities (reordered 2026-11-21): the family calendar and its documents first, then tasks, supplies and smarter groceries, with the UK and Australia launch last. The phases are not dated yet, and the "done when" criteria are proposals to confirm.
 
 | Phase                           | Scope                                                                                                                                                                                                                                                                                                                                                                         | Done when                                                                                            |
 | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| 1. MVP                          | Accounts, household with partner sharing, recipes (manual and import), weekly planner, auto-built grocery list with pantry de-selection, shared offline list, print and native list export, weekly reminder, a localization-ready US English build, and the free tier with the first Premium features (caregiver seats, larger AI import allowance, saved templates, history) | Two partners can plan a week, share the list, and shop from it on both platforms in beta testing     |
+| 1. Meals and groceries (MVP)    | Accounts, household with partner sharing, recipes (manual and import), weekly planner, auto-built grocery list with pantry de-selection, shared offline list, print and native list export, weekly reminder, a localization-ready US English build, and the free tier with the first Premium features (caregiver seats, larger AI import allowance, saved templates, history) | Two partners can plan a week, share the list, and shop from it on both platforms in beta testing     |
 | 2. Calendar and documents       | Shared Calendar and Appointments (Apple and Google calendar sync, appointment reminders and preparation notes, meals on the calendar, busy-day easy-meal suggestions) and Documents and Records (secure vault, scanning, expiry reminders, caregiver sharing)                                                                                                                 | Busy days visibly change the plan, documents attach to appointments, and a security review is passed |
 | 3. Tasks and Chores             | Assignable shared tasks, recurring chores, newborn starter checklists, tasks created from other modules                                                                                                                                                                                                                                                                       | Partners use tasks weekly without leaving the app for a second tool                                  |
 | 4. Household Supplies           | Recurring supplies such as diapers, wipes and formula, usage estimates, running-low flags, and low supplies on the shopping list                                                                                                                                                                                                                                              | Low supplies visibly change the shopping list before the family runs out                             |
@@ -253,7 +253,7 @@ The MVP is Phase 1 plus the household foundation, built and released on iOS and 
 | 6. Baby tracking and ecosystem  | Tracker integrations, daily summary, deeper caregiver roles (Premium)                                                                                                                                                                                                                                                                                                         | At least one tracker integration live, chosen after research                                         |
 | 7. UK and Australia launch      | Local pricing, units, store listings, and legal and privacy review for the UK and Australia                                                                                                                                                                                                                                                                                   | The app is live in both stores with local pricing and listings                                       |
 
-**Launch gates for every phase:** automated tests passing, privacy and store disclosures updated, internal and beta testing on both platforms, and a staged rollout with a rollback plan.
+**Launch gates for every phase:** automated tests passing, privacy and store disclosures updated, internal and beta testing on both platforms, and a staged rollout with a rollback plan. Phases 1 to 3 meet these gates together, in one combined beta and launch.
 
 **Market expansion.** The US launches first. The UK and Australia follow in Phase 7, in English, once the core loop and the second-parent flow are proven, with local pricing, units, store listings, and a privacy review. Canada and Ireland are later candidates.
 
@@ -271,7 +271,7 @@ Success is a family that returns every week and brings in its partner, so the fi
 
 **Key risks**
 
-- **Scope creep across six modules.** Mitigation: strict phase gates and an MVP limited to Phase 1.
+- **Scope creep across six modules.** Mitigation: strict phase gates, and an MVP limited to Phases 1 to 3 with nothing from later phases.
 - **Children's and household data.** Mitigation: privacy by design, minimal collection, security review before the document vault ships, and legal review of terms and policy.
 - **Differentiation from meal-planning apps.** Mitigation: lead with the new-parent focus, partner sharing, and the cross-module household model.
 - **AI parsing errors, especially allergens.** Mitigation: always show parsed results for review and carry clear disclaimers.
