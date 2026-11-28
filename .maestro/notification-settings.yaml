@@ -60,6 +60,20 @@ tags:
 - assertVisible:
     id: notification-type-document_expiry
     checked: true
+# T-04.1 (FR3-NOT-5): task reminders and today's tasks start on, and "show details" covers
+# tasks too.
+- scrollUntilVisible:
+    element:
+      id: notification-type-tasks_today
+- assertVisible:
+    id: notification-type-task_reminders
+    checked: true
+- assertVisible:
+    id: notification-type-tasks_today
+    checked: true
+- scrollUntilVisible:
+    element:
+      id: event-details-switch
 - assertVisible:
     id: event-details-switch
     checked: false

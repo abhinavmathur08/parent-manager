@@ -1710,6 +1710,14 @@
       "document_expiry": {
         "title": "Document expiry",
         "description": "Premium. For parents: 30 and 7 days before a document in the vault expires."
+      },
+      "task_reminders": {
+        "title": "Task reminders",
+        "description": "Reminders you set on tasks that are yours, or unassigned for parents, on this phone. They work offline."
+      },
+      "tasks_today": {
+        "title": "Today's tasks",
+        "description": "At 8:00 in the morning, how many of your tasks are due today. Nothing on days with none."
       }
     },
     "planWeek": {
@@ -1801,8 +1809,8 @@
       "body": "Tonight's dinner, {{meal}}, needs defrosting."
     },
     "eventDetails": {
-      "title": "Show event details",
-      "description": "Adds the event's title and place to reminders on this phone. Off, they show only the kind, time and who's taking."
+      "title": "Show details in notifications",
+      "description": "Adds event titles and places, and task titles, to reminders on this phone. Off, they show only the kind, when it is and who's taking."
     },
     "event": {
       "today": "Today",
@@ -1815,6 +1823,20 @@
       "takingYou": "You're taking.",
       "takingNobody": "Nobody's taking yet.",
       "takingMember": "A member is taking."
+    },
+    "task": {
+      "title": "A task is due",
+      "dueToday": "Due today",
+      "dueTodayAt": "Due today at {{time}}",
+      "dueTomorrow": "Due tomorrow",
+      "dueTomorrowAt": "Due tomorrow at {{time}}",
+      "dueOn": "Due {{day}}",
+      "dueOnAt": "Due {{day}} at {{time}}"
+    },
+    "tasksToday": {
+      "title": "Today's tasks",
+      "body_one": "You have {{count}} task due today.",
+      "body_other": "You have {{count}} tasks due today."
     },
     "documentCategory": {
       "insurance": "Insurance",
