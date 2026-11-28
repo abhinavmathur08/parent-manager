@@ -5,5 +5,96 @@
       "Cover and chill overnight, or for at least four hours.",
       "Slice the banana on top and drizzle with honey to serve."
     ]
+  },
+  "starter.chicken_traybake": {
+    "steps": [
+      "Heat the oven to {oven:200}.",
+      "Toss the chicken, sweet potato and onion with the oil, paprika, salt and pepper on a large baking tray.",
+      "Roast for 25 minutes, add the broccoli, then roast for 15 minutes more, until the chicken reaches {temp:74} in the thickest part."
+    ]
+  },
+  "starter.spinach_egg_muffins": {
+    "steps": [
+      "Heat the oven to {oven:180} and brush the holes of a 12-hole muffin tin with oil.",
+      "Divide the spinach, capsicum, spring onions and cheese between the holes.",
+      "Whisk the eggs with the milk and a little black pepper, then pour over the vegetables.",
+      "Bake for 18 to 20 minutes, until puffed and set in the middle and a knife pushed in comes out clean.",
+      "Cool in the tin for 5 minutes before lifting them out."
+    ]
+  },
+  "starter.breakfast_burritos": {
+    "steps": [
+      "Whisk the eggs with the milk.",
+      "Warm the oil in a large frying pan over medium-low heat. Add the eggs and stir slowly until they are fully set, with no runny egg left, then take the pan off the heat.",
+      "Warm the tortillas briefly so they fold without cracking.",
+      "Spoon beans, egg, cheese, spring onions and a little salsa down the middle of each tortilla. Fold in the sides and roll up tightly.",
+      "Eat straight away, or cool completely, wrap each one in foil and freeze."
+    ]
+  },
+  "starter.banana_oat_muffins": {
+    "steps": [
+      "Heat the oven to {oven:180} and line a 12-hole muffin tin with paper cases, or grease it well.",
+      "Mash the bananas until smooth, then whisk in the eggs, milk and oil.",
+      "Stir in the oats, flour, baking powder and cinnamon until just combined, then fold in the blueberries.",
+      "Fill the holes about three-quarters full and bake for 18 to 20 minutes, until risen and a skewer pushed into the middle comes out clean.",
+      "Cool on a rack. For babies, break into strips or pieces they can hold."
+    ]
+  },
+  "starter.veggie_fried_rice": {
+    "steps": [
+      "Heat half the oil in a large frying pan or wok over high heat. Add the eggs and stir until set, then tip them onto a plate.",
+      "Add the rest of the oil, then the garlic and the white parts of the spring onions, and stir for 30 seconds.",
+      "Add the frozen vegetables and stir-fry for 3 minutes, until hot.",
+      "Break up the rice, add it to the pan and stir-fry for 4 to 5 minutes, until steaming hot all the way through.",
+      "Stir in the soy sauce, sesame oil, egg and spring onion greens."
+    ]
+  },
+  "starter.minestrone": {
+    "steps": [
+      "Warm the oil in a large pot and cook the onion, carrot and celery gently for 10 minutes, until soft.",
+      "Add the garlic, zucchini and mixed herbs and cook for 2 minutes.",
+      "Add the tomatoes, beans and stock, bring to a boil, then simmer for 15 minutes.",
+      "Add the pasta and cook for 8 to 10 minutes, until tender, stirring now and then. Stir in the spinach until it wilts.",
+      "Season with salt and pepper and serve with Parmesan."
+    ]
+  },
+  "starter.turkey_meatballs": {
+    "steps": [
+      "Heat the oven to {oven:200} and line a baking tray with baking paper.",
+      "Mix the turkey, breadcrumbs, egg, Parmesan, zucchini, garlic and oregano with your hands until just combined.",
+      "Roll into balls about the size of a ping-pong ball, set them on the baking tray and brush with the oil.",
+      "Bake for 18 to 20 minutes, until browned, with no pink in the middle, and they reach {temp:74}.",
+      "Meanwhile, simmer the tomatoes with the basil for 10 minutes. Add the meatballs and turn them in the sauce.",
+      "For toddlers, cut the meatballs into quarters."
+    ]
+  },
+  "starter.chicken_coconut_curry": {
+    "steps": [
+      "Warm the oil in a large pan and cook the onion over medium heat for 8 minutes, until soft and golden.",
+      "Add the garlic, ginger and curry powder and stir for a minute, until fragrant.",
+      "Add the chicken and stir to coat it in the spices, then add the tomatoes and coconut milk.",
+      "Simmer, partly covered, for 20 minutes, stirring now and then, until the chicken is tender and reaches {temp:74}.",
+      "Stir in the spinach until it wilts, season with salt, and serve with rice and coriander."
+    ]
+  },
+  "starter.beef_bean_chili": {
+    "title": "Beef and bean chilli",
+    "steps": [
+      "Warm the oil in a large pan and cook the onion and capsicum over medium heat for 8 minutes.",
+      "Add the garlic and beef and cook, breaking the meat up, until browned with no pink left and it reaches {temp:71}.",
+      "Stir in the chilli powder, cumin, paprika and tomato paste and cook for a minute.",
+      "Add the tomatoes, beans and stock. Simmer, partly covered, for 30 minutes, stirring now and then, until thick.",
+      "Season with salt and serve with sour cream and cheese."
+    ],
+    "notes": "Freeze for up to three months. For children, use less chilli powder and add heat to adult bowls at the table."
+  },
+  "starter.salmon_potato_traybake": {
+    "steps": [
+      "Heat the oven to {oven:200}.",
+      "Toss the potatoes with half the oil on a large baking tray and roast for 15 minutes.",
+      "Push the potatoes to the sides, add the green beans and salmon, drizzle with the rest of the oil and lay the lemon slices on the salmon.",
+      "Roast for 12 to 15 minutes more, until the salmon flakes easily and reaches {temp:63} in the thickest part.",
+      "Scatter with dill. For toddlers, flake the salmon and check carefully for bones."
+    ]
   }
 }

@@ -3,6 +3,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { BusyDaysProvider } from '@/features/calendar/busy-days';
 import { overrideId } from '@/features/calendar/tables';
+import { EASY_DINNER_LIMITS } from '@/features/planner/easy-dinner';
 import { PlanWeekScreen } from '@/features/planner/week-screen';
 
 let mockRows: Record<string, unknown[]> = {};
@@ -203,7 +204,8 @@ describe('easy dinners on a Premium household (FR2-BUSY-2, FR2-BUSY-3)', () => {
     expect(await screen.findByTestId('easy-dinner-sheet')).toBeOnTheScreen();
     expect(mockTrack).toHaveBeenCalledWith('busy_day_suggestion_shown', {
       mode: 'add',
-      candidates_count: 4,
+      // The household's quick recipe, then quick starters up to the limit.
+      candidates_count: EASY_DINNER_LIMITS.candidates,
     });
     expect(screen.getByTestId('easy-dinner-0')).toHaveTextContent(/Bean wraps/);
     await fireEvent.press(screen.getByTestId('easy-dinner-0'));
