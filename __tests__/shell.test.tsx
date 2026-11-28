@@ -123,7 +123,7 @@ describe('FloatingTabBar', () => {
 });
 
 describe('Screen', () => {
-  it('pads content so nothing sits under the tab bar', async () => {
+  it('ends the scrolling area above the tab bar, so no row sits under it', async () => {
     await render(
       withSafeArea(
         <Screen title="Plan" testID="s">
@@ -133,8 +133,26 @@ describe('Screen', () => {
     );
     const scroll = screen.getByTestId('s-scroll');
     const content = StyleSheet.flatten(scroll.props.contentContainerStyle);
-    expect(content.paddingBottom).toBe(theme.layout.tabBarClearance + metrics.insets.bottom);
+    expect(StyleSheet.flatten(scroll.props.style).marginBottom).toBe(
+      theme.layout.tabBarClearance + metrics.insets.bottom,
+    );
+    expect(content.paddingBottom).toBe(theme.space[3]);
     expect(content.maxWidth).toBe(theme.layout.maxContentWidth);
+  });
+
+  it('scrolls to the bottom edge on screens without a tab bar', async () => {
+    await render(
+      withSafeArea(
+        <Screen title="Sign in" hasTabBar={false} testID="s">
+          {null}
+        </Screen>,
+      ),
+    );
+    const scroll = screen.getByTestId('s-scroll');
+    expect(StyleSheet.flatten(scroll.props.style ?? {}).marginBottom).toBeUndefined();
+    expect(StyleSheet.flatten(scroll.props.contentContainerStyle).paddingBottom).toBe(
+      metrics.insets.bottom + theme.space[6],
+    );
   });
 });
 

@@ -95,8 +95,6 @@ it('asks for a title before saving', async () => {
 
 it('leaves room for the floating tab bar, so Save never sits under it', async () => {
   await show();
-  const content = StyleSheet.flatten(
-    screen.getByTestId('recipe-editor-scroll').props.contentContainerStyle,
-  );
-  expect(content.paddingBottom).toBeGreaterThanOrEqual(theme.layout.tabBarClearance);
+  const scroll = StyleSheet.flatten(screen.getByTestId('recipe-editor-scroll').props.style);
+  expect(scroll.marginBottom).toBeGreaterThanOrEqual(theme.layout.tabBarClearance);
 });
