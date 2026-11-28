@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type ComponentRef, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Animated,
@@ -29,6 +29,11 @@ export type BottomSheetProps = {
   footer?: ReactNode;
   /** `form` lifts the sheet above the keyboard. */
   variant?: 'content' | 'form';
+  /**
+   * When this changes while open, the body scrolls back to the top, so a status shown there
+   * (such as a finished purchase) isn't left out of sight below a long body.
+   */
+  scrollKey?: string | null;
   testID: string;
 };
 
@@ -56,8 +61,13 @@ export function BottomSheet({
   children,
   footer,
   variant = 'content',
+  scrollKey,
   testID,
 }: BottomSheetProps) {
+  const scrollRef = useRef<ComponentRef<typeof ScrollView>>(null);
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ y: 0, animated: false });
+  }, [scrollKey]);
   const theme = useTheme();
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
@@ -159,6 +169,7 @@ export function BottomSheet({
         </View>
       </View>
       <ScrollView
+        ref={scrollRef}
         style={styles.body}
         contentContainerStyle={{ paddingHorizontal: theme.space[4], paddingBottom: theme.space[4] }}
         keyboardShouldPersistTaps="handled"

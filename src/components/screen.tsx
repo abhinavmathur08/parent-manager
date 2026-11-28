@@ -3,6 +3,7 @@ import { ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { TopBar, type TopBarProps } from '@/components/top-bar';
+import { useTabBarClearance } from '@/hooks/use-tab-bar-clearance';
 import { useTheme } from '@/hooks/use-theme';
 
 export type ScreenProps = Omit<TopBarProps, 'testID'> & {
@@ -18,7 +19,8 @@ export type ScreenProps = Omit<TopBarProps, 'testID'> & {
 
 /**
  * A screen with a TopBar and scrolling content: `screenMargin` sides, content capped at
- * `layout.maxContentWidth`, and bottom padding of `layout.tabBarClearance` on tab screens.
+ * `layout.maxContentWidth`, and on tab screens a scrolling area that ends above the floating tab
+ * bar (`useTabBarClearance`).
  */
 export function Screen({
   children,
@@ -30,9 +32,10 @@ export function Screen({
 }: ScreenProps) {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
-  const paddingBottom = hasTabBar
-    ? theme.layout.tabBarClearance + insets.bottom
-    : insets.bottom + theme.space[6];
+  const clearance = useTabBarClearance();
+  // On tab screens the scrolling area stops at the tab bar's top edge, so a row is never
+  // half-hidden under the bar mid-scroll; the last row still ends `space.3` above it.
+  const paddingBottom = hasTabBar ? theme.space[3] : insets.bottom + theme.space[6];
   return (
     <View
       testID={testID}
@@ -42,6 +45,7 @@ export function Screen({
       <ScrollView
         ref={scrollRef}
         testID={`${testID}-scroll`}
+        style={hasTabBar ? { marginBottom: clearance } : undefined}
         contentContainerStyle={[
           styles.content,
           {

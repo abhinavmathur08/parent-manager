@@ -10,6 +10,7 @@ import type { PlanEntryRow } from '@/features/planner/tables';
 import { todayIn } from '@/features/planner/week';
 import { useRecipeRows } from '@/features/recipes/data';
 import type { Membership } from '@/features/household/membership';
+import { formatList } from '@/i18n';
 import { reportError } from '@/lib/crash-reporting';
 import { readCalendarAccess } from '@/lib/device-calendar/permission';
 import { useSyncEngine, useSyncStatus } from '@/lib/sync';
@@ -95,7 +96,6 @@ function Copier({
       (entry.recipe_id ? titles.get(entry.recipe_id) : undefined) ??
       entry.free_text ??
       t('plan.deletedRecipe');
-    const list = new Intl.ListFormat(i18n.language, { type: 'conjunction' });
     return copyItems({
       events,
       exceptions,
@@ -105,7 +105,8 @@ function Copier({
       kindName: (kind) => t(kindKey(kind as EventRow['kind'])),
       eventLink: (id, date) => Linking.createURL(`calendar/${id}`, { queryParams: { date } }),
       dinners: includeMeals ? dinnersByDate(plan.entries, titleOf) : null,
-      mealTitle: (names) => t('calendarSettings.copy.mealTitle', { meals: list.format(names) }),
+      mealTitle: (names) =>
+        t('calendarSettings.copy.mealTitle', { meals: formatList(names, i18n.language) }),
       mealNotes: t('calendarSettings.copy.mealNotes'),
       mealLink: () => Linking.createURL('plan'),
     });

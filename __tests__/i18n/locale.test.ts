@@ -34,8 +34,13 @@ describe('translations', () => {
         typeof v === 'object' ? keys(v, `${p}${k}.`) : [`${p}${k}`],
       );
     const base = new Set(keys(require('@/i18n/locales/en-US.json')));
+    // A starter checklist item offered only in GB or AU has no en-US text by design (K-01);
+    // scripts/checklist-content.js checks those keys against the templates instead.
+    const own = (k: string) => k.startsWith('checklist_item.');
     for (const file of ['en-GB', 'en-AU']) {
-      const extra = keys(require(`@/i18n/locales/${file}.json`)).filter((k) => !base.has(k));
+      const extra = keys(require(`@/i18n/locales/${file}.json`)).filter(
+        (k) => !base.has(k) && !own(k),
+      );
       expect(extra).toEqual([]);
     }
   });
