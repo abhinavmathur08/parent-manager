@@ -1,7 +1,10 @@
 # T-02.1 (S-44, FR3-TASK-1, D-29): Tasks is the fourth tab, in Recipes' old slot, and opens on
 # its empty state; the filters switch; Recipes opens from the Plan tab's header instead.
 # T-02.2 (S-45, FR3-TASK-2): a task takes 2 taps plus typing, and shows under Anytime.
+# Needs the local stack; see the Testing section of README.md.
 appId: ${APP_ID || 'com.myparentmanager'}
+tags:
+  - backend
 ---
 - runFlow: subflows/create-household.yaml
 - tapOn:
