@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react-native';
+import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { TasksScreen } from '@/features/tasks/tasks-screen';
@@ -6,8 +6,11 @@ import { i18n } from '@/i18n';
 import { PSEUDO_LOCALE } from '@/i18n/locale';
 
 let mockRows: Record<string, unknown[]> = {};
+const mockUpdate = jest.fn(async (..._args: unknown[]) => undefined);
+const mockRemove = jest.fn(async (..._args: unknown[]) => undefined);
 jest.mock('@/lib/sync', () => ({
   useSyncedRows: (table: string) => ({ rows: mockRows[table] ?? [], loading: false }),
+  useSyncWriter: () => ({ update: mockUpdate, remove: mockRemove }),
 }));
 jest.mock('@/lib/supabase', () => ({
   getSupabase: () => ({
@@ -66,7 +69,7 @@ const household = { id: 'hh', locale: 'en-US', timezone: 'America/New_York' };
 const show = () =>
   render(
     <SafeAreaProvider initialMetrics={metrics}>
-      <TasksScreen household={household} userId="me" />
+      <TasksScreen household={household} userId="me" isParent isPremium={false} />
     </SafeAreaProvider>,
   );
 
@@ -85,6 +88,8 @@ beforeEach(() => {
   mockRows = {};
   mockOnline = true;
   mockTrack.mockClear();
+  mockUpdate.mockClear();
+  mockRemove.mockClear();
 });
 afterEach(() => jest.useRealTimers());
 
@@ -150,7 +155,7 @@ describe('S-44 Tasks (FR3-TASK-1)', () => {
       await render(
         <SafeAreaProvider initialMetrics={metrics}>
           <ThemeOverride fontScale={2}>
-            <TasksScreen household={household} userId="me" />
+            <TasksScreen household={household} userId="me" isParent isPremium={false} />
           </ThemeOverride>
         </SafeAreaProvider>,
       );
@@ -160,5 +165,59 @@ describe('S-44 Tasks (FR3-TASK-1)', () => {
       i18n.options.postProcess = false;
       await i18n.changeLanguage('en-US');
     }
+  });
+
+  it('completes in one tap with undo, recording who did it by role only (FR3-TASK-4)', async () => {
+    mockRows.tasks = [task('Fix the gate', { due_date: '2026-11-17', assignee_user_id: 'me' })];
+    await show();
+    await fireEvent.press(screen.getByTestId('tasks-overdue-0-check'));
+    expect(mockUpdate).toHaveBeenCalledWith('tasks', 'Fix the gate', { done: true });
+    expect(mockTrack).toHaveBeenCalledWith('task_completed', {
+      source: 'manual',
+      was_overdue: true,
+      by_assignee: true,
+      recurring: false,
+    });
+    await fireEvent.press(screen.getByText('Undo'));
+    expect(mockUpdate).toHaveBeenLastCalledWith('tasks', 'Fix the gate', { done: false });
+  });
+
+  it('assigns from the member chip, and offers "I\'ll do it" on a shared task (FR3-TASK-5)', async () => {
+    mockRows.tasks = [task('Shared', { shared: true }), task('Private')];
+    await show();
+    // Anytime is in creation order, then by ID: Private, then Shared.
+    await fireEvent.press(screen.getByTestId('tasks-anytime-1-take'));
+    expect(mockUpdate).toHaveBeenCalledWith('tasks', 'Shared', { assignee_user_id: 'me' });
+    expect(mockTrack).toHaveBeenCalledWith('task_assigned', { assignee_role: 'self', via: 'take' });
+    await fireEvent.press(screen.getByTestId('tasks-anytime-0-assign'));
+    await fireEvent.press(await screen.findByTestId('task-assign-0'));
+    expect(mockUpdate).toHaveBeenCalledWith('tasks', 'Private', { assignee_user_id: 'sam' });
+    expect(mockTrack).toHaveBeenCalledWith('task_assigned', {
+      assignee_role: 'parent',
+      via: 'chip',
+    });
+  });
+
+  it('announces title, due, assignee and state, with complete, assign and delete as actions (NFR3-A11Y-1)', async () => {
+    mockRows.tasks = [
+      task('Book the car service', { due_date: '2026-11-19', assignee_user_id: 'me' }),
+    ];
+    await show();
+    const row = screen.getByTestId('tasks-upcoming-0-0');
+    expect(row.props.accessibilityLabel).toBe('Book the car service, Tomorrow, For you, Not done');
+    expect(row.props.accessibilityActions.map((a: { name: string }) => a.name)).toEqual([
+      'toggle',
+      'assign',
+      'delete',
+    ]);
+    // Delete is held behind the undo bar, then written as a tombstone (FR3-TASK-8).
+    await act(async () =>
+      row.props.onAccessibilityAction({ nativeEvent: { actionName: 'delete' } }),
+    );
+    expect(screen.queryByTestId('tasks-upcoming-0-0')).toBeNull();
+    expect(mockRemove).not.toHaveBeenCalled();
+    await act(async () => jest.advanceTimersByTime(6000));
+    expect(mockRemove).toHaveBeenCalledWith('tasks', 'Book the car service');
+    expect(mockTrack).toHaveBeenCalledWith('task_deleted', { recurring: false, scope: 'all' });
   });
 });

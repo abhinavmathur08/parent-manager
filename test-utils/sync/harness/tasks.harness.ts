@@ -259,3 +259,28 @@ it('writes one occurrence when both complete the same chore occurrence offline (
     expect((await device.row(TASK_OCCURRENCES.name, id))?.done).toBe(true);
   }
 });
+
+it("shows the partner's assignment and completion within 2 seconds (FR3-TASK-4, FR3-TASK-5)", async () => {
+  const id = crypto.randomUUID();
+  await A.engine.insert(TASKS.name, id, task('Order the car seat'));
+  await A.engine.sync();
+  expect(await waitUntil(async () => (await B.row(TASKS.name, id)) !== null, 2_000)).not.toBeNull();
+
+  // A assigns it to B from the chip; B sees it as theirs.
+  await A.engine.update(TASKS.name, id, { assignee_user_id: userIds[1] });
+  await A.engine.sync();
+  const assigned = await waitUntil(
+    async () => (await B.row(TASKS.name, id))?.assignee_user_id === userIds[1],
+    2_000,
+  );
+  console.log(`an assignment reached the partner in ${assigned?.toFixed(0)} ms`);
+  expect(assigned).not.toBeNull();
+
+  // B completes it; A sees it done, by B.
+  await B.engine.update(TASKS.name, id, { done: true });
+  await B.engine.sync();
+  const done = await waitUntil(async () => (await A.row(TASKS.name, id))?.done === true, 2_000);
+  console.log(`a completion reached the partner in ${done?.toFixed(0)} ms`);
+  expect(done).not.toBeNull();
+  expect(await A.row(TASKS.name, id)).toMatchObject({ done: true, done_by: userIds[1] });
+});

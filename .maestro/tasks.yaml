@@ -1,6 +1,7 @@
 # T-02.1 (S-44, FR3-TASK-1, D-29): Tasks is the fourth tab, in Recipes' old slot, and opens on
 # its empty state; the filters switch; Recipes opens from the Plan tab's header instead.
 # T-02.2 (S-45, FR3-TASK-2): a task takes 2 taps plus typing, and shows under Anytime.
+# T-02.3: assign it, complete it, and find it under Done.
 # Needs the local stack; see the Testing section of README.md.
 appId: ${APP_ID || 'com.myparentmanager'}
 tags:
@@ -38,6 +39,28 @@ tags:
     timeout: 10000
 - assertVisible:
     id: tasks-anytime-0
+    text: .*Book the car service.*
+# T-02.3 (FR3-TASK-4, FR3-TASK-5): the member chip assigns it in one tap, and the check completes
+# it with an undo. The partner's view is covered by the two-device harness (tasks.harness.ts).
+- tapOn:
+    id: tasks-anytime-0-assign
+- tapOn:
+    id: task-assign-me
+- assertVisible:
+    id: tasks-anytime-0
+    text: .*For you.*
+- tapOn:
+    id: tasks-anytime-0-check
+- assertVisible:
+    id: tasks-undo
+- extendedWaitUntil:
+    visible:
+      id: tasks-all-done
+    timeout: 10000
+- tapOn:
+    id: tasks-done-toggle
+- assertVisible:
+    id: tasks-done-0
     text: .*Book the car service.*
 - runFlow: subflows/open-recipes.yaml
 - runFlow: subflows/close-recipes.yaml
