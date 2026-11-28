@@ -610,7 +610,7 @@ Supabase Auth, with:
 ### CI/CD
 
 - **On every PR:** lint, formatting, types, unit tests and an Expo dependency check, plus pgTAP database tests against a local Supabase stack ("Database tests", F-04.1), Deno tests for Edge Functions ("Edge Function tests", F-04.2) and the two-device sync harness ("Sync harness", H-06.3).
-- **On `main`:** E2E with Maestro on Android (an emulator on Linux) and iOS (a simulator on a macOS runner, which is free for a public repo, with Xcode 26.4 or later, F-04.3). Both jobs live in `.github/workflows/e2e.yml`, build the production variant as a release, and can also be started on any branch with `workflow_dispatch`.
+- **On `main`:** E2E with Maestro on Android (Pixel-sized emulators on Linux, with the flows split across four shards that report as one `Maestro on Android` check) and iOS (a simulator on a macOS runner, which is free for a public repo, with Xcode 26.4 or later, F-04.3). Both jobs live in `.github/workflows/e2e.yml`, build the production variant as a release, and can also be started on any branch with `workflow_dispatch`.
 - **Database migrations:**
   - **Staging:** `.github/workflows/migrations.yml` applies them after any merge to `main` that changes `supabase/migrations`, usually within 5 minutes (F-04.4). It prints a dry run, then runs `pnpm supabase db push --remote=<ref> --yes`. The "staging" GitHub environment holds a `SUPABASE_ACCESS_TOKEN` secret (a token scoped to the staging project) and a `SUPABASE_PROJECT_REF` variable, both added by the product owner.
   - **Production:** the same workflow, started by hand with target "production". The "production" GitHub environment requires the product owner's approval before the job runs, and holds that project's token and ref. Until the production project exists (D-1), the job stops with a message saying what's missing.
@@ -661,6 +661,7 @@ Supabase Auth, with:
 - **Lint rule:** ESLint rejects text written directly in JSX (`react/jsx-no-literals` with an allowlist).
 - **Pseudo-locale:** a pseudo-locale in development builds lengthens text and adds accents, to catch layout and hard-coded strings.
 - **Server copy:** notifications, emails, store listings, legal documents and the starter library are versioned per locale.
+- **Starter checklists (K-01, R3-CHK-1):** the templates ship in the app as data in `src/features/checklists/starter-templates.json` (template ID, stage, regions, and items with ID, regions, due offset and review flags), so no table holds them. Their text is in the locale files under the template and item IDs. Unlike other copy, each text is written out in every locale its regions use, with no fallback to en-US, because each market's text is reviewed separately (D-27). `pnpm run checklists:check` fails on missing or stray text, unknown regions or stages, and wording that reads as medical advice or a clinical schedule, and when `docs/checklist-content-review.md`, the reviewers' sheet that `pnpm run checklists:sheet` generates, is out of date.
 
 ### Design system
 

@@ -1,6 +1,6 @@
 import { act, fireEvent, render, renderHook, screen } from '@testing-library/react-native';
 import { useState } from 'react';
-import { AccessibilityInfo, Animated, StyleSheet } from 'react-native';
+import { AccessibilityInfo, Animated, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { AllergenNotice } from '@/components/allergen-notice';
@@ -69,6 +69,23 @@ describe('BottomSheet', () => {
     await fireEvent.press(screen.getByRole('button', { name: 'Close' }));
     await fireEvent.press(screen.getByTestId('sheet-scrim', { includeHiddenElements: true }));
     expect(onClose).toHaveBeenCalledTimes(2);
+  });
+
+  it('scrolls its body back to the top when scrollKey changes', async () => {
+    const sheet = (key: string) =>
+      withSafeArea(
+        <BottomSheet visible title="Premium" onClose={jest.fn()} scrollKey={key} testID="sheet">
+          {null}
+        </BottomSheet>,
+      );
+    const scrollTo = jest.spyOn(ScrollView.prototype, 'scrollTo');
+    const view = await render(sheet('choose'));
+    scrollTo.mockClear();
+    await view.rerender(sheet('choose'));
+    expect(scrollTo).not.toHaveBeenCalled();
+    await view.rerender(sheet('active'));
+    expect(scrollTo).toHaveBeenCalledWith({ y: 0, animated: false });
+    scrollTo.mockRestore();
   });
 
   it('renders nothing while closed', async () => {

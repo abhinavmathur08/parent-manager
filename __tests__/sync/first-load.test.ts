@@ -73,6 +73,24 @@ describe('first load on a new device (A-01.3, FR-AUTH-8)', () => {
     expect(engine.getStatus()).toMatchObject({ firstLoad: false, state: 'idle' });
   });
 
+  it('tries a failed first load again by itself, with nothing waiting to push', async () => {
+    jest.useFakeTimers();
+    try {
+      const server = new FakeServer();
+      server.put('recipes', { id: 'r1', household_id: 'h1', title: 'Lasagne' });
+      server.offline = true;
+      const engine = await device(server).open();
+      await engine.sync();
+      expect(engine.getStatus()).toMatchObject({ firstLoad: true, state: 'offline', pending: 0 });
+      server.offline = false;
+      await jest.advanceTimersByTimeAsync(5000);
+      expect(engine.getStatus()).toMatchObject({ firstLoad: false, state: 'idle' });
+      engine.stop();
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
   it('is not a first load after a restart, even offline (NFR-OFF-1)', async () => {
     const server = new FakeServer();
     const phone = device(server);
