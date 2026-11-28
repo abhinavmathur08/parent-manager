@@ -36,6 +36,19 @@ export function formatTime(instant: Date, locale: string, timeZone: string): str
 }
 
 /**
+ * A day relative to today in words ("yesterday", "today", "tomorrow") from
+ * `Intl.RelativeTimeFormat`, or null for days further away, which callers show as a date
+ * (NFR3-L10N-1). Null too where the engine has no `RelativeTimeFormat`, so callers fall back to
+ * the date.
+ */
+export function formatRelativeDay(days: number, locale: string): string | null {
+  if (Math.abs(days) > 1 || typeof Intl.RelativeTimeFormat !== 'function') return null;
+  const text = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' }).format(days, 'day');
+  // Capitalised for a label on its own line, as the locale writes the start of a sentence.
+  return text.charAt(0).toLocaleUpperCase(locale) + text.slice(1);
+}
+
+/**
  * A short list such as "Peanuts, Egg and Milk", in the locale's list format. Hermes may not
  * have Intl.ListFormat, so it falls back to the locale file's separator.
  */
