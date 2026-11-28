@@ -371,7 +371,7 @@ When Premium lapses (FR-PAY-9):
 **Requirements**
 
 - **FR-REC-1:** The Recipes tab shows two groups: the household's recipes, sorted by most recently used then name, and the starter library. Each card shows the title, total time, tags and a "used in plan" indicator.
-- **FR-REC-2:** The starter library contains 40 to 60 recipes (PROPOSED; content decision D-8). Every starter recipe uses catalog ingredient and unit IDs and has at least one new-parent tag.
+- **FR-REC-2:** The starter library contains about 45 original recipes (decision D-8: 40 to 60, target 45), about a third of them freezer-friendly or batch prep. Every starter recipe uses catalog ingredient and unit IDs and has at least one new-parent tag. `pnpm run recipes:check` enforces this, plus safe doneness cues and the infant-feeding rules. A person test-cooks every recipe, and baby-led weaning and toddler recipes get a health review, before the beta.
 - **FR-REC-3:** A starter recipe is read-only. "Save a copy" creates an editable household recipe that keeps a link to the original.
 - **FR-REC-4:** Members with write access can create a recipe with:
   - a title (required, at most 120 characters)

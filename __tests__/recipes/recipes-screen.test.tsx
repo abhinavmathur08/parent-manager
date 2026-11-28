@@ -105,7 +105,8 @@ describe('S-16 Recipes tab (FR-REC-1, FR-REC-10)', () => {
     expect(screen.getByText(`${frozen.length} recipes`)).toBeOnTheScreen();
     expect(screen.getByTestId('starter-card-0')).toHaveTextContent(/Lentil and tomato soup/);
 
-    await fireEvent.press(screen.getByTestId('recipes-filter-no_cook'));
+    // No recipe, household or starter, is both freezer-friendly and quick.
+    await fireEvent.press(screen.getByTestId('recipes-filter-quick'));
     expect(screen.getByTestId('recipes-no-results')).toBeOnTheScreen();
   });
 });

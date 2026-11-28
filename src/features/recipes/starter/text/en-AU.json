@@ -96,5 +96,166 @@
       "Roast for 12 to 15 minutes more, until the salmon flakes easily and reaches {temp:63} in the thickest part.",
       "Scatter with dill. For toddlers, flake the salmon and check carefully for bones."
     ]
+  },
+  "starter.red_lentil_dal": {
+    "steps": [
+      "Warm the oil in a large pan and cook the onion gently for 8 minutes, until soft.",
+      "Stir in the garlic, ginger and spices for a minute.",
+      "Add the lentils, tomatoes, coconut milk and water. Bring to a boil, then simmer for 20 to 25 minutes, stirring often, until the lentils have broken down and the dal is thick.",
+      "Stir in the spinach until it wilts, then the lemon juice.",
+      "For babies, serve it thick on a preloaded spoon, or with strips of soft flatbread or toast to dip. Grown-ups can stir salt and chilli into their own bowls."
+    ]
+  },
+  "starter.fish_tacos": {
+    "steps": [
+      "Rub the fish with the paprika, cumin, a little salt and the oil.",
+      "Toss the cabbage with half the lime juice and a pinch of salt. Stir the rest of the lime juice into the sour cream.",
+      "Cook the fish in a hot frying pan for 3 to 4 minutes on each side, until it is opaque all the way through and flakes easily.",
+      "Warm the tortillas. Flake the fish into them and top with the slaw, avocado, lime sour cream and coriander, with lime wedges to squeeze."
+    ]
+  },
+  "starter.zucchini_feta_frittata": {
+    "steps": [
+      "Heat the grill to high.",
+      "Warm the oil in an ovenproof frying pan over medium heat and cook the zucchini and onion for 8 minutes, until soft. Stir in the spinach until it wilts.",
+      "Whisk the eggs with the milk, mint and pepper and pour over the vegetables. Scatter with the feta.",
+      "Cook over low heat for 6 to 8 minutes, until the edges are set.",
+      "Slide the pan under the grill for 2 to 3 minutes, until the top is set and golden. Cool a little, then cut into wedges."
+    ]
+  },
+  "starter.ginger_pork_stir_fry": {
+    "steps": [
+      "Toss the pork with the cornflour and a third of the soy sauce.",
+      "Mix the rest of the soy sauce with the honey, garlic, ginger and a splash of water.",
+      "Heat half the oil in a wok or large frying pan over high heat. Stir-fry the pork for 3 to 4 minutes, until browned and it reaches {temp:63}, then tip it onto a plate.",
+      "Add the rest of the oil and stir-fry the broccoli and capsicum for 4 minutes, adding a splash of water to help the broccoli steam.",
+      "Return the pork with the sauce and spring onions and toss for a minute, until glossy. Serve with rice."
+    ]
+  },
+  "starter.cauliflower_mac_cheese": {
+    "steps": [
+      "Cook the pasta in a large pan of boiling water, adding the cauliflower for the last 5 minutes, until both are tender. Drain.",
+      "Meanwhile, melt the butter in a pan, stir in the flour and cook for a minute.",
+      "Whisk in the milk a little at a time and keep stirring over medium heat until the sauce is smooth and thick.",
+      "Take it off the heat and stir in most of the cheese, the mustard and the nutmeg, then fold in the pasta and cauliflower.",
+      "Eat straight away, or tip it into a baking dish, scatter with the rest of the cheese and brown under the grill."
+    ]
+  },
+  "starter.beef_vegetable_stew": {
+    "steps": [
+      "Heat the oven to {oven:160}.",
+      "Toss the beef in the flour with a little salt and pepper. Brown it in batches in the oil in a large flameproof casserole dish with a lid, then set it aside.",
+      "Lower the heat, add the onion, carrot and celery and cook for 8 minutes, then stir in the garlic and tomato paste.",
+      "Return the beef, add the stock, thyme and bay leaves, and bring to a simmer. Cover and cook in the oven for 1 hour.",
+      "Add the potatoes and cook for 1 hour more, until the beef is falling apart and has reached at least {temp:71}. Take out the bay leaves."
+    ]
+  },
+  "starter.sweet_potato_wedges": {
+    "steps": [
+      "Heat the oven to {oven:200} and line a baking tray with baking paper.",
+      "Cut the sweet potatoes into wedges about the size of an adult finger, and toss them with the oil and paprika.",
+      "Spread them out on the baking tray and roast for 25 to 30 minutes, turning halfway, until soft enough to squash easily between your finger and thumb.",
+      "Cool until just warm before serving. Babies can hold a whole wedge. Peel off the skin if it is tough."
+    ]
+  },
+  "starter.broccoli_cheese_bites": {
+    "steps": [
+      "Heat the oven to {oven:200} and line a baking tray with baking paper.",
+      "Steam or boil the broccoli for 5 minutes, until tender. Drain well, cool a little and chop it finely.",
+      "Mix the broccoli with the eggs, cheese, breadcrumbs and spring onion. Shape into small logs or patties, about the size of a baby's palm.",
+      "Bake for 18 to 20 minutes, turning halfway, until golden and firm.",
+      "Cool before serving."
+    ]
+  },
+  "starter.apple_cinnamon_oatmeal": {
+    "title": "Apple and cinnamon porridge"
+  },
+  "starter.lamb_koftas": {
+    "steps": [
+      "Heat the oven to {oven:200} and line a baking tray with baking paper.",
+      "Mix the lamb, zucchini, onion, garlic, spices and half the mint with your hands.",
+      "Shape into twelve finger-sized logs that a baby can hold, set them on the baking tray and brush with the oil.",
+      "Bake for 15 to 18 minutes, turning once, until browned all over, with no pink in the middle, and they reach {temp:71}.",
+      "Stir the cucumber and the rest of the mint into the yoghurt to dip. Serve with warm pita."
+    ]
+  },
+  "starter.hidden_veg_tomato_sauce": {
+    "steps": [
+      "Warm the oil in a large pan and cook the onion, carrot, zucchini and capsicum gently for 15 minutes, until very soft.",
+      "Add the garlic for a minute, then the tomatoes. Rinse each can with a splash of water and add that too.",
+      "Simmer for 20 minutes, stirring now and then, then stir in the basil.",
+      "Blend until smooth.",
+      "Use it on pasta, as a pizza topping or for dipping. For babies, stir it through soft pasta shapes they can pick up."
+    ]
+  },
+  "starter.banana_oat_cookies": {
+    "title": "Banana oat biscuits",
+    "steps": [
+      "Heat the oven to {oven:180} and line a baking tray with baking paper.",
+      "Mash the bananas well, then stir in the oats, peanut butter and cinnamon. Leave for 5 minutes so the oats soften.",
+      "Drop spoonfuls onto the baking tray and flatten each one.",
+      "Bake for 12 to 15 minutes, until golden at the edges and firm to the touch.",
+      "Let them cool on the baking tray, where they firm up further."
+    ]
+  },
+  "starter.yogurt_berry_pops": {
+    "title": "Frozen yoghurt and berry icy poles",
+    "steps": [
+      "Blend the yoghurt, berries and banana until smooth.",
+      "Pour into icy pole moulds, add sticks and freeze for at least six hours, until solid.",
+      "To get them out, hold the moulds under warm water for a few seconds."
+    ]
+  },
+  "starter.corn_zucchini_fritters": {
+    "steps": [
+      "Whisk the eggs, milk, flour and baking powder into a thick batter.",
+      "Stir in the corn, zucchini, spring onions and cheese.",
+      "Heat a little oil in a frying pan over medium heat. Drop in spoonfuls of batter and flatten them slightly.",
+      "Cook for 3 minutes on each side, until golden and cooked through in the middle. Keep them warm while you cook the rest, adding oil as needed."
+    ],
+    "notes": "Freeze cooled fritters with baking paper between them for up to two months. Reheat in a hot oven until hot all the way through."
+  },
+  "starter.sticky_chicken_drumsticks": {
+    "steps": [
+      "Heat the oven to {oven:200} and line a roasting pan with foil.",
+      "Mix the soy sauce, honey, garlic and ginger, and toss the drumsticks in it.",
+      "Roast for 40 to 45 minutes, turning and basting twice, until sticky and dark and the meat reaches {temp:74} near the bone.",
+      "Scatter with the sesame seeds and spring onions."
+    ]
+  },
+  "starter.sausage_bean_casserole": {
+    "steps": [
+      "Brown the sausages in the oil in a large pan over medium heat for 8 minutes, turning, then lift them out and cut each into three.",
+      "Cook the onion and capsicum in the same pan for 8 minutes, until soft. Add the garlic and paprika for a minute.",
+      "Add the tomatoes, beans, stock, thyme and sausages. Simmer, partly covered, for 15 to 20 minutes, until thick and the sausages reach {temp:71}."
+    ]
+  },
+  "starter.peanut_noodles": {
+    "steps": [
+      "Cook the noodles as the packet says, adding the edamame for the last 2 minutes. Drain and rinse under cold water.",
+      "Whisk the peanut butter, soy sauce, lime juice, sesame oil and honey with a splash of hot water until smooth and pourable.",
+      "Toss the noodles and edamame with the sauce, carrot, cucumber and spring onions.",
+      "Top with coriander, and chilli flakes for anyone who likes heat."
+    ]
+  },
+  "starter.garlic_shrimp_linguine": {
+    "title": "Garlic and lemon prawn linguine",
+    "steps": [
+      "Cook the linguine in a large pan of salted boiling water until just tender. Save a mugful of the cooking water, then drain.",
+      "Meanwhile, warm the oil and butter in a large frying pan over medium heat and cook the garlic and chilli flakes for a minute, without letting the garlic brown.",
+      "Add the prawns and cook for 2 to 3 minutes, turning once, until pink and opaque all the way through.",
+      "Toss in the linguine, lemon zest and juice, parsley and a splash of the cooking water. Season with salt."
+    ]
+  },
+  "starter.homemade_fish_sticks": {
+    "title": "Homemade fish fingers",
+    "steps": [
+      "Heat the oven to {oven:220} and line a baking tray with baking paper.",
+      "Cut the fish into finger-sized strips. Mix the breadcrumbs with the lemon zest.",
+      "Dip each strip in the flour, then the egg, then the breadcrumbs, pressing them on. Lay them on the baking tray and drizzle with the oil.",
+      "Bake for 12 to 15 minutes, turning once, until the coating is golden, crisp and cooked through and the fish is opaque all the way through and flakes easily.",
+      "Cool a little, and check for bones before serving to babies."
+    ],
+    "notes": "Freeze uncooked fish fingers on a tray, then bag them, for up to two months. Bake from frozen for a few minutes longer."
   }
 }

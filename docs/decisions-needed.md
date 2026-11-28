@@ -4,7 +4,7 @@ This is the decision log. Each entry names the backlog items and GitHub issues i
 
 ## Status at a glance
 
-Updated 2026-11-27. D-14 to D-23 are Phase 2 decisions ([spec-phase2.md](spec-phase2.md)). D-24 to D-30 are Phase 3 decisions ([spec-phase3.md](spec-phase3.md)), all decided on 2026-11-27; D-27's health reviewers are still to be arranged before the beta.
+Updated 2026-11-27. D-14 to D-23 are Phase 2 decisions ([spec-phase2.md](spec-phase2.md)). D-24 to D-30 are Phase 3 decisions ([spec-phase3.md](spec-phase3.md)), all decided on 2026-11-27; D-27's health reviewers are still to be arranged before the beta. D-8, the starter recipes, was also decided on 2026-11-27; its test cooks are still to be arranged.
 
 | ID   | Decision                                   | Status                                                 | Needed by                                                                      |
 | ---- | ------------------------------------------ | ------------------------------------------------------ | ------------------------------------------------------------------------------ |
@@ -15,7 +15,7 @@ Updated 2026-11-27. D-14 to D-23 are Phase 2 decisions ([spec-phase2.md](spec-ph
 | D-5  | Apple and Google developer accounts        | Decided 2026-11-08: publish as an individual. Enrolled |                                                                                |
 | D-6  | Onboarding: due date or age, and age range | Decided 2026-11-08                                     |                                                                                |
 | D-7  | AI provider and data terms                 | Deferred 2026-11-08; built with a fake provider        | Before real AI parsing; steps in D-7 below                                     |
-| D-8  | Starter recipe content                     | Deferred                                               | Before the internal beta (L-03.1). Development uses placeholder recipes        |
+| D-8  | Starter recipe content                     | Decided 2026-11-27: Claude drafts, people test-cook    | Test-cook every recipe, and health-review infant ones, before the beta         |
 | D-9  | Free-tier limits                           | Decided 2026-11-08                                     |                                                                                |
 | D-10 | RevenueCat, products, prices and trial     | Interim, decided 2026-11-15: mock store                | Real products, prices and RevenueCat before the beta                           |
 | D-11 | Legal review and no ads                    | Deferred                                               | Before the external beta (L-01.2, #102)                                        |
@@ -164,6 +164,16 @@ Tasks takes the Recipes tab's slot: Plan, Calendar, List, Tasks, Household. Reci
 
 Widgets, lock-screen shortcuts, and Siri and Google Assistant shortcuts are built once, after Phase 3, as one fast-capture item covering tasks and the grocery list together. Phase 3 has a bottom-reachable two-tap add, and keyboard dictation works in the title field. No vision change: the vision's Phase 3 row doesn't list quick capture (spec conflict C3-1).
 
+### D-8 Starter recipe content: decided 2026-11-27, option A, Claude drafts and people test-cook
+
+- **Recipes:** Claude writes about 45 original recipes of everyday family food in its own words, not copied or closely reworded from any source. About a third are freezer-friendly or batch prep, every recipe has at least one new-parent tag, and some are for baby-led weaning and toddlers. Every ingredient uses a catalog ID (missing ingredients are added to the catalog with names in every locale, a store section and allergen codes), amounts stay in base units, and US, UK and Australian text differ where the words do.
+- **Automated check:** `pnpm run recipes:check`, part of `pnpm run check`, enforces safe doneness cues for meat, poultry, fish and eggs, the infant-feeding rules for baby-led weaning and toddler recipes (no honey, whole nuts, unquartered grapes or added salt, among others), catalog IDs, new-parent tags, regional words and a current review sheet. The rules are data, and tested.
+- **People review:** someone test-cooks every recipe before the beta, and the health reviewers arranged for D-27 also check baby-led weaning and toddler recipes. Both are recorded in `docs/starter-recipe-review.md`, which is generated from the content. That sheet is also the rights record: Claude wrote the text for Parent Manager, and it's original.
+- **No photos,** so the library stays small (about 50 KB compressed).
+- **Phases 1 to 3 launch together** in one first beta, so the library is needed by then.
+- **Still open (you):** arrange the test cooks, and add the recipes to the health reviewers' brief. #51 (R-04.2) stays open until every recipe is test-cooked.
+- **Unblocks:** R-04.2 (#51). The content is in the app now. Sign-off waits for the test cooks and reviewers.
+
 ## Deferred until the beta or launch
 
 These don't block development or staging. Each is listed with the point by which it's needed.
@@ -216,11 +226,6 @@ These don't block development or staging. Each is listed with the point by which
 - **Recommendation:** Supabase Pro (from USD 25 a month, first project included), in a new "Parent Manager" organization, created shortly before the external beta.
 - **In the meantime (decided 2026-11-09):** one hosted project, `parent-manager`, serves both development and staging builds, on the Free plan, with test data only. The Migrations workflow (F-04.4, #15) deploys to it after each merge. Automated tests use the local stack.
 - **Production builds too (decided 2026-11-12):** all three EAS environments, production included, point at `parent-manager` until D-1, so crash reporting, analytics and remote config (F-07.1, F-07.2, F-09) can be built now. Only giving production its own project (F-03.2, #10) and F-04.4's production half wait for this decision. No real family may use a build until then.
-
-### D-8 Starter recipe content: needed before the internal beta
-
-- **Recommendation:** commission or write 40 to 60 original recipes, tagged for new parents. Ingredient lists are fine to use freely, but instructions and photos are copyrighted and can't be scraped.
-- **In the meantime:** development uses a handful of placeholder recipes. R-04.1 (the read-only library and save-a-copy) doesn't need the final content; R-04.2 (#51) does.
 
 ### D-10 RevenueCat, products, prices and trial: interim, decided 2026-11-15, mock store
 
