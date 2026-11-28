@@ -77,6 +77,11 @@ export function useTaskEditor({
         repeats: false,
         reminder: values.reminder !== null,
       });
+      if (values.reminder) {
+        track('task_reminder_set', {
+          offset: values.reminder.replace('reminder.', '') as 'at_time' | 'morning' | 'day_before',
+        });
+      }
       clear();
     } catch {
       Alert.alert(t('tasks.editor.failed'));

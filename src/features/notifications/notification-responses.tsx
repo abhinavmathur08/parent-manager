@@ -23,6 +23,8 @@ const CATEGORIES = new Map<string, NotificationType>([
   ['event_changed', 'event_changes'],
   ['who_taking', 'who_taking'],
   ['document_expiring', 'document_expiry'],
+  ['task_reminder', 'task_reminders'],
+  ['tasks_today', 'tasks_today'],
 ]);
 
 // A response is handled once, even if the component mounts again.

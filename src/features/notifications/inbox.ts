@@ -128,6 +128,12 @@ export function routeFor(
     case 'document_expiring':
       // The vault opens from the Household tab.
       return '/household';
+    case 'task_reminder':
+      return typeof data.task_id === 'string'
+        ? { pathname: '/tasks/[id]', params: { id: data.task_id } }
+        : '/tasks';
+    case 'tasks_today':
+      return '/tasks';
     case 'test':
       return '/household/notifications';
     default:

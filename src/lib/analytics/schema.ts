@@ -168,6 +168,8 @@ export const ANALYTICS_EVENTS = {
     via: oneOf('chip', 'detail', 'take'),
   },
   task_deleted: { recurring: bool, scope: oneOf('one', 'all') },
+  // spec-phase3 section 3.5.
+  task_reminder_set: { offset: oneOf('at_time', 'morning', 'day_before') },
   event_created: {
     kind: code,
     all_day: bool,

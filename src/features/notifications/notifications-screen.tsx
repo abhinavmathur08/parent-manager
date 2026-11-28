@@ -175,8 +175,8 @@ export function NotificationsScreen({ userId, household }: NotificationsScreenPr
             />
           );
         })}
-        {prefs.calendar_reminders && !denied ? (
-          // FR2-REM-3: this device only, off by default.
+        {(prefs.calendar_reminders || prefs.task_reminders) && !denied ? (
+          // FR2-REM-3, widened to tasks by FR3-NOT-2: this device only, off by default.
           <Switch
             label={t('notifications.eventDetails.title')}
             description={t('notifications.eventDetails.description')}
