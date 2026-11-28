@@ -15,7 +15,7 @@ import { householdTimeZone } from '@/features/calendar/agenda';
 import { useCalendarMembers } from '@/features/calendar/use-members';
 import type { Member } from '@/features/household/members';
 import { useUndoable } from '@/features/planner/use-undoable';
-import { todayIn } from '@/features/planner/week';
+import { todayIn, type WeekStart } from '@/features/planner/week';
 import { useOnline } from '@/hooks/use-online';
 import { useTheme } from '@/hooks/use-theme';
 import { track } from '@/lib/analytics';
@@ -31,7 +31,7 @@ import { useTaskDeleteRequests } from './task-events';
 import { useTaskWrites } from './writes';
 
 export type TasksScreenProps = {
-  household: { id: string; locale: string; timezone: string | null };
+  household: { id: string; locale: string; timezone: string | null; weekStart?: WeekStart };
   userId: string | null;
   isParent: boolean;
   isPremium: boolean;
@@ -81,7 +81,7 @@ export function TasksScreen({
   const timeZone = householdTimeZone(household.timezone);
   const now = useNow();
   const today = todayIn(timeZone, new Date(now));
-  const { tasks, loading } = useTaskRows();
+  const { tasks, occurrences, loading } = useTaskRows();
   const { upcomingDays } = useTaskLimits();
   const members = useCalendarMembers(household.id);
   const [filter, setFilter] = useState<TaskFilter>({ kind: 'everyone' });
@@ -93,7 +93,15 @@ export function TasksScreen({
   const undoable = useUndoable(failed);
 
   // The React Compiler memoizes this.
-  const view = buildTaskView(tasks, { filter, userId, timeZone, now: new Date(now), upcomingDays });
+  const view = buildTaskView(tasks, {
+    filter,
+    userId,
+    timeZone,
+    now: new Date(now),
+    upcomingDays,
+    occurrences,
+    weekStart: household.weekStart,
+  });
 
   useFocusEffect(
     useCallback(() => {
@@ -146,9 +154,10 @@ export function TasksScreen({
   const row = (item: TaskItem, testID: string, showDay: boolean) => {
     const { task } = item;
     if (undoable.hidden.includes(task.id)) return null;
-    const spokenDue = dueLabel(task, item.date, { today, locale, timeZone, t });
-    const due = showDay || task.due_at ? spokenDue : null;
-    const assigneeId = task.assignee_user_id;
+    const dueAt = item.occurrence ? item.occurrence.dueAt : task.due_at;
+    const spokenDue = dueLabel({ due_at: dueAt }, item.date, { today, locale, timeZone, t });
+    const due = showDay || dueAt ? spokenDue : null;
+    const assigneeId = item.assigneeUserId;
     const assignee =
       assigneeId === userId
         ? t('tasks.row.assigneeYou')
@@ -163,7 +172,7 @@ export function TasksScreen({
         due={due}
         spokenDue={spokenDue}
         assignee={assignee}
-        done={task.done}
+        done={item.done}
         repeats={isChore(task)}
         chipLabel={assigneeId ? (nameOf(assigneeId) ?? '') : t('tasks.editor.anyone')}
         onToggle={() => toggle(item)}

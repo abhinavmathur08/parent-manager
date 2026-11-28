@@ -6,6 +6,7 @@ import {
   type ChoreContext,
 } from '@/features/tasks/chores';
 import { occurrenceId, type TaskOccurrenceRow, type TaskRow } from '@/features/tasks/tables';
+import { buildTaskView } from '@/features/tasks/view';
 
 const task = (over: Partial<TaskRow> = {}): TaskRow => ({
   id: 'chore',
@@ -291,6 +292,55 @@ describe('daylight-saving changes keep the wall time (US, GB and AU)', () => {
       ['2026-11-01', null],
       ['2026-11-02', null],
     ]);
+  });
+});
+
+describe('the Tasks tab shows a chore once, at its next open occurrence (FR3-CHORE-2)', () => {
+  const options = {
+    filter: { kind: 'everyone' } as const,
+    userId: 'sam',
+    timeZone: 'America/New_York',
+    now: new Date('2026-11-18T17:00:00Z'),
+    upcomingDays: 14,
+    weekStart: 1 as const,
+  };
+  const rotating = task({ ...monThu, rotation_user_ids: ['alex', 'sam'] });
+
+  it('places it on its open occurrence, with that occurrence’s assignee', () => {
+    const missed = buildTaskView([rotating], options);
+    expect(missed.overdue.map((item) => [item.date, item.assigneeUserId])).toEqual([
+      ['2026-11-16', 'alex'],
+    ]);
+    const view = buildTaskView([rotating], {
+      ...options,
+      occurrences: [done('2026-11-16', 'alex')],
+    });
+    expect(view.overdue).toEqual([]);
+    expect(view.upcoming.map((day) => [day.date, day.items[0].assigneeUserId])).toEqual([
+      ['2026-11-19', 'sam'],
+    ]);
+  });
+
+  it('filters by the occurrence’s assignee', () => {
+    const rows = [done('2026-11-16', 'alex')];
+    const mine = buildTaskView([rotating], {
+      ...options,
+      occurrences: rows,
+      filter: { kind: 'mine' },
+    });
+    expect(mine.total).toBe(1);
+    const alex = buildTaskView([rotating], {
+      ...options,
+      occurrences: rows,
+      filter: { kind: 'member', userId: 'alex' },
+    });
+    expect(alex.total).toBe(0);
+  });
+
+  it('counts a chore whose rule has ended as done', () => {
+    const ended = task({ repeat: { freq: 'weekly', weekdays: [1], count: 1 } });
+    const view = buildTaskView([ended], { ...options, occurrences: [done('2026-11-02')] });
+    expect(view.done.map((item) => item.done)).toEqual([true]);
   });
 });
 
