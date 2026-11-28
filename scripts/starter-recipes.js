@@ -320,6 +320,8 @@ const US_TERMS = [
   { us: /\bpowdered sugar\b/i, locales: { 'en-GB': 'icing sugar', 'en-AU': 'icing sugar' } },
   { us: /\b(french )?fries\b/i, locales: { 'en-GB': 'chips' } },
   { us: /\bcanned\b/i, locales: { 'en-GB': 'tinned' } },
+  { us: /\bcookies?\b/i, locales: { 'en-GB': 'biscuit', 'en-AU': 'biscuit' } },
+  { us: /\bfish sticks?\b/i, locales: { 'en-GB': 'fish fingers', 'en-AU': 'fish fingers' } },
 ];
 
 const isInfant = (recipe) => (recipe.tags ?? []).some((t) => INFANT_TAGS.includes(t));
