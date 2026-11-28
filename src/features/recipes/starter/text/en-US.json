@@ -1,0 +1,49 @@
+{
+  "starter.overnight_oats": {
+    "title": "Overnight oats",
+    "steps": [
+      "Stir the oats, milk, yogurt and chia seeds together in a jar or bowl.",
+      "Cover and chill overnight, or for at least four hours.",
+      "Slice the banana on top and drizzle with honey to serve."
+    ],
+    "notes": "Leave out the honey for children under one."
+  },
+  "starter.lentil_tomato_soup": {
+    "title": "Lentil and tomato soup",
+    "steps": [
+      "Warm the oil in a large pan and cook the onion and carrot gently for about 8 minutes.",
+      "Add the garlic and cumin and cook for a minute more.",
+      "Add the lentils, tomatoes and stock, then simmer for 25 minutes until the lentils are soft.",
+      "Blend if you like it smooth, and season to taste."
+    ],
+    "notes": "Cool, then freeze in single portions for up to three months.",
+    "lineNotes": { "1": "chopped", "2": "chopped" }
+  },
+  "starter.chicken_traybake": {
+    "title": "One-tray chicken and sweet potato",
+    "steps": [
+      "Heat the oven to {oven:200}.",
+      "Toss the chicken, sweet potato and onion with the oil, paprika, salt and pepper on a large tray.",
+      "Roast for 25 minutes, add the broccoli, then roast for 15 minutes more, until the chicken reaches {temp:74} in the thickest part."
+    ],
+    "lineNotes": { "1": "cubed", "2": "in florets", "3": "in wedges" }
+  },
+  "starter.banana_pancakes": {
+    "title": "Banana pancakes",
+    "steps": [
+      "Mash the banana well, then whisk in the eggs, flour and baking powder.",
+      "Melt a little butter in a frying pan over medium heat.",
+      "Cook small spoonfuls for about 2 minutes on each side, until golden and cooked through.",
+      "Let them cool before serving to little ones."
+    ],
+    "lineNotes": { "0": "ripe" }
+  },
+  "starter.cheesy_pasta_peas": {
+    "title": "Cheesy pasta with peas",
+    "steps": [
+      "Cook the pasta in a large pan of boiling water, adding the peas for the last 3 minutes.",
+      "Drain, then stir in the butter, milk and cheese over low heat until creamy."
+    ],
+    "lineNotes": { "1": "frozen", "4": "grated" }
+  }
+}

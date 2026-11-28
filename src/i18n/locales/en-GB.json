@@ -29,6 +29,10 @@
   "recipes": {
     "unitNames": {
       "l": "litre"
+    },
+    "starter": {
+      "ovenTemp": "{{celsius}}°C ({{fan}}°C fan)",
+      "foodTemp": "{{celsius}}°C"
     }
   },
   "checklist": {

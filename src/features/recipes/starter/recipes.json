@@ -1,0 +1,87 @@
+{
+  "version": 2,
+  "recipes": [
+    {
+      "key": "starter.overnight_oats",
+      "servings": 2,
+      "prepMinutes": 5,
+      "cookMinutes": null,
+      "tags": ["tag.no_cook", "tag.one_handed", "tag.quick"],
+      "lines": [
+        { "ingredientId": "ingredient.rolled_oats", "quantity": 100, "unitId": "unit.g" },
+        { "ingredientId": "ingredient.milk", "quantity": 250, "unitId": "unit.ml" },
+        { "ingredientId": "ingredient.greek_yogurt", "quantity": 120, "unitId": "unit.ml" },
+        { "ingredientId": "ingredient.chia_seeds", "quantity": 10, "unitId": "unit.g" },
+        { "ingredientId": "ingredient.banana", "quantity": 1, "unitId": "unit.each" },
+        { "ingredientId": "ingredient.honey", "quantity": 2, "unitId": "unit.tsp_metric" }
+      ]
+    },
+    {
+      "key": "starter.lentil_tomato_soup",
+      "servings": 4,
+      "prepMinutes": 10,
+      "cookMinutes": 30,
+      "tags": ["tag.freezer_friendly", "tag.batch_prep"],
+      "lines": [
+        { "ingredientId": "ingredient.olive_oil", "quantity": 15, "unitId": "unit.ml" },
+        { "ingredientId": "ingredient.onion", "quantity": 1, "unitId": "unit.each" },
+        { "ingredientId": "ingredient.carrot", "quantity": 2, "unitId": "unit.each" },
+        { "ingredientId": "ingredient.garlic", "quantity": 2, "unitId": "unit.each" },
+        { "ingredientId": "ingredient.cumin", "quantity": 1, "unitId": "unit.tsp_metric" },
+        { "ingredientId": "ingredient.dried_lentils", "quantity": 200, "unitId": "unit.g" },
+        { "ingredientId": "ingredient.canned_tomatoes", "quantity": 1, "unitId": "unit.each" },
+        { "ingredientId": "ingredient.vegetable_stock", "quantity": 1000, "unitId": "unit.ml" },
+        { "ingredientId": "ingredient.salt", "quantity": null, "unitId": null }
+      ]
+    },
+    {
+      "key": "starter.chicken_traybake",
+      "servings": 4,
+      "prepMinutes": 10,
+      "cookMinutes": 40,
+      "tags": ["tag.batch_prep", "tag.kid_friendly"],
+      "lines": [
+        { "ingredientId": "ingredient.chicken_thigh", "quantity": 600, "unitId": "unit.g" },
+        { "ingredientId": "ingredient.sweet_potato", "quantity": 2, "unitId": "unit.each" },
+        { "ingredientId": "ingredient.broccoli", "quantity": 1, "unitId": "unit.each" },
+        { "ingredientId": "ingredient.red_onion", "quantity": 1, "unitId": "unit.each" },
+        { "ingredientId": "ingredient.olive_oil", "quantity": 30, "unitId": "unit.ml" },
+        { "ingredientId": "ingredient.smoked_paprika", "quantity": 1, "unitId": "unit.tsp_metric" },
+        { "ingredientId": "ingredient.salt", "quantity": null, "unitId": null },
+        { "ingredientId": "ingredient.black_pepper", "quantity": null, "unitId": null }
+      ]
+    },
+    {
+      "key": "starter.banana_pancakes",
+      "servings": 2,
+      "prepMinutes": 5,
+      "cookMinutes": 10,
+      "tags": ["tag.baby_led_weaning", "tag.toddler", "tag.quick"],
+      "lines": [
+        { "ingredientId": "ingredient.banana", "quantity": 1, "unitId": "unit.each" },
+        { "ingredientId": "ingredient.egg", "quantity": 2, "unitId": "unit.each" },
+        { "ingredientId": "ingredient.flour", "quantity": 30, "unitId": "unit.g" },
+        {
+          "ingredientId": "ingredient.baking_powder",
+          "quantity": 0.5,
+          "unitId": "unit.tsp_metric"
+        },
+        { "ingredientId": "ingredient.butter", "quantity": 10, "unitId": "unit.g" }
+      ]
+    },
+    {
+      "key": "starter.cheesy_pasta_peas",
+      "servings": 4,
+      "prepMinutes": 5,
+      "cookMinutes": 12,
+      "tags": ["tag.kid_friendly", "tag.toddler", "tag.quick"],
+      "lines": [
+        { "ingredientId": "ingredient.pasta", "quantity": 300, "unitId": "unit.g" },
+        { "ingredientId": "ingredient.pea", "quantity": 150, "unitId": "unit.g" },
+        { "ingredientId": "ingredient.butter", "quantity": 15, "unitId": "unit.g" },
+        { "ingredientId": "ingredient.milk", "quantity": 100, "unitId": "unit.ml" },
+        { "ingredientId": "ingredient.cheddar", "quantity": 100, "unitId": "unit.g" }
+      ]
+    }
+  ]
+}
