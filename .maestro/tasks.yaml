@@ -2,7 +2,10 @@
 # its empty state; the filters switch; Recipes opens from the Plan tab's header instead.
 # T-02.2 (S-45, FR3-TASK-2): a task takes 2 taps plus typing, and shows under Anytime.
 # T-02.3: assign it, complete it, and find it under Done.
+# Needs the local stack; see the Testing section of README.md.
 appId: ${APP_ID || 'com.myparentmanager'}
+tags:
+  - backend
 ---
 - runFlow: subflows/create-household.yaml
 - tapOn:
