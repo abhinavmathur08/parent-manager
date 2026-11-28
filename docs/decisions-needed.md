@@ -4,7 +4,7 @@ This is the decision log. Each entry names the backlog items and GitHub issues i
 
 ## Status at a glance
 
-Updated 2026-11-27. D-14 to D-23 are Phase 2 decisions ([spec-phase2.md](spec-phase2.md)). D-24 to D-30 are Phase 3 decisions ([spec-phase3.md](spec-phase3.md)), all decided on 2026-11-27; Phase 3 is planning only, so none blocks current work.
+Updated 2026-11-27. D-14 to D-23 are Phase 2 decisions ([spec-phase2.md](spec-phase2.md)). D-24 to D-30 are Phase 3 decisions ([spec-phase3.md](spec-phase3.md)), all decided on 2026-11-27; D-27's health reviewers are still to be arranged before the beta.
 
 | ID   | Decision                                   | Status                                                 | Needed by                                                                      |
 | ---- | ------------------------------------------ | ------------------------------------------------------ | ------------------------------------------------------------------------------ |
