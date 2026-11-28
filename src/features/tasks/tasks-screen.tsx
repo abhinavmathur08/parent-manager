@@ -27,6 +27,7 @@ import { useTaskLimits } from './limits';
 import { isChore, type TaskRow as TaskRowData } from './tables';
 import { TaskRow } from './task-row';
 import { buildTaskView, type TaskFilter, type TaskItem } from './view';
+import { useTaskDeleteRequests } from './task-events';
 import { useTaskWrites } from './writes';
 
 export type TasksScreenProps = {
@@ -135,6 +136,12 @@ export function TasksScreen({
       hidden: [task.id],
       commit: () => writes.remove(task),
     });
+
+  // A delete asked for on task detail gets this list's undo bar (FR3-TASK-8).
+  useTaskDeleteRequests((taskId) => {
+    const task = tasks.find((row) => row.id === taskId);
+    if (task) remove(task);
+  });
 
   const row = (item: TaskItem, testID: string, showDay: boolean) => {
     const { task } = item;

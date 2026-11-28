@@ -2014,6 +2014,26 @@
     },
     "assign": {
       "title": "Who is it for?"
+    },
+    "detail": {
+      "title": "Task",
+      "missing": "This task was deleted, or isn't shared with you.",
+      "you": "You",
+      "formerMember": "A former member",
+      "repeat": "Repeats",
+      "rotation": "Taking turns: {{members}}",
+      "source": "From",
+      "sources": {
+        "plan_entry": "The plan",
+        "grocery_item": "The list",
+        "event": "The calendar",
+        "document": "The vault",
+        "checklist": "A checklist"
+      },
+      "created": "Added by {{name}}, {{when}}",
+      "changed": "Last changed by {{name}}, {{when}}",
+      "completed": "Done by {{name}}, {{when}}",
+      "assignHint": "Opens the list of members to assign it to"
     }
   }
 }

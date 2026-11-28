@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
 import { useAuth } from '@/features/auth/session';
@@ -37,6 +38,7 @@ function Tasks({ membership }: { membership: Membership }) {
         userId={userId}
         isParent={membership.role === 'parent'}
         isPremium={isPremium}
+        onOpen={(id) => router.push({ pathname: '/tasks/[id]', params: { id } })}
         footer={<AddTaskButton label={t('tasks.add')} onPress={editor.open} />}
       />
       {editor.sheet}

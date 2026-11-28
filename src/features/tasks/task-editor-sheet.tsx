@@ -39,7 +39,7 @@ export type TaskEditorSheetProps = {
 const EPOCH = '1970-01-01';
 const DUES = ['none', 'date', 'time'] as const;
 /** When the fixed reminders fire, in minutes after midnight household time (FR3-NOT-1, PROPOSED). */
-const REMINDER_MINUTES: Partial<Record<string, number>> = {
+export const REMINDER_MINUTES: Partial<Record<string, number>> = {
   'reminder.morning': 9 * 60,
   'reminder.day_before': 18 * 60,
 };
